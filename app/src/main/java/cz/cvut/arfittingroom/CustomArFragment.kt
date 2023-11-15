@@ -1,4 +1,4 @@
-package com.example.arsnapchat
+package cz.cvut.arfittingroom
 
 import android.os.Bundle
 import android.view.LayoutInflater
