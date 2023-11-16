@@ -58,15 +58,27 @@ class MakeupActivity : AppCompatActivity() {
         setupButtonClickListener(binding.buttonLiner, EMakeupType.LINER)
         setupButtonClickListener(binding.buttonBlush, EMakeupType.BLUSH)
         setupButtonClickListener(binding.buttonLipstick, EMakeupType.LIPSTICK)
-        setupButtonClickListener(binding.buttonYellowSunglasses, EAccessoryType.YELLOW_GLASSES, EModelType.EYES)
-        setupButtonClickListener(binding.buttonSunglasses, EAccessoryType.SUNGLASSES, EModelType.EYES)
-        setupButtonClickListener(binding.buttonMarioHat, EAccessoryType.MARIO_HAT, EModelType.TOP_HEAD)
+        setupButtonClickListener(
+            binding.buttonYellowSunglasses,
+            EAccessoryType.YELLOW_GLASSES,
+            EModelType.EYES
+        )
+        setupButtonClickListener(
+            binding.buttonSunglasses,
+            EAccessoryType.SUNGLASSES,
+            EModelType.EYES
+        )
+        setupButtonClickListener(
+            binding.buttonMarioHat,
+            EAccessoryType.MARIO_HAT,
+            EModelType.TOP_HEAD
+        )
 
         scene.addOnUpdateListener {
             // Remove any AugmentedFaceNodes associated with an AugmentedFace that stopped tracking
             faceNodeMap.entries.removeIf { (face, nodes) ->
                 if (face.trackingState == TrackingState.STOPPED) {
-                    nodes.forEach{entry -> entry.value.setParent(null)}
+                    nodes.forEach { entry -> entry.value.setParent(null) }
                     true
                 } else {
                     false
@@ -83,14 +95,18 @@ class MakeupActivity : AppCompatActivity() {
         }
     }
 
-    private fun setupButtonClickListener(button: Button, accessory: EAccessoryType, modelType: EModelType) {
+    private fun setupButtonClickListener(
+        button: Button,
+        accessory: EAccessoryType,
+        modelType: EModelType
+    ) {
         button.setOnClickListener {
-            logger.info { "${accessory.name} button clicked" }
-
-            if (!loadedModels.containsKey(accessory.sourceURI)) {
-                loadModel(accessory.sourceURI, modelType)
+            if (loadedModels.containsKey(accessory.sourceURI)) {
+                // If the model is already loaded, toggle its application on the face node
+                toggleModelOnFaceNodes(accessory.sourceURI, modelType)
             } else {
-                applyModel(accessory.sourceURI, modelType)
+                // If the model is not loaded, load it
+                loadModel(accessory.sourceURI, modelType)
             }
         }
     }
@@ -221,4 +237,24 @@ class MakeupActivity : AppCompatActivity() {
             }
     }
 
+    private fun toggleModelOnFaceNodes(modelKey: String, modelType: EModelType) {
+        val sceneView = arFragment.arSceneView
+
+        sceneView.session?.getAllTrackables(AugmentedFace::class.java)?.forEach { face ->
+            val modelNodesMap = faceNodeMap.getOrPut(face) { HashMap() }
+            val faceNode = modelNodesMap.getOrPut(modelType) {
+                AugmentedFaceNode(face).also { node ->
+                    node.setParent(sceneView.scene)
+                }
+            }
+
+            if (faceNode.faceRegionsRenderable == loadedModels[modelKey]) {
+                // If the model is currently applied, remove it
+                faceNode.faceRegionsRenderable = null
+            } else {
+                // If the model is not applied, apply it
+                faceNode.faceRegionsRenderable = loadedModels[modelKey]
+            }
+        }
+    }
 }
