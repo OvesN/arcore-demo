@@ -10,4 +10,32 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_gravity="bottom">
+
+        <Button
+            android:id="@+id/button_liner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/liner" />
+
+        <Button
+            android:id="@+id/button_blush"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/blush" />
+
+        <Button
+            android:id="@+id/button_lipstick"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/lipstick" />
+    </LinearLayout>
+
+
 </FrameLayout>

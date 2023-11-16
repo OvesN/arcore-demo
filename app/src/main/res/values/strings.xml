@@ -1,6 +1,9 @@
 <resources>
     <string name="app_name">Fitting Room</string>
-    <string name="makeup">Makeup tutorial</string>
-    <string name="glasses">Glasses tutorial</string>
-    <string name="face_landmarks">Face landmarks</string>
+    <string name="makeup">Makeup</string>
+    <string name="glasses">Glasses</string>
+    <string name="lipstick">Lipstick</string>
+    <string name="blush">Blush</string>
+    <string name="liner">Liner</string>
+
 </resources>
