@@ -5,37 +5,69 @@
     android:layout_height="match_parent"
     tools:context=".MakeupActivity">
 
-    <fragment android:name="cz.cvut.arfittingroom.FaceArFragment"
+    <fragment
+        android:name="cz.cvut.arfittingroom.FaceArFragment"
         android:id="@+id/face_fragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:orientation="vertical"
         android:gravity="center"
         android:layout_gravity="bottom">
 
-        <Button
-            android:id="@+id/button_liner"
-            android:layout_width="wrap_content"
+        <!-- First row of buttons -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/liner" />
+            android:orientation="horizontal"
+            android:gravity="center">
 
-        <Button
-            android:id="@+id/button_blush"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/blush" />
+            <Button
+                android:id="@+id/button_liner"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/liner" />
 
-        <Button
-            android:id="@+id/button_lipstick"
-            android:layout_width="wrap_content"
+            <Button
+                android:id="@+id/button_blush"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/blush" />
+
+            <Button
+                android:id="@+id/button_lipstick"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/lipstick" />
+        </LinearLayout>
+
+        <!-- Second row of buttons -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/lipstick" />
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <Button
+                android:id="@+id/button_sunglasses"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/sunglasses" />
+
+            <Button
+                android:id="@+id/button_yellow_sunglasses"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/yellowSunglasses" />
+
+            <Button
+                android:id="@+id/button_mario_hat"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/marioHat" />
+        </LinearLayout>
     </LinearLayout>
-
-
 </FrameLayout>
