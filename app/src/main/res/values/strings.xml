@@ -1,3 +1,12 @@
 <resources>
-    <string name="app_name">GFG</string>
+    <string name="app_name">Fitting Room</string>
+    <string name="makeup">Makeup</string>
+    <string name="glasses">Glasses</string>
+    <string name="yellowSunglasses">Yellow Sunglasses</string>
+    <string name="sunglasses">Sunglasses</string>
+    <string name="lipstick">Lipstick</string>
+    <string name="blush">Blush</string>
+    <string name="liner">Liner</string>
+    <string name="marioHat">Mario Hat</string>
+
 </resources>
