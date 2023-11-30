@@ -181,6 +181,7 @@ class MakeupActivity : AppCompatActivity() {
                 }
                 modelNodesMap[entry.value.modelType] = faceNode
                 faceNode.faceRegionsRenderable = entry.value.model
+                entry.value.isActive = true
 
                 makeUpService.loadedModels[entry.key] = entry.value
             }

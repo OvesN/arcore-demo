@@ -4,6 +4,8 @@ import android.content.Intent
 import android.graphics.Color.LTGRAY
 import android.os.Bundle
 import android.view.MotionEvent
+import android.widget.Button
+import android.widget.LinearLayout
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.ar.sceneform.HitTestResult
@@ -14,7 +16,6 @@ import com.google.ar.sceneform.rendering.Color
 import com.google.ar.sceneform.rendering.Light
 import com.google.ar.sceneform.rendering.ModelRenderable
 import com.google.ar.sceneform.ux.FootprintSelectionVisualizer
-import com.google.ar.sceneform.ux.TransformableNode
 import com.google.ar.sceneform.ux.TransformationSystem
 import cz.cvut.arfittingroom.ARFittingRoomApplication
 import cz.cvut.arfittingroom.controller.DragTransformableNode
@@ -29,7 +30,7 @@ class ModelEditorActivity : AppCompatActivity() {
     private lateinit var sceneView: SceneView
     private lateinit var transformationSystem: TransformationSystem
     private lateinit var modelNode: DragTransformableNode
-    private var showedModelKey: String = ""
+    private var selectedModelKey: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,6 +45,23 @@ class ModelEditorActivity : AppCompatActivity() {
 
         setContentView(binding.root)
         sceneView = binding.sceneView
+
+        val buttonContainer = binding.buttonContainer
+
+        editorService.loadedModels.forEach{ model ->
+            val button = Button(this).apply {
+                text = model.key
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                )
+                setOnClickListener {
+                    handleChooseModelButtonClick(model.key)
+                }
+            }
+            buttonContainer.addView(button)
+        }
+
         setUpScene(sceneView)
         addModelToScene()
 
@@ -65,6 +83,10 @@ class ModelEditorActivity : AppCompatActivity() {
         }
     }
 
+    private fun handleChooseModelButtonClick(modelKey: String) {
+        selectedModelKey = modelKey
+        editorService.loadedModels[modelKey]?.model?.let { updateModelView(it) }
+    }
 
     private fun addModelToScene() {
         if (editorService.loadedModels.isNotEmpty()) {
@@ -81,7 +103,7 @@ class ModelEditorActivity : AppCompatActivity() {
                 renderable = model.value.model
             }
 
-            showedModelKey = model.key
+            selectedModelKey = model.key
         }
     }
 
@@ -100,7 +122,7 @@ class ModelEditorActivity : AppCompatActivity() {
     }
 
     private fun saveSelectedColor(color: Color) {
-        val newModel = editorService.changeColor(showedModelKey, color, 0)
+        val newModel = editorService.changeColor(selectedModelKey, color, 0)
         updateModelView(newModel)
     }
 
