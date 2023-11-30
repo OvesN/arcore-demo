@@ -7,9 +7,11 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.Drawable
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.widget.Button
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.google.ar.core.ArCoreApk
@@ -18,16 +20,21 @@ import com.google.ar.core.TrackingState
 import com.google.ar.sceneform.rendering.ModelRenderable
 import com.google.ar.sceneform.rendering.Renderable
 import com.google.ar.sceneform.rendering.Texture
+import com.google.ar.sceneform.ux.ArFragment
 import com.google.ar.sceneform.ux.AugmentedFaceNode
 import cz.cvut.arfittingroom.ARFittingRoomApplication
 import cz.cvut.arfittingroom.R
 import cz.cvut.arfittingroom.databinding.ActivityMakeupBinding
 import cz.cvut.arfittingroom.fragment.FaceArFragment
+import cz.cvut.arfittingroom.model.MakeUpState
 import cz.cvut.arfittingroom.model.ModelInfo
 import cz.cvut.arfittingroom.model.enums.EAccessoryType
 import cz.cvut.arfittingroom.model.enums.EMakeupType
 import cz.cvut.arfittingroom.model.enums.EModelType
+import cz.cvut.arfittingroom.service.MakeUpService
 import cz.cvut.arfittingroom.service.ModelEditorService
+import cz.cvut.arfittingroom.utils.TextureCombinerUtil
+import cz.cvut.arfittingroom.utils.TextureCombinerUtil.combineDrawables
 import mu.KotlinLogging
 import javax.inject.Inject
 
@@ -39,13 +46,11 @@ class MakeupActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMakeupBinding
     private lateinit var arFragment: FaceArFragment
-
-    private val appliedMakeUpTypes = mutableSetOf<EMakeupType>()
-    private val loadedModels = mutableMapOf<String, ModelInfo>()
-    private val appliedModelKeys = mutableSetOf<String>()
     private var faceNodeMap = HashMap<AugmentedFace, HashMap<EModelType, AugmentedFaceNode>>()
     private var isUpdated = false
 
+    @Inject
+    lateinit var makeUpService: MakeUpService
     @Inject
     lateinit var editorService: ModelEditorService
 
@@ -92,10 +97,11 @@ class MakeupActivity : AppCompatActivity() {
             logger.info { "3D editor button clicked" }
 
             editorService.loadedModels =
-                loadedModels.filterKeys { key -> appliedModelKeys.contains(key) }.toMutableMap()
-
+                makeUpService.loadedModels.filterKeys { key -> makeUpService.appliedModelKeys.contains(key) }.toMutableMap()
 
             val intent = Intent(this, ModelEditorActivity::class.java)
+
+            makeUpService.appliedModelKeys.clear()
             startActivity(intent)
         }
 
@@ -113,9 +119,60 @@ class MakeupActivity : AppCompatActivity() {
                 updateModelsOnScreen()
             }
         }
-
     }
 
+
+    private fun setupButtonClickListener(button: Button, makeUpType: EMakeupType) {
+        val appliedMakeUpTypes = makeUpService.makeUpState.appliedMakeUpTypes
+
+        button.setOnClickListener {
+            logger.info { "${makeUpType.name} button clicked" }
+            if (!appliedMakeUpTypes.add(makeUpType)) appliedMakeUpTypes.remove(makeUpType)
+            combineTexturesAndApply()
+        }
+    }
+
+    private fun setupButtonClickListener(
+        button: Button,
+        accessory: EAccessoryType,
+        modelType: EModelType
+    ) {
+        button.setOnClickListener {
+            val bazz = makeUpService.appliedModelKeys
+            makeUpService.appliedModelKeys.add(accessory.sourceURI)
+
+            logger.info { "${accessory.name} button clicked" }
+            makeUpService.loadedModels[accessory.sourceURI]?.let { model ->
+                // If the model is already loaded, toggle its application on the face nodes
+                toggleModelOnFaceNodes(model)
+            } ?: run {
+                // Else, handle the case where the model is not loaded
+                loadModel(accessory.sourceURI, modelType)
+            }
+        }
+    }
+
+
+    private fun applyModel(modelKey: String, modelType: EModelType) {
+        makeUpService.appliedModelKeys.add(modelKey)
+
+        val sceneView = arFragment.arSceneView
+        // Update nodes
+        sceneView.session?.getAllTrackables(AugmentedFace::class.java)?.forEach { face ->
+            val modelNodesMap = faceNodeMap.getOrPut(face) { HashMap() }
+            // Check if the node for the given modelType already exists
+            if (modelNodesMap[modelType] == null) {
+                val faceNode = AugmentedFaceNode(face).also { node ->
+                    node.setParent(sceneView.scene)
+
+                }
+                modelNodesMap[modelType] = faceNode
+                faceNode.faceRegionsRenderable = makeUpService.loadedModels[modelKey]?.model
+            } else {
+                modelNodesMap[modelType]?.faceRegionsRenderable = makeUpService.loadedModels[modelKey]?.model
+            }
+        }
+    }
 
     private fun updateModelsOnScreen() {
         val sceneView = arFragment.arSceneView
@@ -132,73 +189,26 @@ class MakeupActivity : AppCompatActivity() {
                 modelNodesMap[entry.value.modelType] = faceNode
                 faceNode.faceRegionsRenderable = entry.value.model
 
-                appliedModelKeys.add(entry.key)
-
+                makeUpService.appliedModelKeys.add(entry.key)
+            }
+            makeUpService.makeUpState.textureBitmap?.let {
+                createTextureAndApply(it)
             }
 
-        }
+           editorService.loadedModels.clear()
+
+           }
     }
-
-    private fun setupButtonClickListener(button: Button, makeUpType: EMakeupType) {
-        button.setOnClickListener {
-            logger.info { "${makeUpType.name} button clicked" }
-            if (!appliedMakeUpTypes.add(makeUpType)) appliedMakeUpTypes.remove(makeUpType)
-            combineTexturesAndApply()
-        }
-    }
-
-    private fun setupButtonClickListener(
-        button: Button,
-        accessory: EAccessoryType,
-        modelType: EModelType
-    ) {
-        button.setOnClickListener {
-            appliedModelKeys.add(accessory.sourceURI)
-
-            logger.info { "${accessory.name} button clicked" }
-            loadedModels[accessory.sourceURI]?.let { model ->
-                // If the model is already loaded, toggle its application on the face nodes
-                toggleModelOnFaceNodes(model)
-            } ?: run {
-                // Else, handle the case where the model is not loaded
-                loadModel(accessory.sourceURI, modelType)
-            }
-        }
-    }
-
-
-    private fun applyModel(modelKey: String, modelType: EModelType) {
-        appliedModelKeys.add(modelKey)
-
-        val sceneView = arFragment.arSceneView
-        // Update nodes
-        sceneView.session?.getAllTrackables(AugmentedFace::class.java)?.forEach { face ->
-            val modelNodesMap = faceNodeMap.getOrPut(face) { HashMap() }
-            // Check if the node for the given modelType already exists
-            if (modelNodesMap[modelType] == null) {
-                val faceNode = AugmentedFaceNode(face).also { node ->
-                    node.setParent(sceneView.scene)
-
-                }
-                modelNodesMap[modelType] = faceNode
-                faceNode.faceRegionsRenderable = loadedModels[modelKey]?.model
-            } else {
-                modelNodesMap[modelType]?.faceRegionsRenderable = loadedModels[modelKey]?.model
-            }
-        }
-    }
-
 
     private fun combineTexturesAndApply() {
-        //TODO FIX NULLABILITY
-        combineDrawables(appliedMakeUpTypes.map {
+        combineDrawables(makeUpService.makeUpState.appliedMakeUpTypes.map {
             ContextCompat.getDrawable(
                 this,
                 it.drawableId
             )!!
         }).let {
             if (it != null) {
-                createTexture(it)
+                createTextureAndApply(it)
             } else {
                 //Clean face node makeup texture
                 faceNodeMap.values
@@ -208,24 +218,9 @@ class MakeupActivity : AppCompatActivity() {
         }
     }
 
-    // Combine two drawables into a single Bitmap
-    private fun combineDrawables(layers: List<Drawable>): Bitmap? {
-        if (layers.isEmpty()) return null
+    private fun createTextureAndApply(combinedBitmap: Bitmap) {
+        makeUpService.makeUpState.textureBitmap = combinedBitmap
 
-        val bitmap = Bitmap.createBitmap(
-            layers.first().intrinsicWidth,
-            layers.first().intrinsicHeight,
-            Bitmap.Config.ARGB_8888
-        )
-        val canvas = Canvas(bitmap)
-
-        layers.forEach { it.setBounds(0, 0, canvas.width, canvas.height) }
-        layers.forEach { it.draw(canvas) }
-
-        return bitmap
-    }
-
-    private fun createTexture(combinedBitmap: Bitmap) {
         // Convert Bitmap to ARCore Texture
         Texture.builder()
             .setSource(combinedBitmap)
@@ -235,6 +230,7 @@ class MakeupActivity : AppCompatActivity() {
                 logger.error { "Error creating texture from bitmap: $throwable" }
                 null
             }
+
     }
 
     // Apply a Bitmap texture to all detected faces
@@ -286,7 +282,7 @@ class MakeupActivity : AppCompatActivity() {
             .setSource(this, Uri.parse(uri))
             .build()
             .thenAccept { model ->
-                loadedModels[uri] = ModelInfo(modelType, model, uri)
+                makeUpService.loadedModels[uri] = ModelInfo(modelType, model, uri)
                 applyModel(uri, modelType)
             }
             .exceptionally { throwable ->
@@ -309,11 +305,11 @@ class MakeupActivity : AppCompatActivity() {
             if (faceNode.faceRegionsRenderable == modelInfo.model) {
                 // If the model is currently applied, remove it
                 faceNode.faceRegionsRenderable = null
-                appliedModelKeys.remove(modelInfo.modelKey)
+                makeUpService.appliedModelKeys.remove(modelInfo.modelKey)
             } else {
                 // If the model is not applied, apply it
                 faceNode.faceRegionsRenderable = modelInfo.model
-                appliedModelKeys.add(modelInfo.modelKey)
+                makeUpService.appliedModelKeys.add(modelInfo.modelKey)
             }
         }
     }
