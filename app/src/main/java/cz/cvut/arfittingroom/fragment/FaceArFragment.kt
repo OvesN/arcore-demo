@@ -1,4 +1,4 @@
-package cz.cvut.arfittingroom
+package cz.cvut.arfittingroom.fragment
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -25,6 +25,6 @@ class FaceArFragment : ArFragment() {
         val frameLayout = super.onCreateView(inflater, container, savedInstanceState) as? FrameLayout
         planeDiscoveryController.hide()
         planeDiscoveryController.setInstructionView(null)
-        return  frameLayout
+        return frameLayout
     }
 }

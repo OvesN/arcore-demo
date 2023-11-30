@@ -1,7 +1,8 @@
-package cz.cvut.arfittingroom
+package cz.cvut.arfittingroom.activity
 
 import android.app.ActivityManager
 import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.Drawable
@@ -18,11 +19,16 @@ import com.google.ar.sceneform.rendering.ModelRenderable
 import com.google.ar.sceneform.rendering.Renderable
 import com.google.ar.sceneform.rendering.Texture
 import com.google.ar.sceneform.ux.AugmentedFaceNode
+import cz.cvut.arfittingroom.ARFittingRoomApplication
+import cz.cvut.arfittingroom.R
 import cz.cvut.arfittingroom.databinding.ActivityMakeupBinding
+import cz.cvut.arfittingroom.fragment.FaceArFragment
 import cz.cvut.arfittingroom.model.enums.EAccessoryType
 import cz.cvut.arfittingroom.model.enums.EMakeupType
 import cz.cvut.arfittingroom.model.enums.EModelType
+import cz.cvut.arfittingroom.service.Editor3DService
 import mu.KotlinLogging
+import javax.inject.Inject
 
 class MakeupActivity : AppCompatActivity() {
     companion object {
@@ -31,14 +37,22 @@ class MakeupActivity : AppCompatActivity() {
     }
 
     private lateinit var binding: ActivityMakeupBinding
+    private lateinit var arFragment: FaceArFragment
 
     private val appliedMakeUpTypes = mutableSetOf<EMakeupType>()
+    private val appliedModelKeys = mutableSetOf<String>()
     private var loadedModels = mutableMapOf<String, ModelRenderable>()
-    private lateinit var arFragment: FaceArFragment
     private var faceNodeMap = HashMap<AugmentedFace, HashMap<EModelType, AugmentedFaceNode>>()
+
+    @Inject
+    lateinit var editorService: Editor3DService
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        (applicationContext as ARFittingRoomApplication)
+            .appComponent
+            .inject(this)
+
         if (!checkIsSupportedDeviceOrFinish()) {
             return
         }
@@ -74,6 +88,15 @@ class MakeupActivity : AppCompatActivity() {
             EModelType.TOP_HEAD
         )
 
+        binding.button3dEditor.setOnClickListener {
+            logger.info { "3D editor button clicked" }
+
+           editorService.modelsToShow = loadedModels.filterKeys { key -> appliedModelKeys.contains(key) }
+
+            val intent = Intent(this, ModelEditorActivity::class.java)
+            startActivity(intent)
+        }
+
         scene.addOnUpdateListener {
             // Remove any AugmentedFaceNodes associated with an AugmentedFace that stopped tracking
             faceNodeMap.entries.removeIf { (face, nodes) ->
@@ -101,6 +124,7 @@ class MakeupActivity : AppCompatActivity() {
         modelType: EModelType
     ) {
         button.setOnClickListener {
+            logger.info { "${accessory.name} button clicked" }
             if (loadedModels.containsKey(accessory.sourceURI)) {
                 // If the model is already loaded, toggle its application on the face node
                 toggleModelOnFaceNodes(accessory.sourceURI, modelType)
@@ -111,7 +135,10 @@ class MakeupActivity : AppCompatActivity() {
         }
     }
 
+
     private fun applyModel(modelKey: String, modelType: EModelType) {
+        appliedModelKeys.add(modelKey)
+
         val sceneView = arFragment.arSceneView
         // Update nodes
         sceneView.session?.getAllTrackables(AugmentedFace::class.java)?.forEach { face ->
@@ -251,9 +278,11 @@ class MakeupActivity : AppCompatActivity() {
             if (faceNode.faceRegionsRenderable == loadedModels[modelKey]) {
                 // If the model is currently applied, remove it
                 faceNode.faceRegionsRenderable = null
+                appliedModelKeys.remove(modelKey)
             } else {
                 // If the model is not applied, apply it
                 faceNode.faceRegionsRenderable = loadedModels[modelKey]
+                appliedModelKeys.add(modelKey)
             }
         }
     }

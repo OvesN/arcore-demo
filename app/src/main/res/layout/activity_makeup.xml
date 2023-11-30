@@ -3,27 +3,27 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MakeupActivity">
+    tools:context=".activity.MakeupActivity">
 
     <fragment
-        android:name="cz.cvut.arfittingroom.FaceArFragment"
         android:id="@+id/face_fragment"
+        android:name="cz.cvut.arfittingroom.fragment.FaceArFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
+        android:layout_gravity="bottom"
         android:gravity="center"
-        android:layout_gravity="bottom">
+        android:orientation="vertical">
 
         <!-- First row of buttons -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center">
+            android:gravity="center"
+            android:orientation="horizontal">
 
             <Button
                 android:id="@+id/button_liner"
@@ -48,8 +48,8 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center">
+            android:gravity="center"
+            android:orientation="horizontal">
 
             <Button
                 android:id="@+id/button_sunglasses"
@@ -68,6 +68,16 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/marioHat" />
+
+
         </LinearLayout>
     </LinearLayout>
+
+    <ImageButton
+        android:id="@+id/button_3d_editor"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end|top"
+        android:background="@null"
+        android:src="@drawable/editor_icon" />
 </FrameLayout>
