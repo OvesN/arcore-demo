@@ -4,6 +4,7 @@ import android.content.Intent
 import android.graphics.Color.LTGRAY
 import android.os.Bundle
 import android.view.MotionEvent
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.ar.sceneform.HitTestResult
 import com.google.ar.sceneform.Node
@@ -55,9 +56,7 @@ class ModelEditorActivity : AppCompatActivity() {
             }
 
         binding.buttonChangeColor.setOnClickListener {
-            //TODO material index, color
-            val newModel = editorService.changeColor(showedModelKey, Color(255f, 0f, 0f), 0)
-            updateModelView(newModel)
+            showColorPicker()
         }
 
         binding.buttonBack.setOnClickListener{
@@ -84,6 +83,25 @@ class ModelEditorActivity : AppCompatActivity() {
 
             showedModelKey = model.key
         }
+    }
+
+    private fun showColorPicker() {
+        val colorOptions = arrayOf("Red", "Green", "Blue") // Add more colors as needed
+        val colorValues = mapOf("Red" to Color(255f,0f,0f), "Green" to Color(0f,255f,0f), "Blue" to Color(0f,255f,255f))
+
+        AlertDialog.Builder(this)
+            .setTitle("Choose a color")
+            .setItems(colorOptions) { _, which ->
+                val colorName = colorOptions[which]
+                val selectedColor = colorValues[colorName]
+                selectedColor?.let { saveSelectedColor(it) }
+            }
+            .show()
+    }
+
+    private fun saveSelectedColor(color: Color) {
+        val newModel = editorService.changeColor(showedModelKey, color, 0)
+        updateModelView(newModel)
     }
 
     private fun updateModelView(model: ModelRenderable) {
