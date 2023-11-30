@@ -1,5 +1,6 @@
 package cz.cvut.arfittingroom.activity
 
+import android.content.Intent
 import android.graphics.Color.LTGRAY
 import android.os.Bundle
 import android.view.MotionEvent
@@ -7,14 +8,10 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.ar.sceneform.HitTestResult
 import com.google.ar.sceneform.Node
 import com.google.ar.sceneform.SceneView
-import com.google.ar.sceneform.math.Quaternion
 import com.google.ar.sceneform.math.Vector3
 import com.google.ar.sceneform.rendering.Color
 import com.google.ar.sceneform.rendering.Light
-import com.google.ar.sceneform.ux.BaseTransformableNode
-import com.google.ar.sceneform.ux.BaseTransformationController
-import com.google.ar.sceneform.ux.DragGesture
-import com.google.ar.sceneform.ux.DragGestureRecognizer
+import com.google.ar.sceneform.rendering.ModelRenderable
 import com.google.ar.sceneform.ux.FootprintSelectionVisualizer
 import com.google.ar.sceneform.ux.TransformableNode
 import com.google.ar.sceneform.ux.TransformationSystem
@@ -31,6 +28,7 @@ class ModelEditorActivity : AppCompatActivity() {
     private lateinit var sceneView: SceneView
     private lateinit var transformationSystem: TransformationSystem
     private lateinit var modelNode: DragTransformableNode
+    private var showedModelKey: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,11 +54,23 @@ class ModelEditorActivity : AppCompatActivity() {
                 )
             }
 
+        binding.buttonChangeColor.setOnClickListener {
+            //TODO material index, color
+            val newModel = editorService.changeColor(showedModelKey, Color(255f, 0f, 0f), 0)
+            updateModelView(newModel)
+        }
+
+        binding.buttonBack.setOnClickListener{
+            val intent = Intent(this, MakeupActivity::class.java)
+            startActivity(intent)
+        }
     }
 
 
     private fun addModelToScene() {
-        if (editorService.modelsToShow.isNotEmpty()) {
+        if (editorService.loadedModels.isNotEmpty()) {
+            val model = editorService.loadedModels.entries.first()
+
             this.modelNode = DragTransformableNode(transformationSystem).apply {
                 setParent(sceneView.scene)
                 translationController.isEnabled = false
@@ -69,10 +79,15 @@ class ModelEditorActivity : AppCompatActivity() {
                 scaleController.maxScale = 2f
                 rotationController.isEnabled = true
                 localPosition = Vector3(0f, 0f, -2.3f)
-                renderable = editorService.modelsToShow.values.first()
+                renderable = model.value.model
             }
 
+            showedModelKey = model.key
         }
+    }
+
+    private fun updateModelView(model: ModelRenderable) {
+        modelNode.renderable = model
     }
 
     private fun setUpScene(sceneView: SceneView) {

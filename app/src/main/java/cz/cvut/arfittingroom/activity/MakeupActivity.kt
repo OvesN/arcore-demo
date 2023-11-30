@@ -23,6 +23,7 @@ import cz.cvut.arfittingroom.ARFittingRoomApplication
 import cz.cvut.arfittingroom.R
 import cz.cvut.arfittingroom.databinding.ActivityMakeupBinding
 import cz.cvut.arfittingroom.fragment.FaceArFragment
+import cz.cvut.arfittingroom.model.ModelInfo
 import cz.cvut.arfittingroom.model.enums.EAccessoryType
 import cz.cvut.arfittingroom.model.enums.EMakeupType
 import cz.cvut.arfittingroom.model.enums.EModelType
@@ -40,9 +41,10 @@ class MakeupActivity : AppCompatActivity() {
     private lateinit var arFragment: FaceArFragment
 
     private val appliedMakeUpTypes = mutableSetOf<EMakeupType>()
+    private val loadedModels = mutableMapOf<String, ModelInfo>()
     private val appliedModelKeys = mutableSetOf<String>()
-    private var loadedModels = mutableMapOf<String, ModelRenderable>()
     private var faceNodeMap = HashMap<AugmentedFace, HashMap<EModelType, AugmentedFaceNode>>()
+    private var isUpdated = false
 
     @Inject
     lateinit var editorService: ModelEditorService
@@ -89,8 +91,9 @@ class MakeupActivity : AppCompatActivity() {
         binding.button3dEditor.setOnClickListener {
             logger.info { "3D editor button clicked" }
 
-            editorService.modelsToShow =
-                loadedModels.filterKeys { key -> appliedModelKeys.contains(key) }
+            editorService.loadedModels =
+                loadedModels.filterKeys { key -> appliedModelKeys.contains(key) }.toMutableMap()
+
 
             val intent = Intent(this, ModelEditorActivity::class.java)
             startActivity(intent)
@@ -106,6 +109,33 @@ class MakeupActivity : AppCompatActivity() {
                     false
                 }
             }
+            if (!isUpdated) {
+                updateModelsOnScreen()
+            }
+        }
+
+    }
+
+
+    private fun updateModelsOnScreen() {
+        val sceneView = arFragment.arSceneView
+        val modelsToUpdate = editorService.loadedModels
+
+        sceneView.session?.getAllTrackables(AugmentedFace::class.java)?.forEach { face ->
+            isUpdated = true
+            val modelNodesMap = faceNodeMap.getOrPut(face) { HashMap() }
+            modelsToUpdate.forEach{entry ->
+                val faceNode = AugmentedFaceNode(face).also { node ->
+                    node.setParent(sceneView.scene)
+
+                }
+                modelNodesMap[entry.value.modelType] = faceNode
+                faceNode.faceRegionsRenderable = entry.value.model
+
+                appliedModelKeys.add(entry.key)
+
+            }
+
         }
     }
 
@@ -123,12 +153,14 @@ class MakeupActivity : AppCompatActivity() {
         modelType: EModelType
     ) {
         button.setOnClickListener {
+            appliedModelKeys.add(accessory.sourceURI)
+
             logger.info { "${accessory.name} button clicked" }
-            if (loadedModels.containsKey(accessory.sourceURI)) {
-                // If the model is already loaded, toggle its application on the face node
-                toggleModelOnFaceNodes(accessory.sourceURI, modelType)
-            } else {
-                // If the model is not loaded, load it
+            loadedModels[accessory.sourceURI]?.let { model ->
+                // If the model is already loaded, toggle its application on the face nodes
+                toggleModelOnFaceNodes(model)
+            } ?: run {
+                // Else, handle the case where the model is not loaded
                 loadModel(accessory.sourceURI, modelType)
             }
         }
@@ -149,9 +181,9 @@ class MakeupActivity : AppCompatActivity() {
 
                 }
                 modelNodesMap[modelType] = faceNode
-                faceNode.faceRegionsRenderable = loadedModels[modelKey]
+                faceNode.faceRegionsRenderable = loadedModels[modelKey]?.model
             } else {
-                modelNodesMap[modelType]?.faceRegionsRenderable = loadedModels[modelKey]
+                modelNodesMap[modelType]?.faceRegionsRenderable = loadedModels[modelKey]?.model
             }
         }
     }
@@ -254,7 +286,7 @@ class MakeupActivity : AppCompatActivity() {
             .setSource(this, Uri.parse(uri))
             .build()
             .thenAccept { model ->
-                loadedModels[uri] = model
+                loadedModels[uri] = ModelInfo(modelType, model, uri)
                 applyModel(uri, modelType)
             }
             .exceptionally { throwable ->
@@ -263,25 +295,25 @@ class MakeupActivity : AppCompatActivity() {
             }
     }
 
-    private fun toggleModelOnFaceNodes(modelKey: String, modelType: EModelType) {
+    private fun toggleModelOnFaceNodes(modelInfo: ModelInfo) {
         val sceneView = arFragment.arSceneView
 
         sceneView.session?.getAllTrackables(AugmentedFace::class.java)?.forEach { face ->
             val modelNodesMap = faceNodeMap.getOrPut(face) { HashMap() }
-            val faceNode = modelNodesMap.getOrPut(modelType) {
+            val faceNode = modelNodesMap.getOrPut(modelInfo.modelType) {
                 AugmentedFaceNode(face).also { node ->
                     node.setParent(sceneView.scene)
                 }
             }
 
-            if (faceNode.faceRegionsRenderable == loadedModels[modelKey]) {
+            if (faceNode.faceRegionsRenderable == modelInfo.model) {
                 // If the model is currently applied, remove it
                 faceNode.faceRegionsRenderable = null
-                appliedModelKeys.remove(modelKey)
+                appliedModelKeys.remove(modelInfo.modelKey)
             } else {
                 // If the model is not applied, apply it
-                faceNode.faceRegionsRenderable = loadedModels[modelKey]
-                appliedModelKeys.add(modelKey)
+                faceNode.faceRegionsRenderable = modelInfo.model
+                appliedModelKeys.add(modelInfo.modelKey)
             }
         }
     }
