@@ -26,7 +26,7 @@ import cz.cvut.arfittingroom.fragment.FaceArFragment
 import cz.cvut.arfittingroom.model.enums.EAccessoryType
 import cz.cvut.arfittingroom.model.enums.EMakeupType
 import cz.cvut.arfittingroom.model.enums.EModelType
-import cz.cvut.arfittingroom.service.Editor3DService
+import cz.cvut.arfittingroom.service.ModelEditorService
 import mu.KotlinLogging
 import javax.inject.Inject
 
@@ -45,13 +45,11 @@ class MakeupActivity : AppCompatActivity() {
     private var faceNodeMap = HashMap<AugmentedFace, HashMap<EModelType, AugmentedFaceNode>>()
 
     @Inject
-    lateinit var editorService: Editor3DService
+    lateinit var editorService: ModelEditorService
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        (applicationContext as ARFittingRoomApplication)
-            .appComponent
-            .inject(this)
+        (application as ARFittingRoomApplication).appComponent.inject(this)
 
         if (!checkIsSupportedDeviceOrFinish()) {
             return
@@ -91,7 +89,8 @@ class MakeupActivity : AppCompatActivity() {
         binding.button3dEditor.setOnClickListener {
             logger.info { "3D editor button clicked" }
 
-           editorService.modelsToShow = loadedModels.filterKeys { key -> appliedModelKeys.contains(key) }
+            editorService.modelsToShow =
+                loadedModels.filterKeys { key -> appliedModelKeys.contains(key) }
 
             val intent = Intent(this, ModelEditorActivity::class.java)
             startActivity(intent)

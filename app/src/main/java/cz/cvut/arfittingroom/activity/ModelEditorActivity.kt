@@ -2,15 +2,18 @@ package cz.cvut.arfittingroom.activity
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.google.ar.sceneform.Node
+import com.google.ar.sceneform.SceneView
 import cz.cvut.arfittingroom.ARFittingRoomApplication
 import cz.cvut.arfittingroom.databinding.ActivityModelEditorBinding
-import cz.cvut.arfittingroom.service.Editor3DService
+import cz.cvut.arfittingroom.service.ModelEditorService
 import javax.inject.Inject
 
 class ModelEditorActivity : AppCompatActivity() {
     @Inject
-    lateinit var editorService: Editor3DService
+    lateinit var editorService: ModelEditorService
     private lateinit var binding: ActivityModelEditorBinding
+    private lateinit var sceneView: SceneView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -19,8 +22,33 @@ class ModelEditorActivity : AppCompatActivity() {
         // Inflate the layout for this activity
         binding = ActivityModelEditorBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        sceneView = binding.sceneView
+        addModelToScene()
+    }
 
-        // Use the FragmentManager to find the AR Fragment by ID
-//        arFragment = supportFragmentManager.findFragmentById(R.id.face_fragment) as FaceArFragment
+
+    private fun addModelToScene() {
+        if (editorService.modelsToShow.isNotEmpty()) {
+            val modelNode = Node().apply {
+                renderable = editorService.modelsToShow.values.first()
+            }
+            sceneView.scene.addChild(modelNode)
+        }
+
+    }
+
+    override fun onResume() {
+        super.onResume()
+        sceneView.resume()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        sceneView.pause()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        sceneView.destroy()
     }
 }

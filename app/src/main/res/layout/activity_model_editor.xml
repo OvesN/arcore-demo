@@ -5,9 +5,8 @@
     android:layout_height="match_parent"
     tools:context=".activity.ModelEditorActivity">
 
-    <fragment
-        android:id="@+id/arFragment"
-        android:name="com.google.ar.sceneform.ux.ArFragment"
+    <com.google.ar.sceneform.SceneView
+        android:id="@+id/sceneView"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 </FrameLayout>

@@ -1,11 +1,13 @@
 package cz.cvut.arfittingroom.module
 
-import cz.cvut.arfittingroom.service.Editor3DService
+import cz.cvut.arfittingroom.service.ModelEditorService
 import dagger.Module
 import dagger.Provides
+import javax.inject.Singleton
 
 @Module
 class ServiceModule {
     @Provides
-    fun provideEditor3DService() = Editor3DService()
+    @Singleton
+    fun provideEditor3DService() = ModelEditorService()
 }
