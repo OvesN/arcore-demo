@@ -4,6 +4,9 @@ import android.content.Intent
 import android.graphics.Color.LTGRAY
 import android.os.Bundle
 import android.view.MotionEvent
+import android.widget.Button
+import android.widget.LinearLayout
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.ar.sceneform.HitTestResult
 import com.google.ar.sceneform.Node
@@ -13,7 +16,6 @@ import com.google.ar.sceneform.rendering.Color
 import com.google.ar.sceneform.rendering.Light
 import com.google.ar.sceneform.rendering.ModelRenderable
 import com.google.ar.sceneform.ux.FootprintSelectionVisualizer
-import com.google.ar.sceneform.ux.TransformableNode
 import com.google.ar.sceneform.ux.TransformationSystem
 import cz.cvut.arfittingroom.ARFittingRoomApplication
 import cz.cvut.arfittingroom.controller.DragTransformableNode
@@ -28,7 +30,7 @@ class ModelEditorActivity : AppCompatActivity() {
     private lateinit var sceneView: SceneView
     private lateinit var transformationSystem: TransformationSystem
     private lateinit var modelNode: DragTransformableNode
-    private var showedModelKey: String = ""
+    private var selectedModelKey: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,6 +45,23 @@ class ModelEditorActivity : AppCompatActivity() {
 
         setContentView(binding.root)
         sceneView = binding.sceneView
+
+        val buttonContainer = binding.buttonContainer
+
+        editorService.loadedModels.forEach{ model ->
+            val button = Button(this).apply {
+                text = model.key
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                )
+                setOnClickListener {
+                    handleChooseModelButtonClick(model.key)
+                }
+            }
+            buttonContainer.addView(button)
+        }
+
         setUpScene(sceneView)
         addModelToScene()
 
@@ -55,9 +74,7 @@ class ModelEditorActivity : AppCompatActivity() {
             }
 
         binding.buttonChangeColor.setOnClickListener {
-            //TODO material index, color
-            val newModel = editorService.changeColor(showedModelKey, Color(255f, 0f, 0f), 0)
-            updateModelView(newModel)
+            showColorPicker()
         }
 
         binding.buttonBack.setOnClickListener{
@@ -66,6 +83,10 @@ class ModelEditorActivity : AppCompatActivity() {
         }
     }
 
+    private fun handleChooseModelButtonClick(modelKey: String) {
+        selectedModelKey = modelKey
+        editorService.loadedModels[modelKey]?.model?.let { updateModelView(it) }
+    }
 
     private fun addModelToScene() {
         if (editorService.loadedModels.isNotEmpty()) {
@@ -82,8 +103,27 @@ class ModelEditorActivity : AppCompatActivity() {
                 renderable = model.value.model
             }
 
-            showedModelKey = model.key
+            selectedModelKey = model.key
         }
+    }
+
+    private fun showColorPicker() {
+        val colorOptions = arrayOf("Red", "Green", "Blue") // Add more colors as needed
+        val colorValues = mapOf("Red" to Color(255f,0f,0f), "Green" to Color(0f,255f,0f), "Blue" to Color(0f,255f,255f))
+
+        AlertDialog.Builder(this)
+            .setTitle("Choose a color")
+            .setItems(colorOptions) { _, which ->
+                val colorName = colorOptions[which]
+                val selectedColor = colorValues[colorName]
+                selectedColor?.let { saveSelectedColor(it) }
+            }
+            .show()
+    }
+
+    private fun saveSelectedColor(color: Color) {
+        val newModel = editorService.changeColor(selectedModelKey, color, 0)
+        updateModelView(newModel)
     }
 
     private fun updateModelView(model: ModelRenderable) {

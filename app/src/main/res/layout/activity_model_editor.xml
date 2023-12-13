@@ -29,4 +29,12 @@
         android:layout_height="wrap_content"
         android:text="@string/change_color"/>
 
+    <LinearLayout
+        android:id="@+id/buttonContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_gravity="bottom">
+    </LinearLayout>
+
 </FrameLayout>
