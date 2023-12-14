@@ -25,7 +25,7 @@ import cz.cvut.arfittingroom.model.ModelInfo
 import cz.cvut.arfittingroom.model.enums.EAccessoryType
 import cz.cvut.arfittingroom.model.enums.EMakeupType
 import cz.cvut.arfittingroom.model.enums.EModelType
-import cz.cvut.arfittingroom.service.MakeUpService
+import cz.cvut.arfittingroom.service.MakeupService
 import cz.cvut.arfittingroom.service.ModelEditorService
 import cz.cvut.arfittingroom.utils.TextureCombinerUtil.combineDrawables
 import mu.KotlinLogging
@@ -43,7 +43,7 @@ class MakeupActivity : AppCompatActivity() {
     private var isUpdated = false
 
     @Inject
-    lateinit var makeUpService: MakeUpService
+    lateinit var makeUpService: MakeupService
 
     @Inject
     lateinit var editorService: ModelEditorService
@@ -88,15 +88,11 @@ class MakeupActivity : AppCompatActivity() {
         )
 
         binding.button3dEditor.setOnClickListener {
-            logger.info { "3D editor button clicked" }
+            editorButtonListener()
+        }
 
-            editorService.loadedModels =
-                makeUpService.loadedModels.filter { (_, modelInfo) -> modelInfo.isActive }
-                    .toMutableMap()
-
-            val intent = Intent(this, ModelEditorActivity::class.java)
-
-            makeUpService.loadedModels.clear()
+        binding.buttonMakeupEditor.setOnClickListener {
+            val intent = Intent(this, MakeupEditorActivity::class.java)
             startActivity(intent)
         }
 
@@ -126,6 +122,18 @@ class MakeupActivity : AppCompatActivity() {
             combineTexturesAndApply()
         }
     }
+
+    private fun editorButtonListener() {
+        editorService.loadedModels =
+            makeUpService.loadedModels.filter { (_, modelInfo) -> modelInfo.isActive }
+                .toMutableMap()
+
+        val intent = Intent(this, ModelEditorActivity::class.java)
+
+        makeUpService.loadedModels.clear()
+        startActivity(intent)
+    }
+
 
     private fun setupButtonClickListener(
         button: Button,
