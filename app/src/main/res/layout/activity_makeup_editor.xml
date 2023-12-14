@@ -6,17 +6,25 @@
     android:layout_height="match_parent"
     tools:context=".activity.MakeupEditorActivity">
 
-    <!-- Full-Screen ImageView -->
     <ImageView
         android:id="@+id/face_image"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:src="@drawable/canonical_face_texture"
-        app:layout_constraintTop_toTopOf="parent"
         android:background="#FF444444"
+        android:scaleType="fitCenter"
+        android:src="@drawable/canonical_face_texture"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <cz.cvut.arfittingroom.view.DrawView
+        android:id="@+id/draw_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/transparent" />
 
     <!-- Back Button in the top right corner -->
     <ImageButton
