@@ -31,7 +31,9 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="top|end"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="0dp">
         <!-- Back Button in the top right corner -->
         <ImageButton
             android:id="@+id/button_back"
@@ -43,14 +45,15 @@
             android:src="@drawable/back_icon"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
+
         <ImageButton
             android:id="@+id/button_undo"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_marginTop="5dp"
             android:layout_marginEnd="5dp"
-            android:scaleType="fitCenter"
             android:background="@null"
+            android:scaleType="fitCenter"
             android:src="@drawable/undo_icon"
             app:layout_constraintBottom_toTopOf="@id/stroke_size_slider"
             app:layout_constraintEnd_toStartOf="@id/button_redo"
@@ -62,52 +65,70 @@
             android:layout_height="40dp"
             android:layout_marginTop="5dp"
             android:layout_marginEnd="5dp"
-            android:scaleType="fitCenter"
             android:background="@null"
+            android:scaleType="fitCenter"
             android:src="@drawable/redo_icon"
             app:layout_constraintBottom_toTopOf="@id/stroke_size_slider"
             app:layout_constraintEnd_toEndOf="parent" />
-   </LinearLayout>
+    </LinearLayout>
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="bottom">
-
-        <ImageButton
-            android:id="@+id/button_color_picker"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginEnd="5dp"
-            android:scaleType="fitCenter"
-            android:layout_alignParentEnd="true"
-            android:layout_above="@id/stroke_size_slider"
-            android:background="@null"
-            android:src="@drawable/color_picker_icon" />
-
-        <ImageButton
-            android:id="@+id/button_star"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_marginStart="5dp"
-            android:scaleType="fitCenter"
-            android:layout_alignParentStart="true"
-            android:layout_above="@id/stroke_size_slider"
-            android:background="@null"
-            android:src="@drawable/star_icon" />
+        android:gravity="bottom"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
         <com.google.android.material.slider.Slider
             android:id="@+id/stroke_size_slider"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
             android:stepSize="1"
             android:theme="@style/MyMaterialTheme"
             android:value="10"
             android:valueFrom="1"
-            android:valueTo="100" />
+            android:valueTo="100"
+            android:layout_alignParentBottom="true"/>
+
+        <ImageButton
+            android:id="@+id/button_color_picker"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_above="@id/stroke_size_slider"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="5dp"
+            android:background="@null"
+            android:scaleType="fitCenter"
+            android:src="@drawable/color_picker_icon" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_above="@id/stroke_size_slider"
+            android:layout_alignParentStart="true">
+
+            <ImageButton
+                android:id="@+id/button_star"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_marginStart="5dp"
+                android:background="@null"
+                android:scaleType="fitCenter"
+                android:src="@drawable/star_icon" />
+            <ImageButton
+                android:id="@+id/button_heart"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginStart="5dp"
+                android:background="@null"
+                android:scaleType="fitCenter"
+                android:src="@drawable/heart_icon" />
+        </LinearLayout>
 
     </RelativeLayout>
+
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
