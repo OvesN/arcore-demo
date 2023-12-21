@@ -125,6 +125,14 @@
                 android:background="@null"
                 android:scaleType="fitCenter"
                 android:src="@drawable/heart_icon" />
+            <ImageButton
+                android:id="@+id/button_flowers_image"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_marginStart="5dp"
+                android:background="@null"
+                android:scaleType="fitCenter"
+                android:src="@drawable/flowers" />
         </LinearLayout>
 
     </RelativeLayout>

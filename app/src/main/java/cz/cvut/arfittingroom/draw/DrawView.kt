@@ -2,10 +2,13 @@ package cz.cvut.arfittingroom.draw
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Canvas
+import android.graphics.Matrix
 import android.graphics.Paint
 import android.util.AttributeSet
 import android.view.MotionEvent
+import android.view.ScaleGestureDetector
 import android.view.View
 import androidx.annotation.ColorInt
 import androidx.core.graphics.alpha
@@ -31,6 +34,17 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private var mIsSaving = false
     private var mIsStrokeWidthBarEnabled = false
 
+    private var scaleFactor = 1.0f
+    private val scaleGestureDetector: ScaleGestureDetector
+    private val matrix = Matrix()
+    private var lastTouchX = 0f
+    private var lastTouchY = 0f
+    private var posX = 0f
+    private var posY = 0f
+
+    var imageBitmap: Bitmap? = null
+    var isInImageMode = false
+
     var strokeShape = EShape.CIRCLE
 
     init {
@@ -42,6 +56,42 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             strokeWidth = mPaintOptions.strokeWidth
             isAntiAlias = true
         }
+
+        scaleGestureDetector = ScaleGestureDetector(
+            context,
+            object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
+                override fun onScale(detector: ScaleGestureDetector): Boolean {
+                    scaleFactor *= detector.scaleFactor
+                    scaleFactor = 0.1f.coerceAtLeast(scaleFactor.coerceAtMost(10.0f))
+                    invalidate()
+                    return true
+                }
+            })
+    }
+
+    private fun adjustImage(event: MotionEvent): Boolean {
+        scaleGestureDetector.onTouchEvent(event)
+
+        val action = event.actionMasked
+        when (action) {
+            MotionEvent.ACTION_DOWN -> {
+                lastTouchX = event.x
+                lastTouchY = event.y
+            }
+
+            MotionEvent.ACTION_MOVE -> {
+                if (!scaleGestureDetector.isInProgress) {
+                    val dx = event.x - lastTouchX
+                    val dy = event.y - lastTouchY
+                    posX += dx
+                    posY += dy
+                    invalidate()
+                    lastTouchX = event.x
+                    lastTouchY = event.y
+                }
+            }
+        }
+        return true
     }
 
     fun undo() {
@@ -107,8 +157,18 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
+        if (imageBitmap != null) {
+            matrix.reset()
+            matrix.postTranslate(-imageBitmap!!.width / 2f, -imageBitmap!!.height / 2f)
+            matrix.postScale(scaleFactor, scaleFactor)
+            matrix.postTranslate(posX + imageBitmap!!.width / 2f, posY + imageBitmap!!.height / 2f)
+        }
+
+        imageBitmap?.let {
+            canvas.drawBitmap(it, matrix, null)
+        }
+
         for ((key, value) in mPaths) {
-            //TODO VERY STUPID
             changePaint(value)
             canvas.drawPath(key, mPaint)
         }
@@ -162,6 +222,12 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     override fun onTouchEvent(event: MotionEvent): Boolean {
         val x = event.x
         val y = event.y
+
+        if (isInImageMode) {
+            adjustImage(event)
+            invalidate()
+            return true
+        }
 
         when (strokeShape) {
             EShape.CIRCLE -> {}
@@ -320,5 +386,9 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         return path
     }
 
+    fun drawImage(image: Int) {
+        imageBitmap = BitmapFactory.decodeResource(resources, image)
+        invalidate()
+    }
 
 }

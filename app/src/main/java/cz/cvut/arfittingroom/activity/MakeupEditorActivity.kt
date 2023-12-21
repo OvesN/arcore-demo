@@ -12,6 +12,7 @@ import com.google.android.material.slider.Slider
 import com.skydoves.colorpickerview.ColorPickerDialog
 import com.skydoves.colorpickerview.listeners.ColorEnvelopeListener
 import cz.cvut.arfittingroom.ARFittingRoomApplication
+import cz.cvut.arfittingroom.R
 import cz.cvut.arfittingroom.databinding.ActivityMakeupEditorBinding
 import cz.cvut.arfittingroom.draw.DrawView
 import cz.cvut.arfittingroom.draw.EShape
@@ -28,6 +29,7 @@ class MakeupEditorActivity : AppCompatActivity() {
 
     @Inject
     lateinit var makeUpService: MakeupService
+
     @Inject
     lateinit var makeupEditorService: MakeupEditorService
 
@@ -43,7 +45,7 @@ class MakeupEditorActivity : AppCompatActivity() {
 
         setContentView(binding.root)
 
-        binding.buttonBack.setOnClickListener{
+        binding.buttonBack.setOnClickListener {
             adjustAndSaveBitmap()
             val intent = Intent(this, MakeupActivity::class.java)
             startActivity(intent)
@@ -63,6 +65,9 @@ class MakeupEditorActivity : AppCompatActivity() {
         binding.buttonHeart.setOnClickListener {
             toggleStrokeShape(EShape.HEART)
         }
+        binding.buttonFlowersImage.setOnClickListener {
+            toggleImage(R.drawable.flowers)
+        }
         slider.addOnChangeListener { _, value, _ ->
             drawView.setStrokeWidth(value)
         }
@@ -72,6 +77,13 @@ class MakeupEditorActivity : AppCompatActivity() {
 
     private fun toggleStrokeShape(shape: EShape) {
         drawView.strokeShape = if (drawView.strokeShape == shape) EShape.CIRCLE else shape
+    }
+
+    private fun toggleImage(imageId: Int) {
+        drawView.isInImageMode = drawView.isInImageMode != true
+        if (drawView.isInImageMode) {
+            drawView.drawImage(imageId)
+        }
     }
 
     private fun showColorPickerDialog() {
@@ -105,10 +117,25 @@ class MakeupEditorActivity : AppCompatActivity() {
         val croppedBitmap = Bitmap.createBitmap(drawView.getBitmap(), 0, newY, width, width)
 
         // Create a matrix for the mirroring transformation
-        val matrix = Matrix().apply { postScale(-1f, 1f, croppedBitmap.width / 2f, croppedBitmap.height / 2f) }
+        val matrix = Matrix().apply {
+            postScale(
+                -1f,
+                1f,
+                croppedBitmap.width / 2f,
+                croppedBitmap.height / 2f
+            )
+        }
 
         // Create and return the mirrored bitmap
-        return Bitmap.createBitmap(croppedBitmap, 0, 0, croppedBitmap.width, croppedBitmap.height, matrix, true)
+        return Bitmap.createBitmap(
+            croppedBitmap,
+            0,
+            0,
+            croppedBitmap.width,
+            croppedBitmap.height,
+            matrix,
+            true
+        )
     }
 
 }
