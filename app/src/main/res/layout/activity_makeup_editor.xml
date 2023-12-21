@@ -26,63 +26,89 @@
         android:layout_height="match_parent"
         android:background="@android:color/transparent" />
 
-    <!-- Back Button in the top right corner -->
-    <ImageButton
-        android:id="@+id/button_back"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@null"
-        android:src="@drawable/back_icon"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="bottom|center_horizontal"
+        android:gravity="top|end"
         android:orientation="vertical">
-
-
-        <!-- New Undo Button -->
+        <!-- Back Button in the top right corner -->
         <ImageButton
-            android:id="@+id/button_undo"
+            android:id="@+id/button_back"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:layout_marginEnd="5dp"
+            android:background="@null"
+            android:src="@drawable/back_icon"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+        <ImageButton
+            android:id="@+id/button_undo"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginEnd="5dp"
+            android:scaleType="fitCenter"
             android:background="@null"
             android:src="@drawable/undo_icon"
             app:layout_constraintBottom_toTopOf="@id/stroke_size_slider"
             app:layout_constraintEnd_toStartOf="@id/button_redo"
             app:layout_constraintVertical_chainStyle="packed" />
 
-        <!-- New Mirror Button -->
         <ImageButton
             android:id="@+id/button_redo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginEnd="5dp"
+            android:scaleType="fitCenter"
             android:background="@null"
-            android:src="@drawable/mirror_icon"
+            android:src="@drawable/redo_icon"
             app:layout_constraintBottom_toTopOf="@id/stroke_size_slider"
             app:layout_constraintEnd_toEndOf="parent" />
+   </LinearLayout>
 
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="bottom">
 
         <ImageButton
             android:id="@+id/button_color_picker"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginEnd="5dp"
+            android:scaleType="fitCenter"
+            android:layout_alignParentEnd="true"
+            android:layout_above="@id/stroke_size_slider"
             android:background="@null"
             android:src="@drawable/color_picker_icon" />
+
+        <ImageButton
+            android:id="@+id/button_star"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginStart="5dp"
+            android:scaleType="fitCenter"
+            android:layout_alignParentStart="true"
+            android:layout_above="@id/stroke_size_slider"
+            android:background="@null"
+            android:src="@drawable/star_icon" />
 
         <com.google.android.material.slider.Slider
             android:id="@+id/stroke_size_slider"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
             android:stepSize="1"
             android:theme="@style/MyMaterialTheme"
             android:value="10"
             android:valueFrom="1"
             android:valueTo="100" />
-    </LinearLayout>
+
+    </RelativeLayout>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 

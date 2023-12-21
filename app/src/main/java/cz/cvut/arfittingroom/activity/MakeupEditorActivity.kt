@@ -1,6 +1,7 @@
 package cz.cvut.arfittingroom.activity
 
-import android.R
+import android.R.string.ok
+import android.R.string.cancel
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Matrix
@@ -13,6 +14,7 @@ import com.skydoves.colorpickerview.listeners.ColorEnvelopeListener
 import cz.cvut.arfittingroom.ARFittingRoomApplication
 import cz.cvut.arfittingroom.databinding.ActivityMakeupEditorBinding
 import cz.cvut.arfittingroom.draw.DrawView
+import cz.cvut.arfittingroom.draw.EShape
 import cz.cvut.arfittingroom.service.MakeupEditorService
 import cz.cvut.arfittingroom.service.MakeupService
 import javax.inject.Inject
@@ -49,6 +51,15 @@ class MakeupEditorActivity : AppCompatActivity() {
         binding.buttonColorPicker.setOnClickListener {
             showColorPickerDialog()
         }
+        binding.buttonRedo.setOnClickListener {
+            drawView.redo()
+        }
+        binding.buttonUndo.setOnClickListener {
+            drawView.undo()
+        }
+        binding.buttonStar.setOnClickListener {
+            toggleStrokeShape(EShape.STAR)
+        }
         slider.addOnChangeListener { _, value, _ ->
             drawView.setStrokeWidth(value)
         }
@@ -56,14 +67,18 @@ class MakeupEditorActivity : AppCompatActivity() {
 
     }
 
+    private fun toggleStrokeShape(shape: EShape) {
+        drawView.strokeShape = if (drawView.strokeShape == shape) EShape.CIRCLE else shape
+    }
+
     private fun showColorPickerDialog() {
         ColorPickerDialog.Builder(this)
             .setTitle("ColorPicker Dialog")
             .setPreferenceName("MyColorPickerDialog")
-            .setPositiveButton(getString(R.string.ok),
+            .setPositiveButton(getString(ok),
                 ColorEnvelopeListener { envelope, _ -> drawView.setColor(envelope.color) })
             .setNegativeButton(
-                getString(R.string.cancel)
+                getString(cancel)
             ) { dialogInterface, _ -> dialogInterface.dismiss() }
             .attachAlphaSlideBar(true)
             .attachBrightnessSlideBar(true)

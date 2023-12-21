@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
+import android.graphics.Path
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
@@ -11,13 +12,15 @@ import androidx.annotation.ColorInt
 import androidx.core.graphics.alpha
 import com.divyanshu.draw.widget.MyPath
 import com.divyanshu.draw.widget.PaintOptions
+import mu.KotlinLogging
 import java.util.LinkedHashMap
 import kotlin.math.cos
 import kotlin.math.sin
 
 //TODO slightly modified android draw
 class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
-    var mPaths = LinkedHashMap<MyPath, PaintOptions>()
+    private var mPaths = LinkedHashMap<MyPath, PaintOptions>()
+    private val logger = KotlinLogging.logger { }
 
     private var mLastPaths = LinkedHashMap<MyPath, PaintOptions>()
     private var mUndonePaths = LinkedHashMap<MyPath, PaintOptions>()
@@ -32,6 +35,8 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private var mStartY = 0f
     private var mIsSaving = false
     private var mIsStrokeWidthBarEnabled = false
+
+    var strokeShape = EShape.CIRCLE
 
     init {
         mPaint.apply {
@@ -100,7 +105,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         return bitmap
     }
 
-    fun addPath(path: MyPath, options: PaintOptions) {
+    private fun addPath(path: MyPath, options: PaintOptions) {
         mPaths[path] = options
     }
 
@@ -118,7 +123,13 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     private fun changePaint(paintOptions: PaintOptions) {
         mPaint.color = paintOptions.color
-        mPaint.strokeWidth = paintOptions.strokeWidth
+        //TODO temporal
+        if (strokeShape == EShape.STAR) {
+            mPaint.strokeWidth = 6f
+        }
+        else {
+            mPaint.strokeWidth = paintOptions.strokeWidth
+        }
     }
 
     fun clearCanvas() {
@@ -151,7 +162,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             mPath.lineTo(mCurX + 1, mCurY)
         }
 
-        mPaths.put(mPath, mPaintOptions)
+        mPaths[mPath] = mPaintOptions
         mPath = MyPath()
         mPaintOptions =
             PaintOptions(mPaintOptions.color, mPaintOptions.strokeWidth, mPaintOptions.alpha)
@@ -160,6 +171,16 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     override fun onTouchEvent(event: MotionEvent): Boolean {
         val x = event.x
         val y = event.y
+
+        when (strokeShape) {
+            EShape.CIRCLE -> {}
+            EShape.STAR -> {
+                drawStar(x, y, mPaintOptions.strokeWidth)
+                mUndonePaths.clear()
+                invalidate()
+                return true
+            }
+        }
 
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
@@ -177,34 +198,42 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         return true
     }
 
-    fun drawStar(centerX: Float, centerY: Float, outerRadius: Float, innerRadius: Float, numPoints: Int) {
-        val starPath = createStarPath(centerX, centerY, outerRadius, innerRadius, numPoints)
-        mPaths[starPath] = mPaintOptions
-        invalidate()
+    private fun drawStar(centerX: Float, centerY: Float, outerRadius: Float) {
+        val starPath = createStarPath(centerX, centerY, outerRadius)
+        val newPaintOptions =
+            PaintOptions(mPaintOptions.color, outerRadius, mPaintOptions.alpha)
+        mPaths[starPath] = newPaintOptions
     }
 
-    private fun createStarPath(cx: Float, cy: Float, outerRadius: Float, innerRadius: Float, numPoints: Int): MyPath {
+
+    private fun createStarPath(cx: Float, cy: Float, outerRadius: Float): MyPath {
+        val section = 2.0 * Math.PI / 5
         val path = MyPath()
-        val angleStep = Math.PI * 2 / numPoints
-        var angle = -Math.PI / 2
+        val innerRadius = outerRadius / 3
 
-        for (i in 0 until numPoints) {
-            val outerX = cx + cos(angle) * outerRadius
-            val outerY = cy + sin(angle) * outerRadius
-            angle += angleStep / 2
-            val innerX = cx + cos(angle) * innerRadius
-            val innerY = cy + sin(angle) * innerRadius
-            angle += angleStep / 2
+        path.reset()
+        path.moveTo(
+            (cx + outerRadius * cos(0.0)).toFloat(),
+            (cy + outerRadius * sin(0.0)).toFloat()
+        )
+        path.lineTo(
+            (cx + innerRadius * cos(section / 2.0)).toFloat(),
+            (cy + innerRadius * sin(section / 2.0)).toFloat()
+        )
 
-            if (i == 0) {
-                path.moveTo(outerX.toFloat(), outerY.toFloat())
-            } else {
-                path.lineTo(outerX.toFloat(), outerY.toFloat())
-            }
-            path.lineTo(innerX.toFloat(), innerY.toFloat())
+        for (i in 1 until 5) {
+            path.lineTo(
+                (cx + outerRadius * cos(section * i)).toFloat(),
+                (cy + outerRadius * sin(section * i)).toFloat()
+            )
+            path.lineTo(
+                (cx + innerRadius * cos(section * i + section / 2.0)).toFloat(),
+                (cy + innerRadius * sin(section * i + section / 2.0)).toFloat()
+            )
         }
-        path.close()
 
+        path.close()
         return path
     }
+
 }
