@@ -281,25 +281,26 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         val section = 2.0 * Math.PI / 5
         val path = MyPath()
         val innerRadius = outerRadius / 3
+        val startAngle = -Math.PI / 2 // Start angle set to -90 degrees
 
         path.reset()
         path.moveTo(
-            (cx + outerRadius * cos(0.0)).toFloat(),
-            (cy + outerRadius * sin(0.0)).toFloat()
+            (cx + outerRadius * cos(startAngle)).toFloat(),
+            (cy + outerRadius * sin(startAngle)).toFloat()
         )
         path.lineTo(
-            (cx + innerRadius * cos(section / 2.0)).toFloat(),
-            (cy + innerRadius * sin(section / 2.0)).toFloat()
+            (cx + innerRadius * cos(startAngle + section / 2.0)).toFloat(),
+            (cy + innerRadius * sin(startAngle + section / 2.0)).toFloat()
         )
 
         for (i in 1 until 5) {
             path.lineTo(
-                (cx + outerRadius * cos(section * i)).toFloat(),
-                (cy + outerRadius * sin(section * i)).toFloat()
+                (cx + outerRadius * cos(startAngle + section * i)).toFloat(),
+                (cy + outerRadius * sin(startAngle + section * i)).toFloat()
             )
             path.lineTo(
-                (cx + innerRadius * cos(section * i + section / 2.0)).toFloat(),
-                (cy + innerRadius * sin(section * i + section / 2.0)).toFloat()
+                (cx + innerRadius * cos(startAngle + section * i + section / 2.0)).toFloat(),
+                (cy + innerRadius * sin(startAngle + section * i + section / 2.0)).toFloat()
             )
         }
 
@@ -317,7 +318,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         // Upper left path
         path.cubicTo(
             5 * outerRadius / 14 + startX, startY,
-            startX, outerRadius / 15 + startY,
+             startX, outerRadius / 15 + startY,
             outerRadius / 28 + startX, 2 * outerRadius / 5 + startY
         )
 
