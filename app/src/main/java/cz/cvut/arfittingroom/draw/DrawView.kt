@@ -1,4 +1,4 @@
-package cz.cvut.arfittingroom.view
+package cz.cvut.arfittingroom.draw
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -8,11 +8,14 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import androidx.annotation.ColorInt
-import androidx.core.graphics.ColorUtils
+import androidx.core.graphics.alpha
 import com.divyanshu.draw.widget.MyPath
 import com.divyanshu.draw.widget.PaintOptions
 import java.util.LinkedHashMap
+import kotlin.math.cos
+import kotlin.math.sin
 
+//TODO slightly modified android draw
 class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     var mPaths = LinkedHashMap<MyPath, PaintOptions>()
 
@@ -74,17 +77,11 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     fun setColor(newColor: Int) {
         @ColorInt
-        val alphaColor = ColorUtils.setAlphaComponent(newColor, mPaintOptions.alpha)
-        mPaintOptions.color = alphaColor
+        mPaintOptions.color = newColor
+        mPaintOptions.alpha = newColor.alpha
         if (mIsStrokeWidthBarEnabled) {
             invalidate()
         }
-    }
-
-    fun setAlpha(newAlpha: Int) {
-        val alpha = (newAlpha * 255) / 100
-        mPaintOptions.alpha = alpha
-        setColor(mPaintOptions.color)
     }
 
     fun setStrokeWidth(newStrokeWidth: Float) {
@@ -178,5 +175,36 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
         invalidate()
         return true
+    }
+
+    fun drawStar(centerX: Float, centerY: Float, outerRadius: Float, innerRadius: Float, numPoints: Int) {
+        val starPath = createStarPath(centerX, centerY, outerRadius, innerRadius, numPoints)
+        mPaths[starPath] = mPaintOptions
+        invalidate()
+    }
+
+    private fun createStarPath(cx: Float, cy: Float, outerRadius: Float, innerRadius: Float, numPoints: Int): MyPath {
+        val path = MyPath()
+        val angleStep = Math.PI * 2 / numPoints
+        var angle = -Math.PI / 2
+
+        for (i in 0 until numPoints) {
+            val outerX = cx + cos(angle) * outerRadius
+            val outerY = cy + sin(angle) * outerRadius
+            angle += angleStep / 2
+            val innerX = cx + cos(angle) * innerRadius
+            val innerY = cy + sin(angle) * innerRadius
+            angle += angleStep / 2
+
+            if (i == 0) {
+                path.moveTo(outerX.toFloat(), outerY.toFloat())
+            } else {
+                path.lineTo(outerX.toFloat(), outerY.toFloat())
+            }
+            path.lineTo(innerX.toFloat(), innerY.toFloat())
+        }
+        path.close()
+
+        return path
     }
 }

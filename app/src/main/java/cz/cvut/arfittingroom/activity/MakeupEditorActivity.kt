@@ -1,22 +1,28 @@
 package cz.cvut.arfittingroom.activity
 
+import android.R
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Matrix
 import android.os.Bundle
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.slider.Slider
+import com.skydoves.colorpickerview.ColorPickerDialog
+import com.skydoves.colorpickerview.listeners.ColorEnvelopeListener
 import cz.cvut.arfittingroom.ARFittingRoomApplication
 import cz.cvut.arfittingroom.databinding.ActivityMakeupEditorBinding
+import cz.cvut.arfittingroom.draw.DrawView
 import cz.cvut.arfittingroom.service.MakeupEditorService
 import cz.cvut.arfittingroom.service.MakeupService
-import cz.cvut.arfittingroom.view.DrawView
 import javax.inject.Inject
+
 
 class MakeupEditorActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMakeupEditorBinding
     private lateinit var drawView: DrawView
     private lateinit var imageView: ImageView
+    private lateinit var slider: Slider
 
     @Inject
     lateinit var makeUpService: MakeupService
@@ -31,6 +37,7 @@ class MakeupEditorActivity : AppCompatActivity() {
         binding = ActivityMakeupEditorBinding.inflate(layoutInflater)
         drawView = binding.drawView
         imageView = binding.faceImage
+        slider = binding.strokeSizeSlider
 
         setContentView(binding.root)
 
@@ -39,6 +46,29 @@ class MakeupEditorActivity : AppCompatActivity() {
             val intent = Intent(this, MakeupActivity::class.java)
             startActivity(intent)
         }
+        binding.buttonColorPicker.setOnClickListener {
+            showColorPickerDialog()
+        }
+        slider.addOnChangeListener { _, value, _ ->
+            drawView.setStrokeWidth(value)
+        }
+        drawView.setStrokeWidth(slider.value)
+
+    }
+
+    private fun showColorPickerDialog() {
+        ColorPickerDialog.Builder(this)
+            .setTitle("ColorPicker Dialog")
+            .setPreferenceName("MyColorPickerDialog")
+            .setPositiveButton(getString(R.string.ok),
+                ColorEnvelopeListener { envelope, _ -> drawView.setColor(envelope.color) })
+            .setNegativeButton(
+                getString(R.string.cancel)
+            ) { dialogInterface, _ -> dialogInterface.dismiss() }
+            .attachAlphaSlideBar(true)
+            .attachBrightnessSlideBar(true)
+            .setBottomSpace(12)
+            .show()
     }
 
     private fun adjustAndSaveBitmap() {

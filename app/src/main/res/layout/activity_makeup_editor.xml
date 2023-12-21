@@ -20,7 +20,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0" />
 
-    <cz.cvut.arfittingroom.view.DrawView
+    <cz.cvut.arfittingroom.draw.DrawView
         android:id="@+id/draw_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -33,8 +33,56 @@
         android:layout_height="wrap_content"
         android:background="@null"
         android:src="@drawable/back_icon"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="bottom|center_horizontal"
+        android:orientation="vertical">
+
+
+        <!-- New Undo Button -->
+        <ImageButton
+            android:id="@+id/button_undo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@null"
+            android:src="@drawable/undo_icon"
+            app:layout_constraintBottom_toTopOf="@id/stroke_size_slider"
+            app:layout_constraintEnd_toStartOf="@id/button_redo"
+            app:layout_constraintVertical_chainStyle="packed" />
+
+        <!-- New Mirror Button -->
+        <ImageButton
+            android:id="@+id/button_redo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@null"
+            android:src="@drawable/mirror_icon"
+            app:layout_constraintBottom_toTopOf="@id/stroke_size_slider"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+
+        <ImageButton
+            android:id="@+id/button_color_picker"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:background="@null"
+            android:src="@drawable/color_picker_icon" />
+
+        <com.google.android.material.slider.Slider
+            android:id="@+id/stroke_size_slider"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:stepSize="1"
+            android:theme="@style/MyMaterialTheme"
+            android:value="10"
+            android:valueFrom="1"
+            android:valueTo="100" />
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 
