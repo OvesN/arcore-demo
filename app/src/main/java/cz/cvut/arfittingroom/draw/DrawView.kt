@@ -313,7 +313,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         val startX = outerRadius / 2 + cx
         val startY = outerRadius / 5 + cy
         // Starting point
-        path.moveTo(startX, startY)
+        path.moveTo(outerRadius / 2 + startX, outerRadius / 5 + startY)
 
         // Upper left path
         path.cubicTo(
