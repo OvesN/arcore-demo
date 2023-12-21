@@ -310,82 +310,40 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     private fun createHeartPath(cx: Float, cy: Float, outerRadius: Float): MyPath {
         val path = MyPath()
-        val startX = outerRadius / 2 + cx
-        val startY = outerRadius / 5 + cy
         // Starting point
-        path.moveTo(outerRadius / 2 + startX, outerRadius / 5 + startY)
+        path.moveTo(outerRadius / 2 + cx, outerRadius / 5 + cy)
 
         // Upper left path
         path.cubicTo(
-            5 * outerRadius / 14 + startX, startY,
-             startX, outerRadius / 15 + startY,
-            outerRadius / 28 + startX, 2 * outerRadius / 5 + startY
+            5 * outerRadius / 14 + cx, cy,
+            cx, outerRadius / 15 + cy,
+            outerRadius / 28 + cx, 2 * outerRadius / 5 + cy
         )
 
         // Lower left path
         path.cubicTo(
-            outerRadius / 14 + startX, 2 * outerRadius / 3 + startY,
-            3 * outerRadius / 7 + startX, 5 * outerRadius / 6 + startY,
-            outerRadius / 2 + startX, outerRadius + startY
+            outerRadius / 14 + cx, 2 * outerRadius / 3 + cy,
+            3 * outerRadius / 7 + cx, 5 * outerRadius / 6 + cy,
+            outerRadius / 2 + cx, outerRadius + cy
         )
 
         // Lower right path
         path.cubicTo(
-            4 * outerRadius / 7 + startX, 5 * outerRadius / 6 + startY,
-            13 * outerRadius / 14 + startX, 2 * outerRadius / 3 + startY,
-            27 * outerRadius / 28 + startX, 2 * outerRadius / 5 + startY
+            4 * outerRadius / 7 + cx, 5 * outerRadius / 6 + cy,
+            13 * outerRadius / 14 + cx, 2 * outerRadius / 3 + cy,
+            27 * outerRadius / 28 + cx, 2 * outerRadius / 5 + cy
         )
 
         // Upper right path
         path.cubicTo(
-            outerRadius + startX, outerRadius / 15 + startY,
-            9 * outerRadius / 14 + startX, 0f + startY,
-            outerRadius / 2 + startX, outerRadius / 5 + startY
+            outerRadius + cx, outerRadius / 15 + cy,
+            9 * outerRadius / 14 + cx, 0f + cy,
+            outerRadius / 2 + cx, outerRadius / 5 + cy
         )
 
         return path
     }
 
-    private fun createHeartPath1(cx: Float, cy: Float, outerRadius: Float): MyPath {
-        val path = MyPath()
-
-        // Adjust the starting point
-        val startX = cx - outerRadius / 2
-        val startY = cy - outerRadius / 5
-        path.moveTo(startX, startY)
-
-        // Upper left curve
-        path.cubicTo(
-            cx - 4 * outerRadius / 14, cy - 5 * outerRadius / 5,
-            cx - 9 * outerRadius / 14, cy - 14 * outerRadius / 15,
-            cx - 27 * outerRadius / 28, cy - 3 * outerRadius / 5
-        )
-
-        // Lower left curve
-        path.cubicTo(
-            cx - 13 * outerRadius / 14, cy + outerRadius / 3,
-            cx - 3 * outerRadius / 7, cy + 5 * outerRadius / 6,
-            cx, cy + outerRadius
-        )
-
-        // Lower right curve
-        path.cubicTo(
-            cx + 3 * outerRadius / 7, cy + 5 * outerRadius / 6,
-            cx + 13 * outerRadius / 14, cy + outerRadius / 3,
-            cx + 27 * outerRadius / 28, cy - 3 * outerRadius / 5
-        )
-
-        // Upper right curve
-        path.cubicTo(
-            cx + 9 * outerRadius / 14, cy - 14 * outerRadius / 15,
-            cx + 4 * outerRadius / 14, cy - 5 * outerRadius / 5,
-            cx, startY
-        )
-
-        path.close()
-
-        return path
-    }
 
     fun drawImage(image: Int) {
         imageBitmap = BitmapFactory.decodeResource(resources, image)
