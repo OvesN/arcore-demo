@@ -76,6 +76,7 @@ class MakeupEditorActivity : AppCompatActivity() {
     }
 
     private fun toggleStrokeShape(shape: EShape) {
+        drawView.isInImageMode = false
         drawView.strokeShape = if (drawView.strokeShape == shape) EShape.CIRCLE else shape
     }
 
