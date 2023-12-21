@@ -4,20 +4,15 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
-import android.graphics.Path
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import androidx.annotation.ColorInt
 import androidx.core.graphics.alpha
-import com.divyanshu.draw.widget.MyPath
-import com.divyanshu.draw.widget.PaintOptions
 import mu.KotlinLogging
-import java.util.LinkedHashMap
 import kotlin.math.cos
 import kotlin.math.sin
 
-//TODO slightly modified android draw
 class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private var mPaths = LinkedHashMap<MyPath, PaintOptions>()
     private val logger = KotlinLogging.logger { }
@@ -113,6 +108,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         super.onDraw(canvas)
 
         for ((key, value) in mPaths) {
+            //TODO VERY STUPID
             changePaint(value)
             canvas.drawPath(key, mPaint)
         }
@@ -123,13 +119,8 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     private fun changePaint(paintOptions: PaintOptions) {
         mPaint.color = paintOptions.color
-        //TODO temporal
-        if (strokeShape == EShape.STAR) {
-            mPaint.strokeWidth = 6f
-        }
-        else {
-            mPaint.strokeWidth = paintOptions.strokeWidth
-        }
+        mPaint.style = paintOptions.style
+        mPaint.strokeWidth = paintOptions.strokeWidth
     }
 
     fun clearCanvas() {
@@ -180,6 +171,13 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                 invalidate()
                 return true
             }
+
+            EShape.HEART -> {
+                drawHeart(x, y, mPaintOptions.strokeWidth)
+                mUndonePaths.clear()
+                invalidate()
+                return true
+            }
         }
 
         when (event.action) {
@@ -198,10 +196,17 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         return true
     }
 
+    private fun drawHeart(centerX: Float, centerY: Float, outerRadius: Float) {
+        val heartPath = createHeartPath(centerX, centerY, outerRadius)
+        val newPaintOptions =
+            PaintOptions(mPaintOptions.color, outerRadius, mPaintOptions.alpha, Paint.Style.FILL)
+        mPaths[heartPath] = newPaintOptions
+    }
+
     private fun drawStar(centerX: Float, centerY: Float, outerRadius: Float) {
         val starPath = createStarPath(centerX, centerY, outerRadius)
         val newPaintOptions =
-            PaintOptions(mPaintOptions.color, outerRadius, mPaintOptions.alpha)
+            PaintOptions(mPaintOptions.color, 6f, mPaintOptions.alpha)
         mPaths[starPath] = newPaintOptions
     }
 
@@ -235,5 +240,85 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         path.close()
         return path
     }
+
+    private fun createHeartPath(cx: Float, cy: Float, outerRadius: Float): MyPath {
+        val path = MyPath()
+        val startX = outerRadius / 2 + cx
+        val startY = outerRadius / 5 + cy
+        // Starting point
+        path.moveTo(startX, startY)
+
+        // Upper left path
+        path.cubicTo(
+            5 * outerRadius / 14 + startX, startY,
+            startX, outerRadius / 15 + startY,
+            outerRadius / 28 + startX, 2 * outerRadius / 5 + startY
+        )
+
+        // Lower left path
+        path.cubicTo(
+            outerRadius / 14 + startX, 2 * outerRadius / 3 + startY,
+            3 * outerRadius / 7 + startX, 5 * outerRadius / 6 + startY,
+            outerRadius / 2 + startX, outerRadius + startY
+        )
+
+        // Lower right path
+        path.cubicTo(
+            4 * outerRadius / 7 + startX, 5 * outerRadius / 6 + startY,
+            13 * outerRadius / 14 + startX, 2 * outerRadius / 3 + startY,
+            27 * outerRadius / 28 + startX, 2 * outerRadius / 5 + startY
+        )
+
+        // Upper right path
+        path.cubicTo(
+            outerRadius + startX, outerRadius / 15 + startY,
+            9 * outerRadius / 14 + startX, 0f + startY,
+            outerRadius / 2 + startX, outerRadius / 5 + startY
+        )
+
+        return path
+    }
+
+    private fun createHeartPath1(cx: Float, cy: Float, outerRadius: Float): MyPath {
+        val path = MyPath()
+
+        // Adjust the starting point
+        val startX = cx - outerRadius / 2
+        val startY = cy - outerRadius / 5
+        path.moveTo(startX, startY)
+
+        // Upper left curve
+        path.cubicTo(
+            cx - 4 * outerRadius / 14, cy - 5 * outerRadius / 5,
+            cx - 9 * outerRadius / 14, cy - 14 * outerRadius / 15,
+            cx - 27 * outerRadius / 28, cy - 3 * outerRadius / 5
+        )
+
+        // Lower left curve
+        path.cubicTo(
+            cx - 13 * outerRadius / 14, cy + outerRadius / 3,
+            cx - 3 * outerRadius / 7, cy + 5 * outerRadius / 6,
+            cx, cy + outerRadius
+        )
+
+        // Lower right curve
+        path.cubicTo(
+            cx + 3 * outerRadius / 7, cy + 5 * outerRadius / 6,
+            cx + 13 * outerRadius / 14, cy + outerRadius / 3,
+            cx + 27 * outerRadius / 28, cy - 3 * outerRadius / 5
+        )
+
+        // Upper right curve
+        path.cubicTo(
+            cx + 9 * outerRadius / 14, cy - 14 * outerRadius / 15,
+            cx + 4 * outerRadius / 14, cy - 5 * outerRadius / 5,
+            cx, startY
+        )
+
+        path.close()
+
+        return path
+    }
+
 
 }

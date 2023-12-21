@@ -60,6 +60,9 @@ class MakeupEditorActivity : AppCompatActivity() {
         binding.buttonStar.setOnClickListener {
             toggleStrokeShape(EShape.STAR)
         }
+        binding.buttonHeart.setOnClickListener {
+            toggleStrokeShape(EShape.HEART)
+        }
         slider.addOnChangeListener { _, value, _ ->
             drawView.setStrokeWidth(value)
         }

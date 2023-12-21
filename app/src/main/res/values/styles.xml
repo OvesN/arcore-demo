@@ -10,6 +10,6 @@
 
     <style name="MyMaterialTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
         <!-- Add attributes here -->
-        <item name="colorPrimary">@color/color_blue</item>
+        <item name="colorPrimary">@color/colorBlue</item>
     </style>
 </resources>

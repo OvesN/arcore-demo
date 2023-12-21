@@ -88,7 +88,7 @@
             android:theme="@style/MyMaterialTheme"
             android:value="10"
             android:valueFrom="1"
-            android:valueTo="100"
+            android:valueTo="150"
             android:layout_alignParentBottom="true"/>
 
         <ImageButton
