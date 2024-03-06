@@ -6,7 +6,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".activity.ModelEditorActivity">
 
-    <com.google.ar.sceneform.SceneView
+    <io.github.sceneview.SceneView
         android:id="@+id/sceneView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

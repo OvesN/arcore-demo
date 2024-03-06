@@ -1,8 +1,9 @@
 package cz.cvut.arfittingroom.service
 
-import com.google.ar.sceneform.rendering.Color
+import io.github.sceneview.math.Color
 import com.google.ar.sceneform.rendering.ModelRenderable
 import cz.cvut.arfittingroom.model.ModelInfo
+import io.github.sceneview.material.setColor
 
 class ModelEditorService {
     var loadedModels = mutableMapOf<String, ModelInfo>()
@@ -13,7 +14,7 @@ class ModelEditorService {
 
         val coloredModel = originalModel.model.makeCopy()
 
-        coloredModel.getMaterial(materialIndex).setFloat3(
+        coloredModel.getMaterial(materialIndex).setColor(
             "baseColor",
             color
         )

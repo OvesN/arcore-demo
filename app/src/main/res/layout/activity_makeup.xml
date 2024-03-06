@@ -6,11 +6,14 @@
     android:layout_height="match_parent"
     tools:context=".activity.MakeupActivity">
 
-    <fragment
-        android:id="@+id/face_fragment"
-        android:name="cz.cvut.arfittingroom.fragment.FaceArFragment"
+    <io.github.sceneview.ar.ARSceneView
+        android:id="@+id/sceneView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <LinearLayout
         android:layout_width="match_parent"

@@ -54,13 +54,11 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
 
-    implementation 'com.google.ar.sceneform.ux:sceneform-ux:1.17.1'
-    implementation 'com.google.ar:core:1.41.0'
     implementation 'com.android.support:multidex:1.0.3'
     implementation 'androidx.appcompat:appcompat:1.6.1'
 
     implementation 'io.github.microutils:kotlin-logging-jvm:2.0.11'
-
+    implementation 'io.github.sceneview:arsceneview:2.0.4'
     implementation "com.google.dagger:dagger:2.48.1"
     implementation "com.google.dagger:dagger-android:2.48.1"
     implementation "com.google.dagger:dagger-android-support:2.48.1"
@@ -70,5 +68,3 @@ dependencies {
     kapt "com.google.dagger:dagger-android-processor:2.48.1"
 
 }
-
-apply plugin: 'com.google.ar.sceneform.plugin'
