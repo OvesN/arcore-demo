@@ -1,4 +1,4 @@
-package cz.cvut.arfittingroom.utils
+package cz.cvut.arfittingroom.util
 
 import android.graphics.Bitmap
 import android.graphics.Canvas
