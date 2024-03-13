@@ -1,9 +1,10 @@
-package cz.cvut.arfittingroom.draw
+package cz.cvut.arfittingroom.draw.path
 
 import android.graphics.Path
+import cz.cvut.arfittingroom.draw.path.Action
 import java.io.Writer
 
-class Move(val x: Float, val y: Float) : Action {
+class Move(private val x: Float, private val y: Float) : Action {
 
     override fun perform(path: Path) {
         path.moveTo(x, y)

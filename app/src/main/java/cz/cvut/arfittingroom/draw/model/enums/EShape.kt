@@ -1,4 +1,4 @@
-package cz.cvut.arfittingroom.draw
+package cz.cvut.arfittingroom.draw.model.enums
 
 enum class EShape {
     STAR,

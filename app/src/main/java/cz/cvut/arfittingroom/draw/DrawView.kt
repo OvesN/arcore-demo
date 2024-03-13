@@ -12,27 +12,30 @@ import android.view.ScaleGestureDetector
 import android.view.View
 import androidx.annotation.ColorInt
 import androidx.core.graphics.alpha
+import cz.cvut.arfittingroom.draw.DrawHistoryHolder.actions
+import cz.cvut.arfittingroom.draw.DrawHistoryHolder.lastPaths
+import cz.cvut.arfittingroom.draw.DrawHistoryHolder.paths
+import cz.cvut.arfittingroom.draw.DrawHistoryHolder.undonePaths
+import cz.cvut.arfittingroom.draw.command.action.DrawPath
+import cz.cvut.arfittingroom.draw.model.element.Star
+import cz.cvut.arfittingroom.draw.model.enums.EShape
+import cz.cvut.arfittingroom.draw.path.DrawablePath
 import mu.KotlinLogging
-import kotlin.math.cos
-import kotlin.math.sin
+
+private val logger = KotlinLogging.logger { }
 
 class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
-    private var mPaths = LinkedHashMap<MyPath, PaintOptions>()
-    private val logger = KotlinLogging.logger { }
 
-    private var mLastPaths = LinkedHashMap<MyPath, PaintOptions>()
-    private var mUndonePaths = LinkedHashMap<MyPath, PaintOptions>()
+    private var curPaint = Paint()
+    private var curPath = DrawablePath()
+    private var paintOptions = PaintOptions()
 
-    private var mPaint = Paint()
-    private var mPath = MyPath()
-    private var mPaintOptions = PaintOptions()
-
-    private var mCurX = 0f
-    private var mCurY = 0f
-    private var mStartX = 0f
-    private var mStartY = 0f
-    private var mIsSaving = false
-    private var mIsStrokeWidthBarEnabled = false
+    private var curX = 0f
+    private var curY = 0f
+    private var startX = 0f
+    private var startY = 0f
+    private var isSaving = false
+    private var isStrokeWidthBarEnabled = false
 
     private var scaleFactor = 1.0f
     private val scaleGestureDetector: ScaleGestureDetector
@@ -42,18 +45,18 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private var posX = 0f
     private var posY = 0f
 
-    var imageBitmap: Bitmap? = null
-    var isInImageMode = false
+    private var imageBitmap: Bitmap? = null
 
+    var isInImageMode = false
     var strokeShape = EShape.CIRCLE
 
     init {
-        mPaint.apply {
-            color = mPaintOptions.color
+        curPaint.apply {
+            color = paintOptions.color
             style = Paint.Style.STROKE
             strokeJoin = Paint.Join.ROUND
             strokeCap = Paint.Cap.ROUND
-            strokeWidth = mPaintOptions.strokeWidth
+            strokeWidth = paintOptions.strokeWidth
             isAntiAlias = true
         }
 
@@ -72,8 +75,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private fun adjustImage(event: MotionEvent): Boolean {
         scaleGestureDetector.onTouchEvent(event)
 
-        val action = event.actionMasked
-        when (action) {
+        when (event.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
                 lastTouchX = event.x
                 lastTouchY = event.y
@@ -95,48 +97,27 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     }
 
     fun undo() {
-        if (mPaths.isEmpty() && mLastPaths.isNotEmpty()) {
-            mPaths = mLastPaths.clone() as LinkedHashMap<MyPath, PaintOptions>
-            mLastPaths.clear()
-            invalidate()
-            return
-        }
-        if (mPaths.isEmpty()) {
-            return
-        }
-        val lastPath = mPaths.values.lastOrNull()
-        val lastKey = mPaths.keys.lastOrNull()
-
-        mPaths.remove(lastKey)
-        if (lastPath != null && lastKey != null) {
-            mUndonePaths[lastKey] = lastPath
-        }
+        DrawHistoryHolder.undo()
         invalidate()
     }
 
     fun redo() {
-        if (mUndonePaths.keys.isEmpty()) {
-            return
-        }
-
-        val lastKey = mUndonePaths.keys.last()
-        addPath(lastKey, mUndonePaths.values.last())
-        mUndonePaths.remove(lastKey)
+        DrawHistoryHolder.redo()
         invalidate()
     }
 
     fun setColor(newColor: Int) {
         @ColorInt
-        mPaintOptions.color = newColor
-        mPaintOptions.alpha = newColor.alpha
-        if (mIsStrokeWidthBarEnabled) {
+        paintOptions.color = newColor
+        paintOptions.alpha = newColor.alpha
+        if (isStrokeWidthBarEnabled) {
             invalidate()
         }
     }
 
     fun setStrokeWidth(newStrokeWidth: Float) {
-        mPaintOptions.strokeWidth = newStrokeWidth
-        if (mIsStrokeWidthBarEnabled) {
+        paintOptions.strokeWidth = newStrokeWidth
+        if (isStrokeWidthBarEnabled) {
             invalidate()
         }
     }
@@ -144,79 +125,79 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     fun getBitmap(): Bitmap {
         val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
-        mIsSaving = true
+        isSaving = true
         draw(canvas)
-        mIsSaving = false
+        isSaving = false
         return bitmap
     }
 
-    private fun addPath(path: MyPath, options: PaintOptions) {
-        mPaths[path] = options
-    }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
-        if (imageBitmap != null) {
-            matrix.reset()
-            matrix.postTranslate(-imageBitmap!!.width / 2f, -imageBitmap!!.height / 2f)
-            matrix.postScale(scaleFactor, scaleFactor)
-            matrix.postTranslate(posX + imageBitmap!!.width / 2f, posY + imageBitmap!!.height / 2f)
-        }
+        actions.forEach{it.execute(canvas)}
 
-        imageBitmap?.let {
-            canvas.drawBitmap(it, matrix, null)
-        }
-
-        for ((key, value) in mPaths) {
-            changePaint(value)
-            canvas.drawPath(key, mPaint)
-        }
-
-        changePaint(mPaintOptions)
-        canvas.drawPath(mPath, mPaint)
+//        if (imageBitmap != null) {
+//            matrix.reset()
+//            matrix.postTranslate(-imageBitmap!!.width / 2f, -imageBitmap!!.height / 2f)
+//            matrix.postScale(scaleFactor, scaleFactor)
+//            matrix.postTranslate(posX + imageBitmap!!.width / 2f, posY + imageBitmap!!.height / 2f)
+//        }
+//
+//        imageBitmap?.let {
+//            canvas.drawBitmap(it, matrix, null)
+//        }
+//
+//        for ((key, value) in paths) {
+//            changePaint(value)
+//            canvas.drawPath(key, paint)
+//        }
+//
+//
+//        changePaint(paintOptions)
+//        canvas.drawPath(path, paint)
     }
 
     private fun changePaint(paintOptions: PaintOptions) {
-        mPaint.color = paintOptions.color
-        mPaint.style = paintOptions.style
-        mPaint.strokeWidth = paintOptions.strokeWidth
+        curPaint.color = paintOptions.color
+        curPaint.style = paintOptions.style
+        curPaint.strokeWidth = paintOptions.strokeWidth
     }
 
     fun clearCanvas() {
-        mLastPaths = mPaths.clone() as LinkedHashMap<MyPath, PaintOptions>
-        mPath.reset()
-        mPaths.clear()
+        paths.putAll(lastPaths.clone() as LinkedHashMap<DrawablePath, PaintOptions>)
+        curPath.reset()
+        paths.clear()
         invalidate()
     }
 
     private fun actionDown(x: Float, y: Float) {
-        mPath.reset()
-        mPath.moveTo(x, y)
-        mCurX = x
-        mCurY = y
+        curPath.reset()
+        curPath.moveTo(x, y)
+        curX = x
+        curY = y
     }
 
     private fun actionMove(x: Float, y: Float) {
-        mPath.quadTo(mCurX, mCurY, (x + mCurX) / 2, (y + mCurY) / 2)
-        mCurX = x
-        mCurY = y
+        curPath.quadTo(curX, curY, (x + curX) / 2, (y + curY) / 2)
+        curX = x
+        curY = y
     }
 
     private fun actionUp() {
-        mPath.lineTo(mCurX, mCurY)
+        curPath.lineTo(curX, curY)
 
         // draw a dot on click
-        if (mStartX == mCurX && mStartY == mCurY) {
-            mPath.lineTo(mCurX, mCurY + 2)
-            mPath.lineTo(mCurX + 1, mCurY + 2)
-            mPath.lineTo(mCurX + 1, mCurY)
+        if (startX == curX && startY == curY) {
+            curPath.lineTo(curX, curY + 2)
+            curPath.lineTo(curX + 1, curY + 2)
+            curPath.lineTo(curX + 1, curY)
         }
 
-        mPaths[mPath] = mPaintOptions
-        mPath = MyPath()
-        mPaintOptions =
-            PaintOptions(mPaintOptions.color, mPaintOptions.strokeWidth, mPaintOptions.alpha)
+        paths[curPath] = paintOptions
+        curPath = DrawablePath()
+        paintOptions =
+            PaintOptions(paintOptions.color, paintOptions.strokeWidth, paintOptions.alpha)
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
@@ -229,29 +210,29 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             return true
         }
 
-        when (strokeShape) {
-            EShape.CIRCLE -> {}
-            EShape.STAR -> {
-                drawStar(x, y, mPaintOptions.strokeWidth)
-                mUndonePaths.clear()
-                invalidate()
-                return true
-            }
-
-            EShape.HEART -> {
-                drawHeart(x, y, mPaintOptions.strokeWidth)
-                mUndonePaths.clear()
-                invalidate()
-                return true
-            }
-        }
-
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
-                mStartX = x
-                mStartY = y
-                actionDown(x, y)
-                mUndonePaths.clear()
+                when (strokeShape) {
+                    EShape.STAR -> {
+                        drawStar(x, y, paintOptions.strokeWidth)
+                        invalidate()
+                        return true
+                    }
+
+                    EShape.HEART -> {
+                        drawHeart(x, y, paintOptions.strokeWidth)
+                        undonePaths.clear()
+                        invalidate()
+                        return true
+                    }
+
+                    else -> {
+                        startX = x
+                        startY = y
+                        actionDown(x, y)
+                        undonePaths.clear()
+                    }
+                }
             }
 
             MotionEvent.ACTION_MOVE -> actionMove(x, y)
@@ -265,51 +246,28 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private fun drawHeart(centerX: Float, centerY: Float, outerRadius: Float) {
         val heartPath = createHeartPath(centerX, centerY, outerRadius)
         val newPaintOptions =
-            PaintOptions(mPaintOptions.color, outerRadius, mPaintOptions.alpha, Paint.Style.FILL)
-        mPaths[heartPath] = newPaintOptions
+            PaintOptions(paintOptions.color, outerRadius, paintOptions.alpha, Paint.Style.FILL)
+        paths[heartPath] = newPaintOptions
     }
 
     private fun drawStar(centerX: Float, centerY: Float, outerRadius: Float) {
-        val starPath = createStarPath(centerX, centerY, outerRadius)
-        val newPaintOptions =
-            PaintOptions(mPaintOptions.color, 6f, mPaintOptions.alpha)
-        mPaths[starPath] = newPaintOptions
+        val star = Star(
+            centerX,
+            centerY,
+            outerRadius,
+            Paint().apply {
+                color = paintOptions.color
+                style = paintOptions.style
+                strokeWidth = paintOptions.strokeWidth
+            }
+        )
+
+        actions.add(DrawPath(star))
     }
 
 
-    private fun createStarPath(cx: Float, cy: Float, outerRadius: Float): MyPath {
-        val section = 2.0 * Math.PI / 5
-        val path = MyPath()
-        val innerRadius = outerRadius / 3
-        val startAngle = -Math.PI / 2 // Start angle set to -90 degrees
-
-        path.reset()
-        path.moveTo(
-            (cx + outerRadius * cos(startAngle)).toFloat(),
-            (cy + outerRadius * sin(startAngle)).toFloat()
-        )
-        path.lineTo(
-            (cx + innerRadius * cos(startAngle + section / 2.0)).toFloat(),
-            (cy + innerRadius * sin(startAngle + section / 2.0)).toFloat()
-        )
-
-        for (i in 1 until 5) {
-            path.lineTo(
-                (cx + outerRadius * cos(startAngle + section * i)).toFloat(),
-                (cy + outerRadius * sin(startAngle + section * i)).toFloat()
-            )
-            path.lineTo(
-                (cx + innerRadius * cos(startAngle + section * i + section / 2.0)).toFloat(),
-                (cy + innerRadius * sin(startAngle + section * i + section / 2.0)).toFloat()
-            )
-        }
-
-        path.close()
-        return path
-    }
-
-    private fun createHeartPath(cx: Float, cy: Float, outerRadius: Float): MyPath {
-        val path = MyPath()
+    private fun createHeartPath(cx: Float, cy: Float, outerRadius: Float): DrawablePath {
+        val path = DrawablePath()
         // Starting point
         path.moveTo(outerRadius / 2 + cx, outerRadius / 5 + cy)
 

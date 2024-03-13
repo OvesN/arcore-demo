@@ -1,4 +1,4 @@
-package cz.cvut.arfittingroom.draw
+package cz.cvut.arfittingroom.draw.path
 
 import android.graphics.Path
 import java.io.Serializable

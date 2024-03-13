@@ -1,7 +1,7 @@
-package cz.cvut.arfittingroom.draw.shape
+package cz.cvut.arfittingroom.draw.path
 
 import android.graphics.Path
-import cz.cvut.arfittingroom.draw.Action
+import cz.cvut.arfittingroom.draw.path.Action
 import java.io.Writer
 
 class Quad(private val x1: Float, private val y1: Float, private val x2: Float, private val y2: Float) :
@@ -14,4 +14,5 @@ class Quad(private val x1: Float, private val y1: Float, private val x2: Float, 
     override fun perform(writer: Writer) {
         writer.write("Q$x1,$y1 $x2,$y2")
     }
+
 }
