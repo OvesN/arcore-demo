@@ -191,7 +191,8 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             color = paintOptions.color
             strokeWidth = paintOptions.strokeWidth
             alpha = paintOptions.alpha
-            style = paintOptions.style
+            strokeCap = Paint.Cap.ROUND
+            style = Paint.Style.STROKE
         })
 
         actions.add(DrawPath(curve))
