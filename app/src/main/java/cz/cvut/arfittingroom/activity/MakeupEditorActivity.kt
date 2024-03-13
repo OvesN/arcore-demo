@@ -16,7 +16,6 @@ import cz.cvut.arfittingroom.R
 import cz.cvut.arfittingroom.databinding.ActivityMakeupEditorBinding
 import cz.cvut.arfittingroom.draw.DrawView
 import cz.cvut.arfittingroom.draw.model.enums.EShape
-import cz.cvut.arfittingroom.service.MakeupEditorService
 import cz.cvut.arfittingroom.service.MakeupService
 import javax.inject.Inject
 
@@ -29,9 +28,6 @@ class MakeupEditorActivity : AppCompatActivity() {
 
     @Inject
     lateinit var makeUpService: MakeupService
-
-    @Inject
-    lateinit var makeupEditorService: MakeupEditorService
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

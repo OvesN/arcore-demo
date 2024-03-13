@@ -13,10 +13,9 @@ import android.view.View
 import androidx.annotation.ColorInt
 import androidx.core.graphics.alpha
 import cz.cvut.arfittingroom.draw.DrawHistoryHolder.actions
-import cz.cvut.arfittingroom.draw.DrawHistoryHolder.lastPaths
-import cz.cvut.arfittingroom.draw.DrawHistoryHolder.paths
-import cz.cvut.arfittingroom.draw.DrawHistoryHolder.undonePaths
 import cz.cvut.arfittingroom.draw.command.action.DrawPath
+import cz.cvut.arfittingroom.draw.model.element.Curve
+import cz.cvut.arfittingroom.draw.model.element.Heart
 import cz.cvut.arfittingroom.draw.model.element.Star
 import cz.cvut.arfittingroom.draw.model.enums.EShape
 import cz.cvut.arfittingroom.draw.path.DrawablePath
@@ -135,7 +134,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
-        actions.forEach{it.execute(canvas)}
+        actions.forEach { it.execute(canvas) }
 
 //        if (imageBitmap != null) {
 //            matrix.reset()
@@ -143,31 +142,11 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 //            matrix.postScale(scaleFactor, scaleFactor)
 //            matrix.postTranslate(posX + imageBitmap!!.width / 2f, posY + imageBitmap!!.height / 2f)
 //        }
-//
-//        imageBitmap?.let {
-//            canvas.drawBitmap(it, matrix, null)
-//        }
-//
-//        for ((key, value) in paths) {
-//            changePaint(value)
-//            canvas.drawPath(key, paint)
-//        }
-//
-//
-//        changePaint(paintOptions)
-//        canvas.drawPath(path, paint)
-    }
-
-    private fun changePaint(paintOptions: PaintOptions) {
-        curPaint.color = paintOptions.color
-        curPaint.style = paintOptions.style
-        curPaint.strokeWidth = paintOptions.strokeWidth
     }
 
     fun clearCanvas() {
-        paths.putAll(lastPaths.clone() as LinkedHashMap<DrawablePath, PaintOptions>)
         curPath.reset()
-        paths.clear()
+        actions.clear()
         invalidate()
     }
 
@@ -194,10 +173,15 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             curPath.lineTo(curX + 1, curY)
         }
 
-        paths[curPath] = paintOptions
-        curPath = DrawablePath()
-        paintOptions =
-            PaintOptions(paintOptions.color, paintOptions.strokeWidth, paintOptions.alpha)
+        val curve = Curve(curPath, Paint().apply {
+            paintOptions.color
+            paintOptions.strokeWidth
+            paintOptions.alpha
+        })
+
+        actions.add(DrawPath(curve))
+
+        curPath.reset()
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
@@ -206,6 +190,21 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
         if (isInImageMode) {
             adjustImage(event)
+            invalidate()
+            return true
+        }
+
+        if (strokeShape == EShape.CIRCLE) {
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    startX = x
+                    startY = y
+                    actionDown(x, y)
+                }
+
+                MotionEvent.ACTION_MOVE -> actionMove(x, y)
+                MotionEvent.ACTION_UP -> actionUp()
+            }
             invalidate()
             return true
         }
@@ -221,22 +220,13 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
                     EShape.HEART -> {
                         drawHeart(x, y, paintOptions.strokeWidth)
-                        undonePaths.clear()
                         invalidate()
                         return true
                     }
 
-                    else -> {
-                        startX = x
-                        startY = y
-                        actionDown(x, y)
-                        undonePaths.clear()
-                    }
+                    else -> {}
                 }
             }
-
-            MotionEvent.ACTION_MOVE -> actionMove(x, y)
-            MotionEvent.ACTION_UP -> actionUp()
         }
 
         invalidate()
@@ -244,10 +234,18 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     }
 
     private fun drawHeart(centerX: Float, centerY: Float, outerRadius: Float) {
-        val heartPath = createHeartPath(centerX, centerY, outerRadius)
-        val newPaintOptions =
-            PaintOptions(paintOptions.color, outerRadius, paintOptions.alpha, Paint.Style.FILL)
-        paths[heartPath] = newPaintOptions
+        val heart = Heart(
+            centerX,
+            centerY,
+            outerRadius,
+            Paint().apply {
+                color = paintOptions.color
+                strokeWidth = outerRadius
+                alpha = paintOptions.alpha
+                style = Paint.Style.FILL
+            }
+        )
+        actions.add(DrawPath(heart))
     }
 
     private fun drawStar(centerX: Float, centerY: Float, outerRadius: Float) {
@@ -258,50 +256,12 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             Paint().apply {
                 color = paintOptions.color
                 style = paintOptions.style
-                strokeWidth = paintOptions.strokeWidth
+                strokeWidth = 6f
+                alpha = paintOptions.alpha
             }
         )
-
         actions.add(DrawPath(star))
     }
-
-
-    private fun createHeartPath(cx: Float, cy: Float, outerRadius: Float): DrawablePath {
-        val path = DrawablePath()
-        // Starting point
-        path.moveTo(outerRadius / 2 + cx, outerRadius / 5 + cy)
-
-        // Upper left path
-        path.cubicTo(
-            5 * outerRadius / 14 + cx, cy,
-            cx, outerRadius / 15 + cy,
-            outerRadius / 28 + cx, 2 * outerRadius / 5 + cy
-        )
-
-        // Lower left path
-        path.cubicTo(
-            outerRadius / 14 + cx, 2 * outerRadius / 3 + cy,
-            3 * outerRadius / 7 + cx, 5 * outerRadius / 6 + cy,
-            outerRadius / 2 + cx, outerRadius + cy
-        )
-
-        // Lower right path
-        path.cubicTo(
-            4 * outerRadius / 7 + cx, 5 * outerRadius / 6 + cy,
-            13 * outerRadius / 14 + cx, 2 * outerRadius / 3 + cy,
-            27 * outerRadius / 28 + cx, 2 * outerRadius / 5 + cy
-        )
-
-        // Upper right path
-        path.cubicTo(
-            outerRadius + cx, outerRadius / 15 + cy,
-            9 * outerRadius / 14 + cx, 0f + cy,
-            outerRadius / 2 + cx, outerRadius / 5 + cy
-        )
-
-        return path
-    }
-
 
     fun drawImage(image: Int) {
         imageBitmap = BitmapFactory.decodeResource(resources, image)

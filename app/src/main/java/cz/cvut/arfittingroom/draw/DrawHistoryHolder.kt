@@ -5,16 +5,8 @@ import cz.cvut.arfittingroom.draw.path.DrawablePath
 import java.util.LinkedList
 
 object DrawHistoryHolder {
-    val paths = LinkedHashMap<DrawablePath, PaintOptions>()
-    val lastPaths = LinkedHashMap<DrawablePath, PaintOptions>()
-    val undonePaths = LinkedHashMap<DrawablePath, PaintOptions>()
-
     val actions = LinkedList<Command>()
     private val undoneActions = LinkedList<Command>()
-
-    fun addPath(path: DrawablePath, options: PaintOptions) {
-        paths[path] = options
-    }
 
     fun undo() {
         if (actions.isEmpty()) {

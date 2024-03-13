@@ -13,7 +13,7 @@ class Star(
     private val outerRadius: Float,
     private val paint: Paint
 ) : Drawable {
-    private fun getPath(): DrawablePath {
+    private fun createPath(): DrawablePath {
         val section = 2.0 * Math.PI / 5
         val path = DrawablePath()
         val innerRadius = outerRadius / 3
@@ -45,6 +45,6 @@ class Star(
     }
 
     override fun draw(canvas: Canvas) {
-        canvas.drawPath(getPath(), paint)
+        canvas.drawPath(createPath(), paint)
     }
 }
