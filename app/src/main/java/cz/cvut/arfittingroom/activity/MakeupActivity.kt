@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
+import com.google.android.filament.LightManager
 import com.google.ar.core.ArCoreApk
 import com.google.ar.core.AugmentedFace
 import com.google.ar.core.TrackingState
@@ -22,6 +23,16 @@ import com.google.ar.sceneform.rendering.Renderable
 import com.google.ar.sceneform.rendering.Texture
 import com.google.ar.sceneform.ux.ArFrontFacingFragment
 import com.google.ar.sceneform.ux.AugmentedFaceNode
+import com.gorisse.thomas.sceneform.Color
+import com.gorisse.thomas.sceneform.Position
+import com.gorisse.thomas.sceneform.environment
+import com.gorisse.thomas.sceneform.light.LightEstimationConfig
+import com.gorisse.thomas.sceneform.light.build
+import com.gorisse.thomas.sceneform.light.color
+import com.gorisse.thomas.sceneform.light.intensity
+import com.gorisse.thomas.sceneform.light.position
+import com.gorisse.thomas.sceneform.lightEstimationConfig
+import com.gorisse.thomas.sceneform.mainLight
 import cz.cvut.arfittingroom.ARFittingRoomApplication
 import cz.cvut.arfittingroom.R
 import cz.cvut.arfittingroom.databinding.ActivityMakeupBinding
@@ -126,7 +137,10 @@ class MakeupActivity : AppCompatActivity() {
 
     private fun onViewCreated(arSceneView: ArSceneView) {
         this.arSceneView = arSceneView
-
+        arSceneView.lightEstimationConfig = LightEstimationConfig.DISABLED
+        val light = LightManager.Builder(LightManager.Type.SUN).intensity(40000f).castShadows(true).build()
+        arSceneView.environment?.indirectLight?.intensity  = 0f
+        arSceneView.mainLight = light
         // This is important to make sure that the camera stream renders first so that
         // the face mesh occlusion works correctly.
         arSceneView.setCameraStreamRenderPriority(Renderable.RENDER_PRIORITY_FIRST)
@@ -196,6 +210,7 @@ class MakeupActivity : AppCompatActivity() {
 
     private fun applyModel(modelKey: String, modelType: EModelType) {
         val sceneView = arFragment.arSceneView
+
         // Update nodes
         sceneView.session?.getAllTrackables(AugmentedFace::class.java)?.forEach { face ->
             val modelNodesMap = faceNodeMap.getOrPut(face) { HashMap() }
