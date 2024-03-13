@@ -25,6 +25,7 @@ private val logger = KotlinLogging.logger { }
 
 class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
+    private var notSavedPaths = LinkedHashMap<DrawablePath, PaintOptions>()
     private var curPaint = Paint()
     private var curPath = DrawablePath()
     private var paintOptions = PaintOptions()
@@ -135,6 +136,13 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         super.onDraw(canvas)
 
         actions.forEach { it.execute(canvas) }
+        notSavedPaths.forEach{
+            changePaint(it.value)
+            canvas.drawPath(it.key, curPaint)
+        }
+
+        changePaint(paintOptions)
+        canvas.drawPath(curPath, curPaint)
 
 //        if (imageBitmap != null) {
 //            matrix.reset()
@@ -142,6 +150,12 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 //            matrix.postScale(scaleFactor, scaleFactor)
 //            matrix.postTranslate(posX + imageBitmap!!.width / 2f, posY + imageBitmap!!.height / 2f)
 //        }
+    }
+
+    private fun changePaint(paintOptions: PaintOptions) {
+        curPaint.color = paintOptions.color
+        curPaint.style = paintOptions.style
+        curPaint.strokeWidth = paintOptions.strokeWidth
     }
 
     fun clearCanvas() {
@@ -174,14 +188,15 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         }
 
         val curve = Curve(curPath, Paint().apply {
-            paintOptions.color
-            paintOptions.strokeWidth
-            paintOptions.alpha
+            color = paintOptions.color
+            strokeWidth = paintOptions.strokeWidth
+            alpha = paintOptions.alpha
+            style = paintOptions.style
         })
 
         actions.add(DrawPath(curve))
 
-        curPath.reset()
+        curPath = DrawablePath()
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
