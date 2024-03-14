@@ -37,6 +37,7 @@ class LayerManager {
         }
     }
 
+    // Returns index of the last layer
     fun addLayer(width: Int, height: Int): Int {
         val layer = Layer(width, height)
         idToLayerMap[layer.id] = layer
@@ -69,6 +70,9 @@ class LayerManager {
 
     fun removeLayer(index: Int) {
         //TODO remove layer action?
+        if (index >= layers.size) {
+            return
+        }
         val layerToRemove = layers[index]
         idToLayerMap.remove(layerToRemove.id)
         layers.removeAt(index)
@@ -98,4 +102,6 @@ class LayerManager {
             layer.draw(canvas)
         }
     }
+
+    fun getNumOfLayers() = layers.size
 }

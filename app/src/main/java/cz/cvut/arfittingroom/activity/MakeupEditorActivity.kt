@@ -33,6 +33,7 @@ class MakeupEditorActivity : AppCompatActivity() {
     private lateinit var drawView: DrawView
     private lateinit var imageView: ImageView
     private lateinit var slider: Slider
+    private lateinit var layersButtonsContainer: LinearLayout
     private var selectedLayerButton: Button? = null
 
     @Inject
@@ -47,7 +48,7 @@ class MakeupEditorActivity : AppCompatActivity() {
         drawView = binding.drawView
         imageView = binding.faceImage
         slider = binding.strokeSizeSlider
-
+        layersButtonsContainer = binding.dynamicLayerButtonsContainer
         setContentView(binding.root)
 
         binding.buttonBack.setOnClickListener {
@@ -78,26 +79,27 @@ class MakeupEditorActivity : AppCompatActivity() {
         }
         drawView.setStrokeWidth(slider.value)
 
+
+        //TODO fix num or indexes or whut
         binding.buttonAddLayer.setOnClickListener {
-            updateLayersButtons(drawView.addLayer())
+            updateLayersButtons(drawView.addLayer() + 1)
         }
 
-        updateLayersButtons(0)
+        //TODO fix later, what if we already have layers?
+        updateLayersButtons(1)
     }
 
     private fun updateLayersButtons(numOfLayers: Int) {
-        val layersContainer: LinearLayout = findViewById(R.id.dynamic_layer_buttons_container)
-        layersContainer.removeAllViews()  // Clear existing views if any
+        layersButtonsContainer.removeAllViews()  // Clear existing views if any
 
-        for (i in 0..numOfLayers) {
+        for (i in 0 until   numOfLayers) {
             val button = Button(this).apply {
                 text = i.toString()
                 setOnClickListener { showLayerEditDialog(i, this) }
             }
 
             selectLayerButton(button)
-
-            layersContainer.addView(button)
+            layersButtonsContainer.addView(button)
         }
     }
 
@@ -109,29 +111,44 @@ class MakeupEditorActivity : AppCompatActivity() {
             .setItems(options) { _, which ->
 
                 when (options[which]) {
-                    ELayerEditAction.DELETE.string -> drawView.layerManager.removeLayer(layerIndex)
-                    ELayerEditAction.MOVE_DOWN.string -> drawView.layerManager.moveLayer(
-                        layerIndex,
-                        layerIndex - 1
-                    )
+                    ELayerEditAction.DELETE.string -> {
+                        drawView.layerManager.removeLayer(layerIndex)
+                        val newLayerIndex = if (layerIndex == 0) 0 else layerIndex - 1
+                        drawView.setActiveLayer(newLayerIndex)
+                        selectLayerButton(layersButtonsContainer.getChildAt(newLayerIndex) as Button)
+                    }
 
-                    ELayerEditAction.MOVE_UP.string -> drawView.layerManager.moveLayer(
-                        layerIndex,
-                        layerIndex + 1
-                    )
+                    ELayerEditAction.MOVE_DOWN.string -> {
+                        drawView.layerManager.moveLayer(layerIndex, layerIndex + 1)
+                        if (drawView.setActiveLayer(layerIndex + 1))
+                        {
+                            selectLayerButton(layersButtonsContainer.getChildAt(layerIndex) as Button)
+                        }
+                    }
+
+                    ELayerEditAction.MOVE_UP.string -> {
+                        drawView.layerManager.moveLayer(layerIndex, layerIndex - 1)
+                        if (drawView.setActiveLayer(layerIndex - 1)) {
+                            selectLayerButton(layersButtonsContainer.getChildAt(layerIndex - 1) as Button)
+                        }
+                    }
 
                     ELayerEditAction.SELECT.string -> {
                         drawView.setActiveLayer(layerIndex)
+                        selectLayerButton(button)
                     }
                 }
-
-                selectLayerButton(button)
             }
             .show()
+
+        updateLayersButtons(drawView.layerManager.getNumOfLayers())
     }
 
     private fun selectLayerButton(button: Button) {
         button.setBackgroundColor(SELECTED_COLOR)
+        if (button == selectedLayerButton) {
+            return
+        }
         selectedLayerButton?.setBackgroundColor(DEFAULT_COLOR)
         selectedLayerButton = button
     }

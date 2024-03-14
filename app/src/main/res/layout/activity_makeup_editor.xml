@@ -50,6 +50,7 @@
         <!-- Placeholder for dynamic number buttons -->
         <LinearLayout
             android:id="@+id/dynamic_layer_buttons_container"
+            android:paddingTop="20dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical" />

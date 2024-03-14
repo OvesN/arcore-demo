@@ -121,12 +121,21 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         return true
     }
 
-    fun addLayer(): Int =
-       layerManager.addLayer(width, height)
+    fun addLayer(): Int  {
+        val newLayerIndex = layerManager.addLayer(width, height)
+        activeLayerIndex = newLayerIndex
+        return newLayerIndex
+    }
 
-    fun setActiveLayer(layerIndex: Int) {
+
+    //Return true if new layer is selected
+    fun setActiveLayer(layerIndex: Int): Boolean {
+        if (layerIndex >= layerManager.getNumOfLayers() || layerIndex < 0) {
+            return false
+        }
         activeLayerIndex = layerIndex
         logger.info { "Active layer is now $layerIndex" }
+        return true
     }
 
     fun setColor(newColor: Int) {
