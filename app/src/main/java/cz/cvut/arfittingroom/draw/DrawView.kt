@@ -87,6 +87,15 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     }
 
+    fun undo() {
+        layerManager.undo()
+        invalidate()
+    }
+
+    fun redo() {
+        layerManager.redo()
+        invalidate()
+    }
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
 
@@ -312,5 +321,14 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         invalidate()
     }
 
+    fun moveLayer(fromIndex: Int, toIndex: Int) {
+        layerManager.moveLayer(fromIndex, toIndex)
+        invalidate()
+    }
+
+    fun removeLayer(layerIndex: Int) {
+        layerManager.removeLayer(layerIndex)
+        invalidate()
+    }
 
 }

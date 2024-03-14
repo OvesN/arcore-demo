@@ -60,10 +60,10 @@ class MakeupEditorActivity : AppCompatActivity() {
             showColorPickerDialog()
         }
         binding.buttonRedo.setOnClickListener {
-            drawView.layerManager.redo()
+            drawView.redo()
         }
         binding.buttonUndo.setOnClickListener {
-            drawView.layerManager.undo()
+            drawView.undo()
         }
         binding.buttonStar.setOnClickListener {
             toggleStrokeShape(EShape.STAR)
@@ -112,22 +112,22 @@ class MakeupEditorActivity : AppCompatActivity() {
 
                 when (options[which]) {
                     ELayerEditAction.DELETE.string -> {
-                        drawView.layerManager.removeLayer(layerIndex)
+                        drawView.removeLayer(layerIndex)
                         val newLayerIndex = if (layerIndex == 0) 0 else layerIndex - 1
                         drawView.setActiveLayer(newLayerIndex)
                         selectLayerButton(layersButtonsContainer.getChildAt(newLayerIndex) as Button)
                     }
 
                     ELayerEditAction.MOVE_DOWN.string -> {
-                        drawView.layerManager.moveLayer(layerIndex, layerIndex + 1)
+                        drawView.moveLayer(layerIndex, layerIndex + 1)
                         if (drawView.setActiveLayer(layerIndex + 1))
                         {
-                            selectLayerButton(layersButtonsContainer.getChildAt(layerIndex) as Button)
+                            selectLayerButton(layersButtonsContainer.getChildAt(layerIndex + 1) as Button)
                         }
                     }
 
                     ELayerEditAction.MOVE_UP.string -> {
-                        drawView.layerManager.moveLayer(layerIndex, layerIndex - 1)
+                        drawView.moveLayer(layerIndex, layerIndex - 1)
                         if (drawView.setActiveLayer(layerIndex - 1)) {
                             selectLayerButton(layersButtonsContainer.getChildAt(layerIndex - 1) as Button)
                         }
