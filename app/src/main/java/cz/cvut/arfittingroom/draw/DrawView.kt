@@ -54,7 +54,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     private var imageBitmap: Bitmap? = null
 
-    private var activeLayerIndex = 0
+    var activeLayerIndex = 0
 
 
     var isInImageMode = false
@@ -124,15 +124,9 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     fun addLayer(): Int =
        layerManager.addLayer(width, height)
 
-
-    fun undo() {
-        layerManager.undo()
-        invalidate()
-    }
-
-    fun redo() {
-        layerManager.redo()
-        invalidate()
+    fun setActiveLayer(layerIndex: Int) {
+        activeLayerIndex = layerIndex
+        logger.info { "Active layer is now $layerIndex" }
     }
 
     fun setColor(newColor: Int) {

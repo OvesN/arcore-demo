@@ -4,11 +4,13 @@ import android.R.string.ok
 import android.R.string.cancel
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.Color
 import android.graphics.Matrix
 import android.os.Bundle
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.LinearLayout
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.slider.Slider
 import com.skydoves.colorpickerview.ColorPickerDialog
@@ -17,17 +19,21 @@ import cz.cvut.arfittingroom.ARFittingRoomApplication
 import cz.cvut.arfittingroom.R
 import cz.cvut.arfittingroom.databinding.ActivityMakeupEditorBinding
 import cz.cvut.arfittingroom.draw.DrawView
+import cz.cvut.arfittingroom.draw.model.enums.ELayerEditAction
 import cz.cvut.arfittingroom.draw.model.enums.EShape
-import cz.cvut.arfittingroom.draw.service.LayerManager
 import cz.cvut.arfittingroom.service.MakeupService
 import javax.inject.Inject
 
+
+private val SELECTED_COLOR = Color.parseColor("#FF5722")
+private const val DEFAULT_COLOR = Color.TRANSPARENT
 
 class MakeupEditorActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMakeupEditorBinding
     private lateinit var drawView: DrawView
     private lateinit var imageView: ImageView
     private lateinit var slider: Slider
+    private var selectedLayerButton: Button? = null
 
     @Inject
     lateinit var makeUpService: MakeupService
@@ -53,10 +59,10 @@ class MakeupEditorActivity : AppCompatActivity() {
             showColorPickerDialog()
         }
         binding.buttonRedo.setOnClickListener {
-            drawView.redo()
+            drawView.layerManager.redo()
         }
         binding.buttonUndo.setOnClickListener {
-            drawView.undo()
+            drawView.layerManager.undo()
         }
         binding.buttonStar.setOnClickListener {
             toggleStrokeShape(EShape.STAR)
@@ -75,6 +81,8 @@ class MakeupEditorActivity : AppCompatActivity() {
         binding.buttonAddLayer.setOnClickListener {
             updateLayersButtons(drawView.addLayer())
         }
+
+        updateLayersButtons(0)
     }
 
     private fun updateLayersButtons(numOfLayers: Int) {
@@ -84,10 +92,48 @@ class MakeupEditorActivity : AppCompatActivity() {
         for (i in 0..numOfLayers) {
             val button = Button(this).apply {
                 text = i.toString()
-
+                setOnClickListener { showLayerEditDialog(i, this) }
             }
+
+            selectLayerButton(button)
+
             layersContainer.addView(button)
         }
+    }
+
+    private fun showLayerEditDialog(layerIndex: Int, button: Button) {
+        val options = ELayerEditAction.entries.map { it.string }.toTypedArray()
+
+        AlertDialog.Builder(this)
+            .setTitle("Edit layer $layerIndex")
+            .setItems(options) { _, which ->
+
+                when (options[which]) {
+                    ELayerEditAction.DELETE.string -> drawView.layerManager.removeLayer(layerIndex)
+                    ELayerEditAction.MOVE_DOWN.string -> drawView.layerManager.moveLayer(
+                        layerIndex,
+                        layerIndex - 1
+                    )
+
+                    ELayerEditAction.MOVE_UP.string -> drawView.layerManager.moveLayer(
+                        layerIndex,
+                        layerIndex + 1
+                    )
+
+                    ELayerEditAction.SELECT.string -> {
+                        drawView.setActiveLayer(layerIndex)
+                    }
+                }
+
+                selectLayerButton(button)
+            }
+            .show()
+    }
+
+    private fun selectLayerButton(button: Button) {
+        button.setBackgroundColor(SELECTED_COLOR)
+        selectedLayerButton?.setBackgroundColor(DEFAULT_COLOR)
+        selectedLayerButton = button
     }
 
     private fun toggleStrokeShape(shape: EShape) {

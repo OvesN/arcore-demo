@@ -7,8 +7,11 @@ import cz.cvut.arfittingroom.draw.DrawHistoryHolder.globalDrawHistory
 import cz.cvut.arfittingroom.draw.Layer
 import cz.cvut.arfittingroom.draw.command.Command
 import cz.cvut.arfittingroom.draw.model.element.Element
+import mu.KotlinLogging
 import java.util.LinkedList
 import java.util.UUID
+
+private val logger = KotlinLogging.logger{}
 
 class LayerManager {
     private val layers = mutableListOf<Layer>()
@@ -65,9 +68,12 @@ class LayerManager {
     }
 
     fun removeLayer(index: Int) {
+        //TODO remove layer action?
         val layerToRemove = layers[index]
         idToLayerMap.remove(layerToRemove.id)
         layers.removeAt(index)
+
+        logger.info { "Layer from index $index removed" }
     }
 
     fun setLayerVisibility(index: Int, isVisible: Boolean) {
@@ -75,8 +81,16 @@ class LayerManager {
     }
 
     fun moveLayer(fromIndex: Int, toIndex: Int) {
+        if (fromIndex == toIndex || fromIndex < 0 || toIndex < 0 || fromIndex >= layers.size || toIndex > layers.size) {
+            // Invalid indices or no movement required
+            logger.info { "Layer does not need to be moved" }
+            return
+        }
+
         val layer = layers.removeAt(fromIndex)
-        layers.add(toIndex, layer)
+        layers.add(if (toIndex > fromIndex) toIndex - 1 else toIndex, layer)
+
+        logger.info {"Layer moved from index $fromIndex to index $toIndex"}
     }
 
     fun drawLayers(canvas: Canvas) {
