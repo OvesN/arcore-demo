@@ -141,7 +141,6 @@ class MakeupEditorActivity : AppCompatActivity() {
             }
             .show()
 
-        updateLayersButtons(drawView.layerManager.getNumOfLayers())
     }
 
     private fun selectLayerButton(button: Button) {
