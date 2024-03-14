@@ -8,6 +8,7 @@ import java.util.UUID
 
 class MoveObject<T>(override val element: T) :
     Command<T> where T : Element, T : Movable {
+    override lateinit var layerId: UUID
     override fun execute(canvas: Canvas) {
         element.move()
     }

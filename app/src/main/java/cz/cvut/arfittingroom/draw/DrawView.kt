@@ -11,7 +11,8 @@ import android.view.ScaleGestureDetector
 import android.view.View
 import androidx.annotation.ColorInt
 import androidx.core.graphics.alpha
-import cz.cvut.arfittingroom.draw.DrawHistoryHolder.actions
+import cz.cvut.arfittingroom.ARFittingRoomApplication
+import cz.cvut.arfittingroom.draw.DrawHistoryHolder.globalDrawHistory
 import cz.cvut.arfittingroom.draw.command.action.DrawPath
 import cz.cvut.arfittingroom.draw.model.element.impl.Curve
 import cz.cvut.arfittingroom.draw.model.element.impl.Heart
@@ -19,7 +20,6 @@ import cz.cvut.arfittingroom.draw.model.element.impl.Star
 import cz.cvut.arfittingroom.draw.model.enums.EShape
 import cz.cvut.arfittingroom.draw.path.DrawablePath
 import cz.cvut.arfittingroom.draw.service.LayerManager
-import cz.cvut.arfittingroom.service.MakeupService
 import mu.KotlinLogging
 import javax.inject.Inject
 
@@ -28,6 +28,7 @@ private val logger = KotlinLogging.logger { }
 class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     @Inject
     lateinit var layerManager: LayerManager
+    private var isLayerInitialized = false
 
     private var curDrawingPath = LinkedHashMap<DrawablePath, PaintOptions>()
     private var curPaint = Paint()
@@ -57,6 +58,8 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     var strokeShape = EShape.CIRCLE
 
     init {
+        (context.applicationContext as? ARFittingRoomApplication)?.appComponent?.inject(this)
+
         // Apply default setting for paint option
         curPaint.apply {
             color = paintOptions.color
@@ -79,8 +82,16 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                 }
             })
 
-        // Initialize first layer
-        layerManager.addLayer(width, height)
+    }
+
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+
+        //Initialize first layer
+        if (!isLayerInitialized) {
+            layerManager.addLayer(w, h)
+            isLayerInitialized = true
+        }
     }
 
     private fun adjustImage(event: MotionEvent): Boolean {
@@ -108,12 +119,12 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     }
 
     fun undo() {
-        DrawHistoryHolder.undo()
+        layerManager.undo()
         invalidate()
     }
 
     fun redo() {
-        DrawHistoryHolder.redo()
+        layerManager.redo()
         invalidate()
     }
 
@@ -149,7 +160,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         layerManager.drawLayers(canvas)
 
         // Draw the current path that the user is drawing
-        curDrawingPath.forEach{
+        curDrawingPath.forEach {
             changePaint(it.value)
             canvas.drawPath(it.key, curPaint)
         }
@@ -167,7 +178,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     fun clearCanvas() {
         curPath.reset()
-        actions.clear()
+        globalDrawHistory.clear()
         invalidate()
     }
 
@@ -202,7 +213,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             style = Paint.Style.STROKE
         })
 
-        actions.add(DrawPath(curve))
+        layerManager.addToLayer(activeLayerIndex, DrawPath(curve))
 
         curPath = DrawablePath()
     }
@@ -268,7 +279,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                 style = Paint.Style.FILL
             }
         )
-        actions.add(DrawPath(heart))
+        layerManager.addToLayer(activeLayerIndex,DrawPath(heart))
     }
 
     private fun drawStar(centerX: Float, centerY: Float, outerRadius: Float) {
@@ -283,12 +294,13 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                 alpha = paintOptions.alpha
             }
         )
-        actions.add(DrawPath(star))
+        layerManager.addToLayer(activeLayerIndex, DrawPath(star))
     }
 
     fun drawImage(image: Int) {
         imageBitmap = BitmapFactory.decodeResource(resources, image)
         invalidate()
     }
+
 
 }

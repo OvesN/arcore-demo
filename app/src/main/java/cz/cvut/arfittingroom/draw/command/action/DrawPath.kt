@@ -11,6 +11,8 @@ import java.util.UUID
 class DrawPath<T>(
     override val element: T
 ) : Command<T> where T : Element, T : Drawable {
+    override lateinit var layerId: UUID
+
     override fun execute(canvas: Canvas) {
         element.draw(canvas)
     }

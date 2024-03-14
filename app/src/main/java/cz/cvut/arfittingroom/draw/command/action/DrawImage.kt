@@ -7,6 +7,7 @@ import cz.cvut.arfittingroom.draw.command.Drawable
 import cz.cvut.arfittingroom.draw.model.element.Element
 import java.util.UUID
 class DrawImage<T>(override val element: T): Command<T> where T : Element, T : Drawable {
+    override lateinit var layerId: UUID
     override fun execute(canvas: Canvas) {
         element.draw(canvas)
     }

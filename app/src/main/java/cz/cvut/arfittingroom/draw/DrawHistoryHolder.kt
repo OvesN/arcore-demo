@@ -2,32 +2,34 @@ package cz.cvut.arfittingroom.draw
 
 import cz.cvut.arfittingroom.draw.command.Command
 import cz.cvut.arfittingroom.draw.model.element.Element
-import cz.cvut.arfittingroom.draw.path.DrawablePath
 import java.util.LinkedList
 
 object DrawHistoryHolder {
-    val actions = LinkedList<Command<out Element>>()
+    val globalDrawHistory = LinkedList<Command<out Element>>()
     private val undoneActions = LinkedList<Command<out Element>>()
 
-    fun undo() {
-        if (actions.isEmpty()) {
-            return
+    fun gelLastAction(): Command<out Element>? {
+        if (globalDrawHistory.isEmpty()) {
+            return null
         }
 
-        val lastAction = actions.last
-        actions.removeLast()
+        val lastAction = globalDrawHistory.last
+        globalDrawHistory.removeLast()
 
         undoneActions.add(lastAction)
+        return lastAction
     }
 
-    fun redo() {
+    fun getLastUndoneAction(): Command<out Element>? {
         if (undoneActions.isEmpty()) {
-            return
+            return null
         }
 
         val lastUndoneAction = undoneActions.last
         undoneActions.removeLast()
 
-        actions.add(lastUndoneAction)
+        globalDrawHistory.add(lastUndoneAction)
+
+        return lastUndoneAction
     }
 }
