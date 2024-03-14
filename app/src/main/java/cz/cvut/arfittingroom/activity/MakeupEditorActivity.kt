@@ -6,7 +6,9 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Matrix
 import android.os.Bundle
+import android.widget.Button
 import android.widget.ImageView
+import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.slider.Slider
 import com.skydoves.colorpickerview.ColorPickerDialog
@@ -70,6 +72,22 @@ class MakeupEditorActivity : AppCompatActivity() {
         }
         drawView.setStrokeWidth(slider.value)
 
+        binding.buttonAddLayer.setOnClickListener {
+            updateLayersButtons(drawView.addLayer())
+        }
+    }
+
+    private fun updateLayersButtons(numOfLayers: Int) {
+        val layersContainer: LinearLayout = findViewById(R.id.dynamic_layer_buttons_container)
+        layersContainer.removeAllViews()  // Clear existing views if any
+
+        for (i in 0..numOfLayers) {
+            val button = Button(this).apply {
+                text = i.toString()
+
+            }
+            layersContainer.addView(button)
+        }
     }
 
     private fun toggleStrokeShape(shape: EShape) {

@@ -9,9 +9,12 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.ScaleGestureDetector
 import android.view.View
+import android.widget.Button
+import android.widget.LinearLayout
 import androidx.annotation.ColorInt
 import androidx.core.graphics.alpha
 import cz.cvut.arfittingroom.ARFittingRoomApplication
+import cz.cvut.arfittingroom.R
 import cz.cvut.arfittingroom.draw.DrawHistoryHolder.globalDrawHistory
 import cz.cvut.arfittingroom.draw.command.action.DrawPath
 import cz.cvut.arfittingroom.draw.model.element.impl.Curve
@@ -117,6 +120,10 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         }
         return true
     }
+
+    fun addLayer(): Int =
+       layerManager.addLayer(width, height)
+
 
     fun undo() {
         layerManager.undo()

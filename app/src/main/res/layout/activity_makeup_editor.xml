@@ -26,6 +26,35 @@
         android:layout_height="match_parent"
         android:background="@android:color/transparent" />
 
+    <!-- Placeholder for + and - buttons and dynamic layer buttons -->
+    <LinearLayout
+        android:id="@+id/layer_controls_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="5dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <!-- + button -->
+        <ImageButton
+            android:id="@+id/button_add_layer"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginEnd="5dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/add"
+            android:background="@null"/>
+
+        <!-- Placeholder for dynamic number buttons -->
+        <LinearLayout
+            android:id="@+id/dynamic_layer_buttons_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+    </LinearLayout>
+
 
     <LinearLayout
         android:layout_width="match_parent"

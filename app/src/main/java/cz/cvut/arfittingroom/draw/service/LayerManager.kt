@@ -34,12 +34,12 @@ class LayerManager {
         }
     }
 
-    fun addLayer(width: Int, height: Int): Layer {
+    fun addLayer(width: Int, height: Int): Int {
         val layer = Layer(width, height)
         idToLayerMap[layer.id] = layer
 
         layers.add(layer)
-        return layer
+        return (layers.size - 1)
     }
 
     fun moveToLayer(element: Element, index: Int) {
