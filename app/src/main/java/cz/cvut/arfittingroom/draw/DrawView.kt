@@ -4,7 +4,6 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
-import android.graphics.Matrix
 import android.graphics.Paint
 import android.util.AttributeSet
 import android.view.MotionEvent
@@ -14,18 +13,23 @@ import androidx.annotation.ColorInt
 import androidx.core.graphics.alpha
 import cz.cvut.arfittingroom.draw.DrawHistoryHolder.actions
 import cz.cvut.arfittingroom.draw.command.action.DrawPath
-import cz.cvut.arfittingroom.draw.model.element.Curve
-import cz.cvut.arfittingroom.draw.model.element.Heart
-import cz.cvut.arfittingroom.draw.model.element.Star
+import cz.cvut.arfittingroom.draw.model.element.impl.Curve
+import cz.cvut.arfittingroom.draw.model.element.impl.Heart
+import cz.cvut.arfittingroom.draw.model.element.impl.Star
 import cz.cvut.arfittingroom.draw.model.enums.EShape
 import cz.cvut.arfittingroom.draw.path.DrawablePath
+import cz.cvut.arfittingroom.draw.service.LayerManager
+import cz.cvut.arfittingroom.service.MakeupService
 import mu.KotlinLogging
+import javax.inject.Inject
 
 private val logger = KotlinLogging.logger { }
 
 class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
+    @Inject
+    lateinit var layerManager: LayerManager
 
-    private var notSavedPaths = LinkedHashMap<DrawablePath, PaintOptions>()
+    private var curDrawingPath = LinkedHashMap<DrawablePath, PaintOptions>()
     private var curPaint = Paint()
     private var curPath = DrawablePath()
     private var paintOptions = PaintOptions()
@@ -39,7 +43,6 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     private var scaleFactor = 1.0f
     private val scaleGestureDetector: ScaleGestureDetector
-    private val matrix = Matrix()
     private var lastTouchX = 0f
     private var lastTouchY = 0f
     private var posX = 0f
@@ -47,10 +50,14 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     private var imageBitmap: Bitmap? = null
 
+    private var activeLayerIndex = 0
+
+
     var isInImageMode = false
     var strokeShape = EShape.CIRCLE
 
     init {
+        // Apply default setting for paint option
         curPaint.apply {
             color = paintOptions.color
             style = Paint.Style.STROKE
@@ -60,6 +67,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             isAntiAlias = true
         }
 
+        // Add event for image scaling
         scaleGestureDetector = ScaleGestureDetector(
             context,
             object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
@@ -70,6 +78,9 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                     return true
                 }
             })
+
+        // Initialize first layer
+        layerManager.addLayer(width, height)
     }
 
     private fun adjustImage(event: MotionEvent): Boolean {
@@ -131,25 +142,21 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         return bitmap
     }
 
-
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
-        actions.forEach { it.execute(canvas) }
-        notSavedPaths.forEach{
+        // Draw all layers
+        layerManager.drawLayers(canvas)
+
+        // Draw the current path that the user is drawing
+        curDrawingPath.forEach{
             changePaint(it.value)
             canvas.drawPath(it.key, curPaint)
         }
 
+        // Draw the current part of the part that the user is drawing
         changePaint(paintOptions)
         canvas.drawPath(curPath, curPaint)
-
-//        if (imageBitmap != null) {
-//            matrix.reset()
-//            matrix.postTranslate(-imageBitmap!!.width / 2f, -imageBitmap!!.height / 2f)
-//            matrix.postScale(scaleFactor, scaleFactor)
-//            matrix.postTranslate(posX + imageBitmap!!.width / 2f, posY + imageBitmap!!.height / 2f)
-//        }
     }
 
     private fun changePaint(paintOptions: PaintOptions) {

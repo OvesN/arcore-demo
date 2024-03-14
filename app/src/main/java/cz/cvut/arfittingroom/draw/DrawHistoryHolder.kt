@@ -1,12 +1,13 @@
 package cz.cvut.arfittingroom.draw
 
 import cz.cvut.arfittingroom.draw.command.Command
+import cz.cvut.arfittingroom.draw.model.element.Element
 import cz.cvut.arfittingroom.draw.path.DrawablePath
 import java.util.LinkedList
 
 object DrawHistoryHolder {
-    val actions = LinkedList<Command>()
-    private val undoneActions = LinkedList<Command>()
+    val actions = LinkedList<Command<out Element>>()
+    private val undoneActions = LinkedList<Command<out Element>>()
 
     fun undo() {
         if (actions.isEmpty()) {

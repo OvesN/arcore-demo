@@ -1,4 +1,4 @@
-package cz.cvut.arfittingroom.draw.model.element
+package cz.cvut.arfittingroom.draw.model.element.impl
 
 import cz.cvut.arfittingroom.draw.command.Command
 

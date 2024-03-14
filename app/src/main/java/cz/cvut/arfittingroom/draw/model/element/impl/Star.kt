@@ -1,9 +1,10 @@
-package cz.cvut.arfittingroom.draw.model.element
+package cz.cvut.arfittingroom.draw.model.element.impl
 
 import android.graphics.Canvas
 import android.graphics.Paint
 import cz.cvut.arfittingroom.draw.path.DrawablePath
 import cz.cvut.arfittingroom.draw.command.Drawable
+import cz.cvut.arfittingroom.draw.model.element.Element
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -12,7 +13,7 @@ class Star(
     private val centerY: Float,
     private val outerRadius: Float,
     private val paint: Paint
-) : Drawable {
+) : Element(), Drawable {
     private fun createPath(): DrawablePath {
         val section = 2.0 * Math.PI / 5
         val path = DrawablePath()
@@ -42,6 +43,10 @@ class Star(
 
         path.close()
         return path
+    }
+
+    override fun doIntersect(x: Int, y: Int): Boolean {
+        TODO("Not yet implemented")
     }
 
     override fun draw(canvas: Canvas) {
