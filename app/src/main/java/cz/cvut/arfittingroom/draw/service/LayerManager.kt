@@ -28,7 +28,7 @@ class LayerManager {
             val relatedLayer = idToLayerMap[action.layerId]
             require(relatedLayer != null)
 
-            relatedLayer.actions[action.element.id]?.remove(action)
+            relatedLayer.actions.remove(action)
         }
     }
 
@@ -73,9 +73,8 @@ class LayerManager {
 
         command.layerId = foundLayer.id
         foundLayer.elements.putIfAbsent(command.element.id, command.element)
-        val commandList = foundLayer.actions.getOrPut(command.element.id) { LinkedList() }
 
-        commandList.add(command)
+        foundLayer.actions.add(command)
     }
 
     fun removeFromLayer(elementId: UUID, index: Int = 0, layer: Layer? = null) {

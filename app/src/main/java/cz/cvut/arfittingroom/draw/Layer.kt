@@ -14,9 +14,9 @@ class Layer(private val width: Int, private val height: Int) {
     val id: UUID = UUID.randomUUID()
     var isVisible: Boolean = true
     val elements = HashMap<UUID, Element>() // Map of elements on the layer, key is element id
-    val actions = HashMap<UUID, LinkedList<Command<out Element>>>() // Map of actions to do on this layer, keys is element id
+    val actions = LinkedList<Command<out Element>>() // Map of actions to do on this layer, keys is element id
 
-    var curDrawingPath = LinkedHashMap<DrawablePath, PaintOptions>()
+    private var curDrawingPath = LinkedHashMap<DrawablePath, PaintOptions>()
     var curPath = DrawablePath()
 
     private val curPaint = Paint()
@@ -25,6 +25,10 @@ class Layer(private val width: Int, private val height: Int) {
 
     init {
         bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        curPaint.apply {
+            strokeCap = Paint.Cap.ROUND
+            style = Paint.Style.STROKE
+        }
     }
 
     fun draw(canvas: Canvas) {
@@ -41,12 +45,18 @@ class Layer(private val width: Int, private val height: Int) {
 
     fun removeElement(elementId: UUID) {
         elements.remove(elementId)
-        actions.remove(elementId)
+        val iterator = actions.iterator()
+        while (iterator.hasNext()) {
+            val command = iterator.next()
+            if (command.element.id == elementId) {
+                iterator.remove()
+            }
+        }
     }
 
     fun addElement(element: Element, relatedActions: List<Command<out Element>>) {
         elements[element.id] = element
-        actions[element.id] = LinkedList(relatedActions)
+        actions.addAll(relatedActions)
     }
 
     private fun createBitmap() {
@@ -54,8 +64,7 @@ class Layer(private val width: Int, private val height: Int) {
 
         val canvas = Canvas(bitmap)
 
-        actions.values.forEach { elementActions -> elementActions
-            .forEach { it.execute(canvas) } }
+        actions.forEach { it.execute(canvas) }
 
         // Draw the current part of the part that the user is drawing
         canvas.drawPath(curPath, curPaint)
@@ -73,6 +82,7 @@ class Layer(private val width: Int, private val height: Int) {
 
     fun changePaint(paintOptions: PaintOptions) {
         curPaint.color = paintOptions.color
+        curPaint.alpha = paintOptions.alpha
         curPaint.style = paintOptions.style
         curPaint.strokeWidth = paintOptions.strokeWidth
     }
