@@ -104,7 +104,7 @@ class MakeupEditorActivity : AppCompatActivity() {
                 button.setBackgroundColor(DEFAULT_COLOR)
             }
 
-            layersButtonsContainer.addView(button, 0)
+            layersButtonsContainer.addView(button, layersButtonsContainer.childCount)
         }
     }
 
