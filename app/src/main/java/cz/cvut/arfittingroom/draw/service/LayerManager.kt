@@ -108,7 +108,7 @@ class LayerManager {
         }
 
         val layer = layers.removeAt(fromIndex)
-        layers.add(if (toIndex > fromIndex) toIndex - 1 else toIndex, layer)
+        layers.add(toIndex, layer)
 
         logger.info {"Layer moved from index $fromIndex to index $toIndex"}
         return true
