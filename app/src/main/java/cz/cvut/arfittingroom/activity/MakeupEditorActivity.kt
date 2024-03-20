@@ -97,7 +97,7 @@ class MakeupEditorActivity : AppCompatActivity() {
                 setOnClickListener { showLayerEditDialog(i, this) }
             }
 
-            if (i == drawView.activeLayerIndex) {
+            if (i == drawView.layerManager.activeLayerIndex) {
                 button.setBackgroundColor(SELECTED_COLOR)
             }
             else {

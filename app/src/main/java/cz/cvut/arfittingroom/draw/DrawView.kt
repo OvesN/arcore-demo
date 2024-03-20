@@ -9,12 +9,9 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.ScaleGestureDetector
 import android.view.View
-import android.widget.Button
-import android.widget.LinearLayout
 import androidx.annotation.ColorInt
 import androidx.core.graphics.alpha
 import cz.cvut.arfittingroom.ARFittingRoomApplication
-import cz.cvut.arfittingroom.R
 import cz.cvut.arfittingroom.draw.DrawHistoryHolder.globalDrawHistory
 import cz.cvut.arfittingroom.draw.command.action.DrawPath
 import cz.cvut.arfittingroom.draw.model.element.impl.Curve
@@ -32,10 +29,6 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     @Inject
     lateinit var layerManager: LayerManager
     private var isLayerInitialized = false
-
-    private var curDrawingPath = LinkedHashMap<DrawablePath, PaintOptions>()
-    private var curPaint = Paint()
-    private var curPath = DrawablePath()
     private var paintOptions = PaintOptions()
 
     private var curX = 0f
@@ -54,24 +47,12 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     private var imageBitmap: Bitmap? = null
 
-    var activeLayerIndex = 0
-
 
     var isInImageMode = false
     var strokeShape = EShape.CIRCLE
 
     init {
         (context.applicationContext as? ARFittingRoomApplication)?.appComponent?.inject(this)
-
-        // Apply default setting for paint option
-        curPaint.apply {
-            color = paintOptions.color
-            style = Paint.Style.STROKE
-            strokeJoin = Paint.Join.ROUND
-            strokeCap = Paint.Cap.ROUND
-            strokeWidth = paintOptions.strokeWidth
-            isAntiAlias = true
-        }
 
         // Add event for image scaling
         scaleGestureDetector = ScaleGestureDetector(
@@ -132,17 +113,16 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     fun addLayer(): Int  {
         val newLayerIndex = layerManager.addLayer(width, height)
-        activeLayerIndex = newLayerIndex
+        layerManager.activeLayerIndex = newLayerIndex
         return newLayerIndex
     }
-
 
     //Return true if new layer is selected
     fun setActiveLayer(layerIndex: Int): Boolean {
         if (layerIndex >= layerManager.getNumOfLayers() || layerIndex < 0) {
             return false
         }
-        activeLayerIndex = layerIndex
+        layerManager.activeLayerIndex = layerIndex
         logger.info { "Active layer is now $layerIndex" }
         return true
     }
@@ -176,55 +156,41 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         super.onDraw(canvas)
 
         // Draw all layers
-        layerManager.drawLayers(canvas)
-
-        // Draw the current path that the user is drawing
-        curDrawingPath.forEach {
-            changePaint(it.value)
-            canvas.drawPath(it.key, curPaint)
-        }
-
-        // Draw the current part of the part that the user is drawing
-        changePaint(paintOptions)
-        canvas.drawPath(curPath, curPaint)
-    }
-
-    private fun changePaint(paintOptions: PaintOptions) {
-        curPaint.color = paintOptions.color
-        curPaint.style = paintOptions.style
-        curPaint.strokeWidth = paintOptions.strokeWidth
+        layerManager.drawLayers(canvas, paintOptions)
     }
 
     fun clearCanvas() {
-        curPath.reset()
+        layerManager.deleteLayers()
         globalDrawHistory.clear()
+        // Add initial layer
+        layerManager.addLayer(width, height)
         invalidate()
     }
 
     private fun actionDown(x: Float, y: Float) {
-        curPath.reset()
-        curPath.moveTo(x, y)
+        layerManager.getCurPath().reset()
+        layerManager.getCurPath().moveTo(x, y)
         curX = x
         curY = y
     }
 
     private fun actionMove(x: Float, y: Float) {
-        curPath.quadTo(curX, curY, (x + curX) / 2, (y + curY) / 2)
+        layerManager.getCurPath().quadTo(curX, curY, (x + curX) / 2, (y + curY) / 2)
         curX = x
         curY = y
     }
 
     private fun actionUp() {
-        curPath.lineTo(curX, curY)
+        layerManager.getCurPath().lineTo(curX, curY)
 
         // draw a dot on click
         if (startX == curX && startY == curY) {
-            curPath.lineTo(curX, curY + 2)
-            curPath.lineTo(curX + 1, curY + 2)
-            curPath.lineTo(curX + 1, curY)
+            layerManager.getCurPath().lineTo(curX, curY + 2)
+            layerManager.getCurPath().lineTo(curX + 1, curY + 2)
+            layerManager.getCurPath().lineTo(curX + 1, curY)
         }
 
-        val curve = Curve(curPath, Paint().apply {
+        val curve = Curve(layerManager.getCurPath(), Paint().apply {
             color = paintOptions.color
             strokeWidth = paintOptions.strokeWidth
             alpha = paintOptions.alpha
@@ -232,9 +198,9 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             style = Paint.Style.STROKE
         })
 
-        layerManager.addToLayer(activeLayerIndex, DrawPath(curve))
+        layerManager.addToLayer(layerManager.activeLayerIndex, DrawPath(curve))
 
-        curPath = DrawablePath()
+        layerManager.setCurPath(DrawablePath())
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
@@ -298,7 +264,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                 style = Paint.Style.FILL
             }
         )
-        layerManager.addToLayer(activeLayerIndex,DrawPath(heart))
+        layerManager.addToLayer(layerManager.activeLayerIndex,DrawPath(heart))
     }
 
     private fun drawStar(centerX: Float, centerY: Float, outerRadius: Float) {
@@ -313,7 +279,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                 alpha = paintOptions.alpha
             }
         )
-        layerManager.addToLayer(activeLayerIndex, DrawPath(star))
+        layerManager.addToLayer(layerManager.activeLayerIndex, DrawPath(star))
     }
 
     fun drawImage(image: Int) {
@@ -323,14 +289,14 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     fun moveLayer(fromIndex: Int, toIndex: Int) {
         if (layerManager.moveLayer(fromIndex, toIndex)) {
-            activeLayerIndex = toIndex
+            layerManager.activeLayerIndex = toIndex
             invalidate()
         }
     }
 
     fun removeLayer(layerIndex: Int) {
         layerManager.removeLayer(layerIndex)
-        activeLayerIndex = if (layerIndex == 0) 0 else layerIndex - 1
+        layerManager.activeLayerIndex = if (layerIndex == 0) 0 else layerIndex - 1
         invalidate()
     }
 

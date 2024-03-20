@@ -1,21 +1,26 @@
 package cz.cvut.arfittingroom.draw.service
 
 import android.graphics.Canvas
+import android.graphics.Paint
 import cz.cvut.arfittingroom.draw.DrawHistoryHolder.gelLastAction
 import cz.cvut.arfittingroom.draw.DrawHistoryHolder.getLastUndoneAction
 import cz.cvut.arfittingroom.draw.DrawHistoryHolder.globalDrawHistory
 import cz.cvut.arfittingroom.draw.Layer
+import cz.cvut.arfittingroom.draw.PaintOptions
 import cz.cvut.arfittingroom.draw.command.Command
 import cz.cvut.arfittingroom.draw.model.element.Element
+import cz.cvut.arfittingroom.draw.path.DrawablePath
 import mu.KotlinLogging
 import java.util.LinkedList
 import java.util.UUID
 
-private val logger = KotlinLogging.logger{}
+private val logger = KotlinLogging.logger {}
 
 class LayerManager {
     private val layers = mutableListOf<Layer>()
     private val idToLayerMap = HashMap<UUID, Layer>()
+
+    var activeLayerIndex = 0
 
     fun undo() {
         val action = gelLastAction()
@@ -43,7 +48,9 @@ class LayerManager {
         idToLayerMap[layer.id] = layer
 
         layers.add(layer)
-        return (layers.size - 1)
+
+        activeLayerIndex = layers.size - 1
+        return activeLayerIndex
     }
 
     fun moveToLayer(element: Element, index: Int) {
@@ -102,7 +109,8 @@ class LayerManager {
         if (fromIndex == toIndex
             || fromIndex < 0 || toIndex < 0
             || toIndex > layers.size
-            || fromIndex == layers.size - 1 && toIndex == layers.size) {
+            || fromIndex == layers.size - 1 && toIndex == layers.size
+        ) {
             logger.info { "Layer does not need to be moved" }
             return false
         }
@@ -110,15 +118,27 @@ class LayerManager {
         val layer = layers.removeAt(fromIndex)
         layers.add(toIndex, layer)
 
-        logger.info {"Layer moved from index $fromIndex to index $toIndex"}
+        logger.info { "Layer moved from index $fromIndex to index $toIndex" }
         return true
     }
 
-    fun drawLayers(canvas: Canvas) {
+    fun drawLayers(canvas: Canvas, paintOptions: PaintOptions) {
+        layers[activeLayerIndex].changePaint(paintOptions)
         layers.forEach { layer ->
             layer.draw(canvas)
         }
     }
 
     fun getNumOfLayers() = layers.size
+
+    fun getCurPath() = layers[activeLayerIndex].curPath
+
+    fun setCurPath(path: DrawablePath) {
+        layers[activeLayerIndex].curPath = path
+    }
+
+    fun deleteLayers() {
+        layers.clear()
+        idToLayerMap.clear()
+    }
 }
