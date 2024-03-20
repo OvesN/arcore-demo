@@ -322,9 +322,10 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     }
 
     fun moveLayer(fromIndex: Int, toIndex: Int) {
-        layerManager.moveLayer(fromIndex, toIndex)
-        activeLayerIndex = toIndex
-        invalidate()
+        if (layerManager.moveLayer(fromIndex, toIndex)) {
+            activeLayerIndex = toIndex
+            invalidate()
+        }
     }
 
     fun removeLayer(layerIndex: Int) {

@@ -96,17 +96,22 @@ class LayerManager {
         layers[index].isVisible = isVisible
     }
 
-    fun moveLayer(fromIndex: Int, toIndex: Int) {
-        if (fromIndex == toIndex || fromIndex < 0 || toIndex < 0 || fromIndex >= layers.size || toIndex > layers.size) {
-            // Invalid indices or no movement required
+    // Returns true if layer was moved
+    fun moveLayer(fromIndex: Int, toIndex: Int): Boolean {
+        // Check for no movement or invalid indices
+        if (fromIndex == toIndex
+            || fromIndex < 0 || toIndex < 0
+            || toIndex > layers.size
+            || fromIndex == layers.size - 1 && toIndex == layers.size) {
             logger.info { "Layer does not need to be moved" }
-            return
+            return false
         }
 
         val layer = layers.removeAt(fromIndex)
         layers.add(if (toIndex > fromIndex) toIndex - 1 else toIndex, layer)
 
         logger.info {"Layer moved from index $fromIndex to index $toIndex"}
+        return true
     }
 
     fun drawLayers(canvas: Canvas) {

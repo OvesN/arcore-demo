@@ -121,11 +121,11 @@ class MakeupEditorActivity : AppCompatActivity() {
                     }
 
                     ELayerEditAction.MOVE_DOWN.string -> {
-                        drawView.moveLayer(layerIndex, layerIndex + 1)
+                        drawView.moveLayer(layerIndex, layerIndex - 1)
                     }
 
                     ELayerEditAction.MOVE_UP.string -> {
-                        drawView.moveLayer(layerIndex, layerIndex - 1)
+                        drawView.moveLayer(layerIndex, layerIndex + 1)
                     }
 
                     ELayerEditAction.SELECT.string -> {
