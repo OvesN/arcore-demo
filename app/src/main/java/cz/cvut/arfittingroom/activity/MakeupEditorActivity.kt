@@ -34,7 +34,6 @@ class MakeupEditorActivity : AppCompatActivity() {
     private lateinit var imageView: ImageView
     private lateinit var slider: Slider
     private lateinit var layersButtonsContainer: LinearLayout
-    private var selectedLayerButton: Button? = null
 
     @Inject
     lateinit var makeUpService: MakeupService
@@ -79,7 +78,6 @@ class MakeupEditorActivity : AppCompatActivity() {
         }
         drawView.setStrokeWidth(slider.value)
 
-
         //TODO fix num or indexes or whut
         binding.buttonAddLayer.setOnClickListener {
             updateLayersButtons(drawView.addLayer() + 1)
@@ -89,17 +87,24 @@ class MakeupEditorActivity : AppCompatActivity() {
         updateLayersButtons(1)
     }
 
+    // Create buttons for layers in reverse order and select the active one
     private fun updateLayersButtons(numOfLayers: Int) {
-        layersButtonsContainer.removeAllViews()  // Clear existing views if any
+        layersButtonsContainer.removeAllViews()
 
-        for (i in 0 until   numOfLayers) {
+        for (i in numOfLayers - 1 downTo 0) {
             val button = Button(this).apply {
                 text = i.toString()
                 setOnClickListener { showLayerEditDialog(i, this) }
             }
 
-            selectLayerButton(button)
-            layersButtonsContainer.addView(button)
+            if (i == drawView.activeLayerIndex) {
+                button.setBackgroundColor(SELECTED_COLOR)
+            }
+            else {
+                button.setBackgroundColor(DEFAULT_COLOR)
+            }
+
+            layersButtonsContainer.addView(button, 0)
         }
     }
 
@@ -113,43 +118,25 @@ class MakeupEditorActivity : AppCompatActivity() {
                 when (options[which]) {
                     ELayerEditAction.DELETE.string -> {
                         drawView.removeLayer(layerIndex)
-                        val newLayerIndex = if (layerIndex == 0) 0 else layerIndex - 1
-                        drawView.setActiveLayer(newLayerIndex)
-                        selectLayerButton(layersButtonsContainer.getChildAt(newLayerIndex) as Button)
                     }
 
                     ELayerEditAction.MOVE_DOWN.string -> {
                         drawView.moveLayer(layerIndex, layerIndex + 1)
-                        if (drawView.setActiveLayer(layerIndex + 1))
-                        {
-                            selectLayerButton(layersButtonsContainer.getChildAt(layerIndex + 1) as Button)
-                        }
                     }
 
                     ELayerEditAction.MOVE_UP.string -> {
                         drawView.moveLayer(layerIndex, layerIndex - 1)
-                        if (drawView.setActiveLayer(layerIndex - 1)) {
-                            selectLayerButton(layersButtonsContainer.getChildAt(layerIndex - 1) as Button)
-                        }
                     }
 
                     ELayerEditAction.SELECT.string -> {
                         drawView.setActiveLayer(layerIndex)
-                        selectLayerButton(button)
                     }
                 }
+
+                updateLayersButtons(drawView.layerManager.getNumOfLayers())
             }
             .show()
 
-    }
-
-    private fun selectLayerButton(button: Button) {
-        button.setBackgroundColor(SELECTED_COLOR)
-        if (button == selectedLayerButton) {
-            return
-        }
-        selectedLayerButton?.setBackgroundColor(DEFAULT_COLOR)
-        selectedLayerButton = button
     }
 
     private fun toggleStrokeShape(shape: EShape) {

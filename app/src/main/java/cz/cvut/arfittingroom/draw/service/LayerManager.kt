@@ -47,11 +47,19 @@ class LayerManager {
     }
 
     fun moveToLayer(element: Element, index: Int) {
+        if (index >= layers.size) {
+            return
+        }
+
         val relatedActions = globalDrawHistory.filter { it.element.id == element.id }.toList()
         layers[index].addElement(element, relatedActions)
     }
 
     fun addToLayer(index: Int = 0, command: Command<out Element>, layer: Layer? = null) {
+        if (index >= layers.size) {
+            return
+        }
+
         globalDrawHistory.add(command)
 
         val foundLayer = layer ?: layers[index]
@@ -64,6 +72,10 @@ class LayerManager {
     }
 
     fun removeFromLayer(elementId: UUID, index: Int = 0, layer: Layer? = null) {
+        if (index >= layers.size) {
+            return
+        }
+
         val foundLayer = layer ?: layers[index]
         foundLayer.removeElement(elementId)
     }
