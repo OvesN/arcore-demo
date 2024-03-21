@@ -13,7 +13,9 @@ import androidx.annotation.ColorInt
 import androidx.core.graphics.alpha
 import cz.cvut.arfittingroom.ARFittingRoomApplication
 import cz.cvut.arfittingroom.draw.DrawHistoryHolder.globalDrawHistory
+import cz.cvut.arfittingroom.draw.command.Scalable
 import cz.cvut.arfittingroom.draw.command.action.DrawPath
+import cz.cvut.arfittingroom.draw.model.element.Element
 import cz.cvut.arfittingroom.draw.model.element.impl.Curve
 import cz.cvut.arfittingroom.draw.model.element.impl.Heart
 import cz.cvut.arfittingroom.draw.model.element.impl.Star
@@ -46,22 +48,22 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private var posY = 0f
 
     private var imageBitmap: Bitmap? = null
-
+    var selectedElement: Element? = null
 
     var isInImageMode = false
-    private var isInElementEditMode = false
     var strokeShape = EShape.CIRCLE
 
     init {
         (context.applicationContext as? ARFittingRoomApplication)?.appComponent?.inject(this)
 
-        // Add event for image scaling
+        // Add event for element scaling
         scaleGestureDetector = ScaleGestureDetector(
             context,
             object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
                 override fun onScale(detector: ScaleGestureDetector): Boolean {
                     scaleFactor *= detector.scaleFactor
-                    scaleFactor = 0.1f.coerceAtLeast(scaleFactor.coerceAtMost(10.0f))
+                    scaleFactor = 0.1f.coerceAtLeast(scaleFactor.coerceAtMost(6.0f))
+
                     invalidate()
                     return true
                 }
@@ -71,6 +73,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     override fun onTouchEvent(event: MotionEvent): Boolean {
         val x = event.x
         val y = event.y
+
 
         //TODO fix this, different modes and different brushes?
         when (strokeShape) {
@@ -84,8 +87,14 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     }
 
     private fun handleElementDeformationMode(event: MotionEvent, x: Float, y: Float) {
+        if (selectedElement != null) {
+            scaleSelectedElement(event)
+
+            //TODO FIX
+            return
+        }
         if (event.action == MotionEvent.ACTION_DOWN) {
-            layerManager.selectElement(x, y)
+            selectedElement = layerManager.selectElement(x, y)
         }
     }
 
@@ -110,6 +119,31 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                 else -> {}
             }
         }
+    }
+
+    private fun scaleSelectedElement(event: MotionEvent): Boolean {
+        scaleGestureDetector.onTouchEvent(event)
+
+        when (event.actionMasked) {
+            MotionEvent.ACTION_DOWN -> {
+                lastTouchX = event.x
+                lastTouchY = event.y
+            }
+
+            MotionEvent.ACTION_MOVE -> {
+                if (!scaleGestureDetector.isInProgress) {
+                    val dx = event.x - lastTouchX
+                    val dy = event.y - lastTouchY
+                    posX += dx
+                    posY += dy
+                    lastTouchX = event.x
+                    lastTouchY = event.y
+                    (selectedElement as? Scalable)?.scale(scaleFactor)
+                    invalidate()
+                }
+            }
+        }
+        return true
     }
 
     fun undo() {

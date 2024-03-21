@@ -4,8 +4,6 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Matrix
 import cz.cvut.arfittingroom.draw.command.Drawable
-import cz.cvut.arfittingroom.draw.command.Movable
-import cz.cvut.arfittingroom.draw.command.Resizable
 import cz.cvut.arfittingroom.draw.model.element.Element
 
 

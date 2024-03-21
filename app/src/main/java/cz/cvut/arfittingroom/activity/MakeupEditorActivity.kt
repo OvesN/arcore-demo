@@ -136,13 +136,12 @@ class MakeupEditorActivity : AppCompatActivity() {
                 updateLayersButtons(drawView.layerManager.getNumOfLayers())
             }
             .show()
-
     }
 
     private fun toggleStrokeShape(shape: EShape) {
         drawView.layerManager.deselectAllElements()
-        drawView.isInImageMode = false
         drawView.strokeShape = if (drawView.strokeShape == shape) EShape.NONE else shape
+        drawView.selectedElement = null
     }
 
     private fun toggleImage(imageId: Int) {

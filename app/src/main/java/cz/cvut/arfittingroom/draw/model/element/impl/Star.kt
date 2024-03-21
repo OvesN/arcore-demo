@@ -6,6 +6,9 @@ import android.graphics.Path
 import android.graphics.RectF
 import cz.cvut.arfittingroom.draw.path.DrawablePath
 import cz.cvut.arfittingroom.draw.command.Drawable
+import cz.cvut.arfittingroom.draw.command.Movable
+import cz.cvut.arfittingroom.draw.command.Rotatable
+import cz.cvut.arfittingroom.draw.command.Scalable
 import cz.cvut.arfittingroom.draw.model.element.Element
 import kotlin.math.cos
 import kotlin.math.sin
@@ -15,7 +18,7 @@ class Star(
     private var centerY: Float,
     private var outerRadius: Float,
     private var paint: Paint
-) : Element(), Drawable {
+) : Element(), Drawable, Movable, Rotatable, Scalable {
     private var starPath: DrawablePath
     private var boundingBoxPath: DrawablePath
 
@@ -90,6 +93,21 @@ class Star(
 
         path.close()
         return path
+    }
+
+    override fun move() {
+        TODO("Not yet implemented")
+    }
+
+    override fun rotate() {
+        TODO("Not yet implemented")
+    }
+
+    override fun scale(factor: Float) {
+        outerRadius *= factor
+
+        starPath = createPath()
+        boundingBoxPath = createBoundingBox()
     }
 
 }
