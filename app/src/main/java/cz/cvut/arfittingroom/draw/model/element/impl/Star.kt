@@ -18,13 +18,15 @@ class Star(
     private var centerY: Float,
     private var outerRadius: Float,
     private var paint: Paint
-) : Element(), Drawable, Movable, Rotatable, Scalable {
+) : Element(), Rotatable {
     private var starPath: DrawablePath
     private var boundingBoxPath: DrawablePath
+    private var originalRadius: Float
 
     init {
         starPath = createPath()
         boundingBoxPath = createBoundingBox()
+        originalRadius = outerRadius
     }
 
     private fun createPath(): DrawablePath {
@@ -104,10 +106,13 @@ class Star(
     }
 
     override fun scale(factor: Float) {
-        outerRadius *= factor
+        outerRadius = factor * originalRadius
 
         starPath = createPath()
         boundingBoxPath = createBoundingBox()
     }
 
+    override fun endScale() {
+        originalRadius = outerRadius
+    }
 }

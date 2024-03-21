@@ -6,7 +6,6 @@ import android.graphics.Matrix
 import cz.cvut.arfittingroom.draw.command.Drawable
 import cz.cvut.arfittingroom.draw.model.element.Element
 
-
 class Image(
     private val imageBitmap: Bitmap,
     private val resourceId: Int,
@@ -14,7 +13,7 @@ class Image(
     private val posX: Int,
     private val posY: Int,
     private val scaleFactor: Float,
-) : Element(), Drawable{
+) : Element(){
     override fun draw(canvas: Canvas) {
         matrix.reset()
         matrix.postTranslate(-imageBitmap.width / 2f, -imageBitmap.height / 2f)
@@ -24,7 +23,20 @@ class Image(
         canvas.drawBitmap(imageBitmap, matrix, null)
     }
 
+    override fun move() {
+        TODO("Not yet implemented")
+    }
+
     override fun doIntersect(x: Float, y: Float): Boolean {
         TODO("Not yet implemented")
     }
+
+    override fun scale(factor: Float) {
+        TODO("Not yet implemented")
+    }
+
+    override fun endScale() {
+        TODO("Not yet implemented")
+    }
+
 }

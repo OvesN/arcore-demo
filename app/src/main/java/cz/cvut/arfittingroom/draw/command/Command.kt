@@ -8,5 +8,7 @@ import java.util.UUID
 interface Command<T> where T : Element {
     val element: T
     fun execute(canvas: Canvas)
+    fun revert() {}
+
     var layerId: UUID
 }

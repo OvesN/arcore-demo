@@ -6,7 +6,7 @@ import cz.cvut.arfittingroom.draw.command.Rotatable
 import cz.cvut.arfittingroom.draw.model.element.Element
 import java.util.UUID
 
-class RotateElement<T>(override val element: T, private val rotatable: Rotatable): Command<T> where T : Element, T : Rotatable {
+class RotateElement<T>(override val element: T, private val rotatable: Rotatable): Command<T> where T : Element {
     override lateinit var layerId: UUID
     override fun execute(canvas: Canvas) {
         rotatable.rotate()

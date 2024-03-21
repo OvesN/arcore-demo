@@ -7,7 +7,7 @@ import cz.cvut.arfittingroom.draw.model.element.Element
 import java.util.UUID
 
 class MoveElement<T>(override val element: T) :
-    Command<T> where T : Element, T : Movable {
+    Command<T> where T : Element {
     override lateinit var layerId: UUID
     override fun execute(canvas: Canvas) {
         element.move()
