@@ -14,7 +14,7 @@ class Curve(
         canvas.drawPath(path, paint)
     }
 
-    override fun move() {
+    override fun move(x: Float, y: Float) {
         TODO("Not yet implemented")
     }
 

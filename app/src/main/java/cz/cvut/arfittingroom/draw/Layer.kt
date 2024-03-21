@@ -100,6 +100,6 @@ class Layer(private val width: Int, private val height: Int) {
     }
 
     fun deselectAllElements() {
-        elements.forEach{it.value.deselect()}
+        elements.forEach{it.value.isSelected = false}
     }
 }

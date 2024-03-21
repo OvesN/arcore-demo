@@ -97,8 +97,12 @@ class Star(
         return path
     }
 
-    override fun move() {
-        TODO("Not yet implemented")
+    override fun move(x:Float, y:Float) {
+        centerX = x
+        centerY = y
+
+        starPath = createPath()
+        boundingBoxPath = createBoundingBox()
     }
 
     override fun rotate() {

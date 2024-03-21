@@ -45,6 +45,11 @@ class LayerManager {
     // Returns index of the last layer
     fun addLayer(width: Int, height: Int): Int {
         val layer = Layer(width, height)
+
+        if (layers.isNotEmpty()) {
+            layers[activeLayerIndex].deselectAllElements()
+        }
+
         idToLayerMap[layer.id] = layer
 
         layers.add(layer)
@@ -145,7 +150,7 @@ class LayerManager {
         deselectAllElements()
 
         val element = layers[activeLayerIndex].findFirstIntersectedElement(x, y)
-        element?.toggleSelected()
+        element?.isSelected = true
 
         return element
     }

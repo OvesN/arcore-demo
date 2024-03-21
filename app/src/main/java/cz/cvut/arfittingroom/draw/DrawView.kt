@@ -13,10 +13,8 @@ import androidx.annotation.ColorInt
 import androidx.core.graphics.alpha
 import cz.cvut.arfittingroom.ARFittingRoomApplication
 import cz.cvut.arfittingroom.draw.DrawHistoryHolder.globalDrawHistory
-import cz.cvut.arfittingroom.draw.command.Command
 import cz.cvut.arfittingroom.draw.command.Scalable
 import cz.cvut.arfittingroom.draw.command.action.DrawPath
-import cz.cvut.arfittingroom.draw.command.action.ScaleElement
 import cz.cvut.arfittingroom.draw.model.element.Element
 import cz.cvut.arfittingroom.draw.model.element.impl.Curve
 import cz.cvut.arfittingroom.draw.model.element.impl.Heart
@@ -60,6 +58,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     var isInImageMode = false
     var strokeShape = EShape.CIRCLE
 
+    private var ignoreNextOneFingerMove = false
 
     init {
         (context.applicationContext as? ARFittingRoomApplication)?.appComponent?.inject(this)
@@ -68,6 +67,11 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         scaleGestureDetector = ScaleGestureDetector(
             context,
             object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
+                override fun onScaleBegin(detector: ScaleGestureDetector): Boolean {
+                    ignoreNextOneFingerMove = true
+                    return super.onScaleBegin(detector)
+                }
+
                 override fun onScale(detector: ScaleGestureDetector): Boolean {
                     if (gestureTolerance(detector)) {
                         scaleFactor *= detector.scaleFactor
@@ -91,6 +95,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 //                        )
 //                    }
 
+                    ignoreNextOneFingerMove = true
                     scaleFactor = 1f
 
                     super.onScaleEnd(detector)
@@ -106,6 +111,8 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     override fun onTouchEvent(event: MotionEvent): Boolean {
         val x = event.x
         val y = event.y
+
+
 
         // Handle multi-touch events for scaling
         //TODO HAndle deselecting while scaling
@@ -126,8 +133,21 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     }
 
     private fun handleElementDeformationMode(event: MotionEvent, x: Float, y: Float) {
-        if (event.action == MotionEvent.ACTION_UP && !scaleGestureDetector.isInProgress) {
-            selectedElement = layerManager.selectElement(x, y)
+        if (!scaleGestureDetector.isInProgress) {
+
+            when (event.action) {
+                MotionEvent.ACTION_POINTER_UP, MotionEvent.ACTION_UP -> {
+                    // When the last finger is lifted, reset ignoreNextMove.
+                    if (event.pointerCount - 1 == 0) { // Subtract 1 because the count includes the finger that is being lifted.
+                        ignoreNextOneFingerMove = false
+                    }
+                }
+
+                MotionEvent.ACTION_DOWN -> selectedElement = layerManager.selectElement(x, y)
+                MotionEvent.ACTION_MOVE -> if (!ignoreNextOneFingerMove) {
+                    selectedElement?.move(x, y)
+                }
+            }
         }
     }
 

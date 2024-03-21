@@ -17,7 +17,7 @@ class Heart(
         canvas.drawPath(createPath(), paint)
     }
 
-    override fun move() {
+    override fun move(x: Float, y: Float) {
         TODO("Not yet implemented")
     }
 

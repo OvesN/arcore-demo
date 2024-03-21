@@ -23,7 +23,7 @@ class Image(
         canvas.drawBitmap(imageBitmap, matrix, null)
     }
 
-    override fun move() {
+    override fun move(x: Float, y: Float) {
         TODO("Not yet implemented")
     }
 
