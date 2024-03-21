@@ -86,4 +86,20 @@ class Layer(private val width: Int, private val height: Int) {
         curPaint.style = paintOptions.style
         curPaint.strokeWidth = paintOptions.strokeWidth
     }
+
+    fun findFirstIntersectedElement(x: Float, y: Float): Element? {
+        val iterator = actions.descendingIterator()
+        while (iterator.hasNext()) {
+            val action = iterator.next()
+            if (action.element.doIntersect(x, y)) {
+                return action.element
+            }
+        }
+        // No intersecting element was found
+        return null
+    }
+
+    fun deselectAllElements() {
+        elements.forEach{it.value.deselect()}
+    }
 }

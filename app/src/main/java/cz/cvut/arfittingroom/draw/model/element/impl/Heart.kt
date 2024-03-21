@@ -17,7 +17,7 @@ class Heart(
         canvas.drawPath(createPath(), paint)
     }
 
-    override fun doIntersect(x: Int, y: Int): Boolean {
+    override fun doIntersect(x: Float, y: Float): Boolean {
         TODO("Not yet implemented")
     }
 

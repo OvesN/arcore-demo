@@ -14,7 +14,7 @@ class Curve(
         canvas.drawPath(path, paint)
     }
 
-    override fun doIntersect(x: Int, y: Int): Boolean {
+    override fun doIntersect(x: Float, y: Float): Boolean {
         TODO("Not yet implemented")
     }
 }

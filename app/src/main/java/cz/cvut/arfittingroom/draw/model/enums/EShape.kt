@@ -4,4 +4,5 @@ enum class EShape {
     STAR,
     CIRCLE,
     HEART,
+    NONE,
 }

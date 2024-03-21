@@ -49,6 +49,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
 
     var isInImageMode = false
+    private var isInElementEditMode = false
     var strokeShape = EShape.CIRCLE
 
     init {
@@ -65,7 +66,50 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                     return true
                 }
             })
+    }
 
+    override fun onTouchEvent(event: MotionEvent): Boolean {
+        val x = event.x
+        val y = event.y
+
+        //TODO fix this, different modes and different brushes?
+        when (strokeShape) {
+            EShape.NONE -> handleElementDeformationMode(event, x, y)
+            EShape.CIRCLE -> handleDrawingMode(event, x, y)
+            else -> handleStampMode(event, x, y)
+        }
+
+        invalidate()
+        return true
+    }
+
+    private fun handleElementDeformationMode(event: MotionEvent, x: Float, y: Float) {
+        if (event.action == MotionEvent.ACTION_DOWN) {
+            layerManager.selectElement(x, y)
+        }
+    }
+
+    private fun handleDrawingMode(event: MotionEvent, x: Float, y: Float) {
+        when (event.action) {
+            MotionEvent.ACTION_DOWN -> {
+                startX = x
+                startY = y
+                actionDown(x, y)
+            }
+
+            MotionEvent.ACTION_MOVE -> actionMove(x, y)
+            MotionEvent.ACTION_UP -> actionUp()
+        }
+    }
+
+    private fun handleStampMode(event: MotionEvent, x: Float, y: Float) {
+        if (event.action == MotionEvent.ACTION_DOWN) {
+            when (strokeShape) {
+                EShape.STAR -> drawStar(x, y, paintOptions.strokeWidth)
+                EShape.HEART -> drawHeart(x, y, paintOptions.strokeWidth)
+                else -> {}
+            }
+        }
     }
 
     fun undo() {
@@ -77,6 +121,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         layerManager.redo()
         invalidate()
     }
+
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
 
@@ -111,7 +156,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         return true
     }
 
-    fun addLayer(): Int  {
+    fun addLayer(): Int {
         val newLayerIndex = layerManager.addLayer(width, height)
         layerManager.activeLayerIndex = newLayerIndex
         return newLayerIndex
@@ -203,55 +248,6 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         layerManager.setCurPath(DrawablePath())
     }
 
-    override fun onTouchEvent(event: MotionEvent): Boolean {
-        val x = event.x
-        val y = event.y
-
-        if (isInImageMode) {
-            adjustImage(event)
-            invalidate()
-            return true
-        }
-
-        if (strokeShape == EShape.CIRCLE) {
-            when (event.action) {
-                MotionEvent.ACTION_DOWN -> {
-                    startX = x
-                    startY = y
-                    actionDown(x, y)
-                }
-
-                MotionEvent.ACTION_MOVE -> actionMove(x, y)
-                MotionEvent.ACTION_UP -> actionUp()
-            }
-            invalidate()
-            return true
-        }
-
-        when (event.action) {
-            MotionEvent.ACTION_DOWN -> {
-                when (strokeShape) {
-                    EShape.STAR -> {
-                        drawStar(x, y, paintOptions.strokeWidth)
-                        invalidate()
-                        return true
-                    }
-
-                    EShape.HEART -> {
-                        drawHeart(x, y, paintOptions.strokeWidth)
-                        invalidate()
-                        return true
-                    }
-
-                    else -> {}
-                }
-            }
-        }
-
-        invalidate()
-        return true
-    }
-
     private fun drawHeart(centerX: Float, centerY: Float, outerRadius: Float) {
         val heart = Heart(
             centerX,
@@ -264,7 +260,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                 style = Paint.Style.FILL
             }
         )
-        layerManager.addToLayer(layerManager.activeLayerIndex,DrawPath(heart))
+        layerManager.addToLayer(layerManager.activeLayerIndex, DrawPath(heart))
     }
 
     private fun drawStar(centerX: Float, centerY: Float, outerRadius: Float) {

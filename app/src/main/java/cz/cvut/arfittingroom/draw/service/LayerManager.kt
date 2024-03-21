@@ -140,4 +140,15 @@ class LayerManager {
         layers.clear()
         idToLayerMap.clear()
     }
+
+    fun selectElement(x: Float, y: Float) {
+        deselectAllElements()
+
+        val element = layers[activeLayerIndex].findFirstIntersectedElement(x, y)
+        element?.toggleSelected()
+    }
+
+    fun deselectAllElements() {
+        layers[activeLayerIndex].deselectAllElements()
+    }
 }

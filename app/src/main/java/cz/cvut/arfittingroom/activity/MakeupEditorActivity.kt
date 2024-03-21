@@ -140,8 +140,9 @@ class MakeupEditorActivity : AppCompatActivity() {
     }
 
     private fun toggleStrokeShape(shape: EShape) {
+        drawView.layerManager.deselectAllElements()
         drawView.isInImageMode = false
-        drawView.strokeShape = if (drawView.strokeShape == shape) EShape.CIRCLE else shape
+        drawView.strokeShape = if (drawView.strokeShape == shape) EShape.NONE else shape
     }
 
     private fun toggleImage(imageId: Int) {
