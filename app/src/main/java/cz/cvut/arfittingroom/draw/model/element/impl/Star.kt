@@ -116,7 +116,9 @@ class Star(
         boundingBoxPath = createBoundingBox()
     }
 
+    // End of the scale gesture by the user
+    // Returns radius to the original one so scale action can be applied correctly
     override fun endScale() {
-        originalRadius = outerRadius
+        outerRadius = originalRadius
     }
 }

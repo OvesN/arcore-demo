@@ -12,9 +12,12 @@ import android.view.View
 import androidx.annotation.ColorInt
 import androidx.core.graphics.alpha
 import cz.cvut.arfittingroom.ARFittingRoomApplication
-import cz.cvut.arfittingroom.draw.DrawHistoryHolder.globalDrawHistory
+import cz.cvut.arfittingroom.draw.DrawHistoryHolder.globalHistory
+import cz.cvut.arfittingroom.draw.DrawHistoryHolder.undo
+import cz.cvut.arfittingroom.draw.command.Command
 import cz.cvut.arfittingroom.draw.command.Scalable
-import cz.cvut.arfittingroom.draw.command.action.DrawPath
+import cz.cvut.arfittingroom.draw.command.action.AddElementToLayer
+import cz.cvut.arfittingroom.draw.command.action.ScaleElement
 import cz.cvut.arfittingroom.draw.model.element.Element
 import cz.cvut.arfittingroom.draw.model.element.impl.Curve
 import cz.cvut.arfittingroom.draw.model.element.impl.Heart
@@ -86,14 +89,10 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
                 override fun onScaleEnd(detector: ScaleGestureDetector) {
                     selectedElement?.endScale()
-                    //TODO resolve actions
-//                    selectedElement?.let {
-//                        it.endScale()
-//                        layerManager.addToLayer(
-//                            layerManager.activeLayerIndex,
-//                            ScaleElement(it, scaleFactor)
-//                        )
-//                    }
+                    selectedElement?.let {
+                        it.endScale()
+                        DrawHistoryHolder.addToHistory(ScaleElement(it, scaleFactor))
+                    }
 
                     ignoreNextOneFingerMove = true
                     scaleFactor = 1f
@@ -111,8 +110,6 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     override fun onTouchEvent(event: MotionEvent): Boolean {
         val x = event.x
         val y = event.y
-
-
 
         // Handle multi-touch events for scaling
         //TODO HAndle deselecting while scaling
@@ -175,12 +172,12 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     }
 
     fun undo() {
-        layerManager.undo()
+        DrawHistoryHolder.undo()
         invalidate()
     }
 
     fun redo() {
-        layerManager.redo()
+        DrawHistoryHolder.redo()
         invalidate()
     }
 
@@ -231,6 +228,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         }
         layerManager.activeLayerIndex = layerIndex
         logger.info { "Active layer is now $layerIndex" }
+
         return true
     }
 
@@ -251,11 +249,14 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     }
 
     fun getBitmap(): Bitmap {
+        layerManager.deselectAllElements()
+
         val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
         isSaving = true
         draw(canvas)
         isSaving = false
+
         return bitmap
     }
 
@@ -268,7 +269,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     fun clearCanvas() {
         layerManager.deleteLayers()
-        globalDrawHistory.clear()
+        globalHistory.clear()
         // Add initial layer
         layerManager.addLayer(width, height)
         invalidate()
@@ -305,9 +306,9 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             style = Paint.Style.STROKE
         })
 
-        layerManager.addToLayer(layerManager.activeLayerIndex, DrawPath(curve))
-
         layerManager.setCurPath(DrawablePath())
+
+        addElementToLayer(layerManager.activeLayerIndex, curve)
     }
 
     private fun drawHeart(centerX: Float, centerY: Float, outerRadius: Float) {
@@ -322,7 +323,8 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                 style = Paint.Style.FILL
             }
         )
-        layerManager.addToLayer(layerManager.activeLayerIndex, DrawPath(heart))
+
+        addElementToLayer(layerManager.activeLayerIndex, heart)
     }
 
     private fun drawStar(centerX: Float, centerY: Float, outerRadius: Float) {
@@ -337,7 +339,8 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                 alpha = paintOptions.alpha
             }
         )
-        layerManager.addToLayer(layerManager.activeLayerIndex, DrawPath(star))
+
+        addElementToLayer(layerManager.activeLayerIndex, star)
     }
 
     fun drawImage(image: Int) {
@@ -358,4 +361,14 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         invalidate()
     }
 
+
+    private fun addElementToLayer(layerIndex: Int, element: Element) {
+        val layerId = layerManager.addElementToLayer(layerIndex, element)
+        if (layerId != null) {
+            DrawHistoryHolder.addToHistory(AddElementToLayer(element, layerManager, layerId))
+        }
+        else {
+            logger.error { "Adding element to the layer was not successfully" }
+        }
+    }
 }

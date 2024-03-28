@@ -14,7 +14,7 @@ class Layer(private val width: Int, private val height: Int) {
     val id: UUID = UUID.randomUUID()
     var isVisible: Boolean = true
     val elements = HashMap<UUID, Element>() // Map of elements on the layer, key is element id
-    val actions = LinkedList<Command<out Element>>() // Map of actions to do on this layer, keys is element id
+    val elementsToDraw = LinkedList<Element>() // Map of actions to do on this layer, keys is element id
 
     private var curDrawingPath = LinkedHashMap<DrawablePath, PaintOptions>()
     var curPath = DrawablePath()
@@ -45,18 +45,18 @@ class Layer(private val width: Int, private val height: Int) {
 
     fun removeElement(elementId: UUID) {
         elements.remove(elementId)
-        val iterator = actions.iterator()
+        val iterator = elementsToDraw.iterator()
         while (iterator.hasNext()) {
-            val command = iterator.next()
-            if (command.element.id == elementId) {
+            val element = iterator.next()
+            if (element.id == elementId) {
                 iterator.remove()
             }
         }
     }
 
-    fun addElement(element: Element, relatedActions: List<Command<out Element>>) {
+    fun addElement(element: Element) {
         elements[element.id] = element
-        actions.addAll(relatedActions)
+        elementsToDraw.add(element)
     }
 
     private fun createBitmap() {
@@ -64,7 +64,7 @@ class Layer(private val width: Int, private val height: Int) {
 
         val canvas = Canvas(bitmap)
 
-        actions.forEach { it.execute(canvas) }
+        elementsToDraw.forEach { it.draw(canvas) }
 
         // Draw the current part of the part that the user is drawing
         canvas.drawPath(curPath, curPaint)
@@ -88,11 +88,11 @@ class Layer(private val width: Int, private val height: Int) {
     }
 
     fun findFirstIntersectedElement(x: Float, y: Float): Element? {
-        val iterator = actions.descendingIterator()
+        val iterator = elementsToDraw.descendingIterator()
         while (iterator.hasNext()) {
-            val action = iterator.next()
-            if (action.element.doIntersect(x, y)) {
-                return action.element
+            val element = iterator.next()
+            if (element.doIntersect(x, y)) {
+                return element
             }
         }
         // No intersecting element was found

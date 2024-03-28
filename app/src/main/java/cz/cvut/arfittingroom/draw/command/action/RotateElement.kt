@@ -7,8 +7,11 @@ import cz.cvut.arfittingroom.draw.model.element.Element
 import java.util.UUID
 
 class RotateElement<T>(override val element: T, private val rotatable: Rotatable): Command<T> where T : Element {
-    override lateinit var layerId: UUID
-    override fun execute(canvas: Canvas) {
+    override fun execute() {
         rotatable.rotate()
+    }
+
+    override fun revert() {
+
     }
 }

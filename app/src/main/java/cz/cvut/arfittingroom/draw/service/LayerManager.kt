@@ -1,17 +1,12 @@
 package cz.cvut.arfittingroom.draw.service
 
 import android.graphics.Canvas
-import android.graphics.Paint
-import cz.cvut.arfittingroom.draw.DrawHistoryHolder.gelLastAction
-import cz.cvut.arfittingroom.draw.DrawHistoryHolder.getLastUndoneAction
-import cz.cvut.arfittingroom.draw.DrawHistoryHolder.globalDrawHistory
+import cz.cvut.arfittingroom.draw.DrawHistoryHolder
 import cz.cvut.arfittingroom.draw.Layer
 import cz.cvut.arfittingroom.draw.PaintOptions
-import cz.cvut.arfittingroom.draw.command.Command
 import cz.cvut.arfittingroom.draw.model.element.Element
 import cz.cvut.arfittingroom.draw.path.DrawablePath
 import mu.KotlinLogging
-import java.util.LinkedList
 import java.util.UUID
 
 private val logger = KotlinLogging.logger {}
@@ -21,26 +16,6 @@ class LayerManager {
     private val idToLayerMap = HashMap<UUID, Layer>()
 
     var activeLayerIndex = 0
-
-    fun undo() {
-        val action = gelLastAction()
-        if (action != null) {
-            val relatedLayer = idToLayerMap[action.layerId]
-            require(relatedLayer != null)
-
-            relatedLayer.actions.remove(action)
-        }
-    }
-
-    fun redo() {
-        val action = getLastUndoneAction()
-        if (action != null) {
-            val relatedLayer = idToLayerMap[action.layerId]
-            require(relatedLayer != null)
-
-            addToLayer(command = action, layer = relatedLayer)
-        }
-    }
 
     // Returns index of the last layer
     fun addLayer(width: Int, height: Int): Int {
@@ -58,36 +33,35 @@ class LayerManager {
         return activeLayerIndex
     }
 
-    fun moveToLayer(element: Element, index: Int) {
+    //Returns layer id to which element was added
+    fun addElementToLayer(
+        index: Int = 0,
+        element: Element,
+        layer: Layer? = null,
+        layerId: UUID? = null
+    ): UUID? {
         if (index >= layers.size) {
-            return
+            return null
         }
 
-        val relatedActions = globalDrawHistory.filter { it.element.id == element.id }.toList()
-        layers[index].addElement(element, relatedActions)
+        val foundLayer = layer ?: layerId.let { idToLayerMap[layerId] } ?: layers[index]
+
+        foundLayer.addElement(element)
+
+        return foundLayer.id
     }
 
-    fun addToLayer(index: Int = 0, command: Command<out Element>, layer: Layer? = null) {
+    fun removeElementFromLayer(
+        elementId: UUID,
+        index: Int = 0,
+        layer: Layer? = null,
+        layerId: UUID? = null
+    ) {
         if (index >= layers.size) {
             return
         }
 
-        globalDrawHistory.add(command)
-
-        val foundLayer = layer ?: layers[index]
-
-        command.layerId = foundLayer.id
-        foundLayer.elements.putIfAbsent(command.element.id, command.element)
-
-        foundLayer.actions.add(command)
-    }
-
-    fun removeFromLayer(elementId: UUID, index: Int = 0, layer: Layer? = null) {
-        if (index >= layers.size) {
-            return
-        }
-
-        val foundLayer = layer ?: layers[index]
+        val foundLayer = layer ?: layerId.let { idToLayerMap[layerId] } ?: layers[index]
         foundLayer.removeElement(elementId)
     }
 

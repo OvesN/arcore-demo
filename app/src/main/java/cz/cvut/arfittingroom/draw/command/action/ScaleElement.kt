@@ -11,8 +11,7 @@ class ScaleElement<T>(
     override val element: T,
     private val scaleFactor: Float
 ) : Command<T> where T : Element {
-    override lateinit var layerId: UUID
-    override fun execute(canvas: Canvas) {
+    override fun execute() {
         element.scale(scaleFactor)
     }
 
