@@ -110,6 +110,14 @@ class Star(
     }
 
     override fun scale(factor: Float) {
+        outerRadius *= factor
+
+        starPath = createPath()
+        boundingBoxPath = createBoundingBox()
+    }
+
+    // Scale while scaling gesture
+    override fun continuousScale(factor: Float)  {
         outerRadius = factor * originalRadius
 
         starPath = createPath()
@@ -118,7 +126,7 @@ class Star(
 
     // End of the scale gesture by the user
     // Returns radius to the original one so scale action can be applied correctly
-    override fun endScale() {
+    override fun endContinuousScale() {
         outerRadius = originalRadius
     }
 }

@@ -13,8 +13,6 @@ import androidx.annotation.ColorInt
 import androidx.core.graphics.alpha
 import cz.cvut.arfittingroom.ARFittingRoomApplication
 import cz.cvut.arfittingroom.draw.DrawHistoryHolder.globalHistory
-import cz.cvut.arfittingroom.draw.DrawHistoryHolder.undo
-import cz.cvut.arfittingroom.draw.command.Command
 import cz.cvut.arfittingroom.draw.command.Scalable
 import cz.cvut.arfittingroom.draw.command.action.AddElementToLayer
 import cz.cvut.arfittingroom.draw.command.action.ScaleElement
@@ -80,7 +78,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                         scaleFactor *= detector.scaleFactor
                         scaleFactor = 0.1f.coerceAtLeast(scaleFactor.coerceAtMost(6.0f))
 
-                        (selectedElement as? Scalable)?.scale(scaleFactor)
+                        (selectedElement as? Scalable)?.continuousScale(scaleFactor)
                         invalidate()
                         return true
                     }
@@ -88,9 +86,9 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                 }
 
                 override fun onScaleEnd(detector: ScaleGestureDetector) {
-                    selectedElement?.endScale()
+                    selectedElement?.endContinuousScale()
                     selectedElement?.let {
-                        it.endScale()
+                        it.endContinuousScale()
                         DrawHistoryHolder.addToHistory(ScaleElement(it, scaleFactor))
                     }
 

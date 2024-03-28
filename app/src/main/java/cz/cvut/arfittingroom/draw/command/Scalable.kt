@@ -2,5 +2,6 @@ package cz.cvut.arfittingroom.draw.command
 
 interface Scalable {
     fun scale(factor: Float)
-    fun endScale()
+    fun endContinuousScale()
+    fun continuousScale(factor: Float)
 }

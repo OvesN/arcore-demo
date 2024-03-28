@@ -29,10 +29,13 @@ class Heart(
         TODO("Not yet implemented")
     }
 
-    override fun endScale() {
+    override fun endContinuousScale() {
         TODO("Not yet implemented")
     }
 
+    override fun continuousScale(factor: Float) {
+        TODO("Not yet implemented")
+    }
 
 
     private fun createPath(): DrawablePath {

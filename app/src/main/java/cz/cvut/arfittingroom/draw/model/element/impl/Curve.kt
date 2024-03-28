@@ -26,7 +26,11 @@ class Curve(
         TODO("Not yet implemented")
     }
 
-    override fun endScale() {
+    override fun endContinuousScale() {
+        TODO("Not yet implemented")
+    }
+
+    override fun continuousScale(factor: Float) {
         TODO("Not yet implemented")
     }
 }
