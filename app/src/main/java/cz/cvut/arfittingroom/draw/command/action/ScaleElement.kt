@@ -9,15 +9,14 @@ import java.util.UUID
 
 class ScaleElement<T>(
     override val element: T,
-    private val scaleFactor: Float
+    private val newRadius: Float,
+    private val oldRadius: Float
 ) : Command<T> where T : Element {
     override fun execute() {
-        element.scale(scaleFactor)
+        element.scale(newRadius)
     }
 
     override fun revert() {
-        if (scaleFactor != 0f) {
-            element.scale(1 / scaleFactor)
-        }
+        element.scale(oldRadius)
     }
 }

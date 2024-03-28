@@ -10,6 +10,12 @@ class Curve(
     private val path: DrawablePath,
     private val paint: Paint
 ) : Element() {
+
+    //TODO resolve
+    override var centerX: Float = 0f
+    override var centerY: Float = 0f
+    override var outerRadius: Float = 0f
+
     override fun draw(canvas: Canvas) {
         canvas.drawPath(path, paint)
     }
@@ -42,7 +48,7 @@ class Curve(
         TODO("Not yet implemented")
     }
 
-    override fun continuousScale(factor: Float) {
+    override fun continuousScale(newRadius: Float) {
         TODO("Not yet implemented")
     }
 }

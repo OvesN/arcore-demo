@@ -10,6 +10,10 @@ import cz.cvut.arfittingroom.draw.path.DrawablePath
 import java.util.UUID
 
 abstract class Element : Scalable, Drawable, Movable, Rotatable {
+    abstract var centerX: Float
+    abstract var centerY: Float
+    abstract var outerRadius: Float
+
     val id: UUID = UUID.randomUUID()
     var isSelected: Boolean = false
 

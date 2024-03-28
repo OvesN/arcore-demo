@@ -15,6 +15,7 @@ import cz.cvut.arfittingroom.ARFittingRoomApplication
 import cz.cvut.arfittingroom.draw.DrawHistoryHolder.globalHistory
 import cz.cvut.arfittingroom.draw.command.Scalable
 import cz.cvut.arfittingroom.draw.command.action.AddElementToLayer
+import cz.cvut.arfittingroom.draw.command.action.MoveElement
 import cz.cvut.arfittingroom.draw.command.action.ScaleElement
 import cz.cvut.arfittingroom.draw.model.element.Element
 import cz.cvut.arfittingroom.draw.model.element.impl.Curve
@@ -53,6 +54,8 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private var posX = 0f
     private var posY = 0f
 
+    private var isInElementMovingMode: Boolean = false
+
     private var imageBitmap: Bitmap? = null
     var selectedElement: Element? = null
 
@@ -76,7 +79,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                 override fun onScale(detector: ScaleGestureDetector): Boolean {
                     if (gestureTolerance(detector)) {
                         scaleFactor *= detector.scaleFactor
-                        scaleFactor = 0.1f.coerceAtLeast(scaleFactor.coerceAtMost(6.0f))
+                        scaleFactor = 0.1f.coerceAtLeast(scaleFactor.coerceAtMost(10.0f))
 
                         (selectedElement as? Scalable)?.continuousScale(scaleFactor)
                         invalidate()
@@ -89,7 +92,13 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                     selectedElement?.endContinuousScale()
                     selectedElement?.let {
                         it.endContinuousScale()
-                        DrawHistoryHolder.addToHistory(ScaleElement(it, scaleFactor))
+                        DrawHistoryHolder.addToHistory(
+                            ScaleElement(
+                                it,
+                                newRadius = it.outerRadius * scaleFactor,
+                                oldRadius = it.outerRadius
+                            )
+                        )
                     }
 
                     ignoreNextOneFingerMove = true
@@ -132,6 +141,21 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
             when (event.action) {
                 MotionEvent.ACTION_POINTER_UP, MotionEvent.ACTION_UP -> {
+                    if (isInElementMovingMode) {
+                        selectedElement?.let { element ->
+                            element.endContinuousMove()
+                            DrawHistoryHolder.addToHistory(
+                                MoveElement(
+                                    element = element,
+                                    oldX = element.centerX,
+                                    oldY = element.centerY,
+                                    newX = x,
+                                    newY = y,
+                                )
+                            )
+                        }
+                        isInElementMovingMode = false
+                    }
                     // When the last finger is lifted, reset ignoreNextMove.
                     if (event.pointerCount - 1 == 0) { // Subtract 1 because the count includes the finger that is being lifted.
                         ignoreNextOneFingerMove = false
@@ -140,6 +164,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
                 MotionEvent.ACTION_DOWN -> selectedElement = layerManager.selectElement(x, y)
                 MotionEvent.ACTION_MOVE -> if (!ignoreNextOneFingerMove) {
+                    isInElementMovingMode = true
                     selectedElement?.move(x, y)
                 }
             }
@@ -364,8 +389,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         val layerId = layerManager.addElementToLayer(layerIndex, element)
         if (layerId != null) {
             DrawHistoryHolder.addToHistory(AddElementToLayer(element, layerManager, layerId))
-        }
-        else {
+        } else {
             logger.error { "Adding element to the layer was not successfully" }
         }
     }

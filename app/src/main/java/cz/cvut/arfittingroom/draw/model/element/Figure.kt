@@ -4,9 +4,9 @@ import android.graphics.RectF
 import cz.cvut.arfittingroom.draw.path.DrawablePath
 
 abstract class Figure : Element() {
-    abstract var centerX: Float
-    abstract var centerY: Float
-    abstract var outerRadius: Float
+    abstract override var centerX: Float
+    abstract override var centerY: Float
+    abstract override var outerRadius: Float
 
     abstract var elementPath: DrawablePath
     abstract var boundingBoxPath: DrawablePath
@@ -39,8 +39,9 @@ abstract class Figure : Element() {
         return path
     }
 
-    override fun scale(factor: Float) {
-        outerRadius *= factor
+    override fun scale(newRadius: Float) {
+        outerRadius = newRadius
+        originalRadius = outerRadius
 
         elementPath = createPath()
         boundingBoxPath = createBoundingBox()
