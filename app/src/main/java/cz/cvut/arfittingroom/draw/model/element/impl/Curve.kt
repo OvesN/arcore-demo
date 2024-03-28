@@ -18,7 +18,19 @@ class Curve(
         TODO("Not yet implemented")
     }
 
+    override fun endContinuousMove() {
+        TODO("Not yet implemented")
+    }
+
+    override fun rotate() {
+        TODO("Not yet implemented")
+    }
+
     override fun doIntersect(x: Float, y: Float): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override fun createBoundingBox(): DrawablePath {
         TODO("Not yet implemented")
     }
 

@@ -10,26 +10,31 @@ import cz.cvut.arfittingroom.draw.command.Movable
 import cz.cvut.arfittingroom.draw.command.Rotatable
 import cz.cvut.arfittingroom.draw.command.Scalable
 import cz.cvut.arfittingroom.draw.model.element.Element
+import cz.cvut.arfittingroom.draw.model.element.Figure
 import kotlin.math.cos
 import kotlin.math.sin
 
 class Star(
-    private var centerX: Float,
-    private var centerY: Float,
-    private var outerRadius: Float,
+    override var centerX: Float,
+    override var centerY: Float,
+    override var outerRadius: Float,
     private var paint: Paint
-) : Element(), Rotatable {
-    private var starPath: DrawablePath
-    private var boundingBoxPath: DrawablePath
-    private var originalRadius: Float
+) : Figure() {
+    override var elementPath: DrawablePath
+    override var boundingBoxPath: DrawablePath
+    override var originalRadius: Float
+    override var originalCenterX: Float
+    override var originalCenterY: Float
 
     init {
-        starPath = createPath()
+        elementPath = createPath()
         boundingBoxPath = createBoundingBox()
         originalRadius = outerRadius
+        originalCenterX = centerX
+        originalCenterY = centerY
     }
 
-    private fun createPath(): DrawablePath {
+    override fun createPath(): DrawablePath {
         val section = 2.0 * Math.PI / 5
         val path = DrawablePath()
         val innerRadius = outerRadius / 3
@@ -60,11 +65,6 @@ class Star(
         return path
     }
 
-    override fun doIntersect(x: Float, y: Float): Boolean {
-        val rectF = RectF()
-        boundingBoxPath.computeBounds(rectF, true)
-        return rectF.contains(x, y)
-    }
 
     override fun draw(canvas: Canvas) {
         canvas.drawPath(createPath(), paint)
@@ -75,58 +75,4 @@ class Star(
         }
     }
 
-    private fun createBoundingBox(): DrawablePath {
-        val path = DrawablePath()
-
-        // Start at the top-left corner of the bounding box
-        path.moveTo(centerX - outerRadius, centerY - outerRadius)
-
-        // Draw line to the top-right corner
-        path.lineTo(centerX + outerRadius, centerY - outerRadius)
-
-        // Draw line to the bottom-right corner
-        path.lineTo(centerX + outerRadius, centerY + outerRadius)
-
-        // Draw line to the bottom-left corner
-        path.lineTo(centerX - outerRadius, centerY + outerRadius)
-
-        // Close the path back to the top-left corner
-        path.lineTo(centerX - outerRadius, centerY - outerRadius)
-
-        path.close()
-        return path
-    }
-
-    override fun move(x:Float, y:Float) {
-        centerX = x
-        centerY = y
-
-        starPath = createPath()
-        boundingBoxPath = createBoundingBox()
-    }
-
-    override fun rotate() {
-        TODO("Not yet implemented")
-    }
-
-    override fun scale(factor: Float) {
-        outerRadius *= factor
-
-        starPath = createPath()
-        boundingBoxPath = createBoundingBox()
-    }
-
-    // Scale while scaling gesture
-    override fun continuousScale(factor: Float)  {
-        outerRadius = factor * originalRadius
-
-        starPath = createPath()
-        boundingBoxPath = createBoundingBox()
-    }
-
-    // End of the scale gesture by the user
-    // Returns radius to the original one so scale action can be applied correctly
-    override fun endContinuousScale() {
-        outerRadius = originalRadius
-    }
 }
