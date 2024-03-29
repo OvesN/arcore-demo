@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.RectF
 import android.util.AttributeSet
@@ -27,6 +28,7 @@ import cz.cvut.arfittingroom.draw.model.enums.EElementEditAction
 import cz.cvut.arfittingroom.draw.model.enums.EShape
 import cz.cvut.arfittingroom.draw.path.DrawablePath
 import cz.cvut.arfittingroom.draw.service.LayerManager
+import cz.cvut.arfittingroom.utils.IconUtil.changeIconColor
 import mu.KotlinLogging
 import javax.inject.Inject
 import kotlin.math.abs
@@ -182,12 +184,14 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                             EElementEditAction.SCALE -> {
                                 isInElementScalingMode = true
                             }
+
                             EElementEditAction.MOVE_TO -> {}
                             EElementEditAction.MOVE_DOWN -> {}
                             EElementEditAction.MOVE_UP -> {}
                             EElementEditAction.ROTATE -> {
                                 isInElementRotationMode = true
                             }
+
                             EElementEditAction.DELETE -> {}
                         }
                     } else {
@@ -439,8 +443,8 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
             // Menu Icon (Top Right Corner)
             editElementIcons[EElementEditAction.MENU]?.let { icon ->
-                val x = boundingBox.topRightCornerCoor.x - icon.width
-                val y = boundingBox.topRightCornerCoor.y
+                val x = boundingBox.topRightCornerCoor.x
+                val y = boundingBox.topRightCornerCoor.y - icon.height
                 canvas.drawBitmap(icon, x, y, null)
                 editElementIconsBounds[EElementEditAction.MENU] =
                     RectF(x, y, x + icon.width, y + icon.height)
@@ -448,8 +452,8 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
             // Scale Icon (Bottom Right Corner)
             editElementIcons[EElementEditAction.SCALE]?.let { icon ->
-                val x = boundingBox.bottomRightCornerCoor.x - icon.width
-                val y = boundingBox.bottomRightCornerCoor.y - icon.height
+                val x = boundingBox.bottomRightCornerCoor.x
+                val y = boundingBox.bottomRightCornerCoor.y
                 canvas.drawBitmap(icon, x, y, null)
                 editElementIconsBounds[EElementEditAction.SCALE] =
                     RectF(x, y, x + icon.width, y + icon.height)
@@ -457,8 +461,8 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
             // Rotate Icon (Bottom Left Corner)
             editElementIcons[EElementEditAction.ROTATE]?.let { icon ->
-                val x = boundingBox.bottomLeftCornerCoor.x
-                val y = boundingBox.bottomLeftCornerCoor.y - icon.height
+                val x = boundingBox.bottomLeftCornerCoor.x - icon.width
+                val y = boundingBox.bottomLeftCornerCoor.y
                 canvas.drawBitmap(icon, x, y, null)
                 editElementIconsBounds[EElementEditAction.ROTATE] =
                     RectF(x, y, x + icon.width, y + icon.height)
@@ -466,8 +470,8 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
             // Delete Icon (Top Left Corner)
             editElementIcons[EElementEditAction.DELETE]?.let { icon ->
-                val x = boundingBox.topLeftCornerCoor.x
-                val y = boundingBox.topLeftCornerCoor.y
+                val x = boundingBox.topLeftCornerCoor.x - icon.width
+                val y = boundingBox.topLeftCornerCoor.y - icon.height
                 canvas.drawBitmap(icon, x, y, null)
                 editElementIconsBounds[EElementEditAction.DELETE] =
                     RectF(x, y, x + icon.width, y + icon.height)
@@ -477,13 +481,25 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     private fun loadEditElementIcons() {
         editElementIcons[EElementEditAction.DELETE] =
-            BitmapFactory.decodeResource(context.resources, R.drawable.delete_icon)
+            changeIconColor(
+                BitmapFactory.decodeResource(context.resources, R.drawable.delete_icon),
+                Color.YELLOW
+            )
         editElementIcons[EElementEditAction.ROTATE] =
-            BitmapFactory.decodeResource(context.resources, R.drawable.rotate_icon)
+            changeIconColor(
+                BitmapFactory.decodeResource(context.resources, R.drawable.rotate_icon),
+                Color.YELLOW
+            )
         editElementIcons[EElementEditAction.SCALE] =
-            BitmapFactory.decodeResource(context.resources, R.drawable.scale_icon)
+            changeIconColor(
+                (BitmapFactory.decodeResource(context.resources, R.drawable.scale_icon)),
+                Color.YELLOW
+            )
         editElementIcons[EElementEditAction.MENU] =
-            BitmapFactory.decodeResource(context.resources, R.drawable.menu_icon)
+            changeIconColor(
+                (BitmapFactory.decodeResource(context.resources, R.drawable.menu_icon)),
+                Color.YELLOW
+            )
     }
 
     private fun resetEditState() {
