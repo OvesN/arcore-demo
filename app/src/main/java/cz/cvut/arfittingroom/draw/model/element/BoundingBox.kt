@@ -31,12 +31,32 @@ class BoundingBox(
         elementPath = createPath()
     }
 
-    private fun createPath(): DrawablePath =
-        RectanglePathCreationStrategy().createPath(
-            centerX = centerX,
-            centerY = centerY,
-            outerRadius = outerRadius
-        )
+    private fun createPath(): DrawablePath {
+        val path = DrawablePath()
+
+        // Start at the top-left corner
+        topLeftCornerCoor = Coordinates(centerX - outerRadius, centerY - outerRadius)
+        path.moveTo(topLeftCornerCoor.x, topLeftCornerCoor.y)
+
+        // Draw line to the top-right corner
+        topRightCornerCoor = Coordinates(centerX + outerRadius, centerY - outerRadius)
+        path.lineTo(topRightCornerCoor.x, topLeftCornerCoor.y)
+
+        // Draw line to the bottom-right corner
+        bottomRightCornerCoor = Coordinates(centerX + outerRadius, centerY + outerRadius)
+        path.lineTo(bottomRightCornerCoor.x, bottomRightCornerCoor.y)
+
+        // Draw line to the bottom-left corner
+        bottomLeftCornerCoor = Coordinates(centerX - outerRadius, centerY + outerRadius)
+        path.lineTo(bottomLeftCornerCoor.x, bottomLeftCornerCoor.y)
+
+        // Close the path back to the top-left corner
+        path.lineTo(centerX - outerRadius, centerY - outerRadius)
+
+        path.close()
+        return path
+
+    }
 
     override fun draw(canvas: Canvas) {
         canvas.drawPath(createPath(), paint)

@@ -4,7 +4,8 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.RectF
-import cz.cvut.arfittingroom.draw.command.ColorChangeable
+import cz.cvut.arfittingroom.draw.command.Repaintable
+import cz.cvut.arfittingroom.draw.model.PaintOptions
 import cz.cvut.arfittingroom.draw.model.element.BoundingBox
 import cz.cvut.arfittingroom.draw.model.element.Element
 import cz.cvut.arfittingroom.draw.model.element.strategy.PathCreationStrategy
@@ -17,7 +18,7 @@ class Figure(
     override var outerRadius: Float,
     private val pathCreationStrategy: PathCreationStrategy,
     private var paint: Paint
-) : Element(), ColorChangeable {
+) : Element(), Repaintable {
 
     override var boundingBox: BoundingBox
 
@@ -75,12 +76,13 @@ class Figure(
     }
 
     override fun rotate(newRotationAngle: Float) {
-        rotationAngle = newRotationAngle
-        originalRotationAngle = newRotationAngle
+        val normalizedAngle = normalizeAngle(newRotationAngle)
+        rotationAngle = normalizedAngle
+        originalRotationAngle = normalizedAngle
     }
 
     override fun rotateContinuously(angleDelta: Float) {
-        rotationAngle = originalRotationAngle + angleDelta
+        rotationAngle = normalizeAngle(originalRotationAngle + angleDelta)
     }
 
     override fun endContinuousRotation() {
@@ -102,15 +104,24 @@ class Figure(
         // Draw the element's path
         canvas.drawPath(elementPath, paint)
 
+        canvas.restore()
+
         // If element is selected, draw  bounding box around it
         if (isSelected) {
             boundingBox.draw(canvas)
         }
-
-        canvas.restore()
     }
 
-    override fun changeColor(newColor: Color) {
+    override fun repaint(newPaint: PaintOptions) {
         TODO("Not yet implemented")
+    }
+
+
+    //TODO to different service?
+    private fun normalizeAngle(angle: Float): Float {
+        var normalizedAngle = angle % 360  // Reduce the angle to the range (-360, 360)
+        if (normalizedAngle < -180) normalizedAngle += 360  // Adjust if the angle is less than -180
+        if (normalizedAngle > 180) normalizedAngle -= 360  // Adjust if the angle is more than 180
+        return normalizedAngle
     }
 }

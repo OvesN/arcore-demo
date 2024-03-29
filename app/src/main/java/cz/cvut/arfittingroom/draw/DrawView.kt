@@ -173,30 +173,35 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                                 )
                             )
                         }
+                        resetEditState()
 
                     } else if (isInElementScalingMode) {
                         selectedElement?.let { element ->
+                            val newRadius = element.outerRadius
                             element.endContinuousScale()
                             addToHistory(
                                 ScaleElement(
                                     element = element,
-                                    newRadius = element.outerRadius * scaleFactor,
+                                    newRadius = newRadius,
                                     oldRadius = element.outerRadius,
                                 )
                             )
                         }
+                        resetEditState()
                     } else if (isInElementRotationMode) {
                         selectedElement?.let { element ->
+                            val newRotationAngle = element.rotationAngle
                             element.endContinuousRotation()
 
                             addToHistory(
                                 RotateElement(
                                     element = element,
-                                    newRotationAngle = rotationAngleDelta,
+                                    newRotationAngle = newRotationAngle,
                                     oldRotationAngle = element.rotationAngle
                                 )
                             )
                         }
+                        resetEditState()
 
                     }
                     // If user was scaling the element with two fingers using ScaleGestureDetector,
@@ -205,7 +210,6 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                         ignoreNextOneFingerMove = false
                     }
 
-                    resetEditState()
                 }
 
                 MotionEvent.ACTION_DOWN -> {
