@@ -101,7 +101,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                         scaleFactor *= detector.scaleFactor
                         scaleFactor = 0.1f.coerceAtLeast(scaleFactor.coerceAtMost(10.0f))
 
-                        (selectedElement as? Scalable)?.scaleContinuously(scaleFactor)
+                        selectedElement?.scaleContinuously(scaleFactor)
                         invalidate()
                         return true
                     }
@@ -109,7 +109,6 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                 }
 
                 override fun onScaleEnd(detector: ScaleGestureDetector) {
-                    selectedElement?.endContinuousScale()
                     selectedElement?.let {
                         it.endContinuousScale()
                         addToHistory(
@@ -202,7 +201,6 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                             )
                         }
                         resetEditState()
-
                     }
                     // If user was scaling the element with two fingers using ScaleGestureDetector,
                     // ignore next one finger move so element will not be moved
@@ -638,7 +636,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         isInElementMovingMode = false
 
         rotationAngleDelta = 0f
-        scaleFactor = 0f
+        scaleFactor = 1f
     }
 
 }

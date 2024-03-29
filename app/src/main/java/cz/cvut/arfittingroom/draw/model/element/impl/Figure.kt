@@ -40,6 +40,7 @@ class Figure(
 
     override fun scale(newRadius: Float) {
         outerRadius = max(newRadius, 1f)
+        originalRadius = outerRadius
 
         elementPath = createPath()
         boundingBox = createBoundingBox()
