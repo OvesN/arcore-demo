@@ -17,6 +17,9 @@ class LayerManager {
 
     var activeLayerIndex = 0
 
+    fun getActiveLayerId() =
+        layers[activeLayerIndex].id
+
     // Returns index of the last layer
     fun addLayer(width: Int, height: Int): Int {
         val layer = Layer(width, height)

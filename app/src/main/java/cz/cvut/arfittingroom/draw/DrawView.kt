@@ -15,10 +15,12 @@ import androidx.annotation.ColorInt
 import androidx.core.graphics.alpha
 import cz.cvut.arfittingroom.ARFittingRoomApplication
 import cz.cvut.arfittingroom.R
-import cz.cvut.arfittingroom.draw.DrawHistoryHolder.globalHistory
+import cz.cvut.arfittingroom.draw.DrawHistoryHolder.addToHistory
+import cz.cvut.arfittingroom.draw.DrawHistoryHolder.clearHistory
 import cz.cvut.arfittingroom.draw.command.Scalable
 import cz.cvut.arfittingroom.draw.command.action.AddElementToLayer
 import cz.cvut.arfittingroom.draw.command.action.MoveElement
+import cz.cvut.arfittingroom.draw.command.action.RemoveElementFromLayer
 import cz.cvut.arfittingroom.draw.command.action.ScaleElement
 import cz.cvut.arfittingroom.draw.model.element.Element
 import cz.cvut.arfittingroom.draw.model.element.impl.Curve
@@ -150,13 +152,12 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     private fun handleElementEditing(event: MotionEvent, x: Float, y: Float) {
         if (!scaleGestureDetector.isInProgress) {
-
             when (event.action) {
                 MotionEvent.ACTION_POINTER_UP, MotionEvent.ACTION_UP -> {
                     if (isInElementMovingMode) {
                         selectedElement?.let { element ->
                             element.endContinuousMove()
-                            DrawHistoryHolder.addToHistory(
+                            addToHistory(
                                 MoveElement(
                                     element = element,
                                     oldX = element.centerX,
@@ -168,7 +169,6 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                         }
                         isInElementMovingMode = false
                     }
-                    // When the last finger is lifted, reset ignoreNextMove.
                     if (event.pointerCount - 1 == 0) { // Subtract 1 because the count includes the finger that is being lifted.
                         ignoreNextOneFingerMove = false
                     }
@@ -176,27 +176,15 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
                 MotionEvent.ACTION_DOWN -> {
                     resetEditState()
-
-                    val pressedIconAction = checkEditButtons(x, y)
-                    if (pressedIconAction != null) {
-                        when (pressedIconAction) {
-                            EElementEditAction.MENU -> {}
-                            EElementEditAction.SCALE -> {
-                                isInElementScalingMode = true
-                            }
-
-                            EElementEditAction.MOVE_TO -> {}
-                            EElementEditAction.MOVE_DOWN -> {}
-                            EElementEditAction.MOVE_UP -> {}
-                            EElementEditAction.ROTATE -> {
-                                isInElementRotationMode = true
-                            }
-
-                            EElementEditAction.DELETE -> {}
+                    selectedElement?.let { element ->
+                        val pressedIconAction = checkEditButtons(x, y)
+                        if (pressedIconAction != null) {
+                            handleIconAction(pressedIconAction, element)
+                            return
                         }
-                    } else {
-                        selectedElement = layerManager.selectElement(x, y)
                     }
+
+                    selectedElement = layerManager.selectElement(x, y)
                 }
 
                 MotionEvent.ACTION_MOVE -> if (!ignoreNextOneFingerMove) {
@@ -206,6 +194,40 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             }
         }
     }
+
+    private fun handleIconAction(action: EElementEditAction, element: Element) {
+        when (action) {
+            EElementEditAction.MENU -> {
+                // Handle menu action
+            }
+
+            EElementEditAction.SCALE -> {
+                isInElementScalingMode = true
+            }
+
+            EElementEditAction.MOVE_TO,
+            EElementEditAction.MOVE_DOWN,
+            EElementEditAction.MOVE_UP -> {
+                // Handle move actions, if required
+            }
+
+            EElementEditAction.ROTATE -> {
+                isInElementRotationMode = true
+            }
+
+            EElementEditAction.DELETE -> {
+                addToHistory(
+                    RemoveElementFromLayer(
+                        element,
+                        layerManager,
+                        layerManager.getActiveLayerId()
+                    )
+                )
+                selectedElement = null
+            }
+        }
+    }
+
 
     // Check if edit button was pressed, if not, return null
     private fun checkEditButtons(x: Float, y: Float): EElementEditAction? =
@@ -335,7 +357,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     fun clearCanvas() {
         layerManager.deleteLayers()
-        globalHistory.clear()
+        clearHistory()
         // Add initial layer
         layerManager.addLayer(width, height)
         invalidate()
@@ -431,7 +453,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private fun addElementToLayer(layerIndex: Int, element: Element) {
         val layerId = layerManager.addElementToLayer(layerIndex, element)
         if (layerId != null) {
-            DrawHistoryHolder.addToHistory(AddElementToLayer(element, layerManager, layerId))
+            addToHistory(AddElementToLayer(element, layerManager, layerId))
         } else {
             logger.error { "Adding element to the layer was not successfully" }
         }
@@ -503,7 +525,6 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     }
 
     private fun resetEditState() {
-        isInElementMovingMode = false
         isInElementRotationMode = false
         isInElementScalingMode = false
     }

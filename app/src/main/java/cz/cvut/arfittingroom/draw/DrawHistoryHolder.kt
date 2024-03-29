@@ -5,7 +5,7 @@ import cz.cvut.arfittingroom.draw.model.element.Element
 import java.util.LinkedList
 
 object DrawHistoryHolder {
-    val globalHistory = LinkedList<Command<out Element>>()
+    private val globalHistory = LinkedList<Command<out Element>>()
     private val undoneActions = LinkedList<Command<out Element>>()
 
     fun undo() {
@@ -37,6 +37,10 @@ object DrawHistoryHolder {
     fun addToHistory(command: Command<Element>){
         globalHistory.add(command)
         command.execute()
+    }
+
+    fun clearHistory() {
+        globalHistory.clear()
     }
 
 }
