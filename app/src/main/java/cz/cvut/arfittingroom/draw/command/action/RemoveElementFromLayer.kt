@@ -12,7 +12,6 @@ class RemoveElementFromLayer<T>(
 ) :
     Command<T> where T : Element {
     override fun execute() {
-        element.isSelected = false
         layerManager.removeElementFromLayer(element.id, layerId = layerId)
     }
 

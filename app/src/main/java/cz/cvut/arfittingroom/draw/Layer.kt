@@ -49,6 +49,7 @@ class Layer(private val width: Int, private val height: Int) {
         while (iterator.hasNext()) {
             val element = iterator.next()
             if (element.id == elementId) {
+                element.isSelected = false
                 iterator.remove()
             }
         }

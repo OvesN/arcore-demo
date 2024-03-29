@@ -169,7 +169,8 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                         }
                         isInElementMovingMode = false
                     }
-                    if (event.pointerCount - 1 == 0) { // Subtract 1 because the count includes the finger that is being lifted.
+                    // Subtract 1 because the count includes the finger that is being lifted
+                    if (event.pointerCount - 1 == 0) {
                         ignoreNextOneFingerMove = false
                     }
                 }
@@ -461,6 +462,14 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     private fun drawSelectedElementEditIcons(canvas: Canvas) {
         selectedElement?.let { element ->
+
+            // Do not draw anything if element was deselected
+            // previously (for example in undo/redo action)
+            if (!element.isSelected) {
+                selectedElement = null
+                return
+            }
+
             val boundingBox = element.boundingBox
 
             // Menu Icon (Top Right Corner)
