@@ -106,7 +106,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                     selectedElement?.endContinuousScale()
                     selectedElement?.let {
                         it.endContinuousScale()
-                        DrawHistoryHolder.addToHistory(
+                        addToHistory(
                             ScaleElement(
                                 it,
                                 newRadius = it.outerRadius * scaleFactor,
@@ -168,9 +168,23 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                             )
                         }
                         isInElementMovingMode = false
+                    } else if (isInElementScalingMode) {
+                        selectedElement?.let { element ->
+                            element.endContinuousScale()
+                            addToHistory(
+                                ScaleElement(
+                                    element = element,
+                                    newRadius = element.outerRadius * scaleFactor,
+                                    oldRadius = element.outerRadius,
+                                )
+                            )
+                        }
+                        scaleFactor = 1f
+                        isInElementScalingMode = false
                     }
-                    // Subtract 1 because the count includes the finger that is being lifted
-                    if (event.pointerCount - 1 == 0) {
+                    // If user was scaling the element with two fingers using ScaleGestureDetector,
+                    // ignore next one finger move so element will not be moved
+                    else if (event.pointerCount - 1 == 0) {
                         ignoreNextOneFingerMove = false
                     }
                 }
@@ -180,6 +194,8 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                     selectedElement?.let { element ->
                         val pressedIconAction = checkEditButtons(x, y)
                         if (pressedIconAction != null) {
+                            lastTouchY = y
+                            lastTouchX = x
                             handleIconAction(pressedIconAction, element)
                             return
                         }
@@ -188,10 +204,27 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                     selectedElement = layerManager.selectElement(x, y)
                 }
 
-                MotionEvent.ACTION_MOVE -> if (!ignoreNextOneFingerMove) {
-                    isInElementMovingMode = true
-                    selectedElement?.move(x, y)
+                MotionEvent.ACTION_MOVE -> {
+                    selectedElement?.let { element ->
+                        if (isInElementScalingMode) {
+                            val xDiff = x - lastTouchX
+                            // A positive xDiff means moving right, negative means moving left.
+                            scaleFactor = if (xDiff > 0) {
+                                1 + abs(xDiff) / 100 // Increase the scale if moving to the right
+                            } else {
+                                1 - abs(xDiff) / 100 // Decrease the scale if moving to the left
+                            }
+
+                            scaleFactor.coerceIn(0.5f, 2f)
+
+                            element.continuousScale(scaleFactor)
+                        } else if (!ignoreNextOneFingerMove) {
+                            isInElementMovingMode = true
+                            element.move(x, y)
+                        }
+                    }
                 }
+
             }
         }
     }
@@ -350,10 +383,10 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
-        drawSelectedElementEditIcons(canvas)
-
         // Draw all layers
         layerManager.drawLayers(canvas, paintOptions)
+
+        drawSelectedElementEditIcons(canvas)
     }
 
     fun clearCanvas() {

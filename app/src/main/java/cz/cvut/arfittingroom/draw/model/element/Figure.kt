@@ -6,6 +6,7 @@ import android.graphics.RectF
 import cz.cvut.arfittingroom.draw.command.ColorChangeable
 import cz.cvut.arfittingroom.draw.model.element.impl.Rectangle
 import cz.cvut.arfittingroom.draw.path.DrawablePath
+import kotlin.math.max
 
 abstract class Figure : Element(), ColorChangeable {
     abstract override var centerX: Float
@@ -24,8 +25,7 @@ abstract class Figure : Element(), ColorChangeable {
     abstract fun createPath(): DrawablePath
 
     override fun scale(newRadius: Float) {
-        outerRadius = newRadius
-        originalRadius = outerRadius
+        outerRadius = max(newRadius, 1f)
 
         elementPath = createPath()
         boundingBox = createBoundingBox()
@@ -33,8 +33,9 @@ abstract class Figure : Element(), ColorChangeable {
 
     // Scale while scaling gesture
     override fun continuousScale(factor: Float) {
-        outerRadius = factor * originalRadius
+        val newRadius = max(factor * originalRadius, 1f)
 
+        outerRadius = newRadius
         elementPath = createPath()
         boundingBox = createBoundingBox()
     }
