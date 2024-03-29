@@ -1,7 +1,9 @@
 package cz.cvut.arfittingroom.draw.model.element.impl
 
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.Paint
+import cz.cvut.arfittingroom.draw.model.element.BoundingBox
 import cz.cvut.arfittingroom.draw.model.element.Figure
 import cz.cvut.arfittingroom.draw.path.DrawablePath
 
@@ -10,17 +12,17 @@ class Heart(
     override var centerX: Float,
     override var centerY: Float,
     override var outerRadius: Float,
-    private val paint: Paint
+    override var paint: Paint
 ) : Figure() {
     override var elementPath: DrawablePath
-    override var boundingBoxPath: DrawablePath
+    override var boundingBox: BoundingBox
     override var originalRadius: Float
     override var originalCenterX: Float
     override var originalCenterY: Float
 
     init {
         elementPath = createPath()
-        boundingBoxPath = createBoundingBox()
+        boundingBox = createBoundingBox()
         originalRadius = outerRadius
         originalCenterX = centerX
         originalCenterY = centerY
@@ -28,6 +30,10 @@ class Heart(
     
     override fun draw(canvas: Canvas) {
         canvas.drawPath(createPath(), paint)
+    }
+
+    override fun changeColor(newColor: Color) {
+        TODO("Not yet implemented")
     }
 
     override fun createPath(): DrawablePath {

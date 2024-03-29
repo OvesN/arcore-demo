@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Matrix
 import cz.cvut.arfittingroom.draw.command.Drawable
+import cz.cvut.arfittingroom.draw.model.element.BoundingBox
 import cz.cvut.arfittingroom.draw.model.element.Element
 import cz.cvut.arfittingroom.draw.model.element.Figure
 import cz.cvut.arfittingroom.draw.path.DrawablePath
@@ -14,18 +15,16 @@ class Image(
     override var centerX: Float,
     override var centerY: Float,
     override var outerRadius: Float,
-) : Figure(){
+) : Element(){
 
-    override var elementPath: DrawablePath
-    override var boundingBoxPath: DrawablePath
-    override var originalRadius: Float
-    override var originalCenterX: Float
-    override var originalCenterY: Float
+    override var boundingBox: BoundingBox
+     var originalRadius: Float
+     var originalCenterX: Float
+     var originalCenterY: Float
 
 
     init {
-        elementPath = createPath()
-        boundingBoxPath = createBoundingBox()
+        boundingBox = createBoundingBox()
         originalRadius = outerRadius
         originalCenterX = centerX
         originalCenterY = centerY
@@ -44,11 +43,15 @@ class Image(
         TODO("Not yet implemented")
     }
 
-    override fun doIntersect(x: Float, y: Float): Boolean {
+    override fun endContinuousMove() {
         TODO("Not yet implemented")
     }
 
-    override fun createPath(): DrawablePath {
+    override fun rotate() {
+        TODO("Not yet implemented")
+    }
+
+    override fun doIntersect(x: Float, y: Float): Boolean {
         TODO("Not yet implemented")
     }
 

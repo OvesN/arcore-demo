@@ -1,6 +1,7 @@
 package cz.cvut.arfittingroom.draw.model.element.impl
 
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.RectF
@@ -9,6 +10,7 @@ import cz.cvut.arfittingroom.draw.command.Drawable
 import cz.cvut.arfittingroom.draw.command.Movable
 import cz.cvut.arfittingroom.draw.command.Rotatable
 import cz.cvut.arfittingroom.draw.command.Scalable
+import cz.cvut.arfittingroom.draw.model.element.BoundingBox
 import cz.cvut.arfittingroom.draw.model.element.Element
 import cz.cvut.arfittingroom.draw.model.element.Figure
 import kotlin.math.cos
@@ -18,17 +20,17 @@ class Star(
     override var centerX: Float,
     override var centerY: Float,
     override var outerRadius: Float,
-    private var paint: Paint
+    override var paint: Paint
 ) : Figure() {
     override var elementPath: DrawablePath
-    override var boundingBoxPath: DrawablePath
+    override var boundingBox: BoundingBox
     override var originalRadius: Float
     override var originalCenterX: Float
     override var originalCenterY: Float
 
     init {
         elementPath = createPath()
-        boundingBoxPath = createBoundingBox()
+        boundingBox = createBoundingBox()
         originalRadius = outerRadius
         originalCenterX = centerX
         originalCenterY = centerY
@@ -65,14 +67,9 @@ class Star(
         return path
     }
 
-
-    override fun draw(canvas: Canvas) {
-        canvas.drawPath(createPath(), paint)
-
-        // If element is selected, draw  bounding box around it
-        if (isSelected) {
-            canvas.drawPath(createBoundingBox(), boundingBoxPaint)
-        }
+    override fun changeColor(newColor: Color) {
+        TODO("Not yet implemented")
     }
+
 
 }

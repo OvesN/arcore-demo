@@ -145,10 +145,7 @@ class MakeupEditorActivity : AppCompatActivity() {
     }
 
     private fun toggleImage(imageId: Int) {
-        drawView.isInImageMode = drawView.isInImageMode != true
-        if (drawView.isInImageMode) {
-            drawView.drawImage(imageId)
-        }
+
     }
 
     private fun showColorPickerDialog() {

@@ -1,50 +1,34 @@
 package cz.cvut.arfittingroom.draw.model.element
 
+import android.graphics.Canvas
+import android.graphics.Paint
 import android.graphics.RectF
+import cz.cvut.arfittingroom.draw.command.ColorChangeable
+import cz.cvut.arfittingroom.draw.model.element.impl.Rectangle
 import cz.cvut.arfittingroom.draw.path.DrawablePath
 
-abstract class Figure : Element() {
+abstract class Figure : Element(), ColorChangeable {
     abstract override var centerX: Float
     abstract override var centerY: Float
     abstract override var outerRadius: Float
+    abstract override var boundingBox: BoundingBox
 
     abstract var elementPath: DrawablePath
-    abstract var boundingBoxPath: DrawablePath
 
     abstract var originalCenterX: Float
     abstract var originalCenterY: Float
     abstract var originalRadius: Float
 
+    abstract var paint: Paint
+
     abstract fun createPath(): DrawablePath
-
-    override fun createBoundingBox(): DrawablePath {
-        val path = DrawablePath()
-
-        // Start at the top-left corner of the bounding box
-        path.moveTo(centerX - outerRadius, centerY - outerRadius)
-
-        // Draw line to the top-right corner
-        path.lineTo(centerX + outerRadius, centerY - outerRadius)
-
-        // Draw line to the bottom-right corner
-        path.lineTo(centerX + outerRadius, centerY + outerRadius)
-
-        // Draw line to the bottom-left corner
-        path.lineTo(centerX - outerRadius, centerY + outerRadius)
-
-        // Close the path back to the top-left corner
-        path.lineTo(centerX - outerRadius, centerY - outerRadius)
-
-        path.close()
-        return path
-    }
 
     override fun scale(newRadius: Float) {
         outerRadius = newRadius
         originalRadius = outerRadius
 
         elementPath = createPath()
-        boundingBoxPath = createBoundingBox()
+        boundingBox = createBoundingBox()
     }
 
     // Scale while scaling gesture
@@ -52,7 +36,7 @@ abstract class Figure : Element() {
         outerRadius = factor * originalRadius
 
         elementPath = createPath()
-        boundingBoxPath = createBoundingBox()
+        boundingBox = createBoundingBox()
     }
 
     // End of the scale gesture by the user
@@ -66,7 +50,7 @@ abstract class Figure : Element() {
         centerY = y
 
         elementPath = createPath()
-        boundingBoxPath = createBoundingBox()
+        boundingBox = createBoundingBox()
     }
 
     // End of the move gesture by the user
@@ -82,7 +66,16 @@ abstract class Figure : Element() {
 
     override fun doIntersect(x: Float, y: Float): Boolean {
         val rectF = RectF()
-        boundingBoxPath.computeBounds(rectF, true)
+        boundingBox.elementPath.computeBounds(rectF, true)
         return rectF.contains(x, y)
+    }
+
+    override fun draw(canvas: Canvas) {
+        canvas.drawPath(createPath(), paint)
+
+        // If element is selected, draw  bounding box around it
+        if (isSelected) {
+            boundingBox.draw(canvas)
+        }
     }
 }

@@ -15,6 +15,7 @@ class DrawablePath : Path(), Serializable {
         copiedActions.forEach {
             it.perform(this)
         }
+
     }
 
     override fun reset() {

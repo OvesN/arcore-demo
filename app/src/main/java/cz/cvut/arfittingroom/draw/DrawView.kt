@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Paint
+import android.graphics.RectF
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.ScaleGestureDetector
@@ -12,6 +13,7 @@ import android.view.View
 import androidx.annotation.ColorInt
 import androidx.core.graphics.alpha
 import cz.cvut.arfittingroom.ARFittingRoomApplication
+import cz.cvut.arfittingroom.R
 import cz.cvut.arfittingroom.draw.DrawHistoryHolder.globalHistory
 import cz.cvut.arfittingroom.draw.command.Scalable
 import cz.cvut.arfittingroom.draw.command.action.AddElementToLayer
@@ -21,6 +23,7 @@ import cz.cvut.arfittingroom.draw.model.element.Element
 import cz.cvut.arfittingroom.draw.model.element.impl.Curve
 import cz.cvut.arfittingroom.draw.model.element.impl.Heart
 import cz.cvut.arfittingroom.draw.model.element.impl.Star
+import cz.cvut.arfittingroom.draw.model.enums.EElementEditAction
 import cz.cvut.arfittingroom.draw.model.enums.EShape
 import cz.cvut.arfittingroom.draw.path.DrawablePath
 import cz.cvut.arfittingroom.draw.service.LayerManager
@@ -55,17 +58,24 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private var posY = 0f
 
     private var isInElementMovingMode: Boolean = false
+    private var isInElementRotationMode: Boolean = false
+    private var isInElementScalingMode: Boolean = false
 
     private var imageBitmap: Bitmap? = null
     var selectedElement: Element? = null
 
-    var isInImageMode = false
     var strokeShape = EShape.CIRCLE
 
     private var ignoreNextOneFingerMove = false
 
+    private val editElementIcons: HashMap<EElementEditAction, Bitmap> = hashMapOf()
+    private val editElementIconsBounds: HashMap<EElementEditAction, RectF> = hashMapOf()
+
     init {
         (context.applicationContext as? ARFittingRoomApplication)?.appComponent?.inject(this)
+
+        // Prepare icons
+        loadEditElementIcons()
 
         // Add event for element scaling
         scaleGestureDetector = ScaleGestureDetector(
@@ -127,16 +137,16 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
         //TODO fix this, different modes and different brushes?
         else when (strokeShape) {
-            EShape.NONE -> handleElementDeformationMode(event, x, y)
-            EShape.CIRCLE -> handleDrawingMode(event, x, y)
-            else -> handleStampMode(event, x, y)
+            EShape.NONE -> handleElementEditing(event, x, y)
+            EShape.CIRCLE -> handleDrawing(event, x, y)
+            else -> handleStampDrawing(event, x, y)
         }
 
         invalidate()
         return true
     }
 
-    private fun handleElementDeformationMode(event: MotionEvent, x: Float, y: Float) {
+    private fun handleElementEditing(event: MotionEvent, x: Float, y: Float) {
         if (!scaleGestureDetector.isInProgress) {
 
             when (event.action) {
@@ -162,7 +172,29 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                     }
                 }
 
-                MotionEvent.ACTION_DOWN -> selectedElement = layerManager.selectElement(x, y)
+                MotionEvent.ACTION_DOWN -> {
+                    resetEditState()
+
+                    val pressedIconAction = checkEditButtons(x, y)
+                    if (pressedIconAction != null) {
+                        when (pressedIconAction) {
+                            EElementEditAction.MENU -> {}
+                            EElementEditAction.SCALE -> {
+                                isInElementScalingMode = true
+                            }
+                            EElementEditAction.MOVE_TO -> {}
+                            EElementEditAction.MOVE_DOWN -> {}
+                            EElementEditAction.MOVE_UP -> {}
+                            EElementEditAction.ROTATE -> {
+                                isInElementRotationMode = true
+                            }
+                            EElementEditAction.DELETE -> {}
+                        }
+                    } else {
+                        selectedElement = layerManager.selectElement(x, y)
+                    }
+                }
+
                 MotionEvent.ACTION_MOVE -> if (!ignoreNextOneFingerMove) {
                     isInElementMovingMode = true
                     selectedElement?.move(x, y)
@@ -171,7 +203,12 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         }
     }
 
-    private fun handleDrawingMode(event: MotionEvent, x: Float, y: Float) {
+    // Check if edit button was pressed, if not, return null
+    private fun checkEditButtons(x: Float, y: Float): EElementEditAction? =
+        editElementIconsBounds.entries.firstOrNull { it.value.contains(x, y) }?.key
+
+
+    private fun handleDrawing(event: MotionEvent, x: Float, y: Float) {
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
                 startX = x
@@ -184,7 +221,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         }
     }
 
-    private fun handleStampMode(event: MotionEvent, x: Float, y: Float) {
+    private fun handleStampDrawing(event: MotionEvent, x: Float, y: Float) {
         if (event.action == MotionEvent.ACTION_DOWN) {
             when (strokeShape) {
                 EShape.STAR -> drawStar(x, y, paintOptions.strokeWidth)
@@ -286,6 +323,8 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
+        drawSelectedElementEditIcons(canvas)
+
         // Draw all layers
         layerManager.drawLayers(canvas, paintOptions)
     }
@@ -314,7 +353,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private fun actionUp() {
         layerManager.getCurPath().lineTo(curX, curY)
 
-        // draw a dot on click
+        // Draw a dot on click
         if (startX == curX && startY == curY) {
             layerManager.getCurPath().lineTo(curX, curY + 2)
             layerManager.getCurPath().lineTo(curX + 1, curY + 2)
@@ -393,4 +432,64 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             logger.error { "Adding element to the layer was not successfully" }
         }
     }
+
+    private fun drawSelectedElementEditIcons(canvas: Canvas) {
+        selectedElement?.let { element ->
+            val boundingBox = element.boundingBox
+
+            // Menu Icon (Top Right Corner)
+            editElementIcons[EElementEditAction.MENU]?.let { icon ->
+                val x = boundingBox.topRightCornerCoor.x - icon.width
+                val y = boundingBox.topRightCornerCoor.y
+                canvas.drawBitmap(icon, x, y, null)
+                editElementIconsBounds[EElementEditAction.MENU] =
+                    RectF(x, y, x + icon.width, y + icon.height)
+            }
+
+            // Scale Icon (Bottom Right Corner)
+            editElementIcons[EElementEditAction.SCALE]?.let { icon ->
+                val x = boundingBox.bottomRightCornerCoor.x - icon.width
+                val y = boundingBox.bottomRightCornerCoor.y - icon.height
+                canvas.drawBitmap(icon, x, y, null)
+                editElementIconsBounds[EElementEditAction.SCALE] =
+                    RectF(x, y, x + icon.width, y + icon.height)
+            }
+
+            // Rotate Icon (Bottom Left Corner)
+            editElementIcons[EElementEditAction.ROTATE]?.let { icon ->
+                val x = boundingBox.bottomLeftCornerCoor.x
+                val y = boundingBox.bottomLeftCornerCoor.y - icon.height
+                canvas.drawBitmap(icon, x, y, null)
+                editElementIconsBounds[EElementEditAction.ROTATE] =
+                    RectF(x, y, x + icon.width, y + icon.height)
+            }
+
+            // Delete Icon (Top Left Corner)
+            editElementIcons[EElementEditAction.DELETE]?.let { icon ->
+                val x = boundingBox.topLeftCornerCoor.x
+                val y = boundingBox.topLeftCornerCoor.y
+                canvas.drawBitmap(icon, x, y, null)
+                editElementIconsBounds[EElementEditAction.DELETE] =
+                    RectF(x, y, x + icon.width, y + icon.height)
+            }
+        }
+    }
+
+    private fun loadEditElementIcons() {
+        editElementIcons[EElementEditAction.DELETE] =
+            BitmapFactory.decodeResource(context.resources, R.drawable.delete_icon)
+        editElementIcons[EElementEditAction.ROTATE] =
+            BitmapFactory.decodeResource(context.resources, R.drawable.rotate_icon)
+        editElementIcons[EElementEditAction.SCALE] =
+            BitmapFactory.decodeResource(context.resources, R.drawable.scale_icon)
+        editElementIcons[EElementEditAction.MENU] =
+            BitmapFactory.decodeResource(context.resources, R.drawable.menu_icon)
+    }
+
+    private fun resetEditState() {
+        isInElementMovingMode = false
+        isInElementRotationMode = false
+        isInElementScalingMode = false
+    }
+
 }
