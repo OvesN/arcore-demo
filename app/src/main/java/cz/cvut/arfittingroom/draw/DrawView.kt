@@ -21,11 +21,14 @@ import cz.cvut.arfittingroom.draw.command.Scalable
 import cz.cvut.arfittingroom.draw.command.action.AddElementToLayer
 import cz.cvut.arfittingroom.draw.command.action.MoveElement
 import cz.cvut.arfittingroom.draw.command.action.RemoveElementFromLayer
+import cz.cvut.arfittingroom.draw.command.action.RotateElement
 import cz.cvut.arfittingroom.draw.command.action.ScaleElement
+import cz.cvut.arfittingroom.draw.model.PaintOptions
 import cz.cvut.arfittingroom.draw.model.element.Element
+import cz.cvut.arfittingroom.draw.model.element.impl.Figure
 import cz.cvut.arfittingroom.draw.model.element.impl.Curve
-import cz.cvut.arfittingroom.draw.model.element.impl.Heart
-import cz.cvut.arfittingroom.draw.model.element.impl.Star
+import cz.cvut.arfittingroom.draw.model.element.strategy.impl.HeartPathCreationStrategy
+import cz.cvut.arfittingroom.draw.model.element.strategy.impl.StarPathCreationStrategy
 import cz.cvut.arfittingroom.draw.model.enums.EElementEditAction
 import cz.cvut.arfittingroom.draw.model.enums.EShape
 import cz.cvut.arfittingroom.draw.path.DrawablePath
@@ -34,6 +37,7 @@ import cz.cvut.arfittingroom.utils.IconUtil.changeIconColor
 import mu.KotlinLogging
 import javax.inject.Inject
 import kotlin.math.abs
+import kotlin.math.atan2
 
 
 private val logger = KotlinLogging.logger { }
@@ -55,6 +59,8 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     private var scaleFactor = 1.0f
     private val scaleGestureDetector: ScaleGestureDetector
+
+    private var rotationAngleDelta = 0f
 
     private var lastTouchX = 0f
     private var lastTouchY = 0f
@@ -95,7 +101,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                         scaleFactor *= detector.scaleFactor
                         scaleFactor = 0.1f.coerceAtLeast(scaleFactor.coerceAtMost(10.0f))
 
-                        (selectedElement as? Scalable)?.continuousScale(scaleFactor)
+                        (selectedElement as? Scalable)?.scaleContinuously(scaleFactor)
                         invalidate()
                         return true
                     }
@@ -167,7 +173,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                                 )
                             )
                         }
-                        isInElementMovingMode = false
+
                     } else if (isInElementScalingMode) {
                         selectedElement?.let { element ->
                             element.endContinuousScale()
@@ -179,14 +185,27 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                                 )
                             )
                         }
-                        scaleFactor = 1f
-                        isInElementScalingMode = false
+                    } else if (isInElementRotationMode) {
+                        selectedElement?.let { element ->
+                            element.endContinuousRotation()
+
+                            addToHistory(
+                                RotateElement(
+                                    element = element,
+                                    newRotationAngle = rotationAngleDelta,
+                                    oldRotationAngle = element.rotationAngle
+                                )
+                            )
+                        }
+
                     }
                     // If user was scaling the element with two fingers using ScaleGestureDetector,
                     // ignore next one finger move so element will not be moved
                     else if (event.pointerCount - 1 == 0) {
                         ignoreNextOneFingerMove = false
                     }
+
+                    resetEditState()
                 }
 
                 MotionEvent.ACTION_DOWN -> {
@@ -207,17 +226,16 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                 MotionEvent.ACTION_MOVE -> {
                     selectedElement?.let { element ->
                         if (isInElementScalingMode) {
-                            val xDiff = x - lastTouchX
-                            // A positive xDiff means moving right, negative means moving left.
-                            scaleFactor = if (xDiff > 0) {
-                                1 + abs(xDiff) / 100 // Increase the scale if moving to the right
-                            } else {
-                                1 - abs(xDiff) / 100 // Decrease the scale if moving to the left
-                            }
-
-                            scaleFactor.coerceIn(0.5f, 2f)
-
-                            element.continuousScale(scaleFactor)
+                            scaleFactor = calculateScaleFactor(x, y)
+                            element.scaleContinuously(scaleFactor)
+                        } else if (isInElementRotationMode) {
+                            rotationAngleDelta = calculateRotationAngleDelta(
+                                centerX = element.centerX,
+                                centerY = element.centerY,
+                                newX = x,
+                                newY = y,
+                            )
+                            element.rotateContinuously(rotationAngleDelta)
                         } else if (!ignoreNextOneFingerMove) {
                             isInElementMovingMode = true
                             element.move(x, y)
@@ -228,6 +246,49 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             }
         }
     }
+
+    private fun calculateRotationAngleDelta(
+        centerX: Float,
+        centerY: Float,
+        newX: Float,
+        newY: Float
+    ): Float {
+        // Calculate the angle from the center to the last touch position
+        val lastAngle =
+            Math.toDegrees(
+                atan2(
+                    (lastTouchY - centerY).toDouble(),
+                    (lastTouchX - centerX).toDouble()
+                )
+            )
+
+        // Calculate the angle from the center to the new touch position
+        val newAngle =
+            Math.toDegrees(atan2((newY - centerY).toDouble(), (newX - centerX).toDouble()))
+
+        // Calculate the difference in angles
+        var angleDelta = newAngle - lastAngle
+
+        // Normalize the angleDelta to be between -180 and 180
+        angleDelta += if (angleDelta > 180) -360 else if (angleDelta < -180) 360 else 0
+
+        return angleDelta.toFloat()
+    }
+
+    private fun calculateScaleFactor(x: Float, y: Float): Float {
+        val xDiff = x - lastTouchX
+        // A positive xDiff means moving right, negative means moving left.
+        val scaleFactor = if (xDiff > 0) {
+            1 + abs(xDiff) / 100 // Increase the scale if moving to the right
+        } else {
+            1 - abs(xDiff) / 100 // Decrease the scale if moving to the left
+        }
+
+        scaleFactor.coerceIn(0.5f, 2f)
+
+        return scaleFactor
+    }
+
 
     private fun handleIconAction(action: EElementEditAction, element: Element) {
         when (action) {
@@ -434,10 +495,11 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     }
 
     private fun drawHeart(centerX: Float, centerY: Float, outerRadius: Float) {
-        val heart = Heart(
+        val heart = Figure(
             centerX,
             centerY,
             outerRadius,
+            HeartPathCreationStrategy(),
             Paint().apply {
                 color = paintOptions.color
                 strokeWidth = outerRadius
@@ -450,10 +512,11 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     }
 
     private fun drawStar(centerX: Float, centerY: Float, outerRadius: Float) {
-        val star = Star(
+        val star = Figure(
             centerX,
             centerY,
             outerRadius,
+            StarPathCreationStrategy(),
             Paint().apply {
                 color = paintOptions.color
                 style = paintOptions.style
@@ -482,7 +545,6 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         layerManager.activeLayerIndex = if (layerIndex == 0) 0 else layerIndex - 1
         invalidate()
     }
-
 
     private fun addElementToLayer(layerIndex: Int, element: Element) {
         val layerId = layerManager.addElementToLayer(layerIndex, element)
@@ -569,6 +631,10 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private fun resetEditState() {
         isInElementRotationMode = false
         isInElementScalingMode = false
+        isInElementMovingMode = false
+
+        rotationAngleDelta = 0f
+        scaleFactor = 0f
     }
 
 }

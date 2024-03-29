@@ -1,6 +1,9 @@
 package cz.cvut.arfittingroom.draw.path
 
 import android.graphics.Path
+import cz.cvut.arfittingroom.draw.path.impl.Line
+import cz.cvut.arfittingroom.draw.path.impl.Move
+import cz.cvut.arfittingroom.draw.path.impl.Quad
 import java.io.ObjectInputStream
 import java.io.Serializable
 import java.util.LinkedList

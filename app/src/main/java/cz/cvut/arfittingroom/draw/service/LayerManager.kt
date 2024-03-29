@@ -1,9 +1,8 @@
 package cz.cvut.arfittingroom.draw.service
 
 import android.graphics.Canvas
-import cz.cvut.arfittingroom.draw.DrawHistoryHolder
 import cz.cvut.arfittingroom.draw.Layer
-import cz.cvut.arfittingroom.draw.PaintOptions
+import cz.cvut.arfittingroom.draw.model.PaintOptions
 import cz.cvut.arfittingroom.draw.model.element.Element
 import cz.cvut.arfittingroom.draw.path.DrawablePath
 import mu.KotlinLogging

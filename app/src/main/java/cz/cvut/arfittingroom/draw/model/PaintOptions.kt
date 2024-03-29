@@ -1,4 +1,4 @@
-package cz.cvut.arfittingroom.draw
+package cz.cvut.arfittingroom.draw.model
 
 import android.graphics.Color
 import android.graphics.Paint.Style

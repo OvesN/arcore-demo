@@ -23,7 +23,7 @@ class Gif(
         TODO("Not yet implemented")
     }
 
-    override fun continuousScale(factor: Float) {
+    override fun scaleContinuously(factor: Float) {
         TODO("Not yet implemented")
     }
 
@@ -39,7 +39,15 @@ class Gif(
         TODO("Not yet implemented")
     }
 
-    override fun rotate() {
+    override fun rotate(newRotationAngle: Float) {
+        TODO("Not yet implemented")
+    }
+
+    override fun endContinuousRotation() {
+        TODO("Not yet implemented")
+    }
+
+    override fun rotateContinuously(angleDelta: Float) {
         TODO("Not yet implemented")
     }
 

@@ -3,7 +3,7 @@ package cz.cvut.arfittingroom.draw
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
-import cz.cvut.arfittingroom.draw.command.Command
+import cz.cvut.arfittingroom.draw.model.PaintOptions
 import cz.cvut.arfittingroom.draw.model.element.Element
 import cz.cvut.arfittingroom.draw.path.DrawablePath
 import java.util.LinkedList

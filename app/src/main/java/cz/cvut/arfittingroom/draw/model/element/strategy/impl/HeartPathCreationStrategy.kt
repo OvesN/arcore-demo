@@ -1,42 +1,11 @@
-package cz.cvut.arfittingroom.draw.model.element.impl
+package cz.cvut.arfittingroom.draw.model.element.strategy.impl
 
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
-import cz.cvut.arfittingroom.draw.model.element.BoundingBox
-import cz.cvut.arfittingroom.draw.model.element.Figure
+import cz.cvut.arfittingroom.draw.model.element.strategy.PathCreationStrategy
 import cz.cvut.arfittingroom.draw.path.DrawablePath
 
+class HeartPathCreationStrategy : PathCreationStrategy {
+    override fun createPath(centerX: Float, centerY: Float, outerRadius: Float): DrawablePath {
 
-class Heart(
-    override var centerX: Float,
-    override var centerY: Float,
-    override var outerRadius: Float,
-    override var paint: Paint
-) : Figure() {
-    override var elementPath: DrawablePath
-    override var boundingBox: BoundingBox
-    override var originalRadius: Float
-    override var originalCenterX: Float
-    override var originalCenterY: Float
-
-    init {
-        elementPath = createPath()
-        boundingBox = createBoundingBox()
-        originalRadius = outerRadius
-        originalCenterX = centerX
-        originalCenterY = centerY
-    }
-    
-    override fun draw(canvas: Canvas) {
-        canvas.drawPath(createPath(), paint)
-    }
-
-    override fun changeColor(newColor: Color) {
-        TODO("Not yet implemented")
-    }
-
-    override fun createPath(): DrawablePath {
         val path = DrawablePath()
         // Starting point
         path.moveTo(outerRadius / 2 + centerX, outerRadius / 5 + centerY)

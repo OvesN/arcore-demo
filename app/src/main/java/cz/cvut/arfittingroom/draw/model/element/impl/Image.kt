@@ -1,13 +1,8 @@
 package cz.cvut.arfittingroom.draw.model.element.impl
 
-import android.graphics.Bitmap
 import android.graphics.Canvas
-import android.graphics.Matrix
-import cz.cvut.arfittingroom.draw.command.Drawable
 import cz.cvut.arfittingroom.draw.model.element.BoundingBox
 import cz.cvut.arfittingroom.draw.model.element.Element
-import cz.cvut.arfittingroom.draw.model.element.Figure
-import cz.cvut.arfittingroom.draw.path.DrawablePath
 
 
 //TODO what to do with this??
@@ -47,7 +42,15 @@ class Image(
         TODO("Not yet implemented")
     }
 
-    override fun rotate() {
+    override fun rotate(newRotationAngle: Float) {
+        TODO("Not yet implemented")
+    }
+
+    override fun endContinuousRotation() {
+        TODO("Not yet implemented")
+    }
+
+    override fun rotateContinuously(angleDelta: Float) {
         TODO("Not yet implemented")
     }
 
@@ -63,7 +66,7 @@ class Image(
         TODO("Not yet implemented")
     }
 
-    override fun continuousScale(factor: Float) {
+    override fun scaleContinuously(factor: Float) {
         TODO("Not yet implemented")
     }
 

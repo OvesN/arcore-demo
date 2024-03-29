@@ -1,5 +1,7 @@
 package cz.cvut.arfittingroom.draw.command
 
 interface Rotatable {
-    fun rotate()
+    fun rotate(newRotationAngle: Float)
+    fun endContinuousRotation()
+    fun rotateContinuously(angleDelta: Float)
 }

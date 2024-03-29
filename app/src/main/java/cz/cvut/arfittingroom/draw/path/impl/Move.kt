@@ -1,4 +1,4 @@
-package cz.cvut.arfittingroom.draw.path
+package cz.cvut.arfittingroom.draw.path.impl
 
 import android.graphics.Path
 import cz.cvut.arfittingroom.draw.path.Action
