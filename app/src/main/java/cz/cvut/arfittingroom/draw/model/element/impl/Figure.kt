@@ -20,81 +20,13 @@ class Figure(
     private var paint: Paint
 ) : Element(), Repaintable {
 
-    override var boundingBox: BoundingBox
-
-    private var elementPath: DrawablePath
-
-    private var originalCenterX: Float
-    private var originalCenterY: Float
-    private var originalRadius: Float
-
-    init {
-        elementPath = createPath()
-        boundingBox = createBoundingBox()
-        originalRadius = outerRadius
-        originalCenterX = centerX
-        originalCenterY = centerY
-    }
+    override var originalRadius: Float = outerRadius
+    override var originalCenterX: Float = centerX
+    override var originalCenterY: Float = centerY
+    override var boundingBox: BoundingBox = createBoundingBox()
 
     private fun createPath(): DrawablePath = pathCreationStrategy.createPath(centerX, centerY, outerRadius)
 
-    override fun scale(newRadius: Float) {
-        outerRadius = max(newRadius, 1f)
-        originalRadius = outerRadius
-
-        elementPath = createPath()
-        boundingBox = createBoundingBox()
-    }
-
-    // Scale while scaling gesture
-    override fun scaleContinuously(factor: Float) {
-        val newRadius = max(factor * originalRadius, 1f)
-
-        outerRadius = newRadius
-        elementPath = createPath()
-        boundingBox = createBoundingBox()
-    }
-
-    // End of the scale gesture by the user
-    // Returns radius to the original one so scale action can be applied correctly
-    override fun endContinuousScale() {
-        outerRadius = originalRadius
-    }
-
-    override fun move(x: Float, y: Float) {
-        centerX = x
-        centerY = y
-
-        elementPath = createPath()
-        boundingBox = createBoundingBox()
-    }
-
-    // End of the move gesture by the user
-    // Returns center x and y to the original values so move action can be applied correctly
-    override fun endContinuousMove() {
-        centerX = originalCenterX
-        centerY = originalCenterY
-    }
-
-    override fun rotate(newRotationAngle: Float) {
-        val normalizedAngle = normalizeAngle(newRotationAngle)
-        rotationAngle = normalizedAngle
-        originalRotationAngle = normalizedAngle
-    }
-
-    override fun rotateContinuously(angleDelta: Float) {
-        rotationAngle = normalizeAngle(originalRotationAngle + angleDelta)
-    }
-
-    override fun endContinuousRotation() {
-        rotationAngle = originalRotationAngle
-    }
-
-    override fun doIntersect(x: Float, y: Float): Boolean {
-        val rectF = RectF()
-        boundingBox.elementPath.computeBounds(rectF, true)
-        return rectF.contains(x, y)
-    }
 
     override fun draw(canvas: Canvas) {
         canvas.save()
@@ -103,12 +35,13 @@ class Figure(
         canvas.rotate(rotationAngle, centerX, centerY)
 
         // Draw the element's path
-        canvas.drawPath(elementPath, paint)
+        canvas.drawPath(createPath(), paint)
 
         canvas.restore()
 
         // If element is selected, draw  bounding box around it
         if (isSelected) {
+            boundingBox = createBoundingBox()
             boundingBox.draw(canvas)
         }
     }
@@ -117,12 +50,4 @@ class Figure(
         TODO("Not yet implemented")
     }
 
-
-    //TODO to different service?
-    private fun normalizeAngle(angle: Float): Float {
-        var normalizedAngle = angle % 360  // Reduce the angle to the range (-360, 360)
-        if (normalizedAngle < -180) normalizedAngle += 360  // Adjust if the angle is less than -180
-        if (normalizedAngle > 180) normalizedAngle -= 360  // Adjust if the angle is more than 180
-        return normalizedAngle
-    }
 }

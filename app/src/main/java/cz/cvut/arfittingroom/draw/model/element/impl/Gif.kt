@@ -8,47 +8,16 @@ import cz.cvut.arfittingroom.draw.model.element.Element
 class Gif(
     override var centerX: Float,
     override var centerY: Float,
-    override var outerRadius: Float,
-    override var boundingBox: BoundingBox
+    override var outerRadius: Float
 ) : Element() {
-    override fun doIntersect(x: Float, y: Float): Boolean {
-        TODO("Not yet implemented")
-    }
+    override var boundingBox: BoundingBox = createBoundingBox()
+    override var originalRadius: Float = outerRadius
 
-    override fun scale(newRadius: Float) {
-        TODO("Not yet implemented")
-    }
+    override var originalCenterX: Float = centerX
+    override var originalCenterY: Float = centerY
 
-    override fun endContinuousScale() {
-        TODO("Not yet implemented")
-    }
-
-    override fun scaleContinuously(factor: Float) {
-        TODO("Not yet implemented")
-    }
 
     override fun draw(canvas: Canvas) {
         TODO("Not yet implemented")
     }
-
-    override fun move(x: Float, y: Float) {
-        TODO("Not yet implemented")
-    }
-
-    override fun endContinuousMove() {
-        TODO("Not yet implemented")
-    }
-
-    override fun rotate(newRotationAngle: Float) {
-        TODO("Not yet implemented")
-    }
-
-    override fun endContinuousRotation() {
-        TODO("Not yet implemented")
-    }
-
-    override fun rotateContinuously(angleDelta: Float) {
-        TODO("Not yet implemented")
-    }
-
 }

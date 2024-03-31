@@ -8,7 +8,7 @@ import cz.cvut.arfittingroom.draw.path.DrawablePath
 
 class Curve(
     private val path: DrawablePath,
-    var paint: Paint
+    private var paint: Paint
 ) : Element() {
 
     //TODO resolve
@@ -16,61 +16,20 @@ class Curve(
     override var centerY: Float = 0f
     override var outerRadius: Float = 0f
 
-    var elementPath: DrawablePath
-    override var boundingBox: BoundingBox
-    var originalRadius: Float
+    var elementPath: DrawablePath = createPath()
+    override var boundingBox: BoundingBox = createBoundingBox()
 
-    var originalCenterX: Float
-    var originalCenterY: Float
+    override var originalCenterX = centerX
+    override var originalCenterY = centerY
+    override var originalRadius = outerRadius
 
-    init {
-        elementPath = createPath()
-        boundingBox = createBoundingBox()
-        originalRadius = outerRadius
-        originalCenterX = centerX
-        originalCenterY = centerY
-    }
-
-    fun createPath(): DrawablePath = path
+    private fun createPath(): DrawablePath = path
 
     override fun draw(canvas: Canvas) {
         canvas.drawPath(path, paint)
     }
 
-    override fun move(x: Float, y: Float) {
-        TODO("Not yet implemented")
-    }
-
-    override fun endContinuousMove() {
-        TODO("Not yet implemented")
-    }
-
-    override fun rotate(newRotationAngle: Float) {
-        TODO("Not yet implemented")
-    }
-
-    override fun endContinuousRotation() {
-        TODO("Not yet implemented")
-    }
-
-    override fun rotateContinuously(angleDelta: Float) {
-        TODO("Not yet implemented")
-    }
-
     override fun doIntersect(x: Float, y: Float): Boolean {
-        TODO("Not yet implemented")
-    }
-
-
-    override fun scale(newRadius: Float) {
-        TODO("Not yet implemented")
-    }
-
-    override fun endContinuousScale() {
-        TODO("Not yet implemented")
-    }
-
-    override fun scaleContinuously(factor: Float) {
-        TODO("Not yet implemented")
+        return super.doIntersect(x, y)
     }
 }

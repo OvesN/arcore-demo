@@ -145,7 +145,7 @@ class MakeupEditorActivity : AppCompatActivity() {
     }
 
     private fun toggleImage(imageId: Int) {
-
+        drawView.loadImage(imageId)
     }
 
     private fun showColorPickerDialog() {

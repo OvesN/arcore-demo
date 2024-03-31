@@ -1,73 +1,49 @@
 package cz.cvut.arfittingroom.draw.model.element.impl
 
+import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.Matrix
 import cz.cvut.arfittingroom.draw.model.element.BoundingBox
 import cz.cvut.arfittingroom.draw.model.element.Element
+import kotlin.math.max
 
 
-//TODO what to do with this??
 class Image(
     override var centerX: Float,
     override var centerY: Float,
     override var outerRadius: Float,
-) : Element(){
+    val resourceId: Int,
+    private val bitmap: Bitmap,
+) : Element() {
 
-    override var boundingBox: BoundingBox
-     var originalRadius: Float
-     var originalCenterX: Float
-     var originalCenterY: Float
-
-
-    init {
-        boundingBox = createBoundingBox()
-        originalRadius = outerRadius
-        originalCenterX = centerX
-        originalCenterY = centerY
-    }
+    override var boundingBox: BoundingBox = createBoundingBox()
+    override var originalRadius: Float = outerRadius
+    override var originalCenterX: Float = centerX
+    override var originalCenterY: Float = centerY
 
     override fun draw(canvas: Canvas) {
-//        matrix.reset()
-//        matrix.postTranslate(-imageBitmap.width / 2f, -imageBitmap.height / 2f)
-//        matrix.postScale(scaleFactor, scaleFactor)
-//        matrix.postTranslate(posX + imageBitmap.width / 2f, posY + imageBitmap.height / 2f)
-//
-//        canvas.drawBitmap(imageBitmap, matrix, null)
-    }
+        // Calculate the scale factor to fit the bitmap within the outerRadius
+        val scaleFactor = (outerRadius * 2) / max(bitmap.width, bitmap.height)
 
-    override fun move(x: Float, y: Float) {
-        TODO("Not yet implemented")
-    }
+        val matrix = Matrix().apply {
+            postScale(scaleFactor, scaleFactor)
 
-    override fun endContinuousMove() {
-        TODO("Not yet implemented")
-    }
+            // Rotate the bitmap around its center
+            postRotate(
+                rotationAngle,
+                bitmap.width / 2f * scaleFactor,
+                bitmap.height / 2f * scaleFactor
+            )
 
-    override fun rotate(newRotationAngle: Float) {
-        TODO("Not yet implemented")
-    }
+            // Translate the bitmap to draw it at the specified center (centerX, centerY)
+            // We adjust the translation to ensure the bitmap's center aligns with the (centerX, centerY)
+            postTranslate(
+                centerX - bitmap.width / 2f * scaleFactor,
+                centerY - bitmap.height / 2f * scaleFactor
+            )
+        }
 
-    override fun endContinuousRotation() {
-        TODO("Not yet implemented")
-    }
-
-    override fun rotateContinuously(angleDelta: Float) {
-        TODO("Not yet implemented")
-    }
-
-    override fun doIntersect(x: Float, y: Float): Boolean {
-        TODO("Not yet implemented")
-    }
-
-    override fun scale(factor: Float) {
-        TODO("Not yet implemented")
-    }
-
-    override fun endContinuousScale() {
-        TODO("Not yet implemented")
-    }
-
-    override fun scaleContinuously(factor: Float) {
-        TODO("Not yet implemented")
+        canvas.drawBitmap(bitmap, matrix, null)
     }
 
 }

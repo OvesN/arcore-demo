@@ -27,6 +27,7 @@ import cz.cvut.arfittingroom.draw.model.PaintOptions
 import cz.cvut.arfittingroom.draw.model.element.Element
 import cz.cvut.arfittingroom.draw.model.element.impl.Figure
 import cz.cvut.arfittingroom.draw.model.element.impl.Curve
+import cz.cvut.arfittingroom.draw.model.element.impl.Image
 import cz.cvut.arfittingroom.draw.model.element.strategy.impl.HeartPathCreationStrategy
 import cz.cvut.arfittingroom.draw.model.element.strategy.impl.StarPathCreationStrategy
 import cz.cvut.arfittingroom.draw.model.enums.EElementEditAction
@@ -530,11 +531,6 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         addElementToLayer(layerManager.activeLayerIndex, star)
     }
 
-    fun drawImage(image: Int) {
-        imageBitmap = BitmapFactory.decodeResource(resources, image)
-        invalidate()
-    }
-
     fun moveLayer(fromIndex: Int, toIndex: Int) {
         if (layerManager.moveLayer(fromIndex, toIndex)) {
             layerManager.activeLayerIndex = toIndex
@@ -555,6 +551,23 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         } else {
             logger.error { "Adding element to the layer was not successfully" }
         }
+    }
+
+    fun loadImage(imageId: Int) {
+        val imageBitmap = BitmapFactory.decodeResource(resources, imageId)
+
+        addElementToLayer(
+            layerManager.activeLayerIndex,
+            Image(
+                width.toFloat() / 2,
+                height.toFloat() / 2,
+                width.toFloat() / 2,
+                imageId,
+                imageBitmap
+            )
+        )
+
+        invalidate()
     }
 
     private fun drawSelectedElementEditIcons(canvas: Canvas) {

@@ -25,11 +25,7 @@ class BoundingBox(
     var bottomRightCornerCoor = Coordinates(0f, 0f)
     var bottomLeftCornerCoor = Coordinates(0f, 0f)
 
-    var elementPath: DrawablePath
-
-    init {
-        elementPath = createPath()
-    }
+    var elementPath: DrawablePath = createPath()
 
     private fun createPath(): DrawablePath {
         val path = DrawablePath()
