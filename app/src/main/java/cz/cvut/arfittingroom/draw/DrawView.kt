@@ -554,7 +554,18 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     }
 
     fun loadImage(imageId: Int) {
-        val imageBitmap = BitmapFactory.decodeResource(resources, imageId)
+        // First decode with inJustDecodeBounds=true to check dimensions
+        val options = BitmapFactory.Options().apply {
+            inJustDecodeBounds = true
+        }
+        BitmapFactory.decodeResource(resources, imageId, options)
+
+        // Calculate inSampleSize
+        options.inSampleSize = calculateInSampleSize(options, width / 3, height / 3)
+
+        // Decode bitmap with inSampleSize set
+        options.inJustDecodeBounds = false
+        val imageBitmap = BitmapFactory.decodeResource(resources, imageId, options)
 
         addElementToLayer(
             layerManager.activeLayerIndex,
@@ -570,6 +581,23 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         invalidate()
     }
 
+    private fun calculateInSampleSize(options: BitmapFactory.Options, reqWidth: Int, reqHeight: Int): Int {
+        val (height: Int, width: Int) = options.run { outHeight to outWidth }
+        var inSampleSize = 1
+
+        if (height > reqHeight || width > reqWidth) {
+            val halfHeight: Int = height / 2
+            val halfWidth: Int = width / 2
+
+            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
+            // height and width larger than the requested height and width.
+            while (halfHeight / inSampleSize >= reqHeight && halfWidth / inSampleSize >= reqWidth) {
+                inSampleSize *= 2
+            }
+        }
+
+        return inSampleSize
+    }
     private fun drawSelectedElementEditIcons(canvas: Canvas) {
         selectedElement?.let { element ->
 

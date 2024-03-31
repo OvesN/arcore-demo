@@ -44,6 +44,12 @@ class Image(
         }
 
         canvas.drawBitmap(bitmap, matrix, null)
+
+        // If element is selected, draw  bounding box around it
+        if (isSelected) {
+            boundingBox = createBoundingBox()
+            boundingBox.draw(canvas)
+        }
     }
 
 }
