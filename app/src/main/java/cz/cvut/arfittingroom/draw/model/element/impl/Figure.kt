@@ -12,6 +12,7 @@ import cz.cvut.arfittingroom.draw.model.element.BoundingBox
 import cz.cvut.arfittingroom.draw.model.element.Element
 import cz.cvut.arfittingroom.draw.model.element.strategy.PathCreationStrategy
 import cz.cvut.arfittingroom.draw.path.DrawablePath
+import cz.cvut.arfittingroom.utils.drawPath
 import kotlin.math.max
 
 class Figure(
@@ -36,7 +37,7 @@ class Figure(
         canvas.rotate(rotationAngle, centerX, centerY)
 
         // Draw the element's path
-        //canvas.drawPath(createPath(), paint)
+        canvas.drawPath(createPath(), paint)
 
         canvas.restore()
 

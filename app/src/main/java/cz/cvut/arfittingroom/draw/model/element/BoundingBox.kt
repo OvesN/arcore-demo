@@ -11,6 +11,7 @@ import cz.cvut.arfittingroom.draw.command.Drawable
 import cz.cvut.arfittingroom.draw.model.element.strategy.impl.RectanglePathCreationStrategy
 import cz.cvut.arfittingroom.draw.path.DrawablePath
 import cz.cvut.arfittingroom.model.Coordinates
+import cz.cvut.arfittingroom.utils.drawPath
 
 class BoundingBox(
     var centerX: Float,
@@ -63,6 +64,6 @@ class BoundingBox(
     }
 
     override fun draw(canvas: ICanvasGL) {
-        //canvas.drawPath(createPath(), paint)
+        canvas.drawPath(createPath(), paint)
     }
 }

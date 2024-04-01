@@ -25,8 +25,7 @@ class Image(
     override var originalCenterY: Float = centerY
 
     override fun drawSpecific(canvas: ICanvasGL) {
-      //  canvas.drawBitmap(bitmap, createTransformationMatrix())
-        canvas.drawBitmap(bitmap, 200, 200)
+       canvas.drawBitmap(bitmap, createTransformationMatrix())
     }
 
     override fun doIntersect(x: Float, y: Float): Boolean {
@@ -53,26 +52,25 @@ class Image(
     }
 
     private fun createTransformationMatrix(): BitmapMatrix {
-
         val bitmapMatrix = BitmapMatrix()
-//
-//        val scaleFactor = (outerRadius * 2) / max(bitmap.width, bitmap.height)
-//
-//        bitmapMatrix.scale(scaleFactor, scaleFactor)
-//
-//        val rotationCenterX = bitmap.width / 2f * scaleFactor
-//        val rotationCenterY = bitmap.height / 2f * scaleFactor
-//
-//        bitmapMatrix.rotateZ(rotationAngle)
-//
-//        // Translate the bitmap to draw it at the specified center
-//        // Adjust the translation to ensure the bitmap's center aligns with the (centerX, centerY)
-//        val translateX = centerX - rotationCenterX
-//        val translateY = centerY - rotationCenterY
-//        bitmapMatrix.translate(translateX, translateY)
+
+        val scaleFactorX = (outerRadius * 2) / max(bitmap.width, bitmap.height)
+        // Use a negative scale factor for Y to flip the image vertically
+        val scaleFactorY = -(outerRadius * 2) / max(bitmap.width, bitmap.height)
+
+        bitmapMatrix.scale(scaleFactorX, scaleFactorY)
+
+        val rotationCenterX = bitmap.width / 2f * scaleFactorX
+        val rotationCenterY = bitmap.height / 2f * scaleFactorY
+
+        bitmapMatrix.rotateZ(rotationAngle)
+
+        // Adjust the translation to ensure the bitmap's center aligns with the (centerX, centerY)
+        val translateX = centerX - rotationCenterX
+        val translateY = centerY - rotationCenterY
+        bitmapMatrix.translate(translateX, translateY)
 
         return bitmapMatrix
     }
-
 
 }

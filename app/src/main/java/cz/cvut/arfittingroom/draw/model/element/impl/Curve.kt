@@ -10,6 +10,7 @@ import com.chillingvan.canvasgl.glcanvas.GLPaint
 import cz.cvut.arfittingroom.draw.model.element.BoundingBox
 import cz.cvut.arfittingroom.draw.model.element.Element
 import cz.cvut.arfittingroom.draw.path.DrawablePath
+import cz.cvut.arfittingroom.utils.drawPath
 import kotlin.math.max
 
 private const val PROXIMITY_THRESHOLD = 40f // pixels
@@ -57,7 +58,7 @@ class Curve(
 
         val transformedPath = DrawablePath()
         path.transform(matrix, transformedPath)
-        //canvas.drawPath(transformedPath, paint)
+        canvas.drawPath(transformedPath, paint)
     }
 
     // These functions are overriden because
