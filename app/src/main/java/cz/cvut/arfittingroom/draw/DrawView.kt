@@ -48,7 +48,6 @@ private const val SPAN_SLOP = 7
 class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     @Inject
     lateinit var layerManager: LayerManager
-    private var isLayerInitialized = false
     private var paintOptions = PaintOptions()
 
     private var curX = 0f
@@ -65,14 +64,11 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     private var lastTouchX = 0f
     private var lastTouchY = 0f
-    private var posX = 0f
-    private var posY = 0f
 
     private var isInElementMovingMode: Boolean = false
     private var isInElementRotationMode: Boolean = false
     private var isInElementScalingMode: Boolean = false
 
-    private var imageBitmap: Bitmap? = null
     var selectedElement: Element? = null
 
     var strokeShape = EShape.CIRCLE
@@ -81,6 +77,13 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     private val editElementIcons: HashMap<EElementEditAction, Bitmap> = hashMapOf()
     private val editElementIconsBounds: HashMap<EElementEditAction, RectF> = hashMapOf()
+
+    interface OnLayerInitializedListener {
+        fun onLayerInitialized(numOfLayers: Int)
+    }
+
+    private var layerInitializedListener: OnLayerInitializedListener? = null
+
 
     init {
         (context.applicationContext as? ARFittingRoomApplication)?.appComponent?.inject(this)
@@ -132,6 +135,16 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                     return spanDelta > SPAN_SLOP
                 }
             })
+
+
+        // Post a runnable to the view, which will be executed after the view is laid out
+        post {
+            if (layerManager.getNumOfLayers() == 0) {
+                layerManager.addLayer(width, height)
+
+                layerInitializedListener?.onLayerInitialized(layerManager.getNumOfLayers())
+            }
+        }
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
@@ -365,39 +378,6 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         invalidate()
     }
 
-    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
-        super.onSizeChanged(w, h, oldw, oldh)
-
-        //Initialize first layer
-        if (!isLayerInitialized) {
-            layerManager.addLayer(w, h)
-            isLayerInitialized = true
-        }
-    }
-
-    private fun adjustImage(event: MotionEvent): Boolean {
-        scaleGestureDetector.onTouchEvent(event)
-
-        when (event.actionMasked) {
-            MotionEvent.ACTION_DOWN -> {
-                lastTouchX = event.x
-                lastTouchY = event.y
-            }
-
-            MotionEvent.ACTION_MOVE -> {
-                if (!scaleGestureDetector.isInProgress) {
-                    val dx = event.x - lastTouchX
-                    val dy = event.y - lastTouchY
-                    posX += dx
-                    posY += dy
-                    invalidate()
-                    lastTouchX = event.x
-                    lastTouchY = event.y
-                }
-            }
-        }
-        return true
-    }
 
     fun addLayer(): Int {
         val newLayerIndex = layerManager.addLayer(width, height)
@@ -442,6 +422,10 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         isSaving = false
 
         return bitmap
+    }
+
+    fun setOnLayerInitializedListener(listener: OnLayerInitializedListener) {
+        this.layerInitializedListener = listener
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -581,7 +565,11 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         invalidate()
     }
 
-    private fun calculateInSampleSize(options: BitmapFactory.Options, reqWidth: Int, reqHeight: Int): Int {
+    private fun calculateInSampleSize(
+        options: BitmapFactory.Options,
+        reqWidth: Int,
+        reqHeight: Int
+    ): Int {
         val (height: Int, width: Int) = options.run { outHeight to outWidth }
         var inSampleSize = 1
 
@@ -598,6 +586,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
         return inSampleSize
     }
+
     private fun drawSelectedElementEditIcons(canvas: Canvas) {
         selectedElement?.let { element ->
 
@@ -679,5 +668,15 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         rotationAngleDelta = 0f
         scaleFactor = 1f
     }
+
+
+//    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+//        super.onSizeChanged(w, h, oldw, oldh)
+//
+//        //Initialize first layer
+//        if (layerManager.getNumOfLayers() == 0) {
+//            layerManager.addLayer(w, h)
+//        }
+//    }
 
 }

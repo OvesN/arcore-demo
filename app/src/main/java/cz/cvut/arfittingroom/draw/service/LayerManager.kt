@@ -103,6 +103,8 @@ class LayerManager {
     }
 
     fun drawLayers(canvas: Canvas, paintOptions: PaintOptions) {
+        if (layers.isEmpty()) return
+
         layers[activeLayerIndex].changePaint(paintOptions)
         layers.forEach { layer ->
             layer.draw(canvas)

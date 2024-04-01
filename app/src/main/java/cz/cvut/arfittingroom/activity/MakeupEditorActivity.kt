@@ -83,8 +83,17 @@ class MakeupEditorActivity : AppCompatActivity() {
             updateLayersButtons(drawView.addLayer() + 1)
         }
 
-        //TODO fix later, what if we already have layers?
-        updateLayersButtons(1)
+        drawView.setOnLayerInitializedListener(object : DrawView.OnLayerInitializedListener {
+            override fun onLayerInitialized(numOfLayers: Int) {
+                updateLayersButtons(numOfLayers)
+            }
+        })
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        updateLayersButtons(drawView.layerManager.getNumOfLayers())
     }
 
     // Create buttons for layers in reverse order and select the active one
