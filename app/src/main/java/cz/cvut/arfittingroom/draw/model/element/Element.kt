@@ -1,5 +1,6 @@
 package cz.cvut.arfittingroom.draw.model.element
 
+import android.graphics.Canvas
 import android.graphics.RectF
 import cz.cvut.arfittingroom.draw.command.Drawable
 import cz.cvut.arfittingroom.draw.command.Movable
@@ -23,6 +24,17 @@ abstract class Element : Scalable, Drawable, Movable, Rotatable {
     var rotationAngle = 0f
     private var originalRotationAngle = 0f
     var isSelected: Boolean = false
+
+    override fun draw(canvas: Canvas) {
+        drawSpecific(canvas)
+
+        if (isSelected) {
+            boundingBox = createBoundingBox()
+            boundingBox.draw(canvas)
+        }
+    }
+
+    abstract fun drawSpecific(canvas: Canvas)
 
     protected fun createBoundingBox(): BoundingBox =
         BoundingBox(centerX, centerY, outerRadius)
@@ -72,10 +84,9 @@ abstract class Element : Scalable, Drawable, Movable, Rotatable {
         rotationAngle = originalRotationAngle
     }
 
+
     open fun doIntersect(x: Float, y: Float): Boolean {
-        val rectF = RectF()
-        boundingBox.elementPath.computeBounds(rectF, true)
-        return rectF.contains(x, y)
+        return boundingBox.rectF.contains(x, y)
     }
 
     private fun normalizeAngle(angle: Float): Float {

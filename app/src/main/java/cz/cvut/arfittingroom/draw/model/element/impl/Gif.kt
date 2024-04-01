@@ -17,7 +17,7 @@ class Gif(
     override var originalCenterY: Float = centerY
 
 
-    override fun draw(canvas: Canvas) {
+    override fun drawSpecific(canvas: Canvas) {
         TODO("Not yet implemented")
     }
 }

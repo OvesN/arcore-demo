@@ -7,6 +7,7 @@ import cz.cvut.arfittingroom.draw.model.element.BoundingBox
 import cz.cvut.arfittingroom.draw.model.element.Element
 import kotlin.math.max
 
+private const val TRANSPARENT_CODE = 0xFF000000
 
 class Image(
     override var centerX: Float,
@@ -21,11 +22,38 @@ class Image(
     override var originalCenterX: Float = centerX
     override var originalCenterY: Float = centerY
 
-    override fun draw(canvas: Canvas) {
+    override fun drawSpecific(canvas: Canvas) {
+        canvas.drawBitmap(bitmap, createTransformationMatrix(), null)
+    }
+
+    override fun doIntersect(x: Float, y: Float): Boolean {
+        if (!boundingBox.rectF.contains(x, y)) {
+            return false
+        }
+
+        // Create an inverse matrix
+        val inverseMatrix = Matrix()
+        createTransformationMatrix().invert(inverseMatrix)
+
+        // Apply the inverse matrix to the (x, y) coordinates
+        val points = floatArrayOf(x, y)
+        inverseMatrix.mapPoints(points)
+
+        // Check if the point is within bitmap bounds
+        if (points[0] < 0 || points[0] >= bitmap.width || points[1] < 0 || points[1] >= bitmap.height) {
+            return false
+        }
+
+        // Check the alpha value of the corresponding pixel in the bitmap
+        val pixel = bitmap.getPixel(points[0].toInt(), points[1].toInt())
+        return (pixel and TRANSPARENT_CODE.toInt()) != 0 // Check if alpha is not 0 (transparent)
+    }
+
+    private fun createTransformationMatrix(): Matrix {
         // Calculate the scale factor to fit the bitmap within the outerRadius
         val scaleFactor = (outerRadius * 2) / max(bitmap.width, bitmap.height)
 
-        val matrix = Matrix().apply {
+        return Matrix().apply {
             postScale(scaleFactor, scaleFactor)
 
             // Rotate the bitmap around its center
@@ -41,14 +69,6 @@ class Image(
                 centerX - bitmap.width / 2f * scaleFactor,
                 centerY - bitmap.height / 2f * scaleFactor
             )
-        }
-
-        canvas.drawBitmap(bitmap, matrix, null)
-
-        // If element is selected, draw  bounding box around it
-        if (isSelected) {
-            boundingBox = createBoundingBox()
-            boundingBox.draw(canvas)
         }
     }
 

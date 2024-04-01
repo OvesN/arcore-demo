@@ -3,6 +3,7 @@ package cz.cvut.arfittingroom.draw.model.element
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.RectF
 import cz.cvut.arfittingroom.draw.command.Drawable
 import cz.cvut.arfittingroom.draw.model.element.strategy.impl.RectanglePathCreationStrategy
 import cz.cvut.arfittingroom.draw.path.DrawablePath
@@ -26,6 +27,11 @@ class BoundingBox(
     var bottomLeftCornerCoor = Coordinates(0f, 0f)
 
     var elementPath: DrawablePath = createPath()
+    var rectF: RectF = RectF()
+
+    init {
+        elementPath.computeBounds(rectF, true)
+    }
 
     private fun createPath(): DrawablePath {
         val path = DrawablePath()
@@ -51,7 +57,6 @@ class BoundingBox(
 
         path.close()
         return path
-
     }
 
     override fun draw(canvas: Canvas) {

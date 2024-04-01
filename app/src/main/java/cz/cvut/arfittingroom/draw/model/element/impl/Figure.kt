@@ -27,8 +27,7 @@ class Figure(
 
     private fun createPath(): DrawablePath = pathCreationStrategy.createPath(centerX, centerY, outerRadius)
 
-
-    override fun draw(canvas: Canvas) {
+    override fun drawSpecific(canvas: Canvas) {
         canvas.save()
 
         // Rotate the canvas around the element's center
@@ -39,11 +38,6 @@ class Figure(
 
         canvas.restore()
 
-        // If element is selected, draw  bounding box around it
-        if (isSelected) {
-            boundingBox = createBoundingBox()
-            boundingBox.draw(canvas)
-        }
     }
 
     override fun repaint(newPaint: PaintOptions) {
