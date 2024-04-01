@@ -27,6 +27,7 @@ import cz.cvut.arfittingroom.model.enums.EMakeupType
 import cz.cvut.arfittingroom.model.enums.EModelType
 import cz.cvut.arfittingroom.service.MakeupService
 import cz.cvut.arfittingroom.service.ModelEditorService
+import cz.cvut.arfittingroom.utils.FileSavingUtil.getTempMaskTextureBitmap
 import cz.cvut.arfittingroom.utils.TextureCombinerUtil.combineDrawables
 import mu.KotlinLogging
 import javax.inject.Inject
@@ -112,6 +113,12 @@ class MakeupActivity : AppCompatActivity() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+
+        val bitmap = getTempMaskTextureBitmap(applicationContext)
+        bitmap?.let {  createTextureAndApply(it) }
+    }
 
     private fun setupButtonClickListener(button: Button, makeUpType: EMakeupType) {
         val appliedMakeUpTypes = makeUpService.makeUpState.appliedMakeUpTypes
