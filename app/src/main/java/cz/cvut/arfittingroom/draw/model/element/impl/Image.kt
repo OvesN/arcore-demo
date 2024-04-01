@@ -1,11 +1,13 @@
 package cz.cvut.arfittingroom.draw.model.element.impl
 
 import android.graphics.Bitmap
-import android.graphics.Canvas
 import android.graphics.Matrix
+import com.chillingvan.canvasgl.ICanvasGL
+import com.chillingvan.canvasgl.ICanvasGL.BitmapMatrix
 import cz.cvut.arfittingroom.draw.model.element.BoundingBox
 import cz.cvut.arfittingroom.draw.model.element.Element
 import kotlin.math.max
+
 
 private const val TRANSPARENT_CODE = 0xFF000000
 
@@ -22,8 +24,9 @@ class Image(
     override var originalCenterX: Float = centerX
     override var originalCenterY: Float = centerY
 
-    override fun drawSpecific(canvas: Canvas) {
-        canvas.drawBitmap(bitmap, createTransformationMatrix(), null)
+    override fun drawSpecific(canvas: ICanvasGL) {
+      //  canvas.drawBitmap(bitmap, createTransformationMatrix())
+        canvas.drawBitmap(bitmap, 200, 200)
     }
 
     override fun doIntersect(x: Float, y: Float): Boolean {
@@ -33,7 +36,7 @@ class Image(
 
         // Create an inverse matrix
         val inverseMatrix = Matrix()
-        createTransformationMatrix().invert(inverseMatrix)
+      //  createTransformationMatrix().invert(inverseMatrix)
 
         // Apply the inverse matrix to the (x, y) coordinates
         val points = floatArrayOf(x, y)
@@ -49,27 +52,27 @@ class Image(
         return (pixel and TRANSPARENT_CODE.toInt()) != 0 // Check if alpha is not 0 (transparent)
     }
 
-    private fun createTransformationMatrix(): Matrix {
-        // Calculate the scale factor to fit the bitmap within the outerRadius
-        val scaleFactor = (outerRadius * 2) / max(bitmap.width, bitmap.height)
+    private fun createTransformationMatrix(): BitmapMatrix {
 
-        return Matrix().apply {
-            postScale(scaleFactor, scaleFactor)
+        val bitmapMatrix = BitmapMatrix()
+//
+//        val scaleFactor = (outerRadius * 2) / max(bitmap.width, bitmap.height)
+//
+//        bitmapMatrix.scale(scaleFactor, scaleFactor)
+//
+//        val rotationCenterX = bitmap.width / 2f * scaleFactor
+//        val rotationCenterY = bitmap.height / 2f * scaleFactor
+//
+//        bitmapMatrix.rotateZ(rotationAngle)
+//
+//        // Translate the bitmap to draw it at the specified center
+//        // Adjust the translation to ensure the bitmap's center aligns with the (centerX, centerY)
+//        val translateX = centerX - rotationCenterX
+//        val translateY = centerY - rotationCenterY
+//        bitmapMatrix.translate(translateX, translateY)
 
-            // Rotate the bitmap around its center
-            postRotate(
-                rotationAngle,
-                bitmap.width / 2f * scaleFactor,
-                bitmap.height / 2f * scaleFactor
-            )
-
-            // Translate the bitmap to draw it at the specified center (centerX, centerY)
-            // We adjust the translation to ensure the bitmap's center aligns with the (centerX, centerY)
-            postTranslate(
-                centerX - bitmap.width / 2f * scaleFactor,
-                centerY - bitmap.height / 2f * scaleFactor
-            )
-        }
+        return bitmapMatrix
     }
+
 
 }

@@ -5,6 +5,8 @@ import android.graphics.Matrix
 import android.graphics.Paint
 import android.graphics.PathMeasure
 import android.graphics.RectF
+import com.chillingvan.canvasgl.ICanvasGL
+import com.chillingvan.canvasgl.glcanvas.GLPaint
 import cz.cvut.arfittingroom.draw.model.element.BoundingBox
 import cz.cvut.arfittingroom.draw.model.element.Element
 import cz.cvut.arfittingroom.draw.path.DrawablePath
@@ -13,7 +15,7 @@ import kotlin.math.max
 private const val PROXIMITY_THRESHOLD = 40f // pixels
 class Curve(
     private var path: DrawablePath,
-    private var paint: Paint
+    private var paint: GLPaint
 ) : Element() {
 
     override var centerX: Float
@@ -46,7 +48,7 @@ class Curve(
         originalRadius = outerRadius
     }
 
-    override fun drawSpecific(canvas: Canvas) {
+    override fun drawSpecific(canvas: ICanvasGL) {
         val matrix = Matrix()
 
         matrix.postRotate(rotationAngle, centerX, centerY)
@@ -55,7 +57,7 @@ class Curve(
 
         val transformedPath = DrawablePath()
         path.transform(matrix, transformedPath)
-        canvas.drawPath(transformedPath, paint)
+        //canvas.drawPath(transformedPath, paint)
     }
 
     // These functions are overriden because

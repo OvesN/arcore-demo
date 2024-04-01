@@ -10,14 +10,14 @@ import android.graphics.RectF
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.ScaleGestureDetector
-import android.view.View
 import androidx.annotation.ColorInt
-import androidx.core.graphics.alpha
+import com.chillingvan.canvasgl.ICanvasGL
+import com.chillingvan.canvasgl.glcanvas.GLPaint
+import com.chillingvan.canvasgl.glview.GLView
 import cz.cvut.arfittingroom.ARFittingRoomApplication
 import cz.cvut.arfittingroom.R
 import cz.cvut.arfittingroom.draw.DrawHistoryHolder.addToHistory
 import cz.cvut.arfittingroom.draw.DrawHistoryHolder.clearHistory
-import cz.cvut.arfittingroom.draw.command.Scalable
 import cz.cvut.arfittingroom.draw.command.action.AddElementToLayer
 import cz.cvut.arfittingroom.draw.command.action.MoveElement
 import cz.cvut.arfittingroom.draw.command.action.RemoveElementFromLayer
@@ -25,8 +25,8 @@ import cz.cvut.arfittingroom.draw.command.action.RotateElement
 import cz.cvut.arfittingroom.draw.command.action.ScaleElement
 import cz.cvut.arfittingroom.draw.model.PaintOptions
 import cz.cvut.arfittingroom.draw.model.element.Element
-import cz.cvut.arfittingroom.draw.model.element.impl.Figure
 import cz.cvut.arfittingroom.draw.model.element.impl.Curve
+import cz.cvut.arfittingroom.draw.model.element.impl.Figure
 import cz.cvut.arfittingroom.draw.model.element.impl.Image
 import cz.cvut.arfittingroom.draw.model.element.strategy.impl.HeartPathCreationStrategy
 import cz.cvut.arfittingroom.draw.model.element.strategy.impl.StarPathCreationStrategy
@@ -45,7 +45,7 @@ private val logger = KotlinLogging.logger { }
 
 private const val SPAN_SLOP = 7
 
-class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
+class DrawView(context: Context, attrs: AttributeSet) : GLView(context, attrs) {
     @Inject
     lateinit var layerManager: LayerManager
     private var paintOptions = PaintOptions()
@@ -84,7 +84,6 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     private var layerInitializedListener: OnLayerInitializedListener? = null
 
-
     init {
         (context.applicationContext as? ARFittingRoomApplication)?.appComponent?.inject(this)
 
@@ -106,7 +105,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                         scaleFactor = 0.1f.coerceAtLeast(scaleFactor.coerceAtMost(10.0f))
 
                         selectedElement?.scaleContinuously(scaleFactor)
-                        invalidate()
+                        requestRender()
                         return true
                     }
                     return false
@@ -165,7 +164,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             else -> handleStampDrawing(event, x, y)
         }
 
-        invalidate()
+        requestRender()
         return true
     }
 
@@ -370,12 +369,12 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     fun undo() {
         DrawHistoryHolder.undo()
-        invalidate()
+        requestRender()
     }
 
     fun redo() {
         DrawHistoryHolder.redo()
-        invalidate()
+        requestRender()
     }
 
 
@@ -399,16 +398,17 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     fun setColor(newColor: Int) {
         @ColorInt
         paintOptions.color = newColor
-        paintOptions.alpha = newColor.alpha
+
+        //paintOptions.alpha = newColor.alpha
         if (isStrokeWidthBarEnabled) {
-            invalidate()
+            requestRender()
         }
     }
 
     fun setStrokeWidth(newStrokeWidth: Float) {
         paintOptions.strokeWidth = newStrokeWidth
         if (isStrokeWidthBarEnabled) {
-            invalidate()
+            requestRender()
         }
     }
 
@@ -428,9 +428,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         this.layerInitializedListener = listener
     }
 
-    override fun onDraw(canvas: Canvas) {
-        super.onDraw(canvas)
-
+    override fun onGLDraw(canvas: ICanvasGL) {
         // Draw all layers
         layerManager.drawLayers(canvas, paintOptions)
 
@@ -442,7 +440,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         clearHistory()
         // Add initial layer
         layerManager.addLayer(width, height)
-        invalidate()
+        requestRender()
     }
 
     private fun actionDown(x: Float, y: Float) {
@@ -468,11 +466,11 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             layerManager.getCurPath().lineTo(curX + 1, curY)
         }
 
-        val curve = Curve(layerManager.getCurPath(), Paint().apply {
+        val curve = Curve(layerManager.getCurPath(), GLPaint().apply {
             color = paintOptions.color
-            strokeWidth = paintOptions.strokeWidth
-            alpha = paintOptions.alpha
-            strokeCap = Paint.Cap.ROUND
+            lineWidth = paintOptions.strokeWidth
+           // alpha = paintOptions.alpha
+           // strokeCap = Paint.Cap.ROUND
             style = Paint.Style.STROKE
         })
 
@@ -487,10 +485,9 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             centerY,
             outerRadius,
             HeartPathCreationStrategy(),
-            Paint().apply {
+            GLPaint().apply {
                 color = paintOptions.color
-                strokeWidth = outerRadius
-                alpha = paintOptions.alpha
+                lineWidth = outerRadius
                 style = Paint.Style.FILL
             }
         )
@@ -504,11 +501,11 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             centerY,
             outerRadius,
             StarPathCreationStrategy(),
-            Paint().apply {
+            GLPaint().apply {
                 color = paintOptions.color
                 style = paintOptions.style
-                strokeWidth = 6f
-                alpha = paintOptions.alpha
+                lineWidth = 6f
+                //alpha = paintOptions.alpha
             }
         )
 
@@ -518,14 +515,14 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     fun moveLayer(fromIndex: Int, toIndex: Int) {
         if (layerManager.moveLayer(fromIndex, toIndex)) {
             layerManager.activeLayerIndex = toIndex
-            invalidate()
+            requestRender()
         }
     }
 
     fun removeLayer(layerIndex: Int) {
         layerManager.removeLayer(layerIndex)
         layerManager.activeLayerIndex = if (layerIndex == 0) 0 else layerIndex - 1
-        invalidate()
+        requestRender()
     }
 
     private fun addElementToLayer(layerIndex: Int, element: Element) {
@@ -562,7 +559,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             )
         )
 
-        invalidate()
+        requestRender()
     }
 
     private fun calculateInSampleSize(
@@ -587,7 +584,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         return inSampleSize
     }
 
-    private fun drawSelectedElementEditIcons(canvas: Canvas) {
+    private fun drawSelectedElementEditIcons(canvas: ICanvasGL) {
         selectedElement?.let { element ->
 
             // Do not draw anything if element was deselected
@@ -603,7 +600,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             editElementIcons[EElementEditAction.MENU]?.let { icon ->
                 val x = boundingBox.topRightCornerCoor.x
                 val y = boundingBox.topRightCornerCoor.y - icon.height
-                canvas.drawBitmap(icon, x, y, null)
+                canvas.drawBitmap(icon, x.toInt(), y.toInt())
                 editElementIconsBounds[EElementEditAction.MENU] =
                     RectF(x, y, x + icon.width, y + icon.height)
             }
@@ -612,7 +609,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             editElementIcons[EElementEditAction.SCALE]?.let { icon ->
                 val x = boundingBox.bottomRightCornerCoor.x
                 val y = boundingBox.bottomRightCornerCoor.y
-                canvas.drawBitmap(icon, x, y, null)
+                canvas.drawBitmap(icon, x.toInt(), y.toInt())
                 editElementIconsBounds[EElementEditAction.SCALE] =
                     RectF(x, y, x + icon.width, y + icon.height)
             }
@@ -621,7 +618,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             editElementIcons[EElementEditAction.ROTATE]?.let { icon ->
                 val x = boundingBox.bottomLeftCornerCoor.x - icon.width
                 val y = boundingBox.bottomLeftCornerCoor.y
-                canvas.drawBitmap(icon, x, y, null)
+                canvas.drawBitmap(icon, x.toInt(), y.toInt())
                 editElementIconsBounds[EElementEditAction.ROTATE] =
                     RectF(x, y, x + icon.width, y + icon.height)
             }
@@ -630,7 +627,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             editElementIcons[EElementEditAction.DELETE]?.let { icon ->
                 val x = boundingBox.topLeftCornerCoor.x - icon.width
                 val y = boundingBox.topLeftCornerCoor.y - icon.height
-                canvas.drawBitmap(icon, x, y, null)
+                canvas.drawBitmap(icon, x.toInt(), y.toInt())
                 editElementIconsBounds[EElementEditAction.DELETE] =
                     RectF(x, y, x + icon.width, y + icon.height)
             }
@@ -668,15 +665,5 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         rotationAngleDelta = 0f
         scaleFactor = 1f
     }
-
-
-//    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
-//        super.onSizeChanged(w, h, oldw, oldh)
-//
-//        //Initialize first layer
-//        if (layerManager.getNumOfLayers() == 0) {
-//            layerManager.addLayer(w, h)
-//        }
-//    }
 
 }

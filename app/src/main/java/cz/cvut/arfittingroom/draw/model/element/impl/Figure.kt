@@ -4,6 +4,8 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.RectF
+import com.chillingvan.canvasgl.ICanvasGL
+import com.chillingvan.canvasgl.glcanvas.GLPaint
 import cz.cvut.arfittingroom.draw.command.Repaintable
 import cz.cvut.arfittingroom.draw.model.PaintOptions
 import cz.cvut.arfittingroom.draw.model.element.BoundingBox
@@ -17,7 +19,7 @@ class Figure(
     override var centerY: Float,
     override var outerRadius: Float,
     private val pathCreationStrategy: PathCreationStrategy,
-    private var paint: Paint
+    private var paint: GLPaint
 ) : Element(), Repaintable {
 
     override var originalRadius: Float = outerRadius
@@ -27,14 +29,14 @@ class Figure(
 
     private fun createPath(): DrawablePath = pathCreationStrategy.createPath(centerX, centerY, outerRadius)
 
-    override fun drawSpecific(canvas: Canvas) {
+    override fun drawSpecific(canvas: ICanvasGL) {
         canvas.save()
 
         // Rotate the canvas around the element's center
         canvas.rotate(rotationAngle, centerX, centerY)
 
         // Draw the element's path
-        canvas.drawPath(createPath(), paint)
+        //canvas.drawPath(createPath(), paint)
 
         canvas.restore()
 

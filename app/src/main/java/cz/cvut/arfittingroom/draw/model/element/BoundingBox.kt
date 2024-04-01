@@ -4,6 +4,9 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.RectF
+import com.chillingvan.canvasgl.ICanvasGL
+import com.chillingvan.canvasgl.androidCanvas.IAndroidCanvasHelper
+import com.chillingvan.canvasgl.glcanvas.GLPaint
 import cz.cvut.arfittingroom.draw.command.Drawable
 import cz.cvut.arfittingroom.draw.model.element.strategy.impl.RectanglePathCreationStrategy
 import cz.cvut.arfittingroom.draw.path.DrawablePath
@@ -15,10 +18,10 @@ class BoundingBox(
     var outerRadius: Float,
 ) : Drawable {
 
-    private val paint: Paint = Paint().apply {
+    private val paint: GLPaint = GLPaint().apply {
         color = Color.YELLOW
         style = Paint.Style.STROKE
-        strokeWidth = 2f
+        lineWidth = 2f
     }
 
     var topRightCornerCoor = Coordinates(0f, 0f)
@@ -59,7 +62,7 @@ class BoundingBox(
         return path
     }
 
-    override fun draw(canvas: Canvas) {
-        canvas.drawPath(createPath(), paint)
+    override fun draw(canvas: ICanvasGL) {
+        //canvas.drawPath(createPath(), paint)
     }
 }

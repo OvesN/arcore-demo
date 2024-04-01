@@ -2,6 +2,7 @@ package cz.cvut.arfittingroom.draw.model.element
 
 import android.graphics.Canvas
 import android.graphics.RectF
+import com.chillingvan.canvasgl.ICanvasGL
 import cz.cvut.arfittingroom.draw.command.Drawable
 import cz.cvut.arfittingroom.draw.command.Movable
 import cz.cvut.arfittingroom.draw.command.Rotatable
@@ -25,7 +26,7 @@ abstract class Element : Scalable, Drawable, Movable, Rotatable {
     private var originalRotationAngle = 0f
     var isSelected: Boolean = false
 
-    override fun draw(canvas: Canvas) {
+    override fun draw(canvas: ICanvasGL) {
         drawSpecific(canvas)
 
         if (isSelected) {
@@ -34,7 +35,7 @@ abstract class Element : Scalable, Drawable, Movable, Rotatable {
         }
     }
 
-    abstract fun drawSpecific(canvas: Canvas)
+    abstract fun drawSpecific(canvas: ICanvasGL)
 
     protected fun createBoundingBox(): BoundingBox =
         BoundingBox(centerX, centerY, outerRadius)

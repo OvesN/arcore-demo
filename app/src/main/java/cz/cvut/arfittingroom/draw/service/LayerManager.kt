@@ -1,6 +1,7 @@
 package cz.cvut.arfittingroom.draw.service
 
 import android.graphics.Canvas
+import com.chillingvan.canvasgl.ICanvasGL
 import cz.cvut.arfittingroom.draw.Layer
 import cz.cvut.arfittingroom.draw.model.PaintOptions
 import cz.cvut.arfittingroom.draw.model.element.Element
@@ -102,7 +103,7 @@ class LayerManager {
         return true
     }
 
-    fun drawLayers(canvas: Canvas, paintOptions: PaintOptions) {
+    fun drawLayers(canvas: ICanvasGL, paintOptions: PaintOptions) {
         if (layers.isEmpty()) return
 
         layers[activeLayerIndex].changePaint(paintOptions)
