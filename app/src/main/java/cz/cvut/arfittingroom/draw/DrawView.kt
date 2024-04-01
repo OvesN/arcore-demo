@@ -3,15 +3,17 @@ package cz.cvut.arfittingroom.draw
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.RectF
+import android.opengl.GLES20
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.ScaleGestureDetector
 import androidx.annotation.ColorInt
+import com.chillingvan.canvasgl.CanvasGL
 import com.chillingvan.canvasgl.ICanvasGL
+import com.chillingvan.canvasgl.OpenGLUtil.createBitmapFromGLSurface
 import com.chillingvan.canvasgl.glcanvas.GLPaint
 import com.chillingvan.canvasgl.glview.GLView
 import cz.cvut.arfittingroom.ARFittingRoomApplication
@@ -36,7 +38,10 @@ import cz.cvut.arfittingroom.draw.path.DrawablePath
 import cz.cvut.arfittingroom.draw.service.LayerManager
 import cz.cvut.arfittingroom.utils.IconUtil.changeIconColor
 import mu.KotlinLogging
+import java.nio.IntBuffer
 import javax.inject.Inject
+import javax.microedition.khronos.egl.EGLConfig
+import javax.microedition.khronos.opengles.GL10
 import kotlin.math.abs
 import kotlin.math.atan2
 
@@ -54,7 +59,6 @@ class DrawView(context: Context, attrs: AttributeSet) : GLView(context, attrs) {
     private var curY = 0f
     private var startX = 0f
     private var startY = 0f
-    private var isSaving = false
     private var isStrokeWidthBarEnabled = false
 
     private var scaleFactor = 1.0f
@@ -77,6 +81,7 @@ class DrawView(context: Context, attrs: AttributeSet) : GLView(context, attrs) {
 
     private val editElementIcons: HashMap<EElementEditAction, Bitmap> = hashMapOf()
     private val editElementIconsBounds: HashMap<EElementEditAction, RectF> = hashMapOf()
+
 
     interface OnLayerInitializedListener {
         fun onLayerInitialized(numOfLayers: Int)
@@ -144,6 +149,12 @@ class DrawView(context: Context, attrs: AttributeSet) : GLView(context, attrs) {
                 layerInitializedListener?.onLayerInitialized(layerManager.getNumOfLayers())
             }
         }
+    }
+
+
+    override fun onSurfaceCreated(gl: GL10, config: EGLConfig) {
+        mCanvas = CanvasGL()
+        layerManager.prepareTextures(mCanvas)
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
@@ -414,15 +425,43 @@ class DrawView(context: Context, attrs: AttributeSet) : GLView(context, attrs) {
 
     fun getBitmap(): Bitmap {
         layerManager.deselectAllElements()
+        // val boo =  getDrawingCache()
 
-        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(bitmap)
-        isSaving = true
-        draw(canvas)
-        isSaving = false
+//        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+//        val canvas = Canvas(bitmap)
+        //  draw(canvas)
+        //   val boo = createBitmapFromGLSurface(0, 0, width, height, height)
+        // val boo = savePixels(0, 0, width, height)
 
-        return bitmap
+
+        val boo = createBitmapFromGLSurface(0, 0, width, height, height)
+        return createBitmapFromGLSurface(0, 0, width, height, height)
     }
+
+    fun savePixels(x: Int, y: Int, w: Int, h: Int): Bitmap {
+        val b = IntArray(w * (y + h))
+        val bt = IntArray(w * h)
+        val ib = IntBuffer.wrap(b)
+        ib.position(0)
+        GLES20.glReadPixels(0, 0, w, h, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, ib)
+        var i = 0
+        var k = 0
+        while (i < h) {
+            //remember, that OpenGL bitmap is incompatible with Android bitmap
+            //and so, some correction need.
+            for (j in 0 until w) {
+                val pix = b[i * w + j]
+                val pb = pix shr 16 and 0xff
+                val pr = pix shl 16 and 0x00ff0000
+                val pix1 = pix and -0xff0100 or pr or pb
+                bt[(h - k - 1) * w + j] = pix1
+            }
+            i++
+            k++
+        }
+        return Bitmap.createBitmap(bt, w, h, Bitmap.Config.ARGB_8888)
+    }
+
 
     fun setOnLayerInitializedListener(listener: OnLayerInitializedListener) {
         this.layerInitializedListener = listener
@@ -469,8 +508,8 @@ class DrawView(context: Context, attrs: AttributeSet) : GLView(context, attrs) {
         val curve = Curve(layerManager.getCurPath(), GLPaint().apply {
             color = paintOptions.color
             lineWidth = paintOptions.strokeWidth
-           // alpha = paintOptions.alpha
-           // strokeCap = Paint.Cap.ROUND
+            // alpha = paintOptions.alpha
+            // strokeCap = Paint.Cap.ROUND
             style = Paint.Style.STROKE
         })
 

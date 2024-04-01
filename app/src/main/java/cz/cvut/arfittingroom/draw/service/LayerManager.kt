@@ -2,6 +2,7 @@ package cz.cvut.arfittingroom.draw.service
 
 import android.graphics.Canvas
 import com.chillingvan.canvasgl.ICanvasGL
+import com.chillingvan.canvasgl.glcanvas.GLCanvas
 import cz.cvut.arfittingroom.draw.Layer
 import cz.cvut.arfittingroom.draw.model.PaintOptions
 import cz.cvut.arfittingroom.draw.model.element.Element
@@ -136,5 +137,9 @@ class LayerManager {
 
     fun deselectAllElements() {
         layers[activeLayerIndex].deselectAllElements()
+    }
+
+    fun prepareTextures(glCanvas: ICanvasGL) {
+        layers.forEach { it.texture.prepare(glCanvas.glCanvas) }
     }
 }

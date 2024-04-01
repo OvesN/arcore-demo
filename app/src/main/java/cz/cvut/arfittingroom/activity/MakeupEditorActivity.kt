@@ -53,7 +53,6 @@ class MakeupEditorActivity : AppCompatActivity() {
         binding.buttonBack.setOnClickListener {
             adjustAndSaveBitmap()
             drawView.layerManager.deselectAllElements()
-
             val intent = Intent(this, MakeupActivity::class.java)
             startActivity(intent)
         }

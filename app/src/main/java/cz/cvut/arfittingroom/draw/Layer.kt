@@ -9,6 +9,7 @@ import com.chillingvan.canvasgl.ICanvasGL
 import com.chillingvan.canvasgl.glcanvas.GLCanvas
 import com.chillingvan.canvasgl.glcanvas.GLPaint
 import com.chillingvan.canvasgl.glcanvas.RawTexture
+import com.chillingvan.canvasgl.glview.texture.GLTexture
 import com.chillingvan.canvasgl.textureFilter.BasicTextureFilter
 import cz.cvut.arfittingroom.draw.model.PaintOptions
 import cz.cvut.arfittingroom.draw.model.element.Element
@@ -34,7 +35,7 @@ class Layer(private val width: Int, private val height: Int) {
     private val curPaint = GLPaint()
     private var opacity: Float = 1.0f // Range from 0.0 (fully transparent) to 1.0 (fully opaque)
 
-    private var texture: RawTexture = RawTexture(width, height, false)
+    var texture: RawTexture = RawTexture(width, height, false)
 
 
     init {
@@ -42,9 +43,11 @@ class Layer(private val width: Int, private val height: Int) {
             //strokeCap = Paint.Cap.ROUND
             style = Paint.Style.STROKE
         }
+
     }
 
     fun draw(canvas: ICanvasGL) {
+
         drawTexture(canvas)
         // Draw the bitmap for layer
         if (isVisible) {
@@ -80,11 +83,9 @@ class Layer(private val width: Int, private val height: Int) {
         elements[element.id] = element
         elementsToDraw.add(element)
 
-
     }
 
     private fun drawTexture(glCanvas: ICanvasGL) {
-
         glCanvas.beginRenderTarget(texture)
 
         glCanvas.clearBuffer(Color.TRANSPARENT)
@@ -120,4 +121,10 @@ class Layer(private val width: Int, private val height: Int) {
         elements.forEach { it.value.isSelected = false }
     }
 
+
+    fun prepareTexture(glCanvas: ICanvasGL) {
+        if (texture.id == -1 || !texture.isLoaded) {
+            texture.prepare(glCanvas.glCanvas)
+        }
+    }
 }
