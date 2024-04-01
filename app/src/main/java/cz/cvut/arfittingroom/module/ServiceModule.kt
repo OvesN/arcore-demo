@@ -1,6 +1,6 @@
 package cz.cvut.arfittingroom.module
 
-import cz.cvut.arfittingroom.service.MakeupEditorService
+import cz.cvut.arfittingroom.draw.service.LayerManager
 import cz.cvut.arfittingroom.service.MakeupService
 import cz.cvut.arfittingroom.service.ModelEditorService
 import dagger.Module
@@ -19,5 +19,5 @@ class ServiceModule {
 
     @Provides
     @Singleton
-    fun provideMakeupEditorService() = MakeupEditorService()
+    fun provideLayerManager() = LayerManager()
 }

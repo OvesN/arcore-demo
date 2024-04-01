@@ -1,13 +1,15 @@
-package cz.cvut.arfittingroom.draw
+package cz.cvut.arfittingroom.draw.path
 
 import android.graphics.Path
-import cz.cvut.arfittingroom.draw.shape.Line
-import cz.cvut.arfittingroom.draw.shape.Quad
+import cz.cvut.arfittingroom.draw.path.impl.Line
+import cz.cvut.arfittingroom.draw.path.impl.Move
+import cz.cvut.arfittingroom.draw.path.impl.Quad
 import java.io.ObjectInputStream
 import java.io.Serializable
 import java.util.LinkedList
 
-class MyPath : Path(), Serializable {
+class DrawablePath : Path(), Serializable {
+
     private val actions = LinkedList<Action>()
     private fun readObject(inputStream: ObjectInputStream) {
         inputStream.defaultReadObject()
@@ -16,6 +18,7 @@ class MyPath : Path(), Serializable {
         copiedActions.forEach {
             it.perform(this)
         }
+
     }
 
     override fun reset() {
