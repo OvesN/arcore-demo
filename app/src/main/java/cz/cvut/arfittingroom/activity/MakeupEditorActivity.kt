@@ -51,11 +51,11 @@ class MakeupEditorActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         binding.buttonBack.setOnClickListener {
-            adjustAndSaveBitmap()
-            drawView.layerManager.deselectAllElements()
-
-            val intent = Intent(this, MakeupActivity::class.java)
-            startActivity(intent)
+            drawView.saveBitmap {
+                // This code will be executed after the bitmap is saved
+                val intent = Intent(this, MakeupActivity::class.java)
+                startActivity(intent)
+            }
         }
         binding.buttonColorPicker.setOnClickListener {
             showColorPickerDialog()
@@ -174,41 +174,5 @@ class MakeupEditorActivity : AppCompatActivity() {
             .show()
     }
 
-    private fun adjustAndSaveBitmap() {
-        val bitmap = adjustBitmap()
-        Bitmap.createScaledBitmap(bitmap, 1024, 1024, true)
-        makeUpService.makeUpState.textureBitmap = bitmap
-    }
-
-    private fun adjustBitmap(): Bitmap {
-        // Calculate the dimensions for the square crop
-        val width = imageView.width
-        val height = imageView.height
-        val newY = (height - width) / 2
-
-        // Crop the bitmap
-        val croppedBitmap = Bitmap.createBitmap(drawView.getBitmap(), 0, newY, width, width)
-
-        // Create a matrix for the mirroring transformation
-        val matrix = Matrix().apply {
-            postScale(
-                -1f,
-                1f,
-                croppedBitmap.width / 2f,
-                croppedBitmap.height / 2f
-            )
-        }
-
-        // Create and return the mirrored bitmap
-        return Bitmap.createBitmap(
-            croppedBitmap,
-            0,
-            0,
-            croppedBitmap.width,
-            croppedBitmap.height,
-            matrix,
-            true
-        )
-    }
 
 }

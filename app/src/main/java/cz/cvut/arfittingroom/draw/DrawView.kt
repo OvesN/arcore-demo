@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.Matrix
 import android.graphics.Paint
 import android.graphics.RectF
 import android.util.AttributeSet
@@ -34,6 +35,7 @@ import cz.cvut.arfittingroom.draw.model.enums.EElementEditAction
 import cz.cvut.arfittingroom.draw.model.enums.EShape
 import cz.cvut.arfittingroom.draw.path.DrawablePath
 import cz.cvut.arfittingroom.draw.service.LayerManager
+import cz.cvut.arfittingroom.utils.FileSavingUtil.saveTempMaskTextureBitmap
 import cz.cvut.arfittingroom.utils.IconUtil.changeIconColor
 import mu.KotlinLogging
 import javax.inject.Inject
@@ -54,7 +56,6 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private var curY = 0f
     private var startX = 0f
     private var startY = 0f
-    private var isSaving = false
     private var isStrokeWidthBarEnabled = false
 
     private var scaleFactor = 1.0f
@@ -417,9 +418,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
         val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
-        isSaving = true
         draw(canvas)
-        isSaving = false
 
         return bitmap
     }
@@ -669,14 +668,51 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         scaleFactor = 1f
     }
 
+    fun saveBitmap(onSaved: () -> Unit) {
+        layerManager.deselectAllElements()
+            saveTempMaskTextureBitmap(adjustBitmap(createBitmap()), context) {
+                onSaved()
+            }
+    }
 
-//    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
-//        super.onSizeChanged(w, h, oldw, oldh)
-//
-//        //Initialize first layer
-//        if (layerManager.getNumOfLayers() == 0) {
-//            layerManager.addLayer(w, h)
-//        }
-//    }
+    private fun createBitmap(): Bitmap {
+        layerManager.deselectAllElements()
 
+        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        draw(canvas)
+
+        return bitmap
+    }
+
+    private fun adjustBitmap(bitmap: Bitmap): Bitmap {
+        // Calculate the dimensions for the square crop
+        val newY = (height - width) / 2
+
+        // Crop the bitmap
+        val croppedBitmap = Bitmap.createBitmap(bitmap, 0, newY, width, width)
+
+        // Create a matrix for the mirroring transformation
+        val matrix = Matrix().apply {
+            postScale(
+                -1f,
+                1f,
+                croppedBitmap.width / 2f,
+                croppedBitmap.height / 2f
+            )
+        }
+
+        // Create and return the mirrored bitmap
+        val mirroredBitmap = Bitmap.createBitmap(
+            croppedBitmap,
+            0,
+            0,
+            croppedBitmap.width,
+            croppedBitmap.height,
+            matrix,
+            true
+        )
+
+        return Bitmap.createScaledBitmap(mirroredBitmap, 1024, 1024, true)
+    }
 }

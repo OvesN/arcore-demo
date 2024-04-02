@@ -27,6 +27,7 @@ import cz.cvut.arfittingroom.model.enums.EMakeupType
 import cz.cvut.arfittingroom.model.enums.EModelType
 import cz.cvut.arfittingroom.service.MakeupService
 import cz.cvut.arfittingroom.service.ModelEditorService
+import cz.cvut.arfittingroom.utils.FileSavingUtil.getTempMaskTextureBitmap
 import cz.cvut.arfittingroom.utils.TextureCombinerUtil.combineDrawables
 import mu.KotlinLogging
 import javax.inject.Inject
@@ -47,6 +48,14 @@ class MakeupActivity : AppCompatActivity() {
 
     @Inject
     lateinit var editorService: ModelEditorService
+
+    override fun onResume() {
+        super.onResume()
+
+        val bitmap = getTempMaskTextureBitmap(applicationContext)
+        bitmap?.let {  createTextureAndApply(it) }
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
