@@ -1,2 +1,4 @@
 rootProject.name='ARSnapchat'
 include ':app'
+include ':canvasglsample'
+include ':canvasgl'

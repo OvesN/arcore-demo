@@ -39,12 +39,14 @@ import cz.cvut.arfittingroom.draw.path.DrawablePath
 import cz.cvut.arfittingroom.draw.service.LayerManager
 import cz.cvut.arfittingroom.utils.FileSavingUtil.saveTempMaskTextureBitmap
 import cz.cvut.arfittingroom.utils.IconUtil.changeIconColor
+import cz.cvut.arfittingroom.utils.drawPath
 import mu.KotlinLogging
 import javax.inject.Inject
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 import kotlin.math.abs
 import kotlin.math.atan2
+import kotlin.time.measureTimedValue
 
 
 private val logger = KotlinLogging.logger { }
@@ -156,6 +158,9 @@ class DrawView(context: Context, attrs: AttributeSet) : GLView(context, attrs) {
     override fun onSurfaceCreated(gl: GL10, config: EGLConfig) {
         mCanvas = CanvasGL()
         layerManager.prepareTextures(mCanvas)
+
+        mCanvas.drawLine(0f, 0f, 1000f, 1000f, GLPaint().apply { color = Color.BLACK })
+        mCanvas.drawCircle(200f, 200f, 500f, GLPaint().apply { color = Color.BLACK})
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {

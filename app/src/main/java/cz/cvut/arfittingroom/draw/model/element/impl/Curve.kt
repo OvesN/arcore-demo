@@ -14,6 +14,7 @@ import cz.cvut.arfittingroom.utils.drawPath
 import kotlin.math.max
 
 private const val PROXIMITY_THRESHOLD = 40f // pixels
+
 class Curve(
     private var path: DrawablePath,
     private var paint: GLPaint
@@ -58,6 +59,7 @@ class Curve(
 
         val transformedPath = DrawablePath()
         path.transform(matrix, transformedPath)
+        val boo = transformedPath.calculateBuffer(40f)
         canvas.drawPath(transformedPath, paint)
     }
 
@@ -120,4 +122,7 @@ class Curve(
 
         return false
     }
+
+
+
 }
