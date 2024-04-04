@@ -162,6 +162,10 @@ class LayerManager {
         val element = layers[activeLayerIndex].findFirstIntersectedElement(x, y)
         element?.isSelected = true
 
+        element?.let {
+            setSelectedElement(it)
+        }
+
         return element
     }
 
@@ -217,7 +221,7 @@ class LayerManager {
      * Initiates the process of separating the elements that
      * should be drawn below and above the [element] into two distinct bitmaps on the active layer
      */
-    fun startElementContinuousChanging(element: Element) {
+    private fun setSelectedElement(element: Element) {
         val activeLayer = layers[activeLayerIndex]
         activeLayer.prepareBitmaps(element)
     }
@@ -258,8 +262,10 @@ class LayerManager {
         val bitmap = Bitmap.createBitmap(viewWidth, viewHeight, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
 
-        layers.forEach {
-            canvas.drawBitmap(it.createBitmap(), 0f, 0f, it.opacityPaint)
+        layers.forEach { layer ->
+            val layerBitmap = layer.createBitmap()
+
+            layerBitmap?.let { canvas.drawBitmap(layerBitmap, 0f, 0f, layer.opacityPaint) }
         }
 
         return bitmap

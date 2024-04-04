@@ -75,16 +75,22 @@ class Layer(
                 iterator.remove()
             }
         }
+
+        selectedElement?.let {
+            if (it.id == elementId) {
+                it.isSelected = false
+                selectedElement = null
+            }
+        }
+
+        prepareBitmap()
     }
-
-    //Returns -1 if no selected element is present on the layer
-    private fun getIndexOfSelectedElement(): Int =
-        elementsToDraw.indexOfFirst { it.isSelected }
-
 
     fun addElement(element: Element) {
         elements[element.id] = element
         elementsToDraw.add(element)
+
+        prepareBitmap()
     }
 
     private fun changePaint(paintOptions: PaintOptions) {
@@ -131,7 +137,7 @@ class Layer(
      *
      * @return bitmap with all elements from this layer
      */
-    fun createBitmap(): Bitmap = createBitmapFromElements(elementsToDraw)
+    fun createBitmap(): Bitmap? = createBitmapFromElements(elementsToDraw)
 
     /**
      * Prepare bitmaps
@@ -145,6 +151,10 @@ class Layer(
             return
         }
 
+        resetBitmaps()
+
+        this.selectedElement?.isSelected = false
+        this.selectedElement = selectedElement
         val selectedElementIndex = elementsToDraw.indexOf(selectedElement)
 
         elementsBelowSelectedElementBitmap =
@@ -164,7 +174,10 @@ class Layer(
         elementsBelowSelectedElementBitmap = createBitmapFromElements(elementsToDraw)
     }
 
-    private fun createBitmapFromElements(elements: List<Element>): Bitmap {
+    private fun createBitmapFromElements(elements: List<Element>): Bitmap? {
+        if (elements.isEmpty()) {
+            return null
+        }
         val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
 
@@ -173,6 +186,10 @@ class Layer(
         }
 
         return bitmap
+    }
+
+    private fun addToBitmap(element: Element) {
+
     }
 
     fun setOpacity(opacity: Float) {

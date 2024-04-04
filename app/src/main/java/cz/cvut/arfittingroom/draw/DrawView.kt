@@ -927,5 +927,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                 newColor = newColor
             )
         )
+
+        invalidate()
     }
 }
