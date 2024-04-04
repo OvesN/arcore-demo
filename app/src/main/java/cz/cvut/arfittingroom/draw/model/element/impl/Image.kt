@@ -13,14 +13,15 @@ class Image(
     override var centerX: Float,
     override var centerY: Float,
     override var outerRadius: Float,
-    val resourceId: Int,
-    private val bitmap: Bitmap,
+    val resourceId: Int
 ) : Element() {
 
     override var boundingBox: BoundingBox = createBoundingBox()
     override var originalRadius: Float = outerRadius
     override var originalCenterX: Float = centerX
     override var originalCenterY: Float = centerY
+
+    lateinit var bitmap: Bitmap
 
     override fun drawSpecific(canvas: Canvas) {
         canvas.drawBitmap(bitmap, createTransformationMatrix(), null)

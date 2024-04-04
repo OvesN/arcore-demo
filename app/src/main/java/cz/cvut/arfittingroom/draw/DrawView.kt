@@ -557,8 +557,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                 height.toFloat() / 2,
                 width.toFloat() / 2,
                 imageId,
-                imageBitmap
-            )
+            ).apply { bitmap = imageBitmap }
         )
 
         invalidate()

@@ -19,7 +19,7 @@ import com.google.ar.sceneform.rendering.Texture
 import com.google.ar.sceneform.ux.AugmentedFaceNode
 import cz.cvut.arfittingroom.ARFittingRoomApplication
 import cz.cvut.arfittingroom.R
-import cz.cvut.arfittingroom.databinding.ActivityMakeupBinding
+import cz.cvut.arfittingroom.databinding.ActivityShowRoomBinding
 import cz.cvut.arfittingroom.fragment.FaceArFragment
 import cz.cvut.arfittingroom.model.ModelInfo
 import cz.cvut.arfittingroom.model.enums.EAccessoryType
@@ -32,13 +32,13 @@ import cz.cvut.arfittingroom.utils.TextureCombinerUtil.combineDrawables
 import mu.KotlinLogging
 import javax.inject.Inject
 
-class MakeupActivity : AppCompatActivity() {
+class ShowRoomActivity : AppCompatActivity() {
     companion object {
         const val MIN_OPENGL_VERSION = 3.0
         private val logger = KotlinLogging.logger { }
     }
 
-    private lateinit var binding: ActivityMakeupBinding
+    private lateinit var binding: ActivityShowRoomBinding
     private lateinit var arFragment: FaceArFragment
     private var faceNodeMap = HashMap<AugmentedFace, HashMap<EModelType, AugmentedFaceNode>>()
     private var isUpdated = false
@@ -66,7 +66,7 @@ class MakeupActivity : AppCompatActivity() {
         }
 
         // Inflate the layout for this activity
-        binding = ActivityMakeupBinding.inflate(layoutInflater)
+        binding = ActivityShowRoomBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         // Use the FragmentManager to find the AR Fragment by ID

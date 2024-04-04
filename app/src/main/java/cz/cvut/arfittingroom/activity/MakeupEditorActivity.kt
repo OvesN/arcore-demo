@@ -3,9 +3,7 @@ package cz.cvut.arfittingroom.activity
 import android.R.string.ok
 import android.R.string.cancel
 import android.content.Intent
-import android.graphics.Bitmap
 import android.graphics.Color
-import android.graphics.Matrix
 import android.os.Bundle
 import android.widget.Button
 import android.widget.ImageView
@@ -53,7 +51,7 @@ class MakeupEditorActivity : AppCompatActivity() {
         binding.buttonBack.setOnClickListener {
             drawView.saveBitmap {
                 // This code will be executed after the bitmap is saved
-                val intent = Intent(this, MakeupActivity::class.java)
+                val intent = Intent(this, ShowRoomActivity::class.java)
                 startActivity(intent)
             }
         }
@@ -173,6 +171,5 @@ class MakeupEditorActivity : AppCompatActivity() {
             .setBottomSpace(12)
             .show()
     }
-
 
 }

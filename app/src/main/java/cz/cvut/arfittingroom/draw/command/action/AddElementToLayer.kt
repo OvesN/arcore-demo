@@ -1,5 +1,6 @@
 package cz.cvut.arfittingroom.draw.command.action
 
+import android.os.Parcelable
 import cz.cvut.arfittingroom.draw.command.Command
 import cz.cvut.arfittingroom.draw.model.element.Element
 import cz.cvut.arfittingroom.draw.service.LayerManager

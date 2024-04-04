@@ -18,7 +18,7 @@ class MainActivity : AppCompatActivity() {
 
         binding.buttonMakeup.setOnClickListener {
             logger.info { "Makeup button clicked" }
-            startActivity(Intent(this, MakeupActivity::class.java))
+            startActivity(Intent(this, ShowRoomActivity::class.java))
         }
 
     }

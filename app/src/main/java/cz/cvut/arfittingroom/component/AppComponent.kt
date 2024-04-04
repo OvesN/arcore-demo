@@ -1,6 +1,6 @@
 package cz.cvut.arfittingroom.component
 
-import cz.cvut.arfittingroom.activity.MakeupActivity
+import cz.cvut.arfittingroom.activity.ShowRoomActivity
 import cz.cvut.arfittingroom.activity.MakeupEditorActivity
 import cz.cvut.arfittingroom.activity.ModelEditorActivity
 import cz.cvut.arfittingroom.draw.DrawView
@@ -12,7 +12,7 @@ import javax.inject.Singleton
 @Component(modules = [ServiceModule::class])
 interface AppComponent {
     fun inject(activity: ModelEditorActivity)
-    fun inject(activity: MakeupActivity)
+    fun inject(activity: ShowRoomActivity)
     fun inject(activity: MakeupEditorActivity)
     fun inject(drawView: DrawView)
 }
