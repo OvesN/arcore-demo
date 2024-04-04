@@ -5,6 +5,7 @@ enum class EElementEditAction {
     SCALE,
     ROTATE,
     MENU,
+    CHANGE_COLOR,
     MOVE_UP,
     MOVE_DOWN,
     MOVE_TO,

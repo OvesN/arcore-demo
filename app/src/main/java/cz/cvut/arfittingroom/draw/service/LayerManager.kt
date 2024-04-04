@@ -2,6 +2,7 @@ package cz.cvut.arfittingroom.draw.service
 
 import android.graphics.Canvas
 import cz.cvut.arfittingroom.draw.Layer
+import cz.cvut.arfittingroom.draw.command.action.MoveElementBetweenLayers
 import cz.cvut.arfittingroom.draw.model.PaintOptions
 import cz.cvut.arfittingroom.draw.model.element.Element
 import cz.cvut.arfittingroom.draw.path.DrawablePath
@@ -136,4 +137,46 @@ class LayerManager {
     fun deselectAllElements() {
         layers[activeLayerIndex].deselectAllElements()
     }
+
+    fun moveElementUp(element: Element): MoveElementBetweenLayers<Element>? {
+        //If element is on already top layer do nothing
+        return if (activeLayerIndex == layers.size - 1) {
+            null
+        } else {
+            MoveElementBetweenLayers(
+                element,
+                oldLayerId = getActiveLayerId(),
+                newLayerId = layers[activeLayerIndex + 1].id,
+                this
+            )
+        }
+    }
+
+    fun moveElementDown(element: Element): MoveElementBetweenLayers<Element>? {
+        //If element is on already bottom layer do nothing
+        return if (activeLayerIndex == 0) {
+            null
+        } else {
+            MoveElementBetweenLayers(
+                element,
+                oldLayerId = getActiveLayerId(),
+                newLayerId =  layers[activeLayerIndex - 1].id,
+                this
+            )
+        }
+    }
+
+    fun moveElementTo(element: Element, layerIndex: Int): MoveElementBetweenLayers<Element>? {
+        return if (layerIndex == activeLayerIndex) {
+            null
+        } else {
+            MoveElementBetweenLayers(
+                element,
+                oldLayerId = getActiveLayerId(),
+                newLayerId = layers[layerIndex].id,
+                this
+            )
+        }
+    }
+
 }

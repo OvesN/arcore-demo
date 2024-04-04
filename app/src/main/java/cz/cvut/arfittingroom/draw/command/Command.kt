@@ -8,5 +8,5 @@ import java.util.UUID
 interface Command<T> where T : Element {
     val element: T
     fun execute()
-    fun revert() {}
+    fun revert()
 }

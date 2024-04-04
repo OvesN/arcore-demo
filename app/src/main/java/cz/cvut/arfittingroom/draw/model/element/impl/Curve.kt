@@ -10,7 +10,7 @@ import cz.cvut.arfittingroom.draw.model.element.Element
 import cz.cvut.arfittingroom.draw.path.DrawablePath
 import kotlin.math.max
 
-private const val PROXIMITY_THRESHOLD = 40f // pixels
+private const val PROXIMITY_THRESHOLD = 50f // pixels
 class Curve(
     private var path: DrawablePath,
     private var paint: Paint

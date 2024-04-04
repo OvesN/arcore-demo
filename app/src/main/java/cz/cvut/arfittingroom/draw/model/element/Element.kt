@@ -42,8 +42,8 @@ abstract class Element : Scalable, Drawable, Movable, Rotatable {
     override fun move(x: Float, y: Float) {
         centerX = x
         centerY = y
-        originalCenterX = centerX
-        originalCenterY = centerY
+//        originalCenterX = centerX
+//        originalCenterY = centerY
     }
 
     // End of the move gesture by the user

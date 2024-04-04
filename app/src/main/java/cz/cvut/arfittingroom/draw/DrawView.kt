@@ -9,6 +9,7 @@ import android.graphics.Matrix
 import android.graphics.Paint
 import android.graphics.RectF
 import android.util.AttributeSet
+import android.util.DisplayMetrics
 import android.view.MotionEvent
 import android.view.ScaleGestureDetector
 import android.view.View
@@ -18,7 +19,6 @@ import cz.cvut.arfittingroom.ARFittingRoomApplication
 import cz.cvut.arfittingroom.R
 import cz.cvut.arfittingroom.draw.DrawHistoryHolder.addToHistory
 import cz.cvut.arfittingroom.draw.DrawHistoryHolder.clearHistory
-import cz.cvut.arfittingroom.draw.command.Scalable
 import cz.cvut.arfittingroom.draw.command.action.AddElementToLayer
 import cz.cvut.arfittingroom.draw.command.action.MoveElement
 import cz.cvut.arfittingroom.draw.command.action.RemoveElementFromLayer
@@ -35,6 +35,7 @@ import cz.cvut.arfittingroom.draw.model.enums.EElementEditAction
 import cz.cvut.arfittingroom.draw.model.enums.EShape
 import cz.cvut.arfittingroom.draw.path.DrawablePath
 import cz.cvut.arfittingroom.draw.service.LayerManager
+import cz.cvut.arfittingroom.model.Coordinates
 import cz.cvut.arfittingroom.utils.FileSavingUtil.saveTempMaskTextureBitmap
 import cz.cvut.arfittingroom.utils.IconUtil.changeIconColor
 import mu.KotlinLogging
@@ -46,6 +47,7 @@ import kotlin.math.atan2
 private val logger = KotlinLogging.logger { }
 
 private const val SPAN_SLOP = 7
+
 
 class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     @Inject
@@ -69,6 +71,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private var isInElementMovingMode: Boolean = false
     private var isInElementRotationMode: Boolean = false
     private var isInElementScalingMode: Boolean = false
+    private var isInElementMenuMode: Boolean = false
 
     var selectedElement: Element? = null
 
@@ -78,6 +81,23 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     private val editElementIcons: HashMap<EElementEditAction, Bitmap> = hashMapOf()
     private val editElementIconsBounds: HashMap<EElementEditAction, RectF> = hashMapOf()
+    private val menuBitmap: Bitmap
+
+
+    //TODO MOVE MENU CONST
+    private lateinit var displayMetrics: DisplayMetrics
+    private var screenWidth = 0f
+    private var screenHeight = 0f
+
+    private var menuWidth = 0f
+    private var menuHeight = 0f
+    private var cornerRadius = 0f
+    private var textSize = 0f
+    private var textPadding = 0f
+    private var lineSpacing = 0f
+    private var menuItemSpacing = 0f
+
+    //-----------------------------------
 
     interface OnLayerInitializedListener {
         fun onLayerInitialized(numOfLayers: Int)
@@ -91,6 +111,8 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
         // Prepare icons
         loadEditElementIcons()
+
+        menuBitmap = prepareElementMenu()
 
         // Add event for element scaling
         scaleGestureDetector = ScaleGestureDetector(
@@ -222,7 +244,6 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                     else if (event.pointerCount - 1 == 0) {
                         ignoreNextOneFingerMove = false
                     }
-
                 }
 
                 MotionEvent.ACTION_DOWN -> {
@@ -238,6 +259,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                     }
 
                     selectedElement = layerManager.selectElement(x, y)
+                    isInElementMenuMode = false
                 }
 
                 MotionEvent.ACTION_MOVE -> {
@@ -306,21 +328,14 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         return scaleFactor
     }
 
-
     private fun handleIconAction(action: EElementEditAction, element: Element) {
         when (action) {
             EElementEditAction.MENU -> {
-                // Handle menu action
+                isInElementMenuMode = !isInElementMenuMode
             }
 
             EElementEditAction.SCALE -> {
                 isInElementScalingMode = true
-            }
-
-            EElementEditAction.MOVE_TO,
-            EElementEditAction.MOVE_DOWN,
-            EElementEditAction.MOVE_UP -> {
-                // Handle move actions, if required
             }
 
             EElementEditAction.ROTATE -> {
@@ -337,11 +352,33 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                 )
                 selectedElement = null
             }
+
+            EElementEditAction.CHANGE_COLOR -> {
+
+            }
+
+            EElementEditAction.MOVE_UP -> {
+                val command = layerManager.moveElementUp(
+                    element,
+                )
+                command?.let { addToHistory(command) }
+            }
+
+            EElementEditAction.MOVE_DOWN -> {
+                val command = layerManager.moveElementDown(
+                    element,
+                )
+                command?.let { addToHistory(command) }
+            }
+            //FIXME do not work, history do not work
+            EElementEditAction.MOVE_TO -> {
+                //TODO open menu with layers
+                val command = layerManager.moveElementTo(element, 1)
+                command?.let { addToHistory(command) }
+            }
         }
     }
 
-
-    // Check if edit button was pressed, if not, return null
     private fun checkEditButtons(x: Float, y: Float): EElementEditAction? =
         editElementIconsBounds.entries.firstOrNull { it.value.contains(x, y) }?.key
 
@@ -585,6 +622,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         return inSampleSize
     }
 
+    //TODO move rectF creation
     private fun drawSelectedElementEditIcons(canvas: Canvas) {
         selectedElement?.let { element ->
 
@@ -632,7 +670,47 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                 editElementIconsBounds[EElementEditAction.DELETE] =
                     RectF(x, y, x + icon.width, y + icon.height)
             }
+
+            if (isInElementMenuMode) {
+                canvas.drawBitmap(
+                    menuBitmap,
+                    boundingBox.topRightCornerCoor.x - menuBitmap.width,
+                    boundingBox.topRightCornerCoor.y, null
+                )
+
+                // Add menu elements for bounding checking
+                val menuItemHeight = textSize + menuItemSpacing
+
+                val menuY = boundingBox.topRightCornerCoor.y
+                val menuX = boundingBox.topRightCornerCoor.x - menuBitmap.width
+
+                // Starting Y position of the first menu item
+                var itemY = menuY + textPadding
+
+                editElementIconsBounds[EElementEditAction.MOVE_UP] =
+                    RectF(menuX, itemY, menuX + menuWidth, itemY + menuItemHeight)
+                itemY += menuItemHeight
+
+                editElementIconsBounds[EElementEditAction.MOVE_DOWN] =
+                    RectF(menuX, itemY, menuX + menuWidth, itemY + menuItemHeight)
+                itemY += menuItemHeight
+
+                editElementIconsBounds[EElementEditAction.MOVE_TO] =
+                    RectF(menuX, itemY, menuX + menuWidth, itemY + menuItemHeight)
+                itemY += menuItemHeight
+
+                editElementIconsBounds[EElementEditAction.CHANGE_COLOR] =
+                    RectF(menuX, itemY, menuX + menuWidth, itemY + menuItemHeight)
+
+
+            } else {
+                editElementIconsBounds.remove(EElementEditAction.MOVE_UP)
+                editElementIconsBounds.remove(EElementEditAction.MOVE_DOWN)
+                editElementIconsBounds.remove(EElementEditAction.MOVE_TO)
+                editElementIconsBounds.remove(EElementEditAction.CHANGE_COLOR)
+            }
         }
+
     }
 
     private fun loadEditElementIcons() {
@@ -658,6 +736,84 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             )
     }
 
+    //TODO to constants or config why???
+    private fun prepareElementMenu(): Bitmap {
+        val displayMetrics = resources.displayMetrics
+        val screenWidth = displayMetrics.widthPixels.toFloat()
+        val screenHeight = displayMetrics.heightPixels.toFloat()
+
+        val menuWidth = screenWidth * 0.3f
+        val menuHeight = screenHeight * 0.125f
+        val cornerRadius = screenWidth * 0.02f
+        val textSize = screenHeight * 0.02f
+        val textPadding = screenWidth * 0.025f
+        val lineSpacing = screenHeight * 0.005f
+        val menuItemSpacing = screenHeight * 0.025f
+
+        //WHY??
+        this.displayMetrics = displayMetrics
+        this.screenWidth = screenWidth
+        this.screenHeight = screenHeight
+
+        this.menuWidth = menuWidth
+        this.menuHeight = menuHeight
+        this.cornerRadius = cornerRadius
+        this.textSize = textSize
+        this.textPadding = textPadding
+        this.lineSpacing = lineSpacing
+        this.menuItemSpacing = menuItemSpacing
+
+        val menuPaint = Paint().apply {
+            color = Color.DKGRAY
+            alpha = (255 * 0.9).toInt()
+        }
+
+        val textPaint = Paint().apply {
+            color = Color.WHITE
+            this.textSize = textSize
+            textAlign = Paint.Align.LEFT
+        }
+
+        val linePaint = Paint().apply {
+            color = Color.LTGRAY
+            strokeWidth = 2f
+        }
+
+        val menuX = 0f
+        val menuY = 0f
+
+        // Draw the background of the menu
+        val rect = RectF(menuX, menuY, menuX + menuWidth, menuY + menuHeight)
+        val bitmap =
+            Bitmap.createBitmap(menuWidth.toInt(), menuHeight.toInt(), Bitmap.Config.ARGB_8888)
+
+        val canvas = Canvas(bitmap)
+        canvas.drawRoundRect(rect, cornerRadius, cornerRadius, menuPaint)
+
+        // Draw menu items
+        val menuItems = listOf("Move up", "Move down", "Move to", "Change color")
+        var textY = menuY + textPadding + textSize
+        for ((index, item) in menuItems.withIndex()) {
+            // Draw text
+            canvas.drawText(item, menuX + textPadding, textY, textPaint)
+
+            // Draw line if not the last item
+            if (index < menuItems.size - 1) {
+                canvas.drawLine(
+                    menuX + textPadding,
+                    textY + lineSpacing,
+                    menuX + menuWidth - textPadding,
+                    textY + lineSpacing,
+                    linePaint
+                )
+            }
+            textY += menuItemSpacing
+        }
+
+        return bitmap
+    }
+
+
     private fun resetEditState() {
         isInElementRotationMode = false
         isInElementScalingMode = false
@@ -669,9 +825,9 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     fun saveBitmap(onSaved: () -> Unit) {
         layerManager.deselectAllElements()
-            saveTempMaskTextureBitmap(adjustBitmap(createBitmap()), context) {
-                onSaved()
-            }
+        saveTempMaskTextureBitmap(adjustBitmap(createBitmap()), context) {
+            onSaved()
+        }
     }
 
     private fun createBitmap(): Bitmap {
