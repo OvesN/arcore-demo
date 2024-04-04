@@ -180,7 +180,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         val y = event.y
 
         // Handle multi-touch events for scaling
-        //TODO HAndle deselecting while scaling
+        //TODO handle deselecting while scaling
         if (event.pointerCount == 2 && selectedElement != null) {
             scaleGestureDetector.onTouchEvent(event)
             return true
@@ -444,7 +444,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         return true
     }
 
-    fun setColor(newColor: Int) {
+    private fun setColor(newColor: Int) {
         @ColorInt
         paintOptions.color = newColor
         paintOptions.alpha = newColor.alpha

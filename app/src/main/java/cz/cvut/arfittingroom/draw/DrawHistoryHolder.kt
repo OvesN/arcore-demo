@@ -1,7 +1,6 @@
 package cz.cvut.arfittingroom.draw
 
 import cz.cvut.arfittingroom.draw.command.Command
-import cz.cvut.arfittingroom.draw.model.element.Element
 import java.util.LinkedList
 
 object DrawHistoryHolder {

@@ -65,7 +65,7 @@ class Image(
             )
 
             // Translate the bitmap to draw it at the specified center (centerX, centerY)
-            // We adjust the translation to ensure the bitmap's center aligns with the (centerX, centerY)
+            // We adjust the translation to ensure the bitmap center aligns with the (centerX, centerY)
             postTranslate(
                 centerX - bitmap.width / 2f * scaleFactor,
                 centerY - bitmap.height / 2f * scaleFactor

@@ -1,6 +1,5 @@
 package cz.cvut.arfittingroom.draw.command.action.element.impl
 
-import cz.cvut.arfittingroom.draw.command.Command
 import cz.cvut.arfittingroom.draw.command.action.element.ElementCommand
 import cz.cvut.arfittingroom.draw.model.element.Element
 import cz.cvut.arfittingroom.draw.service.LayerManager

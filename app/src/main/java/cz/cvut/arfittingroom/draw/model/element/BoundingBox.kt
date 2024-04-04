@@ -5,7 +5,6 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.RectF
 import cz.cvut.arfittingroom.draw.command.Drawable
-import cz.cvut.arfittingroom.draw.model.element.strategy.impl.RectanglePathCreationStrategy
 import cz.cvut.arfittingroom.draw.path.DrawablePath
 import cz.cvut.arfittingroom.model.Coordinates
 
@@ -26,7 +25,7 @@ class BoundingBox(
     var bottomRightCornerCoor = Coordinates(0f, 0f)
     var bottomLeftCornerCoor = Coordinates(0f, 0f)
 
-    var elementPath: DrawablePath = createPath()
+    private var elementPath: DrawablePath = createPath()
     var rectF: RectF = RectF()
 
     init {

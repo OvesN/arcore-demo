@@ -1,7 +1,5 @@
 package cz.cvut.arfittingroom.activity
 
-import android.R.string.ok
-import android.R.string.cancel
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
@@ -11,8 +9,6 @@ import android.widget.LinearLayout
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.slider.Slider
-import com.skydoves.colorpickerview.ColorPickerDialog
-import com.skydoves.colorpickerview.listeners.ColorEnvelopeListener
 import cz.cvut.arfittingroom.ARFittingRoomApplication
 import cz.cvut.arfittingroom.R
 import cz.cvut.arfittingroom.databinding.ActivityMakeupEditorBinding
@@ -106,7 +102,7 @@ class MakeupEditorActivity : AppCompatActivity() {
                 setOnClickListener { showLayerEditDialog(i, this) }
             }
 
-            if (i == drawView.layerManager.activeLayerIndex) {
+            if (i == drawView.layerManager.getActiveLayerIndex()) {
                 button.setBackgroundColor(SELECTED_COLOR)
             }
             else {

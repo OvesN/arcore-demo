@@ -1,7 +1,6 @@
 package cz.cvut.arfittingroom.draw.model.element
 
 import android.graphics.Canvas
-import android.graphics.RectF
 import cz.cvut.arfittingroom.draw.command.Drawable
 import cz.cvut.arfittingroom.draw.command.Movable
 import cz.cvut.arfittingroom.draw.command.Rotatable
