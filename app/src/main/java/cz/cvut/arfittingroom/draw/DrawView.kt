@@ -1,5 +1,7 @@
 package cz.cvut.arfittingroom.draw
 
+import android.R.string.ok
+import android.R.string.cancel
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -8,6 +10,7 @@ import android.graphics.Color
 import android.graphics.Matrix
 import android.graphics.Paint
 import android.graphics.RectF
+import android.provider.Settings.Global.getString
 import android.util.AttributeSet
 import android.util.DisplayMetrics
 import android.view.MotionEvent
@@ -15,17 +18,22 @@ import android.view.ScaleGestureDetector
 import android.view.View
 import androidx.annotation.ColorInt
 import androidx.core.graphics.alpha
+import com.skydoves.colorpickerview.ColorPickerDialog
+import com.skydoves.colorpickerview.listeners.ColorEnvelopeListener
 import cz.cvut.arfittingroom.ARFittingRoomApplication
 import cz.cvut.arfittingroom.R
 import cz.cvut.arfittingroom.draw.DrawHistoryHolder.addToHistory
 import cz.cvut.arfittingroom.draw.DrawHistoryHolder.clearHistory
+import cz.cvut.arfittingroom.draw.command.Repaintable
 import cz.cvut.arfittingroom.draw.command.action.AddElementToLayer
 import cz.cvut.arfittingroom.draw.command.action.MoveElement
 import cz.cvut.arfittingroom.draw.command.action.RemoveElementFromLayer
+import cz.cvut.arfittingroom.draw.command.action.RepaintElement
 import cz.cvut.arfittingroom.draw.command.action.RotateElement
 import cz.cvut.arfittingroom.draw.command.action.ScaleElement
 import cz.cvut.arfittingroom.draw.model.PaintOptions
 import cz.cvut.arfittingroom.draw.model.element.Element
+import cz.cvut.arfittingroom.draw.model.element.RepaintableElement
 import cz.cvut.arfittingroom.draw.model.element.impl.Figure
 import cz.cvut.arfittingroom.draw.model.element.impl.Curve
 import cz.cvut.arfittingroom.draw.model.element.impl.Image
@@ -102,6 +110,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     interface OnLayerInitializedListener {
         fun onLayerInitialized(numOfLayers: Int)
     }
+
 
     private var layerInitializedListener: OnLayerInitializedListener? = null
 
@@ -354,7 +363,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             }
 
             EElementEditAction.CHANGE_COLOR -> {
-
+                showColorPickerDialog(true)
             }
 
             EElementEditAction.MOVE_UP -> {
@@ -373,6 +382,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             //FIXME do not work, history do not work
             EElementEditAction.MOVE_TO -> {
                 //TODO open menu with layers
+                return
                 val command = layerManager.moveElementTo(element, 1)
                 command?.let { addToHistory(command) }
             }
@@ -678,30 +688,35 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                     boundingBox.topRightCornerCoor.y, null
                 )
 
-                // Add menu elements for bounding checking
-                val menuItemHeight = textSize + menuItemSpacing
+                // Initial menu item Y position
+                var itemY = boundingBox.topRightCornerCoor.y + textPadding
 
-                val menuY = boundingBox.topRightCornerCoor.y
                 val menuX = boundingBox.topRightCornerCoor.x - menuBitmap.width
 
-                // Starting Y position of the first menu item
-                var itemY = menuY + textPadding
 
+                // Defining RectF for each menu item
                 editElementIconsBounds[EElementEditAction.MOVE_UP] =
-                    RectF(menuX, itemY, menuX + menuWidth, itemY + menuItemHeight)
-                itemY += menuItemHeight
+                    RectF(menuX, itemY, menuX + menuWidth, itemY + textSize)
+
+                //canvas.drawRect(RectF(menuX, itemY, menuX + menuWidth, itemY + textSize), Paint().apply { color = Color.BLUE })
+                itemY += textSize + lineSpacing  // Increment Y position for the next item
 
                 editElementIconsBounds[EElementEditAction.MOVE_DOWN] =
-                    RectF(menuX, itemY, menuX + menuWidth, itemY + menuItemHeight)
-                itemY += menuItemHeight
+                    RectF(menuX, itemY, menuX + menuWidth, itemY + textSize)
+               // canvas.drawRect(RectF(menuX, itemY, menuX + menuWidth, itemY + textSize), Paint().apply { color = Color.BLACK })
+
+                itemY += textSize + lineSpacing
 
                 editElementIconsBounds[EElementEditAction.MOVE_TO] =
-                    RectF(menuX, itemY, menuX + menuWidth, itemY + menuItemHeight)
-                itemY += menuItemHeight
+                    RectF(menuX, itemY, menuX + menuWidth, itemY + textSize)
+
+                //canvas.drawRect(RectF(menuX, itemY, menuX + menuWidth, itemY + textSize), Paint().apply { color = Color.YELLOW })
+                itemY += textSize + lineSpacing
 
                 editElementIconsBounds[EElementEditAction.CHANGE_COLOR] =
-                    RectF(menuX, itemY, menuX + menuWidth, itemY + menuItemHeight)
+                    RectF(menuX, itemY, menuX + menuWidth, itemY + textSize)
 
+               // canvas.drawRect(RectF(menuX, itemY, menuX + menuWidth, itemY + textSize), Paint().apply { color = Color.RED })
 
             } else {
                 editElementIconsBounds.remove(EElementEditAction.MOVE_UP)
@@ -742,15 +757,15 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         val screenWidth = displayMetrics.widthPixels.toFloat()
         val screenHeight = displayMetrics.heightPixels.toFloat()
 
-        val menuWidth = screenWidth * 0.3f
-        val menuHeight = screenHeight * 0.125f
-        val cornerRadius = screenWidth * 0.02f
-        val textSize = screenHeight * 0.02f
-        val textPadding = screenWidth * 0.025f
-        val lineSpacing = screenHeight * 0.005f
-        val menuItemSpacing = screenHeight * 0.025f
+        val menuWidth = screenWidth * 0.3f * 1.3f
+        val menuHeight = screenHeight * 0.125f * 1.3f
+        val cornerRadius = screenWidth * 0.02f * 1.3f
+        val textSize = screenHeight * 0.02f * 1.3f
+        val textPadding = screenWidth * 0.025f * 1.3f
+        val lineSpacing = screenHeight * 0.005f * 1.3f
+        val menuItemSpacing = screenHeight * 0.025f * 1.3f
 
-        //WHY??
+        //FIXME WHY??
         this.displayMetrics = displayMetrics
         this.screenWidth = screenWidth
         this.screenHeight = screenHeight
@@ -869,5 +884,45 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         )
 
         return Bitmap.createScaledBitmap(mirroredBitmap, 1024, 1024, true)
+    }
+
+    fun showColorPickerDialog(setElementColor: Boolean = false) {
+        ColorPickerDialog.Builder(context)
+            .setTitle("ColorPicker Dialog")
+            .setPreferenceName("MyColorPickerDialog")
+            .setPositiveButton(R.string.OK,
+                ColorEnvelopeListener { envelope, _ ->
+                    run {
+                        if (setElementColor) {
+                            selectedElement?.let { element ->
+                                repaintElement(element, envelope.color)
+                            }
+                        }
+                        //Set brush color
+                        else {
+                            setColor(envelope.color)
+                        }
+                    }
+                })
+            .setNegativeButton(
+                R.string.cancel,
+            ) { dialogInterface, _ -> dialogInterface.dismiss() }
+            .attachAlphaSlideBar(true)
+            .attachBrightnessSlideBar(true)
+            .setBottomSpace(12)
+            .show()
+    }
+
+    //TODO not only color
+    private fun repaintElement(element: Element, newColor: Int) {
+        val repaintable = element as RepaintableElement
+
+        addToHistory(
+            RepaintElement(
+                repaintable,
+                oldColor = repaintable.paint.color,
+                newColor = newColor
+            )
+        )
     }
 }

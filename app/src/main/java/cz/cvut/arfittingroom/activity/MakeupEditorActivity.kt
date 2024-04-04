@@ -56,7 +56,7 @@ class MakeupEditorActivity : AppCompatActivity() {
             }
         }
         binding.buttonColorPicker.setOnClickListener {
-            showColorPickerDialog()
+            drawView.showColorPickerDialog()
         }
         binding.buttonRedo.setOnClickListener {
             drawView.redo()
@@ -155,21 +155,6 @@ class MakeupEditorActivity : AppCompatActivity() {
 
     private fun toggleImage(imageId: Int) {
         drawView.loadImage(imageId)
-    }
-
-    private fun showColorPickerDialog() {
-        ColorPickerDialog.Builder(this)
-            .setTitle("ColorPicker Dialog")
-            .setPreferenceName("MyColorPickerDialog")
-            .setPositiveButton(getString(ok),
-                ColorEnvelopeListener { envelope, _ -> drawView.setColor(envelope.color) })
-            .setNegativeButton(
-                getString(cancel)
-            ) { dialogInterface, _ -> dialogInterface.dismiss() }
-            .attachAlphaSlideBar(true)
-            .attachBrightnessSlideBar(true)
-            .setBottomSpace(12)
-            .show()
     }
 
 }

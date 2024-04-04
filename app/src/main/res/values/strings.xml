@@ -9,4 +9,6 @@
     <string name="liner">Liner</string>
     <string name="marioHat">Mario Hat</string>
     <string name="change_color">Change color</string>
+    <string name="OK">OK</string>
+    <string name="cancel">Cancel</string>
 </resources>
