@@ -2,6 +2,7 @@ package cz.cvut.arfittingroom.draw.service
 
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.Paint
 import cz.cvut.arfittingroom.draw.Layer
 import cz.cvut.arfittingroom.draw.command.action.element.impl.MoveElementBetweenLayers
 import cz.cvut.arfittingroom.draw.model.PaintOptions
@@ -9,6 +10,7 @@ import cz.cvut.arfittingroom.draw.model.element.Element
 import cz.cvut.arfittingroom.draw.path.DrawablePath
 import mu.KotlinLogging
 import java.util.UUID
+
 
 private val logger = KotlinLogging.logger {}
 
@@ -21,6 +23,25 @@ class LayerManager {
     private var layersBelowActiveLayerBitmap: Bitmap? = null
     private var layersAboveActiveLayerBitmap: Bitmap? = null
 
+    //TODO resolve but how?
+    private var viewWidth: Int = 0
+    private var viewHeight: Int = 0
+
+    fun setScreenMetrics(width: Int, height: Int) {
+        viewWidth = width
+        viewHeight = height
+    }
+
+    /**
+     * Draw all layers
+     * The drawing proceeds in the following steps:
+     * 1. Draw all layers below the active layer
+     * 2. Draw active layer
+     * 3. Draw all layers above the active layer
+     *
+     * @param canvas on which to draw the layers
+     * @param paintOptions for current finger painting that the user is creating
+     */
     fun drawLayers(canvas: Canvas, paintOptions: PaintOptions) {
         if (layers.isEmpty()) return
 
@@ -28,9 +49,7 @@ class LayerManager {
             canvas.drawBitmap(it, 0f, 0f, null)
         }
 
-        // Change paint for finger drawing
-        layers[activeLayerIndex].changePaint(paintOptions)
-        layers[activeLayerIndex].draw(canvas)
+        layers[activeLayerIndex].draw(canvas, paintOptions)
 
         layersAboveActiveLayerBitmap?.let {
             canvas.drawBitmap(it, 0f, 0f, null)
@@ -196,25 +215,16 @@ class LayerManager {
 
     /**
      * Initiates the process of separating the elements that
-     * should be drawn before and after [element] into two distinct bitmaps on the active layer
+     * should be drawn below and above the [element] into two distinct bitmaps on the active layer
      */
     fun startElementContinuousChanging(element: Element) {
         val activeLayer = layers[activeLayerIndex]
-
-        activeLayer
-    }
-
-    /**
-     * When the selected element stopped to change continuously,
-     * all elements on the active layer should be merged into one bitmap
-     */
-    fun endElementContinuousChanging() {
-
+        activeLayer.prepareBitmaps(element)
     }
 
     /**
      * Set active layer
-     * When the new active layer is selected,
+     * The active layer is the one that the user is currently drawing on.
      *
      * @param index of the new active layer
      */
@@ -223,11 +233,43 @@ class LayerManager {
             return
         } else {
             val activeLayer = layers[index]
+
             activeLayer.resetBitmaps()
+            resetBitmaps()
 
+            val layersBelow = layers.subList(0, index)
+            val layersAbove = layers.subList(index + 1, layers.lastIndex)
+
+            layersBelowActiveLayerBitmap = createBitmapFromLayers(layersBelow)
+            layersAboveActiveLayerBitmap = createBitmapFromLayers(layersAbove)
+
+            activeLayer.prepareBitmap()
             activeLayerIndex = index
-
         }
+    }
+
+    /**
+     * Creates a bitmap from the given [layers]
+     *
+     * @param layers The layers to be merged
+     * @return A bitmap that merges all the provided layers into one
+     */
+    private fun createBitmapFromLayers(layers: List<Layer>): Bitmap {
+        val bitmap = Bitmap.createBitmap(viewWidth, viewHeight, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+
+        layers.forEach {
+            canvas.drawBitmap(it.createBitmap(), 0f, 0f, it.opacityPaint)
+        }
+
+        return bitmap
+    }
+
+    private fun resetBitmaps() {
+        layersBelowActiveLayerBitmap?.recycle()
+        layersAboveActiveLayerBitmap?.recycle()
+        layersBelowActiveLayerBitmap = null
+        layersAboveActiveLayerBitmap = null
     }
 
     fun restoreDeletedLayer(layerId: UUID) {

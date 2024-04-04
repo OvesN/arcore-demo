@@ -10,47 +10,64 @@ import java.util.LinkedList
 import java.util.UUID
 import kotlin.collections.HashMap
 
-class Layer(private val width: Int,
-            private val height: Int,
-            val id: UUID = UUID.randomUUID()) {
 
+class Layer(
+    private val width: Int,
+    private val height: Int,
+    val id: UUID = UUID.randomUUID()
+) {
     var isVisible: Boolean = true
-
-    private val elements =
-        HashMap<UUID, Element>() // Map of elements on the layer, key is element id
-    private val elementsToDraw =
-        LinkedList<Element>() // Map of actions to do on this layer, keys is element id
-
-    private var curDrawingPath = LinkedHashMap<DrawablePath, PaintOptions>()
+    private val elements = HashMap<UUID, Element>()
+    private val elementsToDraw = LinkedList<Element>()
     var curPath = DrawablePath()
-
     private val curPaint = Paint()
-    var opacity: Float = 1.0f // Range from 0.0 (fully transparent) to 1.0 (fully opaque)
+        .apply {
+            strokeCap = Paint.Cap.ROUND
+            style = Paint.Style.STROKE
+        }
+    val opacityPaint = Paint()
+
+    /**
+     * Range from 0.0 (fully transparent) to 1.0 (fully opaque)
+     */
+    private var opacity: Float = 1.0f
 
     private var elementsBelowSelectedElementBitmap: Bitmap? = null
     private var elementAboveSelectedElementBitmap: Bitmap? = null
 
-    init {
-        curPaint.apply {
-            strokeCap = Paint.Cap.ROUND
-            style = Paint.Style.STROKE
-        }
-    }
+    private var selectedElement: Element? = null
 
-    fun draw(canvas: Canvas) {
-        // Draw the current part of the part that the user is drawing
+
+    /**
+     * Draws the content of the layer
+     * The drawing proceeds in the following steps:
+     * 1. Draw the elements below the selected element
+     * 2. Draw the selected element
+     * 3. Draw the elements above the selected element
+     * 4. Draw the current finger painting that the user is creating
+     *
+     * @param canvas on which to draw the layer's content
+     */
+    fun draw(canvas: Canvas, paintOptions: PaintOptions) {
+        changePaint(paintOptions)
+
+        elementsBelowSelectedElementBitmap?.let {
+            canvas.drawBitmap(it, 0f, 0f, null)
+        }
+
+        selectedElement?.draw(canvas)
+
+        elementAboveSelectedElementBitmap?.let {
+            canvas.drawBitmap(it, 0f, 0f, null)
+        }
+
         canvas.drawPath(curPath, curPaint)
-
-        // Draw the current path that the user is drawing
-        curDrawingPath.forEach {
-            changePaint(it.value)
-            canvas.drawPath(it.key, curPaint)
-        }
     }
 
     fun removeElement(elementId: UUID) {
         elements.remove(elementId)
         val iterator = elementsToDraw.iterator()
+
         while (iterator.hasNext()) {
             val element = iterator.next()
             if (element.id == elementId) {
@@ -70,13 +87,22 @@ class Layer(private val width: Int,
         elementsToDraw.add(element)
     }
 
-    fun changePaint(paintOptions: PaintOptions) {
+    private fun changePaint(paintOptions: PaintOptions) {
         curPaint.color = paintOptions.color
-        curPaint.alpha = paintOptions.alpha
+        curPaint.alpha = (paintOptions.alpha + opacity * 255).toInt().coerceAtMost(255)
         curPaint.style = paintOptions.style
         curPaint.strokeWidth = paintOptions.strokeWidth
     }
 
+    /**
+     * Finds the element that intersects with coordinates on this layer
+     *
+     * @param x The x-coordinate to check for intersection
+     * @param y The y-coordinate to check for intersection
+     *
+     * @return The last drawn element intersecting with the given point,
+     * or null if no element intersects
+     */
     fun findFirstIntersectedElement(x: Float, y: Float): Element? {
         val iterator = elementsToDraw.descendingIterator()
         while (iterator.hasNext()) {
@@ -85,7 +111,7 @@ class Layer(private val width: Int,
                 return element
             }
         }
-        // No intersecting element was found
+
         return null
     }
 
@@ -105,13 +131,55 @@ class Layer(private val width: Int,
      *
      * @return bitmap with all elements from this layer
      */
-    fun createBitmap(): Bitmap {
+    fun createBitmap(): Bitmap = createBitmapFromElements(elementsToDraw)
+
+    /**
+     * Prepare bitmaps
+     * If [selectedElement] is the same as previous one for this layer, do nothing.
+     * If not, recreate bitmaps for items above and below this [selectedElement]
+     *
+     * @param selectedElement
+     */
+    fun prepareBitmaps(selectedElement: Element) {
+        if (selectedElement == this.selectedElement) {
+            return
+        }
+
+        val selectedElementIndex = elementsToDraw.indexOf(selectedElement)
+
+        elementsBelowSelectedElementBitmap =
+            createBitmapFromElements(elementsToDraw.subList(0, selectedElementIndex))
+        elementAboveSelectedElementBitmap = createBitmapFromElements(
+            elementsToDraw.subList(
+                selectedElementIndex + 1,
+                elementsToDraw.lastIndex
+            )
+        )
+    }
+
+    /**
+     * Prepare bitmap when the layer is selected as active
+     */
+    fun prepareBitmap() {
+        elementsBelowSelectedElementBitmap = createBitmapFromElements(elementsToDraw)
+    }
+
+    private fun createBitmapFromElements(elements: List<Element>): Bitmap {
         val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
-        elementsToDraw.forEach {
+
+        elements.forEach {
             it.draw(canvas)
         }
 
         return bitmap
     }
+
+    fun setOpacity(opacity: Float) {
+        this.opacity = opacity
+        opacityPaint.apply {
+            alpha = (opacity * 255).toInt()
+        }
+    }
+
 }

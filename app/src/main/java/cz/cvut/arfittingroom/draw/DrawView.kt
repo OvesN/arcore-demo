@@ -113,6 +113,8 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     init {
         (context.applicationContext as? ARFittingRoomApplication)?.appComponent?.inject(this)
 
+        layerManager.setScreenMetrics(width, height)
+
         // Prepare icons
         loadEditElementIcons()
 
