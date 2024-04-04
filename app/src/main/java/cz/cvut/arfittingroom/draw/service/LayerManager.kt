@@ -1,8 +1,9 @@
 package cz.cvut.arfittingroom.draw.service
 
+import android.graphics.Bitmap
 import android.graphics.Canvas
 import cz.cvut.arfittingroom.draw.Layer
-import cz.cvut.arfittingroom.draw.command.action.MoveElementBetweenLayers
+import cz.cvut.arfittingroom.draw.command.action.element.impl.MoveElementBetweenLayers
 import cz.cvut.arfittingroom.draw.model.PaintOptions
 import cz.cvut.arfittingroom.draw.model.element.Element
 import cz.cvut.arfittingroom.draw.path.DrawablePath
@@ -15,14 +16,36 @@ class LayerManager {
     private val layers = mutableListOf<Layer>()
     private val idToLayerMap = HashMap<UUID, Layer>()
 
-    var activeLayerIndex = 0
+    private var activeLayerIndex = 0
+
+    private var layersBelowActiveLayerBitmap: Bitmap? = null
+    private var layersAboveActiveLayerBitmap: Bitmap? = null
+
+    fun drawLayers(canvas: Canvas, paintOptions: PaintOptions) {
+        if (layers.isEmpty()) return
+
+        layersBelowActiveLayerBitmap?.let {
+            canvas.drawBitmap(it, 0f, 0f, null)
+        }
+
+        // Change paint for finger drawing
+        layers[activeLayerIndex].changePaint(paintOptions)
+        layers[activeLayerIndex].draw(canvas)
+
+        layersAboveActiveLayerBitmap?.let {
+            canvas.drawBitmap(it, 0f, 0f, null)
+        }
+    }
 
     fun getActiveLayerId() =
         layers[activeLayerIndex].id
 
+    fun getActiveLayerIndex() =
+        activeLayerIndex
+
     // Returns index of the last layer
-    fun addLayer(width: Int, height: Int): Int {
-        val layer = Layer(width, height)
+    fun addLayer(width: Int, height: Int, layerId: UUID? = null): Int {
+        val layer = layerId?.let { Layer(width, height, layerId) } ?: Layer(width, height)
 
         if (layers.isNotEmpty()) {
             layers[activeLayerIndex].deselectAllElements()
@@ -43,11 +66,10 @@ class LayerManager {
         layer: Layer? = null,
         layerId: UUID? = null
     ): UUID? {
-        if (index >= layers.size) {
-            return null
-        }
-
-        val foundLayer = layer ?: layerId.let { idToLayerMap[layerId] } ?: layers[index]
+        val foundLayer = layer
+            ?: layerId.let { idToLayerMap[layerId] }
+            ?: layers.getOrNull(index)
+            ?: return null
 
         foundLayer.addElement(element)
 
@@ -60,20 +82,19 @@ class LayerManager {
         layer: Layer? = null,
         layerId: UUID? = null
     ) {
-        if (index >= layers.size) {
-            return
-        }
+        val foundLayer = layer
+            ?: layerId.let { idToLayerMap[layerId] }
+            ?: layers.getOrNull(index)
+            ?: return
 
-        val foundLayer = layer ?: layerId.let { idToLayerMap[layerId] } ?: layers[index]
         foundLayer.removeElement(elementId)
     }
 
-    fun removeLayer(index: Int) {
-        //TODO remove layer action?
-        if (index >= layers.size) {
-            return
-        }
-        val layerToRemove = layers[index]
+    fun removeLayer(index: Int = 0, layerId: UUID? = null) {
+        val layerToRemove = layerId?.let { idToLayerMap[layerId] }
+            ?: layers.getOrNull(index)
+            ?: return
+
         idToLayerMap.remove(layerToRemove.id)
         layers.removeAt(index)
 
@@ -103,15 +124,6 @@ class LayerManager {
         return true
     }
 
-    fun drawLayers(canvas: Canvas, paintOptions: PaintOptions) {
-        if (layers.isEmpty()) return
-
-        layers[activeLayerIndex].changePaint(paintOptions)
-        layers.forEach { layer ->
-            layer.draw(canvas)
-        }
-    }
-
     fun getNumOfLayers() = layers.size
 
     fun getCurPath() = layers[activeLayerIndex].curPath
@@ -138,12 +150,13 @@ class LayerManager {
         layers[activeLayerIndex].deselectAllElements()
     }
 
-    fun moveElementUp(element: Element): MoveElementBetweenLayers<Element>? {
+    fun moveElementUp(element: Element): MoveElementBetweenLayers? {
         //If element is on already top layer do nothing
         return if (activeLayerIndex == layers.size - 1) {
             null
         } else {
             MoveElementBetweenLayers(
+                element.id,
                 element,
                 oldLayerId = getActiveLayerId(),
                 newLayerId = layers[activeLayerIndex + 1].id,
@@ -152,31 +165,73 @@ class LayerManager {
         }
     }
 
-    fun moveElementDown(element: Element): MoveElementBetweenLayers<Element>? {
+    fun moveElementDown(element: Element): MoveElementBetweenLayers? {
         //If element is on already bottom layer do nothing
         return if (activeLayerIndex == 0) {
             null
         } else {
             MoveElementBetweenLayers(
+                element.id,
                 element,
                 oldLayerId = getActiveLayerId(),
-                newLayerId =  layers[activeLayerIndex - 1].id,
+                newLayerId = layers[activeLayerIndex - 1].id,
                 this
             )
         }
     }
 
-    fun moveElementTo(element: Element, layerIndex: Int): MoveElementBetweenLayers<Element>? {
+    fun moveElementTo(element: Element, layerIndex: Int): MoveElementBetweenLayers? {
         return if (layerIndex == activeLayerIndex) {
             null
         } else {
             MoveElementBetweenLayers(
+                element.id,
                 element,
                 oldLayerId = getActiveLayerId(),
                 newLayerId = layers[layerIndex].id,
                 this
             )
         }
+    }
+
+    /**
+     * Initiates the process of separating the elements that
+     * should be drawn before and after [element] into two distinct bitmaps on the active layer
+     */
+    fun startElementContinuousChanging(element: Element) {
+        val activeLayer = layers[activeLayerIndex]
+
+        activeLayer
+    }
+
+    /**
+     * When the selected element stopped to change continuously,
+     * all elements on the active layer should be merged into one bitmap
+     */
+    fun endElementContinuousChanging() {
+
+    }
+
+    /**
+     * Set active layer
+     * When the new active layer is selected,
+     *
+     * @param index of the new active layer
+     */
+    fun setActiveLayer(index: Int) {
+        if (index > layers.size - 1) {
+            return
+        } else {
+            val activeLayer = layers[index]
+            activeLayer.resetBitmaps()
+
+            activeLayerIndex = index
+
+        }
+    }
+
+    fun restoreDeletedLayer(layerId: UUID) {
+
     }
 
 }

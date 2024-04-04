@@ -1,14 +1,12 @@
 package cz.cvut.arfittingroom.draw
 
 import cz.cvut.arfittingroom.draw.command.Command
-import cz.cvut.arfittingroom.draw.command.Repaintable
-import cz.cvut.arfittingroom.draw.command.action.RepaintElement
 import cz.cvut.arfittingroom.draw.model.element.Element
 import java.util.LinkedList
 
 object DrawHistoryHolder {
-    private val globalHistory = LinkedList<Command<out Element>>()
-    private val undoneActions = LinkedList<Command<out Element>>()
+    private val globalHistory = LinkedList<Command>()
+    private val undoneActions = LinkedList<Command>()
 
     fun undo() {
         if (globalHistory.isEmpty()) {
@@ -36,7 +34,7 @@ object DrawHistoryHolder {
         lastUndoneAction.execute()
     }
 
-    fun addToHistory(command: Command<out Element>){
+    fun addToHistory(command: Command){
         globalHistory.add(command)
         command.execute()
     }

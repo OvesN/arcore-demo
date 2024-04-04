@@ -1,16 +1,17 @@
-package cz.cvut.arfittingroom.draw.command.action
+package cz.cvut.arfittingroom.draw.command.action.element.impl
 
 import cz.cvut.arfittingroom.draw.command.Command
+import cz.cvut.arfittingroom.draw.command.action.element.ElementCommand
 import cz.cvut.arfittingroom.draw.model.element.Element
 import cz.cvut.arfittingroom.draw.service.LayerManager
 import java.util.UUID
 
-class RemoveElementFromLayer<T>(
-    override val element: T,
+class RemoveElementFromLayer(
+    override val elementId: UUID,
+    private val element: Element,
     private val layerManager: LayerManager,
     private val layerId: UUID
-) :
-    Command<T> where T : Element {
+) : ElementCommand() {
     override fun execute() {
         layerManager.removeElementFromLayer(element.id, layerId = layerId)
     }

@@ -1,7 +1,5 @@
 package cz.cvut.arfittingroom.draw
 
-import android.R.string.ok
-import android.R.string.cancel
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -10,7 +8,6 @@ import android.graphics.Color
 import android.graphics.Matrix
 import android.graphics.Paint
 import android.graphics.RectF
-import android.provider.Settings.Global.getString
 import android.util.AttributeSet
 import android.util.DisplayMetrics
 import android.view.MotionEvent
@@ -25,15 +22,14 @@ import cz.cvut.arfittingroom.R
 import cz.cvut.arfittingroom.draw.DrawHistoryHolder.addToHistory
 import cz.cvut.arfittingroom.draw.DrawHistoryHolder.clearHistory
 import cz.cvut.arfittingroom.draw.command.Repaintable
-import cz.cvut.arfittingroom.draw.command.action.AddElementToLayer
-import cz.cvut.arfittingroom.draw.command.action.MoveElement
-import cz.cvut.arfittingroom.draw.command.action.RemoveElementFromLayer
-import cz.cvut.arfittingroom.draw.command.action.RepaintElement
-import cz.cvut.arfittingroom.draw.command.action.RotateElement
-import cz.cvut.arfittingroom.draw.command.action.ScaleElement
+import cz.cvut.arfittingroom.draw.command.action.element.impl.AddElementToLayer
+import cz.cvut.arfittingroom.draw.command.action.element.impl.MoveElement
+import cz.cvut.arfittingroom.draw.command.action.element.impl.RemoveElementFromLayer
+import cz.cvut.arfittingroom.draw.command.action.element.impl.RepaintElement
+import cz.cvut.arfittingroom.draw.command.action.element.impl.RotateElement
+import cz.cvut.arfittingroom.draw.command.action.element.impl.ScaleElement
 import cz.cvut.arfittingroom.draw.model.PaintOptions
 import cz.cvut.arfittingroom.draw.model.element.Element
-import cz.cvut.arfittingroom.draw.model.element.RepaintableElement
 import cz.cvut.arfittingroom.draw.model.element.impl.Figure
 import cz.cvut.arfittingroom.draw.model.element.impl.Curve
 import cz.cvut.arfittingroom.draw.model.element.impl.Image
@@ -43,7 +39,6 @@ import cz.cvut.arfittingroom.draw.model.enums.EElementEditAction
 import cz.cvut.arfittingroom.draw.model.enums.EShape
 import cz.cvut.arfittingroom.draw.path.DrawablePath
 import cz.cvut.arfittingroom.draw.service.LayerManager
-import cz.cvut.arfittingroom.model.Coordinates
 import cz.cvut.arfittingroom.utils.FileSavingUtil.saveTempMaskTextureBitmap
 import cz.cvut.arfittingroom.utils.IconUtil.changeIconColor
 import mu.KotlinLogging
@@ -149,6 +144,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                         it.endContinuousScale()
                         addToHistory(
                             ScaleElement(
+                                it.id,
                                 it,
                                 newRadius = it.outerRadius * scaleFactor,
                                 oldRadius = it.outerRadius
@@ -210,7 +206,8 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                             element.endContinuousMove()
                             addToHistory(
                                 MoveElement(
-                                    element = element,
+                                    element.id,
+                                    movable = element,
                                     oldX = element.centerX,
                                     oldY = element.centerY,
                                     newX = x,
@@ -226,7 +223,8 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                             element.endContinuousScale()
                             addToHistory(
                                 ScaleElement(
-                                    element = element,
+                                    element.id,
+                                    element,
                                     newRadius = newRadius,
                                     oldRadius = element.outerRadius,
                                 )
@@ -240,7 +238,8 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
                             addToHistory(
                                 RotateElement(
-                                    element = element,
+                                    element.id,
+                                    element,
                                     newRotationAngle = newRotationAngle,
                                     oldRotationAngle = element.rotationAngle
                                 )
@@ -354,6 +353,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             EElementEditAction.DELETE -> {
                 addToHistory(
                     RemoveElementFromLayer(
+                        element.id,
                         element,
                         layerManager,
                         layerManager.getActiveLayerId()
@@ -429,7 +429,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     fun addLayer(): Int {
         val newLayerIndex = layerManager.addLayer(width, height)
-        layerManager.activeLayerIndex = newLayerIndex
+        layerManager.setActiveLayer(newLayerIndex)
         return newLayerIndex
     }
 
@@ -438,7 +438,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         if (layerIndex >= layerManager.getNumOfLayers() || layerIndex < 0) {
             return false
         }
-        layerManager.activeLayerIndex = layerIndex
+        layerManager.setActiveLayer(layerIndex)
         logger.info { "Active layer is now $layerIndex" }
 
         return true
@@ -524,7 +524,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
         layerManager.setCurPath(DrawablePath())
 
-        addElementToLayer(layerManager.activeLayerIndex, curve)
+        addElementToLayer(layerManager.getActiveLayerIndex(), curve)
     }
 
     private fun drawHeart(centerX: Float, centerY: Float, outerRadius: Float) {
@@ -541,7 +541,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             }
         )
 
-        addElementToLayer(layerManager.activeLayerIndex, heart)
+        addElementToLayer(layerManager.getActiveLayerIndex(), heart)
     }
 
     private fun drawStar(centerX: Float, centerY: Float, outerRadius: Float) {
@@ -558,26 +558,26 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             }
         )
 
-        addElementToLayer(layerManager.activeLayerIndex, star)
+        addElementToLayer(layerManager.getActiveLayerIndex(), star)
     }
 
     fun moveLayer(fromIndex: Int, toIndex: Int) {
         if (layerManager.moveLayer(fromIndex, toIndex)) {
-            layerManager.activeLayerIndex = toIndex
+            layerManager.setActiveLayer(toIndex)
             invalidate()
         }
     }
 
     fun removeLayer(layerIndex: Int) {
         layerManager.removeLayer(layerIndex)
-        layerManager.activeLayerIndex = if (layerIndex == 0) 0 else layerIndex - 1
+        layerManager.setActiveLayer(if (layerIndex == 0) 0 else layerIndex - 1)
         invalidate()
     }
 
     private fun addElementToLayer(layerIndex: Int, element: Element) {
         val layerId = layerManager.addElementToLayer(layerIndex, element)
         if (layerId != null) {
-            addToHistory(AddElementToLayer(element, layerManager, layerId))
+            addToHistory(AddElementToLayer(element.id, element, layerManager, layerId))
         } else {
             logger.error { "Adding element to the layer was not successfully" }
         }
@@ -598,7 +598,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         val imageBitmap = BitmapFactory.decodeResource(resources, imageId, options)
 
         addElementToLayer(
-            layerManager.activeLayerIndex,
+            layerManager.getActiveLayerIndex(),
             Image(
                 width.toFloat() / 2,
                 height.toFloat() / 2,
@@ -703,7 +703,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
                 editElementIconsBounds[EElementEditAction.MOVE_DOWN] =
                     RectF(menuX, itemY, menuX + menuWidth, itemY + textSize)
-               // canvas.drawRect(RectF(menuX, itemY, menuX + menuWidth, itemY + textSize), Paint().apply { color = Color.BLACK })
+                // canvas.drawRect(RectF(menuX, itemY, menuX + menuWidth, itemY + textSize), Paint().apply { color = Color.BLACK })
 
                 itemY += textSize + lineSpacing
 
@@ -716,7 +716,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                 editElementIconsBounds[EElementEditAction.CHANGE_COLOR] =
                     RectF(menuX, itemY, menuX + menuWidth, itemY + textSize)
 
-               // canvas.drawRect(RectF(menuX, itemY, menuX + menuWidth, itemY + textSize), Paint().apply { color = Color.RED })
+                // canvas.drawRect(RectF(menuX, itemY, menuX + menuWidth, itemY + textSize), Paint().apply { color = Color.RED })
 
             } else {
                 editElementIconsBounds.remove(EElementEditAction.MOVE_UP)
@@ -915,10 +915,11 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     //TODO not only color
     private fun repaintElement(element: Element, newColor: Int) {
-        val repaintable = element as RepaintableElement
+        val repaintable = element as Repaintable
 
         addToHistory(
             RepaintElement(
+                element.id,
                 repaintable,
                 oldColor = repaintable.paint.color,
                 newColor = newColor

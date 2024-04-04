@@ -6,10 +6,8 @@ import android.graphics.Paint
 import android.graphics.PathMeasure
 import android.graphics.RectF
 import cz.cvut.arfittingroom.draw.command.Repaintable
-import cz.cvut.arfittingroom.draw.model.PaintOptions
 import cz.cvut.arfittingroom.draw.model.element.BoundingBox
 import cz.cvut.arfittingroom.draw.model.element.Element
-import cz.cvut.arfittingroom.draw.model.element.RepaintableElement
 import cz.cvut.arfittingroom.draw.path.DrawablePath
 import kotlin.math.max
 
@@ -17,7 +15,7 @@ private const val PROXIMITY_THRESHOLD = 50f // pixels
 class Curve(
     private var path: DrawablePath,
     override val paint: Paint
-) : RepaintableElement() {
+) : Element(), Repaintable {
 
     override var centerX: Float
     override var centerY: Float
