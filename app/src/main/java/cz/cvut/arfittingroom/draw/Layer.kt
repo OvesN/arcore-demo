@@ -90,7 +90,7 @@ class Layer(
         elements[element.id] = element
         elementsToDraw.add(element)
 
-        prepareBitmap()
+        addToBitmap(element)
     }
 
     private fun changePaint(paintOptions: PaintOptions) {
@@ -159,18 +159,19 @@ class Layer(
 
         elementsBelowSelectedElementBitmap =
             createBitmapFromElements(elementsToDraw.subList(0, selectedElementIndex))
-        elementAboveSelectedElementBitmap = createBitmapFromElements(
-            elementsToDraw.subList(
-                selectedElementIndex + 1,
-                elementsToDraw.lastIndex
+
+        elementAboveSelectedElementBitmap =
+            if (selectedElementIndex == elementsToDraw.lastIndex) null
+            else createBitmapFromElements(
+                elementsToDraw.subList(
+                    selectedElementIndex + 1,
+                    elementsToDraw.lastIndex
+                )
             )
-        )
     }
 
-    /**
-     * Prepare bitmap when the layer is selected as active
-     */
     fun prepareBitmap() {
+        resetBitmaps()
         elementsBelowSelectedElementBitmap = createBitmapFromElements(elementsToDraw)
     }
 
@@ -189,7 +190,16 @@ class Layer(
     }
 
     private fun addToBitmap(element: Element) {
+        val bitmap = elementAboveSelectedElementBitmap ?: Bitmap.createBitmap(
+            width,
+            height,
+            Bitmap.Config.ARGB_8888
+        )
+        val canvas = Canvas(bitmap)
 
+        element.draw(canvas)
+
+        elementAboveSelectedElementBitmap = bitmap
     }
 
     fun setOpacity(opacity: Float) {

@@ -23,6 +23,7 @@ abstract class Element : Scalable, Drawable, Movable, Rotatable {
     var rotationAngle = 0f
     private var originalRotationAngle = 0f
     var isSelected: Boolean = false
+    var shouldBeRedrawn: Boolean = false
 
     override fun draw(canvas: Canvas) {
         drawSpecific(canvas)
@@ -41,8 +42,6 @@ abstract class Element : Scalable, Drawable, Movable, Rotatable {
     override fun move(x: Float, y: Float) {
         centerX = x
         centerY = y
-//        originalCenterX = centerX
-//        originalCenterY = centerY
     }
 
     // End of the move gesture by the user

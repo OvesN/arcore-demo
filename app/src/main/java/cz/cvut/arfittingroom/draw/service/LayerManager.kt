@@ -8,6 +8,7 @@ import cz.cvut.arfittingroom.draw.command.action.element.impl.MoveElementBetween
 import cz.cvut.arfittingroom.draw.model.PaintOptions
 import cz.cvut.arfittingroom.draw.model.element.Element
 import cz.cvut.arfittingroom.draw.path.DrawablePath
+import cz.cvut.arfittingroom.utils.ScreenUtil
 import mu.KotlinLogging
 import java.util.UUID
 
@@ -23,14 +24,6 @@ class LayerManager {
     private var layersBelowActiveLayerBitmap: Bitmap? = null
     private var layersAboveActiveLayerBitmap: Bitmap? = null
 
-    //TODO resolve but how?
-    private var viewWidth: Int = 0
-    private var viewHeight: Int = 0
-
-    fun setScreenMetrics(width: Int, height: Int) {
-        viewWidth = width
-        viewHeight = height
-    }
 
     /**
      * Draw all layers
@@ -56,6 +49,12 @@ class LayerManager {
         }
     }
 
+    fun updateLayersBitmaps() {
+        layers.forEach {
+            it.prepareBitmap()
+        }
+    }
+
     fun getActiveLayerId() =
         layers[activeLayerIndex].id
 
@@ -78,22 +77,20 @@ class LayerManager {
         return activeLayerIndex
     }
 
-    //Returns layer id to which element was added
     fun addElementToLayer(
         index: Int = 0,
         element: Element,
         layer: Layer? = null,
         layerId: UUID? = null
-    ): UUID? {
+    ) {
         val foundLayer = layer
             ?: layerId.let { idToLayerMap[layerId] }
             ?: layers.getOrNull(index)
-            ?: return null
 
-        foundLayer.addElement(element)
-
-        return foundLayer.id
+        foundLayer?.addElement(element)
     }
+
+    fun getLayerIdByIndex(index: Int): UUID? = layers.getOrNull(index)?.id
 
     fun removeElementFromLayer(
         elementId: UUID,
@@ -233,16 +230,21 @@ class LayerManager {
      * @param index of the new active layer
      */
     fun setActiveLayer(index: Int) {
-        if (index > layers.size - 1) {
+        if (index < 0 || index >= layers.size) {
             return
         } else {
+            deselectAllElements()
+
             val activeLayer = layers[index]
 
             activeLayer.resetBitmaps()
             resetBitmaps()
 
             val layersBelow = layers.subList(0, index)
-            val layersAbove = layers.subList(index + 1, layers.lastIndex)
+            val layersAbove = if (index + 1 <= layers.lastIndex) layers.subList(
+                index + 1,
+                layers.size
+            ) else listOf()
 
             layersBelowActiveLayerBitmap = createBitmapFromLayers(layersBelow)
             layersAboveActiveLayerBitmap = createBitmapFromLayers(layersAbove)
@@ -257,9 +259,12 @@ class LayerManager {
      *
      * @param layers The layers to be merged
      * @return A bitmap that merges all the provided layers into one
+     * or null if there is nothing to draw
      */
-    private fun createBitmapFromLayers(layers: List<Layer>): Bitmap {
-        val bitmap = Bitmap.createBitmap(viewWidth, viewHeight, Bitmap.Config.ARGB_8888)
+    private fun createBitmapFromLayers(layers: List<Layer>): Bitmap? {
+        if (layers.isEmpty()) return null
+
+        val bitmap = Bitmap.createBitmap(ScreenUtil.screenWidth, ScreenUtil.screenHeight, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
 
         layers.forEach { layer ->
