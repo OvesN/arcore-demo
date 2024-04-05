@@ -1,7 +1,6 @@
 package cz.cvut.arfittingroom.draw.model.element.impl
 
 import android.graphics.Canvas
-import cz.cvut.arfittingroom.draw.command.Command
 import cz.cvut.arfittingroom.draw.model.element.BoundingBox
 import cz.cvut.arfittingroom.draw.model.element.Element
 

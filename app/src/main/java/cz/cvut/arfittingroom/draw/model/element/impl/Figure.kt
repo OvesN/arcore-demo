@@ -1,17 +1,12 @@
 package cz.cvut.arfittingroom.draw.model.element.impl
 
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.Paint
-import android.graphics.RectF
 import cz.cvut.arfittingroom.draw.command.Repaintable
-import cz.cvut.arfittingroom.draw.model.PaintOptions
 import cz.cvut.arfittingroom.draw.model.element.BoundingBox
 import cz.cvut.arfittingroom.draw.model.element.Element
-import cz.cvut.arfittingroom.draw.model.element.RepaintableElement
 import cz.cvut.arfittingroom.draw.model.element.strategy.PathCreationStrategy
 import cz.cvut.arfittingroom.draw.path.DrawablePath
-import kotlin.math.max
 
 class Figure(
     override var centerX: Float,
@@ -19,7 +14,7 @@ class Figure(
     override var outerRadius: Float,
     private val pathCreationStrategy: PathCreationStrategy,
     override val paint: Paint
-) : RepaintableElement() {
+) : Element(), Repaintable {
 
     override var originalRadius: Float = outerRadius
     override var originalCenterX: Float = centerX
@@ -38,7 +33,6 @@ class Figure(
         canvas.drawPath(createPath(), paint)
 
         canvas.restore()
-
     }
 
     override fun repaint(newColor: Int) {

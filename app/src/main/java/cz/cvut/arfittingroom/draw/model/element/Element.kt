@@ -1,7 +1,6 @@
 package cz.cvut.arfittingroom.draw.model.element
 
 import android.graphics.Canvas
-import android.graphics.RectF
 import cz.cvut.arfittingroom.draw.command.Drawable
 import cz.cvut.arfittingroom.draw.command.Movable
 import cz.cvut.arfittingroom.draw.command.Rotatable
@@ -42,8 +41,6 @@ abstract class Element : Scalable, Drawable, Movable, Rotatable {
     override fun move(x: Float, y: Float) {
         centerX = x
         centerY = y
-//        originalCenterX = centerX
-//        originalCenterY = centerY
     }
 
     // End of the move gesture by the user
