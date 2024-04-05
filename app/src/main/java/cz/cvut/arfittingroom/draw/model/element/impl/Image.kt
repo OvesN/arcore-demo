@@ -21,10 +21,13 @@ class Image(
     override var originalCenterX: Float = centerX
     override var originalCenterY: Float = centerY
 
+    private var transformationMatrix: Matrix = Matrix()
+
     lateinit var bitmap: Bitmap
 
     override fun drawSpecific(canvas: Canvas) {
-        canvas.drawBitmap(bitmap, createTransformationMatrix(), null)
+        transformationMatrix = createTransformationMatrix()
+        canvas.drawBitmap(bitmap, transformationMatrix, null)
     }
 
     override fun doIntersect(x: Float, y: Float): Boolean {
@@ -34,7 +37,7 @@ class Image(
 
         // Create an inverse matrix
         val inverseMatrix = Matrix()
-        createTransformationMatrix().invert(inverseMatrix)
+        transformationMatrix.invert(inverseMatrix)
 
         // Apply the inverse matrix to the (x, y) coordinates
         val points = floatArrayOf(x, y)

@@ -23,7 +23,6 @@ abstract class Element : Scalable, Drawable, Movable, Rotatable {
     var rotationAngle = 0f
     private var originalRotationAngle = 0f
     var isSelected: Boolean = false
-    var shouldBeRedrawn: Boolean = false
 
     override fun draw(canvas: Canvas) {
         drawSpecific(canvas)

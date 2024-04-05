@@ -129,14 +129,12 @@ class LayerManager {
             || toIndex > layers.size
             || fromIndex == layers.size - 1 && toIndex == layers.size
         ) {
-            logger.info { "Layer does not need to be moved" }
             return false
         }
 
         val layer = layers.removeAt(fromIndex)
         layers.add(toIndex, layer)
 
-        logger.info { "Layer moved from index $fromIndex to index $toIndex" }
         return true
     }
 

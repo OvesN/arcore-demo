@@ -33,7 +33,6 @@ class Figure(
         canvas.drawPath(createPath(), paint)
 
         canvas.restore()
-
     }
 
     override fun repaint(newColor: Int) {

@@ -165,7 +165,7 @@ class Layer(
             else createBitmapFromElements(
                 elementsToDraw.subList(
                     selectedElementIndex + 1,
-                    elementsToDraw.lastIndex
+                    elementsToDraw.size
                 )
             )
     }

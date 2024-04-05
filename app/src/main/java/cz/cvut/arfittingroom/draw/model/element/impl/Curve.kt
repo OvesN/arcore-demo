@@ -11,7 +11,8 @@ import cz.cvut.arfittingroom.draw.model.element.Element
 import cz.cvut.arfittingroom.draw.path.DrawablePath
 import kotlin.math.max
 
-private const val PROXIMITY_THRESHOLD = 50f // pixels
+private const val PROXIMITY_THRESHOLD = 60f // pixels
+
 class Curve(
     private var path: DrawablePath,
     override val paint: Paint
@@ -48,14 +49,8 @@ class Curve(
     }
 
     override fun drawSpecific(canvas: Canvas) {
-        val matrix = Matrix()
-
-        matrix.postRotate(rotationAngle, centerX, centerY)
-        matrix.postScale(radiusDiff, radiusDiff, centerX, centerY)
-        matrix.postTranslate(xDiff, yDiff)
-
         val transformedPath = DrawablePath()
-        path.transform(matrix, transformedPath)
+        path.transform(createTransformationMatrix(), transformedPath)
         canvas.drawPath(transformedPath, paint)
     }
 
@@ -97,6 +92,13 @@ class Curve(
             return false
         }
 
+        val inverseMatrix = Matrix()
+        createTransformationMatrix().invert(inverseMatrix)
+
+        val point = floatArrayOf(x, y)
+
+        inverseMatrix.mapPoints(point)
+
         val pm = PathMeasure(path, false)
         val pathLength = pm.length
         val pathCoords = FloatArray(2) // Holds coordinates as [x, y]
@@ -107,8 +109,8 @@ class Curve(
             pm.getPosTan(distance, pathCoords, null)
 
             // Calculate the distance from the point to the current path segment point
-            val dx = pathCoords[0] - x
-            val dy = pathCoords[1] - y
+            val dx = pathCoords[0] - point[0]
+            val dy = pathCoords[1] - point[1]
             if (dx * dx + dy * dy <= PROXIMITY_THRESHOLD * PROXIMITY_THRESHOLD) {
                 return true
             }
@@ -121,5 +123,15 @@ class Curve(
 
     override fun repaint(newColor: Int) {
         paint.color = newColor
+    }
+
+    private fun createTransformationMatrix(): Matrix {
+        val matrix = Matrix()
+
+        matrix.postRotate(rotationAngle, centerX, centerY)
+        matrix.postScale(radiusDiff, radiusDiff, centerX, centerY)
+        matrix.postTranslate(xDiff, yDiff)
+
+        return matrix
     }
 }
