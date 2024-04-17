@@ -8,7 +8,7 @@ import cz.cvut.arfittingroom.model.MASK_TEXTURE_FILE_NAME
 import java.io.FileInputStream
 import java.lang.Exception
 
-object FileSavingUtil {
+object FileUtil {
     fun saveTempMaskTextureBitmap(bitmap: Bitmap, context: Context, onSaved: () -> Unit) {
         try {
             context.openFileOutput(MASK_TEXTURE_FILE_NAME, Context.MODE_PRIVATE).use { fos ->
@@ -39,7 +39,7 @@ object FileSavingUtil {
     }
 
     fun deleteTempMaskTextureBitmap(context: Context) {
-        val fileDeleted = context.deleteFile(MASK_TEXTURE_FILE_NAME)
+        context.deleteFile(MASK_TEXTURE_FILE_NAME)
     }
 
 }

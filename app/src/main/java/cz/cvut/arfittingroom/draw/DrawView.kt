@@ -38,7 +38,7 @@ import cz.cvut.arfittingroom.draw.model.enums.EShape
 import cz.cvut.arfittingroom.draw.path.DrawablePath
 import cz.cvut.arfittingroom.draw.service.LayerManager
 import cz.cvut.arfittingroom.draw.service.UIDrawer
-import cz.cvut.arfittingroom.utils.FileSavingUtil.saveTempMaskTextureBitmap
+import cz.cvut.arfittingroom.utils.FileUtil.saveTempMaskTextureBitmap
 import mu.KotlinLogging
 import javax.inject.Inject
 import kotlin.math.abs
@@ -72,9 +72,6 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private var totalTranslateX: Float = 0f
     private var totalTranslateY: Float = 0f
 
-    private var lastGestureX: Float = 0f
-    private var lastGestureY: Float = 0f
-
     private var isInElementMovingMode: Boolean = false
     private var isInElementRotationMode: Boolean = false
     private var isInElementScalingMode: Boolean = false
@@ -87,6 +84,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private val uiDrawer = UIDrawer(context)
 
     private var ignoreDrawing: Boolean = false
+    private var canvasTransformationMatrix: Matrix = Matrix()
 
 
     interface OnLayerInitializedListener {
@@ -97,8 +95,6 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     init {
         (context.applicationContext as? ARFittingRoomApplication)?.appComponent?.inject(this)
-        totalTranslateX = width / 2f
-        totalTranslateY = height / 2f
         // Add event for element scaling
         scaleGestureDetector = ScaleGestureDetector(
             context,
@@ -194,22 +190,26 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
         when (event.actionMasked) {
             MotionEvent.ACTION_MOVE -> {
-                val dx = (event.getX(0) + event.getX(1)) / 2 - lastGestureX
-                val dy = (event.getY(0) + event.getY(1)) / 2 - lastGestureY
+                val currentX = (event.getX(0) + event.getX(1)) / 2
+                val currentY = (event.getY(0) + event.getY(1)) / 2
 
-                if (!scaleGestureDetector.isInProgress) {
+                // Calculate the translation delta
+                val dx = currentX - lastTouchX
+                val dy = currentY - lastTouchY
+
+                if (!scaleGestureDetector.isInProgress && lastTouchX != 0f && lastTouchY != 0f) {
                     totalTranslateX += dx
                     totalTranslateY += dy
                 }
 
-                lastGestureX = (event.getX(0) + event.getX(1)) / 2
-                lastGestureY = (event.getY(0) + event.getY(1)) / 2
+                lastTouchX = currentX
+                lastTouchY = currentY
             }
 
-            MotionEvent.ACTION_POINTER_UP, MotionEvent.ACTION_UP -> {
+            ACTION_POINTER_UP, MotionEvent.ACTION_UP -> {
                 if (event.pointerCount <= 2) {
-                    lastGestureX = 0f
-                    lastGestureY = 0f
+                    lastTouchX = 0f
+                    lastTouchY = 0f
                 }
             }
         }
@@ -488,6 +488,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
+        canvas.setMatrix(createCanvasTransformationMatrix())
         draw(canvas, true)
     }
 
@@ -499,11 +500,10 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         invalidate()
     }
 
-    private fun draw(canvas: Canvas, shouldDrawFaceTexture: Boolean) {
-        canvas.save()
-        canvas.translate(totalTranslateX, totalTranslateY)
-        canvas.scale(canvasScaleFactor, canvasScaleFactor, lastTouchX, lastTouchY)
-
+    private fun draw(
+        canvas: Canvas,
+        shouldDrawFaceTexture: Boolean = true
+    ) {
         // Draw all layers
         layerManager.drawLayers(canvas, paintOptions)
 
@@ -511,8 +511,6 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         if (shouldDrawFaceTexture) {
             uiDrawer.drawFaceTextureImage(canvas)
         }
-
-        canvas.restore()
     }
 
     private fun actionDown(x: Float, y: Float) {
@@ -755,4 +753,18 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
         invalidate()
     }
+
+
+    private fun createCanvasTransformationMatrix(
+    ): Matrix {
+        val transformationMatrix = Matrix()
+
+        transformationMatrix.postTranslate(totalTranslateX, totalTranslateY)
+
+
+        //transformationMatrix.postScale(canvasScaleFactor, canvasScaleFactor, pivotX, pivotY)
+
+        return transformationMatrix
+    }
+
 }
