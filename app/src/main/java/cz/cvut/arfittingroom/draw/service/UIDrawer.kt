@@ -5,14 +5,16 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.Matrix
 import android.graphics.Paint
-import android.graphics.PointF
 import android.graphics.RectF
 import cz.cvut.arfittingroom.R
 import cz.cvut.arfittingroom.draw.model.element.Element
 import cz.cvut.arfittingroom.draw.model.enums.EElementEditAction
 import cz.cvut.arfittingroom.utils.IconUtil
 import cz.cvut.arfittingroom.utils.ScreenUtil
+import cz.cvut.arfittingroom.utils.ScreenUtil.screenHeight
+import cz.cvut.arfittingroom.utils.ScreenUtil.screenWidth
 
 class UIDrawer(private val context: Context) {
     private var menuWidth: Float = 0f
@@ -29,6 +31,9 @@ class UIDrawer(private val context: Context) {
     private val editElementIcons: HashMap<EElementEditAction, Bitmap> = hashMapOf()
     private val editElementIconsBounds: HashMap<EElementEditAction, RectF> = hashMapOf()
     private val menuBitmap: Bitmap
+
+    private val faceTextureImage: Bitmap
+    private val faceTextureMatix: Matrix
 
     init {
         initializeDimensions()
@@ -50,18 +55,36 @@ class UIDrawer(private val context: Context) {
         }
 
         menuBitmap = prepareMenuBitmap()
-
+        faceTextureImage = BitmapFactory.decodeResource(context.resources, R.drawable.canonical_face_texture)
+        faceTextureMatix = prepareFaceTextureMatrix()
         loadEditElementIcons()
     }
 
+    private fun prepareFaceTextureMatrix(): Matrix {
+        val bitmapWidth = faceTextureImage.width
+        val bitmapHeight = faceTextureImage.height
+
+        val scale =
+            (screenWidth.toFloat() / bitmapWidth).coerceAtMost(screenHeight.toFloat() / bitmapHeight)
+
+        val x = (screenWidth - bitmapWidth * scale) / 2
+        val y = (screenHeight - bitmapHeight * scale) / 2
+
+        val matrix = Matrix()
+        matrix.setScale(scale, scale)
+        matrix.postTranslate(x, y)
+
+        return matrix
+    }
+
     private fun initializeDimensions() {
-        menuWidth = ScreenUtil.screenWidth * 0.3f * 1.3f
-        menuHeight = ScreenUtil.screenHeight * 0.125f * 1.3f
-        cornerRadius = ScreenUtil.screenWidth * 0.02f * 1.3f
-        textSize = ScreenUtil.screenHeight * 0.02f * 1.3f
-        textPadding = ScreenUtil.screenWidth * 0.025f * 1.3f
-        lineSpacing = ScreenUtil.screenHeight * 0.005f * 1.3f
-        menuItemSpacing = ScreenUtil.screenHeight * 0.025f * 1.3f
+        menuWidth = screenWidth * 0.3f * 1.3f
+        menuHeight = screenHeight * 0.125f * 1.3f
+        cornerRadius = screenWidth * 0.02f * 1.3f
+        textSize = screenHeight * 0.02f * 1.3f
+        textPadding = screenWidth * 0.025f * 1.3f
+        lineSpacing = screenHeight * 0.005f * 1.3f
+        menuItemSpacing = screenHeight * 0.025f * 1.3f
     }
 
     private fun prepareMenuBitmap(): Bitmap {
@@ -120,6 +143,10 @@ class UIDrawer(private val context: Context) {
                 (BitmapFactory.decodeResource(context.resources, R.drawable.menu_icon)),
                 Color.YELLOW
             )
+    }
+
+    fun drawFaceTextureImage(canvas: Canvas) {
+        canvas.drawBitmap(faceTextureImage, faceTextureMatix, null)
     }
 
     fun drawSelectedElementEditIcons(

@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.util.DisplayMetrics
 import androidx.appcompat.app.AppCompatActivity
 import cz.cvut.arfittingroom.databinding.ActivityMainBinding
+import cz.cvut.arfittingroom.utils.FileUtil.deleteTempMaskTextureBitmap
 import cz.cvut.arfittingroom.utils.ScreenUtil
 import mu.KotlinLogging
 
@@ -23,6 +24,8 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
 
         setContentView(binding.root)
+
+        deleteTempMaskTextureBitmap(applicationContext)
 
         binding.buttonMakeup.setOnClickListener {
             logger.info { "Makeup button clicked" }

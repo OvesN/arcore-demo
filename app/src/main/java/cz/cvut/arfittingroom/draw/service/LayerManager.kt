@@ -24,7 +24,6 @@ class LayerManager {
     private var layersBelowActiveLayerBitmap: Bitmap? = null
     private var layersAboveActiveLayerBitmap: Bitmap? = null
 
-
     /**
      * Draw all layers
      * The drawing proceeds in the following steps:
@@ -47,6 +46,7 @@ class LayerManager {
         layersAboveActiveLayerBitmap?.let {
             canvas.drawBitmap(it, 0f, 0f, null)
         }
+
     }
 
     fun updateLayersBitmaps() {
