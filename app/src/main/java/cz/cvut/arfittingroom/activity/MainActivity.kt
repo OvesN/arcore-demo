@@ -1,13 +1,11 @@
 package cz.cvut.arfittingroom.activity
 
-import android.content.Context
 import android.content.Intent
 import android.content.res.Resources
 import android.os.Bundle
-import android.util.DisplayMetrics
 import androidx.appcompat.app.AppCompatActivity
 import cz.cvut.arfittingroom.databinding.ActivityMainBinding
-import cz.cvut.arfittingroom.utils.FileUtil.deleteTempMaskTextureBitmap
+import cz.cvut.arfittingroom.utils.FileUtil.deleteTempFiles
 import cz.cvut.arfittingroom.utils.ScreenUtil
 import mu.KotlinLogging
 
@@ -25,7 +23,7 @@ class MainActivity : AppCompatActivity() {
 
         setContentView(binding.root)
 
-        deleteTempMaskTextureBitmap(applicationContext)
+        deleteTempFiles(applicationContext)
 
         binding.buttonMakeup.setOnClickListener {
             logger.info { "Makeup button clicked" }

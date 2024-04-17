@@ -12,6 +12,7 @@ import android.view.MotionEvent.ACTION_POINTER_UP
 import android.view.View
 import androidx.annotation.ColorInt
 import androidx.core.graphics.alpha
+import androidx.core.graphics.drawable.toBitmap
 import com.skydoves.colorpickerview.ColorPickerDialog
 import com.skydoves.colorpickerview.listeners.ColorEnvelopeListener
 import cz.cvut.arfittingroom.ARFittingRoomApplication
@@ -41,6 +42,7 @@ import cz.cvut.arfittingroom.draw.service.UIDrawer
 import cz.cvut.arfittingroom.model.TOUCH_TO_MOVE_THRESHOLD
 import cz.cvut.arfittingroom.utils.FileUtil.saveTempMaskTextureBitmap
 import mu.KotlinLogging
+import pl.droidsonroids.gif.GifDrawable
 import javax.inject.Inject
 import kotlin.math.abs
 import kotlin.math.atan2
@@ -88,6 +90,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private var ignoreDrawing: Boolean = false
     private var canvasTransformationMatrix: Matrix = Matrix()
 
+    private val foo: GifDrawable
 
     interface OnLayerInitializedListener {
         fun onLayerInitialized(numOfLayers: Int)
@@ -97,6 +100,8 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     init {
         (context.applicationContext as? ARFittingRoomApplication)?.appComponent?.inject(this)
+        foo = GifDrawable(resources, R.drawable.donut)
+
         // Add event for element scaling
         scaleGestureDetector = ScaleGestureDetector(
             context,
@@ -530,6 +535,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
+        
         canvasTransformationMatrix = createCanvasTransformationMatrix()
         canvas.setMatrix(canvasTransformationMatrix)
         draw(canvas, true)

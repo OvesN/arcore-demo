@@ -3,6 +3,7 @@ package cz.cvut.arfittingroom.draw.model.element.impl
 import android.graphics.Canvas
 import cz.cvut.arfittingroom.draw.model.element.BoundingBox
 import cz.cvut.arfittingroom.draw.model.element.Element
+import pl.droidsonroids.gif.GifDrawable
 
 class Gif(
     override var centerX: Float,
@@ -15,7 +16,7 @@ class Gif(
     override var originalCenterX: Float = centerX
     override var originalCenterY: Float = centerY
 
-
+    lateinit var gifDrawable: GifDrawable
     override fun drawSpecific(canvas: Canvas) {
         TODO("Not yet implemented")
     }
