@@ -4,12 +4,9 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.Matrix
 import android.graphics.Paint
-import android.graphics.RectF
 import android.util.AttributeSet
-import android.util.DisplayMetrics
 import android.view.MotionEvent
 import android.view.ScaleGestureDetector
 import android.view.View
@@ -41,9 +38,6 @@ import cz.cvut.arfittingroom.draw.path.DrawablePath
 import cz.cvut.arfittingroom.draw.service.LayerManager
 import cz.cvut.arfittingroom.draw.service.UIDrawer
 import cz.cvut.arfittingroom.utils.FileSavingUtil.saveTempMaskTextureBitmap
-import cz.cvut.arfittingroom.utils.IconUtil.changeIconColor
-import cz.cvut.arfittingroom.utils.ScreenUtil.screenHeight
-import cz.cvut.arfittingroom.utils.ScreenUtil.screenWidth
 import mu.KotlinLogging
 import javax.inject.Inject
 import kotlin.math.abs
@@ -90,12 +84,11 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         fun onLayerInitialized(numOfLayers: Int)
     }
 
-
     private var layerInitializedListener: OnLayerInitializedListener? = null
-
 
     init {
         (context.applicationContext as? ARFittingRoomApplication)?.appComponent?.inject(this)
+
 
         // Add event for element scaling
         scaleGestureDetector = ScaleGestureDetector(
@@ -447,6 +440,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         layerManager.drawLayers(canvas, paintOptions)
 
         uiDrawer.drawSelectedElementEditIcons(canvas, selectedElement, isInElementMenuMode)
+        uiDrawer.drawFaceTextureImage(canvas)
     }
 
     fun clearCanvas() {
