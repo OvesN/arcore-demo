@@ -105,23 +105,18 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                 }
 
                 override fun onScale(detector: ScaleGestureDetector): Boolean {
-                    if (gestureTolerance(detector)) {
-                        selectedElement?.let {
-                            elementScaleFactor *= detector.scaleFactor
-                            elementScaleFactor =
-                                0.1f.coerceAtLeast(elementScaleFactor.coerceAtMost(10.0f))
-
-                            selectedElement?.scaleContinuously(elementScaleFactor)
-                        } ?: {
-                            canvasScaleFactor *= detector.scaleFactor
-                            canvasScaleFactor =
-                                0.1f.coerceAtLeast(canvasScaleFactor.coerceAtMost(10.0f))
-                        }
-
-                        invalidate()
-                        return true
+                    if (!gestureTolerance(detector)) {
+                        return false
                     }
-                    return false
+
+                    if (selectedElement != null) {
+                        scaleSelectedElement(detector)
+                    } else {
+                        scaleCanvas(detector)
+                    }
+
+                    invalidate()
+                    return true
                 }
 
                 override fun onScaleEnd(detector: ScaleGestureDetector) {
@@ -144,6 +139,17 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                 private fun gestureTolerance(detector: ScaleGestureDetector): Boolean {
                     val spanDelta = abs(detector.currentSpan - detector.previousSpan)
                     return spanDelta > SPAN_SLOP
+                }
+
+                private fun scaleSelectedElement(detector: ScaleGestureDetector) {
+                    elementScaleFactor *= detector.scaleFactor
+                    elementScaleFactor = 0.1f.coerceAtLeast(elementScaleFactor.coerceAtMost(10.0f))
+                    selectedElement?.scaleContinuously(elementScaleFactor)
+                }
+
+                private fun scaleCanvas(detector: ScaleGestureDetector) {
+                    canvasScaleFactor *= detector.scaleFactor
+                    canvasScaleFactor = 0.1f.coerceAtLeast(canvasScaleFactor.coerceAtMost(10.0f))
                 }
             })
 
@@ -763,14 +769,13 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     }
 
 
-    private fun createCanvasTransformationMatrix(
-    ): Matrix {
+    private fun createCanvasTransformationMatrix(): Matrix {
         val transformationMatrix = Matrix()
 
         transformationMatrix.postTranslate(totalTranslateX, totalTranslateY)
 
 
-        //transformationMatrix.postScale(canvasScaleFactor, canvasScaleFactor, pivotX, pivotY)
+        transformationMatrix.postScale(canvasScaleFactor, canvasScaleFactor, pivotX, pivotY)
 
         return transformationMatrix
     }
