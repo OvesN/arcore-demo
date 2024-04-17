@@ -6,12 +6,12 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
+import android.os.Handler
+import android.os.Looper
 import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.core.graphics.drawable.toBitmap
 import com.google.ar.core.ArCoreApk
 import com.google.ar.core.AugmentedFace
 import com.google.ar.core.TrackingState
@@ -29,6 +29,7 @@ import cz.cvut.arfittingroom.model.enums.EMakeupType
 import cz.cvut.arfittingroom.model.enums.EModelType
 import cz.cvut.arfittingroom.service.MakeupService
 import cz.cvut.arfittingroom.service.ModelEditorService
+import cz.cvut.arfittingroom.utils.FileUtil.getTempMaskGif
 import cz.cvut.arfittingroom.utils.FileUtil.getTempMaskTextureBitmap
 import cz.cvut.arfittingroom.utils.TextureCombinerUtil.combineDrawables
 import mu.KotlinLogging
@@ -45,19 +46,16 @@ class ShowRoomActivity : AppCompatActivity() {
     private lateinit var arFragment: FaceArFragment
     private var faceNodeMap = HashMap<AugmentedFace, HashMap<EModelType, AugmentedFaceNode>>()
     private var isUpdated = false
+
     //FIXME
     private var shouldPlayAnimation = true
-    private var texturesPrepared = false
+    private var gifPrepared = false
 
     private lateinit var foo: GifDrawable
 
     private val gifTextures = mutableListOf<Texture>()
 
     private var frameCounter = 0
-    //Speed control
-    private var multiplier = 0.5
-
-    private val skipFrames = (multiplier - 1.0).toInt()
 
     @Inject
     lateinit var makeUpService: MakeupService
@@ -65,18 +63,28 @@ class ShowRoomActivity : AppCompatActivity() {
     @Inject
     lateinit var editorService: ModelEditorService
 
+
+    private var handler = Handler(Looper.getMainLooper())
+    private var gifRunnable: Runnable? = null
+    private var frameDelay: Long = 100 // Default frame delay (100 ms per frame)
+
+
+    //TODO uncomment when ready
     override fun onResume() {
         super.onResume()
+        resetGifState()
 
         val bitmap = getTempMaskTextureBitmap(applicationContext)
-        bitmap?.let {  createTextureAndApply(it) }
+        bitmap?.let { createTextureAndApply(it); shouldPlayAnimation = false }
+        val gif = getTempMaskGif(applicationContext)
+        gif?.let { shouldPlayAnimation = true}
     }
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         (application as ARFittingRoomApplication).appComponent.inject(this)
-        foo = GifDrawable(resources, R.drawable.donut)
+        //foo = GifDrawable(resources, R.drawable.donut)
 
         if (!checkIsSupportedDeviceOrFinish()) {
             return
@@ -133,9 +141,13 @@ class ShowRoomActivity : AppCompatActivity() {
                 }
             }
             if (shouldPlayAnimation) {
-                playGifAnimation()
-            }
-            else if (!isUpdated) {
+                if (!gifPrepared) {
+                    prepareAllGifTextures()
+                } else if (gifRunnable == null) {
+                    startAnimation()
+                }
+
+            } else if (!isUpdated) {
                 updateModelsOnScreen()
             }
         }
@@ -197,7 +209,8 @@ class ShowRoomActivity : AppCompatActivity() {
                 faceNode.faceRegionsRenderable = makeUpService.loadedModels[modelKey]?.model
             } else {
                 //FixME too stupid
-                makeUpService.loadedModels.values.find { it.model == modelNodesMap[modelType]?.faceRegionsRenderable }?.isActive = false
+                makeUpService.loadedModels.values.find { it.model == modelNodesMap[modelType]?.faceRegionsRenderable }?.isActive =
+                    false
 
                 modelNodesMap[modelType]?.faceRegionsRenderable =
                     makeUpService.loadedModels[modelKey]?.model
@@ -233,7 +246,6 @@ class ShowRoomActivity : AppCompatActivity() {
 
     private fun prepareAllGifTextures() {
         gifTextures.clear()
-        texturesPrepared = false
         val numberOfFrames = foo.numberOfFrames
 
         for (i in 0 until numberOfFrames) {
@@ -242,30 +254,15 @@ class ShowRoomActivity : AppCompatActivity() {
                 .build()
                 .thenAccept { texture ->
                     gifTextures.add(texture)
-                    applyTextureToAllFaces(texture)
+                    //applyTextureToAllFaces(texture)
                     if (gifTextures.size == numberOfFrames) {
-                        texturesPrepared = true
+                        gifPrepared = true
                     }
                 }
                 .exceptionally { throwable ->
                     logger.error { "Error creating texture for frame $i: $throwable" }
                     null
                 }
-        }
-    }
-
-    private fun playGifAnimation() {
-        if (!texturesPrepared) {
-            prepareAllGifTextures()
-            return
-        }
-
-        if (gifTextures.isNotEmpty()) {
-            applyTextureToAllFaces(gifTextures[frameCounter])
-            frameCounter++
-            if (frameCounter >= gifTextures.size) {
-                frameCounter = 0
-            }
         }
     }
 
@@ -382,5 +379,40 @@ class ShowRoomActivity : AppCompatActivity() {
                 modelInfo.isActive = true
             }
         }
+    }
+
+    private fun startAnimation() {
+        if (!gifPrepared) {
+            return
+        }
+
+        if (gifRunnable == null) {
+            gifRunnable = Runnable {
+                if (!gifPrepared) {
+                    prepareAllGifTextures()
+                } else {
+                    if (gifTextures.size > frameCounter) {
+                        applyTextureToAllFaces(gifTextures[frameCounter])
+                        frameCounter = (frameCounter + 1) % gifTextures.size
+                    }
+                    handler.postDelayed(gifRunnable!!, frameDelay)
+                }
+
+            }
+        }
+        gifRunnable?.let { handler.post(it) }
+    }
+
+    private fun stopAnimation() {
+        gifRunnable?.let { handler.removeCallbacks(it) }
+    }
+
+    private fun setSpeed(fps: Int) {
+        frameDelay = 1000L / fps
+    }
+
+    private fun resetGifState() {
+        gifPrepared = false
+        gifRunnable = null
     }
 }
