@@ -3,6 +3,7 @@ package cz.cvut.arfittingroom.draw.model.element.impl
 import android.graphics.Canvas
 import android.graphics.Matrix
 import android.graphics.Paint
+import android.graphics.Path
 import android.graphics.PathMeasure
 import android.graphics.RectF
 import cz.cvut.arfittingroom.draw.command.Repaintable
@@ -18,9 +19,9 @@ class Curve(
     override val paint: Paint
 ) : Element(), Repaintable {
 
-    override var centerX: Float
-    override var centerY: Float
-    override var outerRadius: Float
+    override var centerX: Float = 0f
+    override var centerY: Float = 0f
+    override var outerRadius: Float = 0f
 
     override var boundingBox: BoundingBox
 
@@ -34,14 +35,7 @@ class Curve(
     private var radiusDiff: Float = 1f  // No scaling by default
 
     init {
-        val rect = RectF()
-        path.computeBounds(rect, true)
-
-        centerX = rect.centerX()
-        centerY = rect.centerY()
-        outerRadius = max(rect.width(), rect.height()) / 2
-
-        boundingBox = createBoundingBox()
+        boundingBox = updateBoundingBoxAndCenter()
 
         originalCenterX = centerX
         originalCenterY = centerY
@@ -51,6 +45,7 @@ class Curve(
     override fun drawSpecific(canvas: Canvas) {
         val transformedPath = DrawablePath()
         path.transform(createTransformationMatrix(), transformedPath)
+
         canvas.drawPath(transformedPath, paint)
     }
 
@@ -85,7 +80,6 @@ class Curve(
     override fun endContinuousScale() {
         outerRadius = originalRadius
     }
-
 
     override fun doIntersect(x: Float, y: Float): Boolean {
         if (!boundingBox.rectF.contains(x, y)) {
@@ -128,10 +122,20 @@ class Curve(
     private fun createTransformationMatrix(): Matrix {
         val matrix = Matrix()
 
-        matrix.postRotate(rotationAngle, centerX, centerY)
-        matrix.postScale(radiusDiff, radiusDiff, centerX, centerY)
+        matrix.postRotate(rotationAngle, originalCenterX, originalCenterY)
+        matrix.postScale(radiusDiff, radiusDiff, originalCenterX, originalCenterY)
         matrix.postTranslate(xDiff, yDiff)
-
         return matrix
+    }
+
+    private fun updateBoundingBoxAndCenter():BoundingBox {
+        val bounds = RectF()
+        path.computeBounds(bounds, true)
+
+        centerX = bounds.centerX()
+        centerY = bounds.centerY()
+        outerRadius = max(bounds.width(), bounds.height()) / 2
+
+        return createBoundingBox()
     }
 }

@@ -8,6 +8,7 @@ import android.graphics.Matrix
 import android.graphics.Paint
 import android.util.AttributeSet
 import android.view.MotionEvent
+import android.view.MotionEvent.ACTION_POINTER_UP
 import android.view.ScaleGestureDetector
 import android.view.View
 import androidx.annotation.ColorInt
@@ -60,13 +61,19 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private var startY = 0f
     private var isStrokeWidthBarEnabled = false
 
-    private var scaleFactor = 1.0f
+    private var elementScaleFactor = 1.0f
+    private var canvasScaleFactor = 1.0f
     private val scaleGestureDetector: ScaleGestureDetector
 
     private var rotationAngleDelta = 0f
 
     private var lastTouchX = 0f
     private var lastTouchY = 0f
+    private var totalTranslateX: Float = 0f
+    private var totalTranslateY: Float = 0f
+
+    private var lastGestureX: Float = 0f
+    private var lastGestureY: Float = 0f
 
     private var isInElementMovingMode: Boolean = false
     private var isInElementRotationMode: Boolean = false
@@ -79,6 +86,8 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     private val uiDrawer = UIDrawer(context)
 
+    private var ignoreDrawing: Boolean = false
+
 
     interface OnLayerInitializedListener {
         fun onLayerInitialized(numOfLayers: Int)
@@ -88,8 +97,8 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     init {
         (context.applicationContext as? ARFittingRoomApplication)?.appComponent?.inject(this)
-
-
+        totalTranslateX = width / 2f
+        totalTranslateY = height / 2f
         // Add event for element scaling
         scaleGestureDetector = ScaleGestureDetector(
             context,
@@ -101,10 +110,18 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
                 override fun onScale(detector: ScaleGestureDetector): Boolean {
                     if (gestureTolerance(detector)) {
-                        scaleFactor *= detector.scaleFactor
-                        scaleFactor = 0.1f.coerceAtLeast(scaleFactor.coerceAtMost(10.0f))
+                        selectedElement?.let {
+                            elementScaleFactor *= detector.scaleFactor
+                            elementScaleFactor =
+                                0.1f.coerceAtLeast(elementScaleFactor.coerceAtMost(10.0f))
 
-                        selectedElement?.scaleContinuously(scaleFactor)
+                            selectedElement?.scaleContinuously(elementScaleFactor)
+                        } ?: {
+                            canvasScaleFactor *= detector.scaleFactor
+                            canvasScaleFactor =
+                                0.1f.coerceAtLeast(canvasScaleFactor.coerceAtMost(10.0f))
+                        }
+
                         invalidate()
                         return true
                     }
@@ -118,15 +135,13 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                             ScaleElement(
                                 it.id,
                                 it,
-                                newRadius = it.outerRadius * scaleFactor,
+                                newRadius = it.outerRadius * elementScaleFactor,
                                 oldRadius = it.outerRadius
                             )
                         )
+                        ignoreNextOneFingerMove = true
+                        elementScaleFactor = 1f
                     }
-
-                    ignoreNextOneFingerMove = true
-                    scaleFactor = 1f
-
                     super.onScaleEnd(detector)
                 }
 
@@ -152,9 +167,16 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         val y = event.y
 
         // Handle multi-touch events for scaling
-        if (event.pointerCount == 2 && selectedElement != null) {
+        if (event.pointerCount == 2) {
+            ignoreDrawing = true
             scaleGestureDetector.onTouchEvent(event)
-            return true
+            if (selectedElement == null) {
+                handleCanvasGesture(event)
+            }
+        } else if (ignoreDrawing &&
+            (event.actionMasked == ACTION_POINTER_UP || event.actionMasked == MotionEvent.ACTION_UP)
+        ) {
+            ignoreDrawing = false
         }
 
         //TODO fix this, different modes and different brushes?
@@ -166,6 +188,31 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
         invalidate()
         return true
+    }
+
+    private fun handleCanvasGesture(event: MotionEvent) {
+
+        when (event.actionMasked) {
+            MotionEvent.ACTION_MOVE -> {
+                val dx = (event.getX(0) + event.getX(1)) / 2 - lastGestureX
+                val dy = (event.getY(0) + event.getY(1)) / 2 - lastGestureY
+
+                if (!scaleGestureDetector.isInProgress) {
+                    totalTranslateX += dx
+                    totalTranslateY += dy
+                }
+
+                lastGestureX = (event.getX(0) + event.getX(1)) / 2
+                lastGestureY = (event.getY(0) + event.getY(1)) / 2
+            }
+
+            MotionEvent.ACTION_POINTER_UP, MotionEvent.ACTION_UP -> {
+                if (event.pointerCount <= 2) {
+                    lastGestureX = 0f
+                    lastGestureY = 0f
+                }
+            }
+        }
     }
 
     private fun handleElementEditing(event: MotionEvent, x: Float, y: Float) {
@@ -244,8 +291,8 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                 MotionEvent.ACTION_MOVE -> {
                     selectedElement?.let { element ->
                         if (isInElementScalingMode) {
-                            scaleFactor = calculateScaleFactor(x, y)
-                            element.scaleContinuously(scaleFactor)
+                            elementScaleFactor = calculateScaleFactor(x, y)
+                            element.scaleContinuously(elementScaleFactor)
                         } else if (isInElementRotationMode) {
                             rotationAngleDelta = calculateRotationAngleDelta(
                                 centerX = element.centerX,
@@ -361,6 +408,9 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     }
 
     private fun handleDrawing(event: MotionEvent, x: Float, y: Float) {
+        if (ignoreDrawing) {
+            return
+        }
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
                 startX = x
@@ -374,6 +424,9 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     }
 
     private fun handleStampDrawing(event: MotionEvent, x: Float, y: Float) {
+        if (ignoreDrawing) {
+            return
+        }
         if (event.action == MotionEvent.ACTION_DOWN) {
             when (strokeShape) {
                 EShape.STAR -> drawStar(x, y, paintOptions.strokeWidth)
@@ -435,12 +488,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-
-        // Draw all layers
-        layerManager.drawLayers(canvas, paintOptions)
-
-        uiDrawer.drawSelectedElementEditIcons(canvas, selectedElement, isInElementMenuMode)
-        uiDrawer.drawFaceTextureImage(canvas)
+        draw(canvas, true)
     }
 
     fun clearCanvas() {
@@ -449,6 +497,22 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         // Add initial layer
         layerManager.addLayer(width, height)
         invalidate()
+    }
+
+    private fun draw(canvas: Canvas, shouldDrawFaceTexture: Boolean) {
+        canvas.save()
+        canvas.translate(totalTranslateX, totalTranslateY)
+        canvas.scale(canvasScaleFactor, canvasScaleFactor, lastTouchX, lastTouchY)
+
+        // Draw all layers
+        layerManager.drawLayers(canvas, paintOptions)
+
+        uiDrawer.drawSelectedElementEditIcons(canvas, selectedElement, isInElementMenuMode)
+        if (shouldDrawFaceTexture) {
+            uiDrawer.drawFaceTextureImage(canvas)
+        }
+
+        canvas.restore()
     }
 
     private fun actionDown(x: Float, y: Float) {
@@ -539,7 +603,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         if (layerId != null) {
             addToHistory(AddElementToLayer(element.id, element, layerManager, layerId))
         } else {
-            logger.error { "Adding element to the layer was not successfully" }
+            logger.error { "Adding element to the layer was unsuccessfull" }
         }
     }
 
@@ -598,7 +662,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         isInElementMovingMode = false
 
         rotationAngleDelta = 0f
-        scaleFactor = 1f
+        elementScaleFactor = 1f
     }
 
     fun saveBitmap(onSaved: () -> Unit) {
@@ -613,7 +677,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
         val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
-        draw(canvas)
+        draw(canvas, false)
 
         return bitmap
     }
