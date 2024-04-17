@@ -159,8 +159,15 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        val x = event.x
-        val y = event.y
+        val inverseMatrix = Matrix()
+        if (!canvasTransformationMatrix.invert(inverseMatrix)) {
+            return false
+        }
+        val touchPoint = floatArrayOf(event.x, event.y)
+        inverseMatrix.mapPoints(touchPoint)
+
+        val x = touchPoint[0]
+        val y = touchPoint[1]
 
         // Handle multi-touch events for scaling
         if (event.pointerCount == 2) {
@@ -488,7 +495,8 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        canvas.setMatrix(createCanvasTransformationMatrix())
+        canvasTransformationMatrix = createCanvasTransformationMatrix()
+        canvas.setMatrix(canvasTransformationMatrix)
         draw(canvas, true)
     }
 
