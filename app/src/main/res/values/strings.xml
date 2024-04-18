@@ -11,4 +11,8 @@
     <string name="change_color">Change color</string>
     <string name="OK">OK</string>
     <string name="cancel">Cancel</string>
+    <string name="draw">Draw</string>
+    <string name="stamp">Stamp</string>
+    <string name="image">Image</string>
+    <string name="text">Text</string>
 </resources>
