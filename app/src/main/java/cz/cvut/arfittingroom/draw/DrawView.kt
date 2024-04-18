@@ -1,6 +1,7 @@
 package cz.cvut.arfittingroom.draw
 
 import android.content.Context
+import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
@@ -31,6 +32,7 @@ import cz.cvut.arfittingroom.draw.model.PaintOptions
 import cz.cvut.arfittingroom.draw.model.element.Element
 import cz.cvut.arfittingroom.draw.model.element.impl.Curve
 import cz.cvut.arfittingroom.draw.model.element.impl.Figure
+import cz.cvut.arfittingroom.draw.model.element.impl.Gif
 import cz.cvut.arfittingroom.draw.model.element.impl.Image
 import cz.cvut.arfittingroom.draw.model.element.strategy.impl.HeartPathCreationStrategy
 import cz.cvut.arfittingroom.draw.model.element.strategy.impl.StarPathCreationStrategy
@@ -42,7 +44,10 @@ import cz.cvut.arfittingroom.draw.service.UIDrawer
 import cz.cvut.arfittingroom.model.TOUCH_TO_MOVE_THRESHOLD
 import cz.cvut.arfittingroom.utils.FileUtil.saveTempMaskTextureBitmap
 import mu.KotlinLogging
+import pl.droidsonroids.gif.GifDecoder
 import pl.droidsonroids.gif.GifDrawable
+import pl.droidsonroids.gif.GifOptions
+import pl.droidsonroids.gif.InputSource
 import javax.inject.Inject
 import kotlin.math.abs
 import kotlin.math.atan2
@@ -90,7 +95,9 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private var ignoreDrawing: Boolean = false
     private var canvasTransformationMatrix: Matrix = Matrix()
 
-    private val foo: GifDrawable
+    private var gifRunnable: Runnable? = null
+    private var frameDelay: Long = 100
+    private var frameCounter = 0
 
     interface OnLayerInitializedListener {
         fun onLayerInitialized(numOfLayers: Int)
@@ -100,7 +107,6 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     init {
         (context.applicationContext as? ARFittingRoomApplication)?.appComponent?.inject(this)
-        foo = GifDrawable(resources, R.drawable.donut)
 
         // Add event for element scaling
         scaleGestureDetector = ScaleGestureDetector(
@@ -535,7 +541,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        
+
         canvasTransformationMatrix = createCanvasTransformationMatrix()
         canvas.setMatrix(canvasTransformationMatrix)
         draw(canvas, true)
@@ -553,7 +559,6 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         canvas: Canvas,
         shouldDrawFaceTexture: Boolean = true
     ) {
-        // Draw all layers
         layerManager.drawLayers(canvas, paintOptions)
 
         uiDrawer.drawSelectedElementEditIcons(canvas, selectedElement, isInElementMenuMode)
@@ -654,6 +659,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         }
     }
 
+
     fun loadImage(imageId: Int) {
         // First decode with inJustDecodeBounds=true to check dimensions
         val options = BitmapFactory.Options().apply {
@@ -662,7 +668,8 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         BitmapFactory.decodeResource(resources, imageId, options)
 
         // Calculate inSampleSize
-        options.inSampleSize = calculateInSampleSize(options, width / 3, height / 3)
+        options.inSampleSize =
+            calculateInSampleSize(options.outWidth, options.outHeight, width / 3, height / 3)
 
         // Decode bitmap with inSampleSize set
         options.inJustDecodeBounds = false
@@ -681,12 +688,38 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         invalidate()
     }
 
+    fun loadGif(gifId: Int) {
+        val gif = GifDrawable(resources, gifId)
+//        val sampleSize =
+//            calculateInSampleSize(gif.bounds.width(), gif.bounds.height(), width / 3, height / 3)
+//        val gifDecoder = GifDecoder(
+//            InputSource.ResourcesSource(resources, gifId),
+//            GifOptions().apply { this.setInSampleSize(sampleSize) })
+
+        addElementToLayer(
+            layerManager.getActiveLayerIndex(),
+            Gif(
+                gifId,
+                width.toFloat() / 2,
+                height.toFloat() / 2,
+                width.toFloat() / 2,
+            ).apply {
+                setDrawable(gif)
+            }
+        )
+
+        //startAnimation(gif)
+
+        invalidate()
+    }
+
+
     private fun calculateInSampleSize(
-        options: BitmapFactory.Options,
+        width: Int,
+        height: Int,
         reqWidth: Int,
         reqHeight: Int
     ): Int {
-        val (height: Int, width: Int) = options.run { outHeight to outWidth }
         var inSampleSize = 1
 
         if (height > reqHeight || width > reqWidth) {
@@ -812,5 +845,6 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
         return transformationMatrix
     }
+
 
 }

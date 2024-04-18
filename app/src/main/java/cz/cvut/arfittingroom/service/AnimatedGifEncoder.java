@@ -1,26 +1,23 @@
 package cz.cvut.arfittingroom.service;
 
-import java.io.IOException;
-import java.io.OutputStream;
-
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 
+import java.io.IOException;
+import java.io.OutputStream;
+
+
 /**
- * Author: nbadal
- * Source: <a href="https://github.com/nbadal/android-gif-encoder">...</a>
+ * Slightly modified version of original code by:
+ * Author: Alessandro La Rosa
+ * Source: <a href="http://www.jappit.com/blog/2008/12/04/j2me-animated-gif-encoder/">...</a>
  */
 public class AnimatedGifEncoder {
 
-    protected int width; // image size
+    protected int width; // bitmap size
 
     protected int height;
-
-    protected int x = 0;
-
-    protected int y = 0;
 
     protected int transparent = -1; // transparent color if given
 
@@ -34,7 +31,7 @@ public class AnimatedGifEncoder {
 
     protected OutputStream out;
 
-    protected Bitmap image; // current frame
+    protected Bitmap bitmap; // current frame
 
     protected byte[] pixels; // BGR byte array from frame
 
@@ -85,7 +82,7 @@ public class AnimatedGifEncoder {
 
     /**
      * Sets the number of times the set of GIF frames should be played. Default is
-     * 1; 0 means play indefinitely. Must be invoked before the first image is
+     * 1; 0 means play indefinitely. Must be invoked before the first bitmap is
      * added.
      *
      * @param iter
@@ -116,11 +113,11 @@ public class AnimatedGifEncoder {
      * Adds next GIF frame. The frame is not written immediately, but is actually
      * deferred until the next frame is received so that timing data can be
      * inserted. Invoking <code>finish()</code> flushes all frames. If
-     * <code>setSize</code> was not invoked, the size of the first image is used
+     * <code>setSize</code> was not invoked, the size of the first bitmap is used
      * for all subsequent frames.
      *
      * @param im
-     *          BufferedImage containing frame to write.
+     *          Bufferedbitmap containing frame to write.
      * @return true if successful.
      */
     public boolean addFrame(Bitmap im) {
@@ -133,12 +130,8 @@ public class AnimatedGifEncoder {
                 // use first frame's size
                 setSize(im.getWidth(), im.getHeight());
             }
-            if(image != null) {
-                // recycle the old Bitmap instance to free its memory
-                image.recycle();
-            }
-            image = im;
-            getImagePixels(); // convert to correct format if necessary
+            bitmap = im;
+            getbitmapPixels(); // convert to correct format if necessary
             analyzePixels(); // build color table & map pixels
             if (firstFrame) {
                 writeLSD(); // logical screen descriptior
@@ -149,7 +142,7 @@ public class AnimatedGifEncoder {
                 }
             }
             writeGraphicCtrlExt(); // write graphic control extension
-            writeImageDesc(); // image descriptor
+            writebitmapDesc(); // bitmap descriptor
             if (!firstFrame) {
                 writePalette(); // local color table
             }
@@ -184,7 +177,7 @@ public class AnimatedGifEncoder {
         // reset for subsequent use
         transIndex = 0;
         out = null;
-        image = null;
+        bitmap = null;
         pixels = null;
         indexedPixels = null;
         colorTab = null;
@@ -208,7 +201,7 @@ public class AnimatedGifEncoder {
     }
 
     /**
-     * Sets quality of color quantization (conversion of images to the maximum 256
+     * Sets quality of color quantization (conversion of bitmaps to the maximum 256
      * colors allowed by the GIF specification). Lower values (minimum = 1)
      * produce better colors, but slow processing significantly. 10 is the
      * default, and produces good color mapping at reasonable speeds. Values
@@ -234,6 +227,8 @@ public class AnimatedGifEncoder {
      *          int frame width.
      */
     public void setSize(int w, int h) {
+        if (started && !firstFrame)
+            return;
         width = w;
         height = h;
         if (width < 1)
@@ -244,25 +239,11 @@ public class AnimatedGifEncoder {
     }
 
     /**
-     * Sets the GIF frame position. The position is 0,0 by default.
-     * Useful for only updating a section of the image
-     *
-     * @param w
-     *          int frame width.
-     * @param h
-     *          int frame width.
-     */
-    public void setPosition(int x, int y) {
-        this.x = x;
-        this.y = y;
-    }
-
-    /**
      * Initiates GIF file creation on the given stream. The stream is not closed
      * automatically.
      *
      * @param os
-     *          OutputStream on which GIF images are written.
+     *          OutputStream on which GIF bitmaps are written.
      * @return false if initial write failed.
      */
     public boolean start(OutputStream os) {
@@ -280,7 +261,7 @@ public class AnimatedGifEncoder {
     }
 
     /**
-     * Analyzes image colors and creates color map.
+     * Analyzes bitmap colors and creates color map.
      */
     protected void analyzePixels() {
         int len = pixels.length;
@@ -296,7 +277,7 @@ public class AnimatedGifEncoder {
             colorTab[i + 2] = temp;
             usedEntry[i / 3] = false;
         }
-        // map image pixels to new palette
+        // map bitmap pixels to new palette
         int k = 0;
         for (int i = 0; i < nPix; i++) {
             int index = nq.map(pixels[k++] & 0xff, pixels[k++] & 0xff, pixels[k++] & 0xff);
@@ -341,19 +322,19 @@ public class AnimatedGifEncoder {
     }
 
     /**
-     * Extracts image pixels into byte array "pixels"
+     * Extracts bitmap pixels into byte array "pixels"
      */
-    protected void getImagePixels() {
-        int w = image.getWidth();
-        int h = image.getHeight();
+    protected void getbitmapPixels() {
+        int w = bitmap.getWidth();
+        int h = bitmap.getHeight();
         if ((w != width) || (h != height)) {
-            // create new image with right size/format
-            Bitmap temp = Bitmap.createBitmap(width, height, Config.RGB_565);
+            // create new bitmap with right size/format
+            Bitmap temp = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
             Canvas g = new Canvas(temp);
-            g.drawBitmap(image, 0, 0, new Paint());
-            image = temp;
+            g.drawBitmap(bitmap, 0, 0, new Paint());
+            bitmap = temp;
         }
-        int[] data = getImageData(image);
+        int[] data = getbitmapData(bitmap);
         pixels = new byte[data.length * 3];
         for (int i = 0; i < data.length; i++) {
             int td = data[i];
@@ -363,7 +344,7 @@ public class AnimatedGifEncoder {
             pixels[tind] = (byte) ((td >> 16) & 0xFF);
         }
     }
-    protected int[] getImageData(Bitmap img) {
+    protected int[] getbitmapData(Bitmap img) {
         int w = img.getWidth();
         int h = img.getHeight();
 
@@ -404,13 +385,13 @@ public class AnimatedGifEncoder {
     }
 
     /**
-     * Writes Image Descriptor
+     * Writes bitmap Descriptor
      */
-    protected void writeImageDesc() throws IOException {
-        out.write(0x2c); // image separator
-        writeShort(x); // image position x,y = 0,0
-        writeShort(y);
-        writeShort(width); // image size
+    protected void writebitmapDesc() throws IOException {
+        out.write(0x2c); // bitmap separator
+        writeShort(0); // bitmap position x,y = 0,0
+        writeShort(0);
+        writeShort(width); // bitmap size
         writeShort(height);
         // packed fields
         if (firstFrame) {
@@ -520,7 +501,7 @@ class NeuQuant {
 
     protected static final int netsize = 256; /* number of colours used */
 
-    /* four primes near 500 - assume no image has a length so large */
+    /* four primes near 500 - assume no bitmap has a length so large */
     /* that it is divisible by all four primes */
     protected static final int prime1 = 499;
 
@@ -532,13 +513,13 @@ class NeuQuant {
 
     protected static final int minpicturebytes = (3 * prime4);
 
-    /* minimum size for input image */
+    /* minimum size for input bitmap */
 
     /*
      * Program Skeleton ---------------- [select samplefac in range 1..30] [read
-     * image from input file] pic = (unsigned char*) malloc(3*width*height);
+     * bitmap from input file] pic = (unsigned char*) malloc(3*width*height);
      * initnet(pic,3*width*height,samplefac); learn(); unbiasnet(); [write output
-     * image header, using writecolourmap(f)] inxbuild(); write output image using
+     * bitmap header, using writecolourmap(f)] inxbuild(); write output bitmap using
      * inxsearch(b,g,r)
      */
 
@@ -605,7 +586,7 @@ class NeuQuant {
      * Types and Global Variables --------------------------
      */
 
-    protected byte[] thepicture; /* the input image itself */
+    protected byte[] thepicture; /* the input bitmap itself */
 
     protected int lengthcount; /* lengthcount = H*W*3 */
 
@@ -1017,7 +998,7 @@ class LZWEncoder {
 
     private int curPixel;
 
-    // GIFCOMPR.C - GIF Image compression routines
+    // GIFCOMPR.C - GIF bitmap compression routines
     //
     // Lempel-Ziv compression based on 'compress'. GIF modifications by
     // David Rowley (mgardi@watdcsu.waterloo.edu)
@@ -1028,7 +1009,7 @@ class LZWEncoder {
 
     static final int HSIZE = 5003; // 80% occupancy
 
-    // GIF Image compression - modified 'compress'
+    // GIF bitmap compression - modified 'compress'
     //
     // Based on: compress.c - File compression ala IEEE Computer, June 1984.
     //
@@ -1234,7 +1215,7 @@ class LZWEncoder {
     }
 
     // ----------------------------------------------------------------------------
-    // Return the next pixel from the image
+    // Return the next pixel from the bitmap
     // ----------------------------------------------------------------------------
     private int nextPixel() {
         if (remaining == 0)

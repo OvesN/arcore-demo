@@ -5,9 +5,9 @@ import android.graphics.Canvas
 import android.graphics.Matrix
 import cz.cvut.arfittingroom.draw.model.element.BoundingBox
 import cz.cvut.arfittingroom.draw.model.element.Element
+import cz.cvut.arfittingroom.model.TRANSPARENT_CODE
 import kotlin.math.max
 
-private const val TRANSPARENT_CODE = 0xFF000000
 
 class Image(
     override var centerX: Float,

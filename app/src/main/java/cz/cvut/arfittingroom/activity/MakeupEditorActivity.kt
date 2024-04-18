@@ -66,7 +66,10 @@ class MakeupEditorActivity : AppCompatActivity() {
             toggleStrokeShape(EShape.HEART)
         }
         binding.buttonFlowersImage.setOnClickListener {
-            toggleImage(R.drawable.flowers)
+            addImage(R.drawable.flowers)
+        }
+        binding.buttonGif.setOnClickListener {
+            addGif(R.drawable.donut)
         }
         slider.addOnChangeListener { _, value, _ ->
             drawView.setStrokeWidth(value)
@@ -148,8 +151,11 @@ class MakeupEditorActivity : AppCompatActivity() {
         drawView.selectedElement = null
     }
 
-    private fun toggleImage(imageId: Int) {
+    private fun addImage(imageId: Int) {
         drawView.loadImage(imageId)
     }
 
+    private fun addGif(gifId: Int) {
+        drawView.loadGif(gifId)
+    }
 }

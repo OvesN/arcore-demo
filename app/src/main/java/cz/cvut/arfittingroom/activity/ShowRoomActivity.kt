@@ -48,7 +48,7 @@ class ShowRoomActivity : AppCompatActivity() {
     private var isUpdated = false
 
     //FIXME
-    private var shouldPlayAnimation = true
+    private var shouldPlayAnimation = false
     private var gifPrepared = false
 
     private lateinit var foo: GifDrawable
@@ -151,7 +151,6 @@ class ShowRoomActivity : AppCompatActivity() {
                 updateModelsOnScreen()
             }
         }
-
     }
 
 
