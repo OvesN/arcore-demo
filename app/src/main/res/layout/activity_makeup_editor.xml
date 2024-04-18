@@ -25,6 +25,16 @@
         android:layout_height="match_parent"
         android:background="@android:color/transparent" />
 
+    <!-- top ui -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:background="@color/colorBlack"
+        android:gravity="top"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <!-- Placeholder for + and - buttons and dynamic layer buttons -->
     <LinearLayout
         android:id="@+id/layer_controls_container"
@@ -42,17 +52,17 @@
             android:layout_height="40dp"
             android:layout_marginTop="5dp"
             android:layout_marginEnd="5dp"
+            android:background="@null"
             android:scaleType="fitCenter"
-            android:src="@drawable/add"
-            android:background="@null"/>
+            android:src="@drawable/add" />
 
         <!-- Placeholder for dynamic number buttons -->
         <LinearLayout
             android:id="@+id/dynamic_layer_buttons_container"
-            android:paddingTop="20dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical" />
+            android:orientation="vertical"
+            android:paddingTop="20dp" />
     </LinearLayout>
 
 
@@ -99,44 +109,57 @@
             android:src="@drawable/redo_icon"
             app:layout_constraintBottom_toTopOf="@id/stroke_size_slider"
             app:layout_constraintEnd_toEndOf="parent" />
+
     </LinearLayout>
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="bottom"
+        android:layout_height="match_parent"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:translationX="-190dp"
+        >
 
         <com.google.android.material.slider.Slider
             android:id="@+id/stroke_size_slider"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_centerInParent="true"
             android:stepSize="1"
-            android:theme="@style/MyMaterialTheme"
+            android:theme="@style/CustomSliderStyle"
             android:value="10"
             android:valueFrom="1"
             android:valueTo="150"
-            android:layout_alignParentBottom="true"/>
+            android:rotation="-90"
+            app:tickVisible="false" />
+    </RelativeLayout>
+
+
+    <!-- bottom ui -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:background="@color/colorBlack"
+        android:gravity="bottom"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
 
         <ImageButton
             android:id="@+id/button_color_picker"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:layout_above="@id/stroke_size_slider"
-            android:layout_alignParentEnd="true"
-            android:layout_marginEnd="5dp"
             android:background="@null"
             android:scaleType="fitCenter"
-            android:src="@drawable/color_picker_icon" />
+            app:srcCompat="@drawable/color_picker" />
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_above="@id/stroke_size_slider"
-            android:layout_alignParentStart="true">
+            android:layout_alignParentStart="true"
+
+            android:orientation="horizontal">
 
             <ImageButton
                 android:id="@+id/button_star"
@@ -146,6 +169,7 @@
                 android:background="@null"
                 android:scaleType="fitCenter"
                 android:src="@drawable/star_icon" />
+
             <ImageButton
                 android:id="@+id/button_heart"
                 android:layout_width="40dp"
@@ -154,6 +178,7 @@
                 android:background="@null"
                 android:scaleType="fitCenter"
                 android:src="@drawable/heart_icon" />
+
             <ImageButton
                 android:id="@+id/button_flowers_image"
                 android:layout_width="50dp"
@@ -180,8 +205,7 @@
                 android:src="@drawable/hamburger" />
         </LinearLayout>
 
-    </RelativeLayout>
-
+    </LinearLayout>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

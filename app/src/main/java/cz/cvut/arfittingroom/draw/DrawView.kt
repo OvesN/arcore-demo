@@ -850,7 +850,6 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     fun showColorPickerDialog(setElementColor: Boolean = false) {
         ColorPickerDialog.Builder(context)
-            .setTitle("ColorPicker Dialog")
             .setPreferenceName("MyColorPickerDialog")
             .setPositiveButton(R.string.OK,
                 ColorEnvelopeListener { envelope, _ ->
