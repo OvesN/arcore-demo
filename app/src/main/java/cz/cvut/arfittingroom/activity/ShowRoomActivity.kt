@@ -48,7 +48,7 @@ class ShowRoomActivity : AppCompatActivity() {
     private var isUpdated = false
 
     //FIXME
-    private var shouldPlayAnimation = false
+    private var shouldPlayAnimation = true
     private var gifPrepared = false
 
     private lateinit var foo: GifDrawable
@@ -72,7 +72,7 @@ class ShowRoomActivity : AppCompatActivity() {
     //TODO uncomment when ready
     override fun onResume() {
         super.onResume()
-        resetGifState()
+        //resetGifState()
 
         val bitmap = getTempMaskTextureBitmap(applicationContext)
         bitmap?.let { createTextureAndApply(it); shouldPlayAnimation = false }
@@ -84,7 +84,7 @@ class ShowRoomActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         (application as ARFittingRoomApplication).appComponent.inject(this)
-        //foo = GifDrawable(resources, R.drawable.donut)
+        foo = GifDrawable(resources, R.drawable.donut)
 
         if (!checkIsSupportedDeviceOrFinish()) {
             return
