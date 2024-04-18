@@ -3,7 +3,6 @@ package cz.cvut.arfittingroom.activity
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
-import android.view.ScaleGestureDetector
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -59,21 +58,15 @@ class MakeupEditorActivity : AppCompatActivity() {
         binding.buttonUndo.setOnClickListener {
             drawView.undo()
         }
-        binding.buttonStar.setOnClickListener {
-            toggleStrokeShape(EShape.STAR)
-        }
-        binding.buttonHeart.setOnClickListener {
-            toggleStrokeShape(EShape.HEART)
-        }
-        binding.buttonFlowersImage.setOnClickListener {
-            addImage(R.drawable.flowers)
-        }
-        binding.buttonGif.setOnClickListener {
-            addGif(R.drawable.donut)
-        }
-        binding.buttonGif2.setOnClickListener {
-            addGif(R.drawable.hamburger)
-        }
+//        binding.buttonStar.setOnClickListener {
+//            toggleStrokeShape(EShape.STAR)
+//        }
+//        binding.buttonHeart.setOnClickListener {
+//            toggleStrokeShape(EShape.HEART)
+//        }
+//        binding.buttonFlowersImage.setOnClickListener {
+//            toggleImage(R.drawable.flowers)
+//        }
         slider.addOnChangeListener { _, value, _ ->
             drawView.setStrokeWidth(value)
         }

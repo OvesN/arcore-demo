@@ -73,17 +73,6 @@
         android:orientation="vertical"
         tools:layout_editor_absoluteX="0dp"
         tools:layout_editor_absoluteY="0dp">
-        <!-- Back Button in the top right corner -->
-        <ImageButton
-            android:id="@+id/button_back"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
-            android:layout_marginEnd="5dp"
-            android:background="@null"
-            android:src="@drawable/back_icon"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
 
         <ImageButton
             android:id="@+id/button_undo"
@@ -115,97 +104,93 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_constraintTop_toTopOf="parent"
+        android:translationX="-190dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
-        android:translationX="-190dp"
-        >
+        app:layout_constraintTop_toTopOf="parent">
 
         <com.google.android.material.slider.Slider
             android:id="@+id/stroke_size_slider"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_centerInParent="true"
+            android:rotation="-90"
             android:stepSize="1"
             android:theme="@style/CustomSliderStyle"
             android:value="10"
             android:valueFrom="1"
             android:valueTo="150"
-            android:rotation="-90"
             app:tickVisible="false" />
     </RelativeLayout>
 
 
-    <!-- bottom ui -->
-    <LinearLayout
+    <!-- ConstraintLayout is used for more flexible positioning -->
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="100dp"
         android:background="@color/colorBlack"
-        android:gravity="bottom"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
+        <!-- Color Picker Button at the top left -->
         <ImageButton
             android:id="@+id/button_color_picker"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
             android:background="@null"
             android:scaleType="fitCenter"
-            app:srcCompat="@drawable/color_picker" />
+            app:srcCompat="@drawable/color_picker"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:paddingTop="10dp"
+            android:paddingStart="10dp"
+            android:paddingEnd="0dp" />
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
+        <!-- Menu Button at the top right -->
+        <ImageButton
+            android:id="@+id/button_menu"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:background="@null"
+            android:scaleType="fitCenter"
+            app:srcCompat="@drawable/menu"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:paddingTop="10dp"
+            android:paddingEnd="10dp"
+            android:paddingStart="0dp"/>
 
-            android:orientation="horizontal">
+        <!-- OK Button at the bottom right -->
+        <ImageButton
+            android:id="@+id/button_ok"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:background="@null"
+            android:scaleType="fitCenter"
+            app:srcCompat="@drawable/ok"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:paddingBottom="10dp"
+            android:paddingEnd="10dp"
+            android:paddingStart="0dp"/>
 
-            <ImageButton
-                android:id="@+id/button_star"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_marginStart="5dp"
-                android:background="@null"
-                android:scaleType="fitCenter"
-                android:src="@drawable/star_icon" />
+        <!-- Back Button at the bottom left -->
+        <ImageButton
+            android:id="@+id/button_back"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:background="@null"
+            android:scaleType="fitCenter"
+            app:srcCompat="@drawable/back"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:paddingBottom="10dp"
+            android:paddingStart="10dp"
+            android:paddingEnd="0dp"/>
 
-            <ImageButton
-                android:id="@+id/button_heart"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_marginStart="5dp"
-                android:background="@null"
-                android:scaleType="fitCenter"
-                android:src="@drawable/heart_icon" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-            <ImageButton
-                android:id="@+id/button_flowers_image"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_marginStart="5dp"
-                android:background="@null"
-                android:scaleType="fitCenter"
-                android:src="@drawable/flowers" />
-            <ImageButton
-                android:id="@+id/button_gif"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_marginStart="5dp"
-                android:background="@null"
-                android:scaleType="fitCenter"
-                android:src="@drawable/donut" />
-            <ImageButton
-                android:id="@+id/button_gif2"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_marginStart="5dp"
-                android:background="@null"
-                android:scaleType="fitCenter"
-                android:src="@drawable/hamburger" />
-        </LinearLayout>
-
-    </LinearLayout>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
