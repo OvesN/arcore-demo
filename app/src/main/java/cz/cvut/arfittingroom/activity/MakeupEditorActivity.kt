@@ -3,6 +3,7 @@ package cz.cvut.arfittingroom.activity
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
+import android.view.ScaleGestureDetector
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -29,8 +30,6 @@ class MakeupEditorActivity : AppCompatActivity() {
     private lateinit var slider: Slider
     private lateinit var layersButtonsContainer: LinearLayout
 
-    @Inject
-    lateinit var makeUpService: MakeupService
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

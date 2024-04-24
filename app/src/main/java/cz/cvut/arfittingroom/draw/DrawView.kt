@@ -9,7 +9,6 @@ import android.graphics.Paint
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.MotionEvent.ACTION_POINTER_UP
-import android.view.ScaleGestureDetector
 import android.view.View
 import androidx.annotation.ColorInt
 import androidx.core.graphics.alpha
@@ -17,6 +16,7 @@ import com.skydoves.colorpickerview.ColorPickerDialog
 import com.skydoves.colorpickerview.listeners.ColorEnvelopeListener
 import cz.cvut.arfittingroom.ARFittingRoomApplication
 import cz.cvut.arfittingroom.R
+import cz.cvut.arfittingroom.controller.ScaleGestureDetector
 import cz.cvut.arfittingroom.draw.DrawHistoryHolder.addToHistory
 import cz.cvut.arfittingroom.draw.DrawHistoryHolder.clearHistory
 import cz.cvut.arfittingroom.draw.command.Repaintable
@@ -28,8 +28,8 @@ import cz.cvut.arfittingroom.draw.command.action.element.impl.RotateElement
 import cz.cvut.arfittingroom.draw.command.action.element.impl.ScaleElement
 import cz.cvut.arfittingroom.draw.model.PaintOptions
 import cz.cvut.arfittingroom.draw.model.element.Element
-import cz.cvut.arfittingroom.draw.model.element.impl.Figure
 import cz.cvut.arfittingroom.draw.model.element.impl.Curve
+import cz.cvut.arfittingroom.draw.model.element.impl.Figure
 import cz.cvut.arfittingroom.draw.model.element.impl.Image
 import cz.cvut.arfittingroom.draw.model.element.strategy.impl.HeartPathCreationStrategy
 import cz.cvut.arfittingroom.draw.model.element.strategy.impl.StarPathCreationStrategy
@@ -38,11 +38,13 @@ import cz.cvut.arfittingroom.draw.model.enums.EShape
 import cz.cvut.arfittingroom.draw.path.DrawablePath
 import cz.cvut.arfittingroom.draw.service.LayerManager
 import cz.cvut.arfittingroom.draw.service.UIDrawer
+import cz.cvut.arfittingroom.model.TOUCH_TO_MOVE_THRESHOLD
 import cz.cvut.arfittingroom.utils.FileUtil.saveTempMaskTextureBitmap
 import mu.KotlinLogging
 import javax.inject.Inject
 import kotlin.math.abs
 import kotlin.math.atan2
+import kotlin.math.sqrt
 
 
 private val logger = KotlinLogging.logger { }
@@ -98,7 +100,8 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         // Add event for element scaling
         scaleGestureDetector = ScaleGestureDetector(
             context,
-            object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
+            object :  ScaleGestureDetector.SimpleOnScaleGestureListener() {
+
                 override fun onScaleBegin(detector: ScaleGestureDetector): Boolean {
                     ignoreNextOneFingerMove = true
                     return super.onScaleBegin(detector)
@@ -108,7 +111,6 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                     if (!gestureTolerance(detector)) {
                         return false
                     }
-
                     if (selectedElement != null) {
                         scaleSelectedElement(detector)
                     } else {
@@ -153,7 +155,6 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                 }
             })
 
-
         // Post a runnable to the view, which will be executed after the view is laid out
         post {
             if (layerManager.getNumOfLayers() == 0) {
@@ -164,6 +165,8 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         }
     }
 
+    private var lastDownX = 0f
+    private var lastDownY = 0f
     override fun onTouchEvent(event: MotionEvent): Boolean {
         val inverseMatrix = Matrix()
         if (!canvasTransformationMatrix.invert(inverseMatrix)) {
@@ -171,13 +174,30 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         }
         val touchPoint = floatArrayOf(event.x, event.y)
         inverseMatrix.mapPoints(touchPoint)
-
         val x = touchPoint[0]
         val y = touchPoint[1]
+
+        // Some devices do not distinguish MOVE and just screen touching events, so we need to control it manually
+        when (event.actionMasked) {
+            MotionEvent.ACTION_DOWN -> {
+                lastDownX = x
+                lastDownY = y
+            }
+            MotionEvent.ACTION_MOVE -> {
+                if (!isDistanceGreaterThanThreshold(x, y)) {
+                    return true
+                }
+            }
+            MotionEvent.ACTION_UP, ACTION_POINTER_UP -> {
+                lastDownX = 0f
+                lastDownY = 0f
+            }
+        }
 
         // Handle multi-touch events for scaling
         if (event.pointerCount == 2) {
             ignoreDrawing = true
+            layerManager.setCurPath(DrawablePath())
             scaleGestureDetector.onTouchEvent(event)
             if (selectedElement == null) {
                 handleCanvasGesture(event)
@@ -186,6 +206,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             (event.actionMasked == ACTION_POINTER_UP || event.actionMasked == MotionEvent.ACTION_UP)
         ) {
             ignoreDrawing = false
+            return true
         }
 
         //TODO fix this, different modes and different brushes?
@@ -200,7 +221,6 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     }
 
     private fun handleCanvasGesture(event: MotionEvent) {
-
         when (event.actionMasked) {
             MotionEvent.ACTION_MOVE -> {
                 val currentX = (event.getX(0) + event.getX(1)) / 2
@@ -231,7 +251,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private fun handleElementEditing(event: MotionEvent, x: Float, y: Float) {
         if (!scaleGestureDetector.isInProgress) {
             when (event.action) {
-                MotionEvent.ACTION_POINTER_UP, MotionEvent.ACTION_UP -> {
+                ACTION_POINTER_UP, MotionEvent.ACTION_UP -> {
                     if (isInElementMovingMode) {
                         selectedElement?.let { element ->
                             element.endContinuousMove()
@@ -351,6 +371,15 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         angleDelta += if (angleDelta > 180) -360 else if (angleDelta < -180) 360 else 0
 
         return angleDelta.toFloat()
+    }
+
+   private fun isDistanceGreaterThanThreshold( x2: Float, y2: Float): Boolean {
+        val deltaX = lastDownX - x2
+        val deltaY = lastDownY - y2
+
+        val distance = sqrt(deltaX * deltaX + deltaY * deltaY)
+
+        return distance > TOUCH_TO_MOVE_THRESHOLD
     }
 
     private fun calculateScaleFactor(x: Float, y: Float): Float {
@@ -773,8 +802,6 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         val transformationMatrix = Matrix()
 
         transformationMatrix.postTranslate(totalTranslateX, totalTranslateY)
-
-
         transformationMatrix.postScale(canvasScaleFactor, canvasScaleFactor, pivotX, pivotY)
 
         return transformationMatrix
