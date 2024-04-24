@@ -11,8 +11,6 @@ import android.graphics.RectF
 import cz.cvut.arfittingroom.R
 import cz.cvut.arfittingroom.draw.model.element.Element
 import cz.cvut.arfittingroom.draw.model.enums.EElementEditAction
-import cz.cvut.arfittingroom.utils.IconUtil
-import cz.cvut.arfittingroom.utils.ScreenUtil
 import cz.cvut.arfittingroom.utils.ScreenUtil.screenHeight
 import cz.cvut.arfittingroom.utils.ScreenUtil.screenWidth
 
@@ -55,7 +53,8 @@ class UIDrawer(private val context: Context) {
         }
 
         menuBitmap = prepareMenuBitmap()
-        faceTextureImage = BitmapFactory.decodeResource(context.resources, R.drawable.canonical_face_texture)
+        faceTextureImage =
+            BitmapFactory.decodeResource(context.resources, R.drawable.canonical_face_texture)
         faceTextureMatix = prepareFaceTextureMatrix()
         loadEditElementIcons()
     }
@@ -124,25 +123,19 @@ class UIDrawer(private val context: Context) {
 
     private fun loadEditElementIcons() {
         editElementIcons[EElementEditAction.DELETE] =
-            IconUtil.changeIconColor(
-                BitmapFactory.decodeResource(context.resources, R.drawable.delete_icon),
-                Color.YELLOW
-            )
+
+            BitmapFactory.decodeResource(context.resources, R.drawable.delete_icon)
+
         editElementIcons[EElementEditAction.ROTATE] =
-            IconUtil.changeIconColor(
-                BitmapFactory.decodeResource(context.resources, R.drawable.rotate_icon),
-                Color.YELLOW
-            )
+
+            BitmapFactory.decodeResource(context.resources, R.drawable.rotate_icon)
+
         editElementIcons[EElementEditAction.SCALE] =
-            IconUtil.changeIconColor(
-                (BitmapFactory.decodeResource(context.resources, R.drawable.scale_icon)),
-                Color.YELLOW
-            )
+
+            (BitmapFactory.decodeResource(context.resources, R.drawable.scale_icon))
+
         editElementIcons[EElementEditAction.MENU] =
-            IconUtil.changeIconColor(
-                (BitmapFactory.decodeResource(context.resources, R.drawable.menu_icon)),
-                Color.YELLOW
-            )
+            (BitmapFactory.decodeResource(context.resources, R.drawable.menu_icon))
     }
 
     fun drawFaceTextureImage(canvas: Canvas) {

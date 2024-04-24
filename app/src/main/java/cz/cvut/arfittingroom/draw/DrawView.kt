@@ -1,7 +1,6 @@
 package cz.cvut.arfittingroom.draw
 
 import android.content.Context
-import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
@@ -13,7 +12,6 @@ import android.view.MotionEvent.ACTION_POINTER_UP
 import android.view.View
 import androidx.annotation.ColorInt
 import androidx.core.graphics.alpha
-import androidx.core.graphics.drawable.toBitmap
 import com.skydoves.colorpickerview.ColorPickerDialog
 import com.skydoves.colorpickerview.listeners.ColorEnvelopeListener
 import cz.cvut.arfittingroom.ARFittingRoomApplication
@@ -41,13 +39,17 @@ import cz.cvut.arfittingroom.draw.model.enums.EShape
 import cz.cvut.arfittingroom.draw.path.DrawablePath
 import cz.cvut.arfittingroom.draw.service.LayerManager
 import cz.cvut.arfittingroom.draw.service.UIDrawer
+import cz.cvut.arfittingroom.model.SPAN_SLOP
 import cz.cvut.arfittingroom.model.TOUCH_TO_MOVE_THRESHOLD
 import cz.cvut.arfittingroom.utils.FileUtil.saveTempMaskTextureBitmap
 import mu.KotlinLogging
 import pl.droidsonroids.gif.GifDecoder
 import pl.droidsonroids.gif.GifDrawable
+import pl.droidsonroids.gif.GifDrawableBuilder
+import pl.droidsonroids.gif.GifDrawableInit
 import pl.droidsonroids.gif.GifOptions
 import pl.droidsonroids.gif.InputSource
+import pl.droidsonroids.gif.InputSource.ResourcesSource
 import javax.inject.Inject
 import kotlin.math.abs
 import kotlin.math.atan2
@@ -55,8 +57,6 @@ import kotlin.math.sqrt
 
 
 private val logger = KotlinLogging.logger { }
-
-private const val SPAN_SLOP = 7
 
 
 class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
@@ -111,7 +111,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         // Add event for element scaling
         scaleGestureDetector = ScaleGestureDetector(
             context,
-            object :  ScaleGestureDetector.SimpleOnScaleGestureListener() {
+            object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
 
                 override fun onScaleBegin(detector: ScaleGestureDetector): Boolean {
                     ignoreNextOneFingerMove = true
@@ -194,11 +194,13 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                 lastDownX = x
                 lastDownY = y
             }
+
             MotionEvent.ACTION_MOVE -> {
                 if (!isDistanceGreaterThanThreshold(x, y)) {
                     return true
                 }
             }
+
             MotionEvent.ACTION_UP, ACTION_POINTER_UP -> {
                 lastDownX = 0f
                 lastDownY = 0f
@@ -384,7 +386,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         return angleDelta.toFloat()
     }
 
-   private fun isDistanceGreaterThanThreshold( x2: Float, y2: Float): Boolean {
+    private fun isDistanceGreaterThanThreshold(x2: Float, y2: Float): Boolean {
         val deltaX = lastDownX - x2
         val deltaY = lastDownY - y2
 
@@ -434,6 +436,8 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             }
 
             EElementEditAction.CHANGE_COLOR -> {
+                element.isSelected = false
+                selectedElement = null
                 showColorPickerDialog(true)
             }
 
@@ -442,6 +446,8 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                     element,
                 )
                 command?.let { addToHistory(command) }
+                element.isSelected = false
+                selectedElement = null
             }
 
             EElementEditAction.MOVE_DOWN -> {
@@ -449,13 +455,18 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                     element,
                 )
                 command?.let { addToHistory(command) }
+                element.isSelected = false
+                selectedElement = null
             }
             //FIXME do not work, history do not work
             EElementEditAction.MOVE_TO -> {
+                element.isSelected = false
+                selectedElement = null
                 //TODO open menu with layers
                 return
                 val command = layerManager.moveElementTo(element, 1)
                 command?.let { addToHistory(command) }
+
             }
         }
     }
@@ -680,7 +691,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             Image(
                 width.toFloat() / 2,
                 height.toFloat() / 2,
-                width.toFloat() / 2,
+                width.toFloat() / 4,
                 imageId,
             ).apply { bitmap = imageBitmap }
         )
@@ -690,11 +701,15 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     fun loadGif(gifId: Int) {
         val gif = GifDrawable(resources, gifId)
-//        val sampleSize =
-//            calculateInSampleSize(gif.bounds.width(), gif.bounds.height(), width / 3, height / 3)
-//        val gifDecoder = GifDecoder(
-//            InputSource.ResourcesSource(resources, gifId),
-//            GifOptions().apply { this.setInSampleSize(sampleSize) })
+
+        val adjustedGif = GifDrawableBuilder().with(gif).from(resources, gifId).sampleSize(
+            calculateInSampleSize(
+                gif.currentFrame.width,
+                gif.currentFrame.height,
+                width / 3,
+                height / 3
+            )
+        ).build()
 
         addElementToLayer(
             layerManager.getActiveLayerIndex(),
@@ -702,13 +717,11 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                 gifId,
                 width.toFloat() / 2,
                 height.toFloat() / 2,
-                width.toFloat() / 2,
+                width.toFloat() / 4,
             ).apply {
-                setDrawable(gif)
+                setDrawable(adjustedGif)
             }
         )
-
-        //startAnimation(gif)
 
         invalidate()
     }

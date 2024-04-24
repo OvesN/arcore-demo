@@ -34,8 +34,7 @@ class Gif(
 
     override fun drawSpecific(canvas: Canvas) {
         transformationMatrix = createTransformationMatrix()
-        //TODO fix scaling
-        firstFrameBitmap?.let { canvas.drawBitmap(it, outerRadius, outerRadius, null) }
+        firstFrameBitmap?.let { canvas.drawBitmap(it, transformationMatrix, null) }
     }
 
     //TODO resolve later copy paste
@@ -53,7 +52,7 @@ class Gif(
         inverseMatrix.mapPoints(points)
 
         // Check if the point is within bitmap bounds
-        if (points[0] < 0 || points[0] >= gifDrawable.bounds.width() || points[1] < 0 || points[1] >= gifDrawable.bounds.height()) {
+        if (points[0] < 0 || points[0] >= gifDrawable.currentFrame.width || points[1] < 0 || points[1] >= gifDrawable.currentFrame.height) {
             return false
         }
 
@@ -63,8 +62,8 @@ class Gif(
     }
 
     private fun createTransformationMatrix(): Matrix {
-        val width = gifDrawable.bounds.width()
-        val height = gifDrawable.bounds.height()
+        val width = gifDrawable.currentFrame.width
+        val height = gifDrawable.currentFrame.height
 
         // Calculate the scale factor to fit the bitmap within the outerRadius
         val scaleFactor = (outerRadius * 2) / max(width, height)
@@ -76,7 +75,7 @@ class Gif(
             postRotate(
                 rotationAngle,
                 width / 2f * scaleFactor,
-                width / 2f * scaleFactor
+                height / 2f * scaleFactor
             )
 
             // Translate the bitmap to draw it at the specified center (centerX, centerY)

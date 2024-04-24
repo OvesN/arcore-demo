@@ -71,6 +71,9 @@ class MakeupEditorActivity : AppCompatActivity() {
         binding.buttonGif.setOnClickListener {
             addGif(R.drawable.donut)
         }
+        binding.buttonGif2.setOnClickListener {
+            addGif(R.drawable.hamburger)
+        }
         slider.addOnChangeListener { _, value, _ ->
             drawView.setStrokeWidth(value)
         }
