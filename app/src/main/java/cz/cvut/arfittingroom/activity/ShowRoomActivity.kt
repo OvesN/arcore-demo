@@ -66,7 +66,6 @@ class ShowRoomActivity : AppCompatActivity() {
     private var gifRunnable: Runnable? = null
     private var frameDelay: Long = 100 // Default frame delay (100 ms per frame)
 
-
     override fun onResume() {
         super.onResume()
         resetGifState()
@@ -244,6 +243,7 @@ class ShowRoomActivity : AppCompatActivity() {
         val numberOfFrames = gif?.numberOfFrames ?: 0
 
         for (i in 0 until numberOfFrames) {
+            val boo = gif?.seekToFrameAndGet(i)
             Texture.builder()
                 .setSource(gif?.seekToFrameAndGet(i))
                 .build()

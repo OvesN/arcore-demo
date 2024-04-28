@@ -812,8 +812,8 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         if (layerManager.doesContainAnyGif()) {
             layerManager.setAllGifsToAnimationMode()
             layerManager.resetAllGifs()
-
-            saveTempMaskGif(layerManager, height, width, context) {
+            val gif = GifDrawable(resources, R.drawable.hamburger)
+            saveTempMaskGif(layerManager, gif, height, width, context) {
                 onSaved()
             }
         } else {
@@ -833,8 +833,6 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
         return bitmap
     }
-
-
 
 
     fun showColorPickerDialog(setElementColor: Boolean = false) {

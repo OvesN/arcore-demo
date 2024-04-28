@@ -4,14 +4,8 @@ package cz.cvut.arfittingroom.utils
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Matrix
-import android.graphics.Movie
-import android.graphics.drawable.AnimatedImageDrawable
-import com.bumptech.glide.load.resource.gif.GifDrawable
-import cz.cvut.arfittingroom.draw.Layer
-import cz.cvut.arfittingroom.draw.model.element.impl.Gif
 import cz.cvut.arfittingroom.draw.service.LayerManager
 import cz.cvut.arfittingroom.model.MASK_GIF_FILE_NAME
 import cz.cvut.arfittingroom.model.MASK_TEXTURE_FILE_NAME
@@ -53,7 +47,7 @@ object FileUtil {
         return try {
             val fis = context.openFileInput(MASK_GIF_FILE_NAME)
             val bis = BufferedInputStream(fis)
-            val gif = GifDrawable.createFromStream(bis)
+            val gif = GifDrawable(bis)
 
             fis.close()
             bis.close()
@@ -66,6 +60,7 @@ object FileUtil {
 
     fun saveTempMaskGif(
         layerManager: LayerManager,
+        gifDrawable: GifDrawable,
         height: Int,
         width: Int,
         context: Context,
@@ -73,7 +68,7 @@ object FileUtil {
     ) {
         try {
             context.openFileOutput(MASK_GIF_FILE_NAME, Context.MODE_PRIVATE).use { fos ->
-                val gifData = generateGIF(layerManager, height, width)
+                val gifData = generateGIF(layerManager, height, width, gifDrawable)
                 fos.write(gifData)
                 fos.close()
                 onSaved()
@@ -86,23 +81,25 @@ object FileUtil {
     private fun generateGIF(
         layerManager: LayerManager,
         height: Int,
-        width: Int
+        width: Int,
+        gifDrawable: GifDrawable
     ): ByteArray {
         val bos = ByteArrayOutputStream()
         val maxNumberOfFrames = layerManager.getMaxNumberOfFrames()
 
         animatedGifEncoder.start(bos)
-        animatedGifEncoder.setDelay(100)
+        animatedGifEncoder.setDelay(1000)
         animatedGifEncoder.setTransparent(Color.TRANSPARENT)
+        animatedGifEncoder.setRepeat(0)
+        animatedGifEncoder.setDispose(2)
 
+        var counter = 0
         repeat(maxNumberOfFrames) {
             animatedGifEncoder.addFrame(
-                adjustBitmap(
-                    layerManager.createBitmapFromAllLayers(),
-                    height,
-                    width
-                )
+                gifDrawable.seekToFrameAndGet(counter)
+
             )
+            counter++
         }
 
         animatedGifEncoder.finish()
