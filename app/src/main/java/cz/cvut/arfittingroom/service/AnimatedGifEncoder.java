@@ -329,7 +329,7 @@ public class AnimatedGifEncoder {
         int h = bitmap.getHeight();
         if ((w != width) || (h != height)) {
             // create new bitmap with right size/format
-            Bitmap temp = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
+            Bitmap temp = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
             Canvas g = new Canvas(temp);
             g.drawBitmap(bitmap, 0, 0, new Paint());
             bitmap = temp;

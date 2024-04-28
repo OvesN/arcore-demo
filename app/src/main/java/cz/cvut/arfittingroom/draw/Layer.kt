@@ -154,7 +154,7 @@ class Layer(
 
         resetBitmaps()
 
-        elementsToDraw.forEach { if (it != selectedElement ) it.setSelected(false) }
+        elementsToDraw.forEach { if (it != selectedElement) it.setSelected(false) }
 
         this.elementToUpdate = selectedElement
         val selectedElementIndex = elementsToDraw.indexOf(selectedElement)
@@ -216,8 +216,26 @@ class Layer(
         }
     }
 
-
     fun doesHaveGif(): Boolean =
-        elementsToDraw.firstOrNull{it is Gif}?.let { true } ?: false
+        elementsToDraw.firstOrNull { it is Gif }?.let { true } ?: false
+
+    fun getMaxNumberOfFrames() =
+        elementsToDraw.filterIsInstance<Gif>().maxOfOrNull { it.gifDrawable.numberOfFrames } ?: 0
+
+    fun setAllGifsToAnimationMode() {
+        elementsToDraw.forEach {
+            if (it is Gif) {
+                it.shouldDrawNextFrame = true
+            }
+        }
+    }
+
+    fun resetAllGifs() {
+        elementsToDraw.forEach {
+            if (it is Gif) {
+                it.gifDrawable.setVisible(true, true)
+            }
+        }
+    }
 
 }

@@ -47,11 +47,10 @@ class ShowRoomActivity : AppCompatActivity() {
     private var faceNodeMap = HashMap<AugmentedFace, HashMap<EModelType, AugmentedFaceNode>>()
     private var isUpdated = false
 
-    //FIXME
-    private var shouldPlayAnimation = true
+    private var shouldPlayAnimation = false
     private var gifPrepared = false
 
-    private lateinit var foo: GifDrawable
+    private var gif: GifDrawable? = null
 
     private val gifTextures = mutableListOf<Texture>()
 
@@ -63,28 +62,25 @@ class ShowRoomActivity : AppCompatActivity() {
     @Inject
     lateinit var editorService: ModelEditorService
 
-
     private var handler = Handler(Looper.getMainLooper())
     private var gifRunnable: Runnable? = null
     private var frameDelay: Long = 100 // Default frame delay (100 ms per frame)
 
 
-    //TODO uncomment when ready
     override fun onResume() {
         super.onResume()
-        //resetGifState()
+        resetGifState()
 
         val bitmap = getTempMaskTextureBitmap(applicationContext)
         bitmap?.let { createTextureAndApply(it); shouldPlayAnimation = false }
-        val gif = getTempMaskGif(applicationContext)
+
+        gif = getTempMaskGif(applicationContext)
         gif?.let { shouldPlayAnimation = true}
     }
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         (application as ARFittingRoomApplication).appComponent.inject(this)
-        foo = GifDrawable(resources, R.drawable.donut)
 
         if (!checkIsSupportedDeviceOrFinish()) {
             return
@@ -245,15 +241,14 @@ class ShowRoomActivity : AppCompatActivity() {
 
     private fun prepareAllGifTextures() {
         gifTextures.clear()
-        val numberOfFrames = foo.numberOfFrames
+        val numberOfFrames = gif?.numberOfFrames ?: 0
 
         for (i in 0 until numberOfFrames) {
             Texture.builder()
-                .setSource(foo.seekToFrameAndGet(i))
+                .setSource(gif?.seekToFrameAndGet(i))
                 .build()
                 .thenAccept { texture ->
                     gifTextures.add(texture)
-                    //applyTextureToAllFaces(texture)
                     if (gifTextures.size == numberOfFrames) {
                         gifPrepared = true
                     }

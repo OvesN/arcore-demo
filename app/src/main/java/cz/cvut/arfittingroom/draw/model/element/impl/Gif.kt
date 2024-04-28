@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Matrix
 import android.util.Log
+import com.bumptech.glide.load.resource.gif.GifDrawable
 import cz.cvut.arfittingroom.draw.model.element.BoundingBox
 import cz.cvut.arfittingroom.draw.model.element.Element
 import cz.cvut.arfittingroom.model.TRANSPARENT_CODE
@@ -31,7 +32,7 @@ class Gif(
 
     fun setDrawable(gifDrawable: GifDrawable) {
         this.gifDrawable = gifDrawable
-        firstFrameBitmap = gifDrawable.seekToFrameAndGet(0)
+        firstFrameBitmap = gifDrawable.firstFrame
         gifDrawable.setVisible(true, true)
     }
 

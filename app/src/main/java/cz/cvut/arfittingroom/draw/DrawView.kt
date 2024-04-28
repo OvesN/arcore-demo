@@ -44,6 +44,8 @@ import cz.cvut.arfittingroom.draw.service.LayerManager
 import cz.cvut.arfittingroom.draw.service.UIDrawer
 import cz.cvut.arfittingroom.model.SPAN_SLOP
 import cz.cvut.arfittingroom.model.TOUCH_TO_MOVE_THRESHOLD
+import cz.cvut.arfittingroom.utils.FileUtil.adjustBitmap
+import cz.cvut.arfittingroom.utils.FileUtil.saveTempMaskGif
 import cz.cvut.arfittingroom.utils.FileUtil.saveTempMaskTextureBitmap
 import mu.KotlinLogging
 import pl.droidsonroids.gif.GifDrawable
@@ -255,11 +257,13 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         }
     }
 
-    private fun stopAnimation(gif: Gif) {
-        gif.shouldDrawNextFrame = false
+    fun stopAnimation(gif: Gif? = null) {
+        if (gif != null) {
+            gif.shouldDrawNextFrame = false
+            gif.gifDrawable.setVisible(true, true)
+        }
         Log.println(Log.INFO, null, "Stop animation")
         gifToPlay = null
-        gif.gifDrawable.setVisible(true, true)
         gifRunnable?.let {
             handler.removeCallbacks(it)
             gifRunnable = null
@@ -805,9 +809,19 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     fun saveBitmap(onSaved: () -> Unit) {
         layerManager.deselectAllElements()
-        saveTempMaskTextureBitmap(adjustBitmap(createBitmap()), context) {
-            onSaved()
+        if (layerManager.doesContainAnyGif()) {
+            layerManager.setAllGifsToAnimationMode()
+            layerManager.resetAllGifs()
+
+            saveTempMaskGif(layerManager, height, width, context) {
+                onSaved()
+            }
+        } else {
+            saveTempMaskTextureBitmap(adjustBitmap(createBitmap(), height, width), context) {
+                onSaved()
+            }
         }
+
     }
 
     private fun createBitmap(): Bitmap {
@@ -820,36 +834,8 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         return bitmap
     }
 
-    private fun adjustBitmap(bitmap: Bitmap): Bitmap {
-        // Calculate the dimensions for the square crop
-        val newY = (height - width) / 2
 
-        // Crop the bitmap
-        val croppedBitmap = Bitmap.createBitmap(bitmap, 0, newY, width, width)
 
-        // Create a matrix for the mirroring transformation
-        val matrix = Matrix().apply {
-            postScale(
-                -1f,
-                1f,
-                croppedBitmap.width / 2f,
-                croppedBitmap.height / 2f
-            )
-        }
-
-        // Create and return the mirrored bitmap
-        val mirroredBitmap = Bitmap.createBitmap(
-            croppedBitmap,
-            0,
-            0,
-            croppedBitmap.width,
-            croppedBitmap.height,
-            matrix,
-            true
-        )
-
-        return Bitmap.createScaledBitmap(mirroredBitmap, 1024, 1024, true)
-    }
 
     fun showColorPickerDialog(setElementColor: Boolean = false) {
         ColorPickerDialog.Builder(context)

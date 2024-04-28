@@ -97,6 +97,11 @@ class MakeupEditorActivity : AppCompatActivity() {
         updateLayersButtons(drawView.layerManager.getNumOfLayers())
     }
 
+    override fun onPause() {
+        super.onPause()
+        drawView.stopAnimation()
+    }
+
     // Create buttons for layers in reverse order and select the active one
     private fun updateLayersButtons(numOfLayers: Int) {
         layersButtonsContainer.removeAllViews()

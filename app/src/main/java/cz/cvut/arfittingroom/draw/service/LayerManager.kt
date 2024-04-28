@@ -264,7 +264,11 @@ class LayerManager {
     private fun createBitmapFromLayers(layers: List<Layer>): Bitmap? {
         if (layers.isEmpty()) return null
 
-        val bitmap = Bitmap.createBitmap(ScreenUtil.screenWidth, ScreenUtil.screenHeight, Bitmap.Config.ARGB_8888)
+        val bitmap = Bitmap.createBitmap(
+            ScreenUtil.screenWidth,
+            ScreenUtil.screenHeight,
+            Bitmap.Config.ARGB_8888
+        )
         val canvas = Canvas(bitmap)
 
         layers.forEach { layer ->
@@ -288,4 +292,23 @@ class LayerManager {
 
     }
 
+    fun doesContainAnyGif() = layers.any { it.doesHaveGif() }
+
+    fun getMaxNumberOfFrames() = layers.maxOfOrNull {
+        it.getMaxNumberOfFrames()
+    } ?: 0
+
+    fun createBitmapFromAllLayers() = createBitmapFromLayers(layers) ?: Bitmap.createBitmap(
+        ScreenUtil.screenWidth,
+        ScreenUtil.screenHeight,
+        Bitmap.Config.ARGB_8888
+    )
+
+    fun setAllGifsToAnimationMode() {
+        layers.forEach { it.setAllGifsToAnimationMode() }
+    }
+
+    fun resetAllGifs() {
+        layers.forEach { it.resetAllGifs() }
+    }
 }
