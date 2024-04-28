@@ -37,19 +37,21 @@ class Gif(
 
     override fun drawSpecific(canvas: Canvas) {
         transformationMatrix = createTransformationMatrix()
-        val bitmapToDraw = if (shouldDrawNextFrame) gifDrawable.currentFrame else firstFrameBitmap
+        val bitmapToDraw = if (shouldDrawNextFrame) gifDrawable.seekToFrameAndGet(nextFrameIndex) else firstFrameBitmap
 
         bitmapToDraw?.let { canvas.drawBitmap(it, transformationMatrix, null) }
         if (shouldDrawNextFrame) {
-            Log.println(Log.INFO, null, "frame " + gifDrawable.currentFrameIndex + " is drawn")
+            Log.println(Log.INFO, null, "frame $nextFrameIndex is drawn")
         }
 
-        nextFrameIndex = gifDrawable.currentFrameIndex
+        nextFrameIndex++
+        nextFrameIndex %= gifDrawable.numberOfFrames - 1
     }
 
     override fun setSelected(isSelected: Boolean) {
         super.setSelected(isSelected)
         shouldDrawNextFrame = isSelected
+        nextFrameIndex = 0
     }
 
     //TODO resolve later copy paste
