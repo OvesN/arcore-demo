@@ -84,7 +84,7 @@ abstract class Element : Scalable, Drawable, Movable, Rotatable {
 
 
     open fun doIntersect(x: Float, y: Float): Boolean {
-        return boundingBox.rectF.contains(x, y)
+        return boundingBox.contains(x, y)
     }
 
     open fun setSelected(isSelected: Boolean) {

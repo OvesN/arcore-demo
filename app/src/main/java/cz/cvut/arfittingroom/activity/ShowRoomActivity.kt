@@ -8,6 +8,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -29,11 +30,11 @@ import cz.cvut.arfittingroom.model.enums.EMakeupType
 import cz.cvut.arfittingroom.model.enums.EModelType
 import cz.cvut.arfittingroom.service.MakeupService
 import cz.cvut.arfittingroom.service.ModelEditorService
-import cz.cvut.arfittingroom.utils.FileUtil.getTempMaskGif
+import cz.cvut.arfittingroom.utils.FileUtil.doesTempAnimatedMaskExist
+import cz.cvut.arfittingroom.utils.FileUtil.getNextTempMaskFrame
 import cz.cvut.arfittingroom.utils.FileUtil.getTempMaskTextureBitmap
 import cz.cvut.arfittingroom.utils.TextureCombinerUtil.combineDrawables
 import mu.KotlinLogging
-import pl.droidsonroids.gif.GifDrawable
 import javax.inject.Inject
 
 class ShowRoomActivity : AppCompatActivity() {
@@ -49,8 +50,6 @@ class ShowRoomActivity : AppCompatActivity() {
 
     private var shouldPlayAnimation = false
     private var gifPrepared = false
-
-    private var gif: GifDrawable? = null
 
     private val gifTextures = mutableListOf<Texture>()
 
@@ -73,8 +72,8 @@ class ShowRoomActivity : AppCompatActivity() {
         val bitmap = getTempMaskTextureBitmap(applicationContext)
         bitmap?.let { createTextureAndApply(it); shouldPlayAnimation = false }
 
-        gif = getTempMaskGif(applicationContext)
-        gif?.let { shouldPlayAnimation = true}
+        shouldPlayAnimation = doesTempAnimatedMaskExist(applicationContext)
+
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -240,24 +239,28 @@ class ShowRoomActivity : AppCompatActivity() {
 
     private fun prepareAllGifTextures() {
         gifTextures.clear()
-        val numberOfFrames = gif?.numberOfFrames ?: 0
+        var counter = 0
 
-        for (i in 0 until numberOfFrames) {
-            val boo = gif?.seekToFrameAndGet(i)
+        while (true) {
+            val frameBitmap = getNextTempMaskFrame(applicationContext, counter) ?: break
             Texture.builder()
-                .setSource(gif?.seekToFrameAndGet(i))
+                .setSource(frameBitmap)
                 .build()
                 .thenAccept { texture ->
                     gifTextures.add(texture)
-                    if (gifTextures.size == numberOfFrames) {
-                        gifPrepared = true
-                    }
                 }
                 .exceptionally { throwable ->
-                    logger.error { "Error creating texture for frame $i: $throwable" }
+                    Log.println(
+                        Log.ERROR,
+                        null,
+                        "Error creating texture for frame $counter: $throwable"
+                    )
                     null
                 }
+            counter++
         }
+
+        gifPrepared = true
     }
 
 

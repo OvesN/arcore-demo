@@ -36,7 +36,7 @@ class Layer(
     private var elementsBelowUpdatableElementBitmap: Bitmap? = null
     private var elementAboveUpdatableElementBitmap: Bitmap? = null
 
-    private var elementToUpdate: Element? = null
+    var elementToUpdate: Element? = null
 
 
     /**
@@ -142,22 +142,15 @@ class Layer(
 
     /**
      * Prepare bitmaps
-     * If [selectedElement] is the same as previous one for this layer, do nothing.
-     * If not, recreate bitmaps for items above and below this [selectedElement]
+     * Recreate bitmaps for items above and below updatable element
      *
-     * @param selectedElement
      */
-    fun prepareBitmaps(selectedElement: Element) {
-        if (selectedElement == this.elementToUpdate) {
-            return
-        }
-
+    fun prepareBitmaps() {
         resetBitmaps()
 
-        elementsToDraw.forEach { if (it != selectedElement) it.setSelected(false) }
+        elementsToDraw.forEach { if (it != elementToUpdate) it.setSelected(false) }
 
-        this.elementToUpdate = selectedElement
-        val selectedElementIndex = elementsToDraw.indexOf(selectedElement)
+        val selectedElementIndex = elementsToDraw.indexOf(elementToUpdate)
 
         elementsBelowUpdatableElementBitmap =
             createBitmapFromElements(elementsToDraw.subList(0, selectedElementIndex))
@@ -234,6 +227,14 @@ class Layer(
         elementsToDraw.forEach {
             if (it is Gif) {
                 it.gifDrawable.setVisible(true, true)
+            }
+        }
+    }
+
+    fun setAllGifsToStaticMode() {
+        elementsToDraw.forEach {
+            if (it is Gif) {
+                it.shouldDrawNextFrame = false
             }
         }
     }

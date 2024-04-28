@@ -94,6 +94,9 @@ class MakeupEditorActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
 
+        drawView.layerManager.resetAllGifs()
+        drawView.layerManager.setAllGifsToStaticMode()
+
         updateLayersButtons(drawView.layerManager.getNumOfLayers())
     }
 

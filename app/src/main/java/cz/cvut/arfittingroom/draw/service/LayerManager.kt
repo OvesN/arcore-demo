@@ -220,7 +220,8 @@ class LayerManager {
      */
     fun setUpdatableElement(element: Element) {
         val activeLayer = layers[activeLayerIndex]
-        activeLayer.prepareBitmaps(element)
+        activeLayer.elementToUpdate = element
+        activeLayer.prepareBitmaps()
     }
 
     /**
@@ -306,6 +307,10 @@ class LayerManager {
 
     fun setAllGifsToAnimationMode() {
         layers.forEach { it.setAllGifsToAnimationMode() }
+    }
+
+    fun setAllGifsToStaticMode() {
+        layers.forEach { it.setAllGifsToStaticMode() }
     }
 
     fun resetAllGifs() {

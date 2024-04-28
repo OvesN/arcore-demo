@@ -45,7 +45,7 @@ import cz.cvut.arfittingroom.draw.service.UIDrawer
 import cz.cvut.arfittingroom.model.SPAN_SLOP
 import cz.cvut.arfittingroom.model.TOUCH_TO_MOVE_THRESHOLD
 import cz.cvut.arfittingroom.utils.FileUtil.adjustBitmap
-import cz.cvut.arfittingroom.utils.FileUtil.saveTempMaskGif
+import cz.cvut.arfittingroom.utils.FileUtil.saveTempMaskFrames
 import cz.cvut.arfittingroom.utils.FileUtil.saveTempMaskTextureBitmap
 import mu.KotlinLogging
 import pl.droidsonroids.gif.GifDrawable
@@ -812,8 +812,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         if (layerManager.doesContainAnyGif()) {
             layerManager.setAllGifsToAnimationMode()
             layerManager.resetAllGifs()
-            val gif = GifDrawable(resources, R.drawable.hamburger)
-            saveTempMaskGif(layerManager, gif, height, width, context) {
+            saveTempMaskFrames(layerManager, height, width, context) {
                 onSaved()
             }
         } else {
