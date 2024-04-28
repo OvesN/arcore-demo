@@ -3,7 +3,7 @@ package cz.cvut.arfittingroom.draw.model.element.impl
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Matrix
-import androidx.core.graphics.drawable.toBitmap
+import android.util.Log
 import cz.cvut.arfittingroom.draw.model.element.BoundingBox
 import cz.cvut.arfittingroom.draw.model.element.Element
 import cz.cvut.arfittingroom.model.TRANSPARENT_CODE
@@ -25,16 +25,31 @@ class Gif(
 
     lateinit var gifDrawable: GifDrawable
     private var firstFrameBitmap: Bitmap? = null
+    var shouldDrawNextFrame = false
 
+    var nextFrameIndex = 0
 
     fun setDrawable(gifDrawable: GifDrawable) {
         this.gifDrawable = gifDrawable
-        firstFrameBitmap = gifDrawable.toBitmap()
+        firstFrameBitmap = gifDrawable.seekToFrameAndGet(0)
+        gifDrawable.setVisible(true, true)
     }
 
     override fun drawSpecific(canvas: Canvas) {
         transformationMatrix = createTransformationMatrix()
-        firstFrameBitmap?.let { canvas.drawBitmap(it, transformationMatrix, null) }
+        val bitmapToDraw = if (shouldDrawNextFrame) gifDrawable.currentFrame else firstFrameBitmap
+
+        bitmapToDraw?.let { canvas.drawBitmap(it, transformationMatrix, null) }
+        if (shouldDrawNextFrame) {
+            Log.println(Log.INFO, null, "frame " + gifDrawable.currentFrameIndex + " is drawn")
+        }
+
+        nextFrameIndex = gifDrawable.currentFrameIndex
+    }
+
+    override fun setSelected(isSelected: Boolean) {
+        super.setSelected(isSelected)
+        shouldDrawNextFrame = isSelected
     }
 
     //TODO resolve later copy paste

@@ -150,7 +150,7 @@ class UIDrawer(private val context: Context) {
         selectedElement?.let { element ->
             // Do not draw anything if element was deselected
             // previously (for example in undo/redo action)
-            if (!element.isSelected) {
+            if (!element.isSelected()) {
                 return
             }
 

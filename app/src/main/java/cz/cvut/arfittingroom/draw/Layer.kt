@@ -5,6 +5,7 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import cz.cvut.arfittingroom.draw.model.PaintOptions
 import cz.cvut.arfittingroom.draw.model.element.Element
+import cz.cvut.arfittingroom.draw.model.element.impl.Gif
 import cz.cvut.arfittingroom.draw.path.DrawablePath
 import java.util.LinkedList
 import java.util.UUID
@@ -32,18 +33,18 @@ class Layer(
      */
     private var opacity: Float = 1.0f
 
-    private var elementsBelowSelectedElementBitmap: Bitmap? = null
-    private var elementAboveSelectedElementBitmap: Bitmap? = null
+    private var elementsBelowUpdatableElementBitmap: Bitmap? = null
+    private var elementAboveUpdatableElementBitmap: Bitmap? = null
 
-    private var selectedElement: Element? = null
+    private var elementToUpdate: Element? = null
 
 
     /**
      * Draws the content of the layer
      * The drawing proceeds in the following steps:
-     * 1. Draw the elements below the selected element
-     * 2. Draw the selected element
-     * 3. Draw the elements above the selected element
+     * 1. Draw the elements below the updatable element
+     * 2. Draw the element element that should be constantly updated (selected or gif)
+     * 3. Draw the elements above the updatable element
      * 4. Draw the current finger painting that the user is creating
      *
      * @param canvas on which to draw the layer's content
@@ -51,13 +52,13 @@ class Layer(
     fun draw(canvas: Canvas, paintOptions: PaintOptions) {
         changePaint(paintOptions)
 
-        elementsBelowSelectedElementBitmap?.let {
+        elementsBelowUpdatableElementBitmap?.let {
             canvas.drawBitmap(it, 0f, 0f, null)
         }
 
-        selectedElement?.draw(canvas)
+        elementToUpdate?.draw(canvas)
 
-        elementAboveSelectedElementBitmap?.let {
+        elementAboveUpdatableElementBitmap?.let {
             canvas.drawBitmap(it, 0f, 0f, null)
         }
 
@@ -71,15 +72,15 @@ class Layer(
         while (iterator.hasNext()) {
             val element = iterator.next()
             if (element.id == elementId) {
-                element.isSelected = false
+                element.setSelected(false)
                 iterator.remove()
             }
         }
 
-        selectedElement?.let {
+        elementToUpdate?.let {
             if (it.id == elementId) {
-                it.isSelected = false
-                selectedElement = null
+                it.setSelected(false)
+                elementToUpdate = null
             }
         }
 
@@ -122,14 +123,14 @@ class Layer(
     }
 
     fun deselectAllElements() {
-        elements.forEach { it.value.isSelected = false }
+        elements.forEach { it.value.setSelected(false) }
     }
 
     fun resetBitmaps() {
-        elementsBelowSelectedElementBitmap?.recycle()
-        elementsBelowSelectedElementBitmap = null
-        elementAboveSelectedElementBitmap?.recycle()
-        elementAboveSelectedElementBitmap = null
+        elementsBelowUpdatableElementBitmap?.recycle()
+        elementsBelowUpdatableElementBitmap = null
+        elementAboveUpdatableElementBitmap?.recycle()
+        elementAboveUpdatableElementBitmap = null
     }
 
     /**
@@ -147,20 +148,21 @@ class Layer(
      * @param selectedElement
      */
     fun prepareBitmaps(selectedElement: Element) {
-        if (selectedElement == this.selectedElement) {
+        if (selectedElement == this.elementToUpdate) {
             return
         }
 
         resetBitmaps()
 
-        this.selectedElement?.isSelected = false
-        this.selectedElement = selectedElement
+        elementsToDraw.forEach { if (it != selectedElement ) it.setSelected(false) }
+
+        this.elementToUpdate = selectedElement
         val selectedElementIndex = elementsToDraw.indexOf(selectedElement)
 
-        elementsBelowSelectedElementBitmap =
+        elementsBelowUpdatableElementBitmap =
             createBitmapFromElements(elementsToDraw.subList(0, selectedElementIndex))
 
-        elementAboveSelectedElementBitmap =
+        elementAboveUpdatableElementBitmap =
             if (selectedElementIndex == elementsToDraw.lastIndex) null
             else createBitmapFromElements(
                 elementsToDraw.subList(
@@ -172,13 +174,14 @@ class Layer(
 
     fun prepareBitmap() {
         resetBitmaps()
-        elementsBelowSelectedElementBitmap = createBitmapFromElements(elementsToDraw)
+        elementsBelowUpdatableElementBitmap = createBitmapFromElements(elementsToDraw)
     }
 
     private fun createBitmapFromElements(elements: List<Element>): Bitmap? {
         if (elements.isEmpty()) {
             return null
         }
+
         val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
 
@@ -190,7 +193,7 @@ class Layer(
     }
 
     private fun addToBitmap(element: Element) {
-        val bitmap = elementAboveSelectedElementBitmap ?: Bitmap.createBitmap(
+        val bitmap = elementAboveUpdatableElementBitmap ?: Bitmap.createBitmap(
             width,
             height,
             Bitmap.Config.ARGB_8888
@@ -199,8 +202,12 @@ class Layer(
 
         element.draw(canvas)
 
-        elementAboveSelectedElementBitmap = bitmap
+        elementAboveUpdatableElementBitmap = bitmap
     }
+
+//    private fun createBitmapsWithGif(): List<Bitmap> {
+//
+//    }
 
     fun setOpacity(opacity: Float) {
         this.opacity = opacity
@@ -208,5 +215,9 @@ class Layer(
             alpha = (opacity * 255).toInt()
         }
     }
+
+
+    fun doesHaveGif(): Boolean =
+        elementsToDraw.firstOrNull{it is Gif}?.let { true } ?: false
 
 }

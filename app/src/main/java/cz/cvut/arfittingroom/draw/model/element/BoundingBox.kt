@@ -18,6 +18,7 @@ class BoundingBox(
         color = Color.YELLOW
         style = Paint.Style.STROKE
         strokeWidth = 2f
+        pathEffect
     }
 
     var topRightCornerCoor = Coordinates(0f, 0f)

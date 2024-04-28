@@ -4,6 +4,8 @@ package cz.cvut.arfittingroom.utils
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Canvas
+import cz.cvut.arfittingroom.draw.Layer
 import cz.cvut.arfittingroom.draw.model.element.impl.Gif
 import cz.cvut.arfittingroom.model.MASK_GIF_FILE_NAME
 import cz.cvut.arfittingroom.model.MASK_TEXTURE_FILE_NAME
@@ -67,50 +69,28 @@ object FileUtil {
 
     //TODO test this
     fun generateGIF(
-        staticLayerBitmaps: List<Bitmap>,
-        gifByLayerIndex: Map<Int, List<Gif>>
+        layers: List<Layer>
     ): ByteArray? {
-        val numberOfFramesList = gifByLayerIndex.values.flatMap { layer ->
-            layer.map { it.gifDrawable.numberOfFrames }
-        }
-        val lcm = lcm(numberOfFramesList)
+        var bitmap = Bitmap.createBitmap(2048, 2048, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+       // val maxNumberOfFrames = gifByLayerIndex.values.flatMap { it.flatMap { maxOf(it.gifDrawable.numberOfFrames) }}
+        layers.forEach {
 
+//            if(it is Gif) {
+//
+//            }
+        }
         val bos = ByteArrayOutputStream()
         animatedGifEncoder.start(bos)
 
-        repeat(lcm) {
-           // animatedGifEncoder.addFrame(bitmap)
-        }
+
+         // animatedGifEncoder.addFrame(bitmap)
+
 
         animatedGifEncoder.finish()
         return bos.toByteArray()
     }
-
-    private fun gcd(a: Int, b: Int): Int {
-        var x = a
-        var y = b
-        while (y != 0) {
-            val temp = y
-            y = x % y
-            x = temp
-        }
-        return x
-    }
-
-    private fun lcm(a: Int, b: Int): Int {
-        return a / gcd(a, b) * b
-    }
-
-    private fun lcm(values: List<Int>): Int {
-        if (values.isEmpty()) throw IllegalArgumentException("List should not be empty")
-        var result = values[0]
-        for (i in 1 until values.size) {
-            result = lcm(result, values[i])
-            if (result == 0) break
-        }
-        return result
-    }
-
+    
 
     fun deleteTempFiles(context: Context) {
         context.deleteFile(MASK_TEXTURE_FILE_NAME)

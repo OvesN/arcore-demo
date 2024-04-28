@@ -7,6 +7,7 @@ import cz.cvut.arfittingroom.draw.Layer
 import cz.cvut.arfittingroom.draw.command.action.element.impl.MoveElementBetweenLayers
 import cz.cvut.arfittingroom.draw.model.PaintOptions
 import cz.cvut.arfittingroom.draw.model.element.Element
+import cz.cvut.arfittingroom.draw.model.element.impl.Gif
 import cz.cvut.arfittingroom.draw.path.DrawablePath
 import cz.cvut.arfittingroom.utils.ScreenUtil
 import mu.KotlinLogging
@@ -155,14 +156,15 @@ class LayerManager {
         deselectAllElements()
 
         val element = layers[activeLayerIndex].findFirstIntersectedElement(x, y)
-        element?.isSelected = true
+        element?.setSelected(true)
 
         element?.let {
-            setSelectedElement(it)
+            setUpdatableElement(it)
         }
 
         return element
     }
+
 
     fun deselectAllElements() {
         layers[activeLayerIndex].deselectAllElements()
@@ -216,7 +218,7 @@ class LayerManager {
      * Initiates the process of separating the elements that
      * should be drawn below and above the [element] into two distinct bitmaps on the active layer
      */
-    private fun setSelectedElement(element: Element) {
+    fun setUpdatableElement(element: Element) {
         val activeLayer = layers[activeLayerIndex]
         activeLayer.prepareBitmaps(element)
     }
@@ -280,6 +282,7 @@ class LayerManager {
         layersBelowActiveLayerBitmap = null
         layersAboveActiveLayerBitmap = null
     }
+
 
     fun restoreDeletedLayer(layerId: UUID) {
 

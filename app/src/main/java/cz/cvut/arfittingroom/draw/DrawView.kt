@@ -6,7 +6,10 @@ import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Matrix
 import android.graphics.Paint
+import android.os.Handler
+import android.os.Looper
 import android.util.AttributeSet
+import android.util.Log
 import android.view.MotionEvent
 import android.view.MotionEvent.ACTION_POINTER_UP
 import android.view.View
@@ -43,13 +46,8 @@ import cz.cvut.arfittingroom.model.SPAN_SLOP
 import cz.cvut.arfittingroom.model.TOUCH_TO_MOVE_THRESHOLD
 import cz.cvut.arfittingroom.utils.FileUtil.saveTempMaskTextureBitmap
 import mu.KotlinLogging
-import pl.droidsonroids.gif.GifDecoder
 import pl.droidsonroids.gif.GifDrawable
 import pl.droidsonroids.gif.GifDrawableBuilder
-import pl.droidsonroids.gif.GifDrawableInit
-import pl.droidsonroids.gif.GifOptions
-import pl.droidsonroids.gif.InputSource
-import pl.droidsonroids.gif.InputSource.ResourcesSource
 import javax.inject.Inject
 import kotlin.math.abs
 import kotlin.math.atan2
@@ -95,9 +93,11 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private var ignoreDrawing: Boolean = false
     private var canvasTransformationMatrix: Matrix = Matrix()
 
+    private var handler = Handler(Looper.getMainLooper())
     private var gifRunnable: Runnable? = null
     private var frameDelay: Long = 100
-    private var frameCounter = 0
+
+    private var gifToPlay: Gif? = null
 
     interface OnLayerInitializedListener {
         fun onLayerInitialized(numOfLayers: Int)
@@ -183,6 +183,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         if (!canvasTransformationMatrix.invert(inverseMatrix)) {
             return false
         }
+
         val touchPoint = floatArrayOf(event.x, event.y)
         inverseMatrix.mapPoints(touchPoint)
         val x = touchPoint[0]
@@ -231,6 +232,38 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
         invalidate()
         return true
+    }
+
+    private var frameCount = 0
+    private fun startAnimation(gif: Gif) {
+        if (gifRunnable == null) {
+            Log.println(Log.INFO, null, "Start animation")
+            gifRunnable = Runnable {
+                Log.println(Log.INFO, null, "count $frameCount")
+                // Play gif three times and stop on the first frame
+                if (frameCount >= gif.gifDrawable.numberOfFrames * 3 && gif.nextFrameIndex == 1
+                ) {
+                    frameCount = 0
+                    stopAnimation(gif)
+                } else {
+                    frameCount++
+                    invalidate()
+                    handler.postDelayed(gifRunnable!!, frameDelay)
+                }
+            }
+            gifRunnable?.let { handler.post(it) }
+        }
+    }
+
+    private fun stopAnimation(gif: Gif) {
+        gif.shouldDrawNextFrame = false
+        Log.println(Log.INFO, null, "Stop animation")
+        gifToPlay = null
+        gif.gifDrawable.setVisible(true, true)
+        gifRunnable?.let {
+            handler.removeCallbacks(it)
+            gifRunnable = null
+        }
     }
 
     private fun handleCanvasGesture(event: MotionEvent) {
@@ -331,6 +364,12 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                     }
 
                     selectedElement = layerManager.selectElement(x, y)
+                    // In case that we selected gif, play it's animation
+                    selectedElement.let {
+                        if (it is Gif) {
+                            gifToPlay = it
+                        }
+                    }
                     isInElementMenuMode = false
                 }
 
@@ -436,7 +475,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             }
 
             EElementEditAction.CHANGE_COLOR -> {
-                element.isSelected = false
+                element.setSelected(false)
                 selectedElement = null
                 showColorPickerDialog(true)
             }
@@ -446,7 +485,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                     element,
                 )
                 command?.let { addToHistory(command) }
-                element.isSelected = false
+                element.setSelected(false)
                 selectedElement = null
             }
 
@@ -455,12 +494,12 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                     element,
                 )
                 command?.let { addToHistory(command) }
-                element.isSelected = false
+                element.setSelected(false)
                 selectedElement = null
             }
             //FIXME do not work, history do not work
             EElementEditAction.MOVE_TO -> {
-                element.isSelected = false
+                element.setSelected(false)
                 selectedElement = null
                 //TODO open menu with layers
                 return
@@ -552,6 +591,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
+        gifToPlay?.let { startAnimation(it) }
 
         canvasTransformationMatrix = createCanvasTransformationMatrix()
         canvas.setMatrix(canvasTransformationMatrix)
@@ -700,28 +740,33 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     }
 
     fun loadGif(gifId: Int) {
-        val gif = GifDrawable(resources, gifId)
+        val gifDrawable = GifDrawable(resources, gifId)
 
-        val adjustedGif = GifDrawableBuilder().with(gif).from(resources, gifId).sampleSize(
+        val adjustedGif = GifDrawableBuilder().with(gifDrawable).from(resources, gifId).sampleSize(
             calculateInSampleSize(
-                gif.currentFrame.width,
-                gif.currentFrame.height,
+                gifDrawable.currentFrame.width,
+                gifDrawable.currentFrame.height,
                 width / 3,
                 height / 3
             )
         ).build()
 
+        val gif = Gif(
+            gifId,
+            width.toFloat() / 2,
+            height.toFloat() / 2,
+            width.toFloat() / 4,
+        ).apply {
+            setDrawable(adjustedGif)
+            shouldDrawNextFrame = true
+        }
         addElementToLayer(
             layerManager.getActiveLayerIndex(),
-            Gif(
-                gifId,
-                width.toFloat() / 2,
-                height.toFloat() / 2,
-                width.toFloat() / 4,
-            ).apply {
-                setDrawable(adjustedGif)
-            }
+            gif
         )
+
+        gifToPlay = gif
+        layerManager.setUpdatableElement(gif)
 
         invalidate()
     }

@@ -22,7 +22,7 @@ abstract class Element : Scalable, Drawable, Movable, Rotatable {
 
     var rotationAngle = 0f
     private var originalRotationAngle = 0f
-    var isSelected: Boolean = false
+    private var isSelected: Boolean = false
 
     override fun draw(canvas: Canvas) {
         drawSpecific(canvas)
@@ -86,6 +86,12 @@ abstract class Element : Scalable, Drawable, Movable, Rotatable {
     open fun doIntersect(x: Float, y: Float): Boolean {
         return boundingBox.rectF.contains(x, y)
     }
+
+    open fun setSelected(isSelected: Boolean) {
+        this.isSelected = isSelected
+    }
+
+    fun isSelected() = isSelected
 
     private fun normalizeAngle(angle: Float): Float {
         var normalizedAngle = angle % 360  // Reduce the angle to the range (-360, 360)
