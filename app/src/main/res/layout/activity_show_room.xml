@@ -6,9 +6,8 @@
     android:layout_height="match_parent"
     tools:context=".activity.ShowRoomActivity">
 
-    <fragment
-        android:id="@+id/face_fragment"
-        android:name="cz.cvut.arfittingroom.fragment.FaceArFragment"
+    <FrameLayout
+        android:id="@+id/arFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 

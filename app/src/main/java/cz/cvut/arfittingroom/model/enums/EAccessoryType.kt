@@ -1,9 +1,8 @@
 package cz.cvut.arfittingroom.model.enums
 
 
-//TODO load from DB?
 enum class EAccessoryType(val sourceURI: String) {
-    SUNGLASSES("sunglasses.sfb"),
-    YELLOW_GLASSES("yellow_sunglasses.sfb"),
-    MARIO_HAT("mario_hat.sfb"),
+    SUNGLASSES("fox.glb"),
+    YELLOW_GLASSES("yellow_sunglasses.glb"),
+    MARIO_HAT("mario_hat.glb"),
 }
