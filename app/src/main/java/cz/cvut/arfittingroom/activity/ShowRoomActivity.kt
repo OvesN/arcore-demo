@@ -30,6 +30,7 @@ import com.google.ar.sceneform.rendering.Texture
 import com.google.ar.sceneform.ux.ArFrontFacingFragment
 import com.google.ar.sceneform.ux.AugmentedFaceNode
 import com.gorisse.thomas.sceneform.environment
+import com.gorisse.thomas.sceneform.estimatedEnvironmentLights
 import com.gorisse.thomas.sceneform.light.LightEstimationConfig
 import com.gorisse.thomas.sceneform.light.build
 import com.gorisse.thomas.sceneform.lightEstimationConfig
@@ -161,16 +162,12 @@ class ShowRoomActivity : AppCompatActivity() {
         this.arSceneView = arSceneView
         arSceneView.lightEstimationConfig = LightEstimationConfig.DISABLED
         val light = LightManager.Builder(LightManager.Type.POINT)
-            //.intensity(90000f)
-            .position(-0.4f, 0.0f, -0.25f)
-            //.direction(0.0f, 0.0f, -1.0f)
+            .position(-0.4f, 0.0f, -0.2f)
             .intensity(200000.0f)
             .color(0.98f, 0.89f, 0.76f)
-          //  .direction(0f, -0.7f, -0.7f)
-            //.position()
-//            .sunAngularRadius(1.9f)
-//            .sunHaloSize(10.0f)
-//            .sunHaloFalloff(80.0f)
+            .sunAngularRadius(1.9f)
+            .sunHaloSize(10.0f)
+            .sunHaloFalloff(80.0f)
             .castShadows(true).build()
         arSceneView.environment?.indirectLight?.intensity = 5000f
         arSceneView.mainLight = light
