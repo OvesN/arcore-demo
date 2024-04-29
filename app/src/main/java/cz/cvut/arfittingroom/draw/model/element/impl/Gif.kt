@@ -16,6 +16,7 @@ class Gif(
     override var centerY: Float,
     override var outerRadius: Float,
 ) : Element() {
+    override val name: String = "gif"
     override var boundingBox: BoundingBox = createBoundingBox()
     override var originalRadius: Float = outerRadius
 
@@ -26,35 +27,40 @@ class Gif(
     lateinit var gifDrawable: GifDrawable
     private var firstFrameBitmap: Bitmap? = null
     var shouldDrawNextFrame = false
+    var increaseFrameIndexEachDraw = false
 
-    var nextFrameIndex = 0
+    var currentFrameIndex = 0
 
     fun setDrawable(gifDrawable: GifDrawable) {
         this.gifDrawable = gifDrawable
         firstFrameBitmap = gifDrawable.seekToFrameAndGet(0)
-        gifDrawable.setVisible(true, true)
     }
 
     override fun drawSpecific(canvas: Canvas) {
+        if (increaseFrameIndexEachDraw) {
+            currentFrameIndex++
+        }
+        if (currentFrameIndex >= gifDrawable.numberOfFrames) {
+            currentFrameIndex = 0
+        }
+
         transformationMatrix = createTransformationMatrix()
-        val bitmapToDraw = if (shouldDrawNextFrame) gifDrawable.seekToFrameAndGet(nextFrameIndex) else firstFrameBitmap
+        val bitmapToDraw =
+            if (shouldDrawNextFrame) gifDrawable.seekToFrameAndGet(currentFrameIndex) else firstFrameBitmap
 
         bitmapToDraw?.let { canvas.drawBitmap(it, transformationMatrix, null) }
         if (shouldDrawNextFrame) {
-            Log.println(Log.INFO, null, "frame $nextFrameIndex is drawn")
+            Log.println(Log.INFO, null, "frame $currentFrameIndex is drawn")
         }
-
-        nextFrameIndex++
-        nextFrameIndex %= gifDrawable.numberOfFrames - 1
     }
 
     override fun setSelected(isSelected: Boolean) {
         super.setSelected(isSelected)
         shouldDrawNextFrame = isSelected
-        nextFrameIndex = 0
+        currentFrameIndex = 0
     }
 
-    //TODO resolve later copy paste
+    //TODO resolve later copy paste from image
     override fun doIntersect(x: Float, y: Float): Boolean {
         if (!boundingBox.rectF.contains(x, y)) {
             return false

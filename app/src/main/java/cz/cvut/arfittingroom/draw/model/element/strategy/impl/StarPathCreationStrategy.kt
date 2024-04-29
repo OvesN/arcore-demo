@@ -6,6 +6,7 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 class StarPathCreationStrategy: PathCreationStrategy {
+    override val name: String = "star"
     override fun createPath(centerX: Float, centerY: Float, outerRadius: Float): DrawablePath {
         val section = 2.0 * Math.PI / 5
         val path = DrawablePath()

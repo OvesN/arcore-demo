@@ -73,7 +73,6 @@ object FileUtil {
         context: Context,
         onSaved: () -> Unit
     ) {
-
         try {
             val imagesDir = File(context.filesDir, MASK_FRAMES_DIR_NAME)
             if (!imagesDir.exists()) {

@@ -7,9 +7,9 @@ object DrawHistoryHolder {
     private val globalHistory = LinkedList<Command>()
     private val undoneActions = LinkedList<Command>()
 
-    fun undo() {
+    fun undo(): Command? {
         if (globalHistory.isEmpty()) {
-            return
+            return null
         }
 
         val lastAction = globalHistory.last
@@ -18,11 +18,12 @@ object DrawHistoryHolder {
         undoneActions.add(lastAction)
 
         lastAction.revert()
+        return lastAction
     }
 
-    fun redo() {
+    fun redo(): Command? {
         if (undoneActions.isEmpty()) {
-            return
+            return null
         }
 
         val lastUndoneAction = undoneActions.last
@@ -31,6 +32,8 @@ object DrawHistoryHolder {
         globalHistory.add(lastUndoneAction)
 
         lastUndoneAction.execute()
+
+        return lastUndoneAction
     }
 
     fun addToHistory(command: Command){

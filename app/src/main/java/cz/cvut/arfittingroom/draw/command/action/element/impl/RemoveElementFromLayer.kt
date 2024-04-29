@@ -11,6 +11,8 @@ class RemoveElementFromLayer(
     private val layerManager: LayerManager,
     private val layerId: UUID
 ) : ElementCommand() {
+
+    override val description: String = "remove ${element.name}"
     override fun execute() {
         layerManager.removeElementFromLayer(element.id, layerId = layerId)
     }

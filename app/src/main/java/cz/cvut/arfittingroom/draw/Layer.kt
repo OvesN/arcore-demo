@@ -219,6 +219,8 @@ class Layer(
         elementsToDraw.forEach {
             if (it is Gif) {
                 it.shouldDrawNextFrame = true
+                it.currentFrameIndex = 0
+                it.increaseFrameIndexEachDraw = true
             }
         }
     }
@@ -226,7 +228,7 @@ class Layer(
     fun resetAllGifs() {
         elementsToDraw.forEach {
             if (it is Gif) {
-                it.gifDrawable.setVisible(true, true)
+                it.currentFrameIndex = 0
             }
         }
     }
@@ -235,6 +237,8 @@ class Layer(
         elementsToDraw.forEach {
             if (it is Gif) {
                 it.shouldDrawNextFrame = false
+                it.currentFrameIndex = 0
+                it.increaseFrameIndexEachDraw = false
             }
         }
     }

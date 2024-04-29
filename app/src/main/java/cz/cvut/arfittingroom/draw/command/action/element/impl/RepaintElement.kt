@@ -10,6 +10,8 @@ class RepaintElement(
     private val newColor: Int,
     private val oldColor: Int
 ) : ElementCommand() {
+    override val description: String = "change color of element"
+
     override fun execute() {
         repaintable.repaint(newColor)
     }

@@ -12,6 +12,8 @@ class MoveElement(
     private val newX: Float,
     private val newY: Float
 ) : ElementCommand() {
+
+    override val description: String = "move element"
     override fun execute() {
         movable.move(newX, newY)
     }

@@ -15,7 +15,7 @@ class Image(
     override var outerRadius: Float,
     val resourceId: Int
 ) : Element() {
-
+    override val name: String = "image"
     override var boundingBox: BoundingBox = createBoundingBox()
     override var originalRadius: Float = outerRadius
     override var originalCenterX: Float = centerX

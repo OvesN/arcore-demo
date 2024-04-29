@@ -10,6 +10,7 @@ import kotlin.math.max
 
 abstract class Element : Scalable, Drawable, Movable, Rotatable {
     val id: UUID = UUID.randomUUID()
+    abstract val name: String
 
     abstract var centerX: Float
     abstract var centerY: Float

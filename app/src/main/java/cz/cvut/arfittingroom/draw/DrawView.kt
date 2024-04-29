@@ -10,9 +10,11 @@ import android.os.Handler
 import android.os.Looper
 import android.util.AttributeSet
 import android.util.Log
+import android.view.Gravity
 import android.view.MotionEvent
 import android.view.MotionEvent.ACTION_POINTER_UP
 import android.view.View
+import android.widget.Toast
 import androidx.annotation.ColorInt
 import androidx.core.graphics.alpha
 import com.skydoves.colorpickerview.ColorPickerDialog
@@ -98,8 +100,6 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private var handler = Handler(Looper.getMainLooper())
     private var gifRunnable: Runnable? = null
     private var frameDelay: Long = 100
-
-    private var gifToPlay: Gif? = null
 
     interface OnLayerInitializedListener {
         fun onLayerInitialized(numOfLayers: Int)
@@ -238,32 +238,34 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     private var frameCount = 0
     private fun startAnimation(gif: Gif) {
-        if (gifRunnable == null) {
-            Log.println(Log.INFO, null, "Start animation")
-            gifRunnable = Runnable {
-                Log.println(Log.INFO, null, "count $frameCount")
-                // Play gif three times and stop on the first frame
-                if (frameCount >= gif.gifDrawable.numberOfFrames * 3 && gif.nextFrameIndex == 1
-                ) {
-                    frameCount = 0
-                    stopAnimation(gif)
-                } else {
-                    frameCount++
-                    invalidate()
-                    handler.postDelayed(gifRunnable!!, frameDelay)
-                }
-            }
-            gifRunnable?.let { handler.post(it) }
+        if (gifRunnable != null) {
+            stopAnimation()
         }
+
+        Log.println(Log.INFO, null, "Start animation")
+        gifRunnable = Runnable {
+            Log.println(Log.INFO, null, "count $frameCount")
+            // Play gif three times and stop on the first frame
+            if (frameCount >= gif.gifDrawable.numberOfFrames * 3 && gif.currentFrameIndex == 0
+            ) {
+                frameCount = 0
+                stopAnimation(gif)
+            } else {
+                gif.currentFrameIndex++
+                frameCount++
+                invalidate()
+                handler.postDelayed(gifRunnable!!, frameDelay)
+            }
+        }
+        gifRunnable?.let { handler.post(it) }
     }
 
     fun stopAnimation(gif: Gif? = null) {
         if (gif != null) {
             gif.shouldDrawNextFrame = false
-            gif.gifDrawable.setVisible(true, true)
+            gif.currentFrameIndex = 0
         }
         Log.println(Log.INFO, null, "Stop animation")
-        gifToPlay = null
         gifRunnable?.let {
             handler.removeCallbacks(it)
             gifRunnable = null
@@ -371,7 +373,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                     // In case that we selected gif, play it's animation
                     selectedElement.let {
                         if (it is Gif) {
-                            gifToPlay = it
+                            startAnimation(it)
                         }
                     }
                     isInElementMenuMode = false
@@ -544,13 +546,27 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     }
 
     fun undo() {
-        DrawHistoryHolder.undo()
+        val command = DrawHistoryHolder.undo()
+        command?.let {
+            val toast = Toast.makeText(context, "Undo ${command.description}", Toast.LENGTH_SHORT)
+            toast.setGravity(Gravity.CENTER_HORIZONTAL, 0, 0)
+
+            toast.show()
+        }
+        stopAnimation()
         layerManager.updateLayersBitmaps()
         invalidate()
     }
 
     fun redo() {
-        DrawHistoryHolder.redo()
+        val command = DrawHistoryHolder.redo()
+        command?.let {
+            val toast = Toast.makeText(context, "Redo ${command.description}", Toast.LENGTH_SHORT)
+            toast.setGravity(Gravity.CENTER_HORIZONTAL, 0, 0)
+
+            toast.show()
+        }
+        stopAnimation()
         layerManager.updateLayersBitmaps()
         invalidate()
     }
@@ -595,7 +611,6 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        gifToPlay?.let { startAnimation(it) }
 
         canvasTransformationMatrix = createCanvasTransformationMatrix()
         canvas.setMatrix(canvasTransformationMatrix)
@@ -769,10 +784,9 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             gif
         )
 
-        gifToPlay = gif
         layerManager.setUpdatableElement(gif)
 
-        invalidate()
+        startAnimation(gif)
     }
 
 

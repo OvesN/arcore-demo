@@ -15,7 +15,7 @@ class Figure(
     private val pathCreationStrategy: PathCreationStrategy,
     override val paint: Paint
 ) : Element(), Repaintable {
-
+    override val name: String = pathCreationStrategy.name
     override var originalRadius: Float = outerRadius
     override var originalCenterX: Float = centerX
     override var originalCenterY: Float = centerY
