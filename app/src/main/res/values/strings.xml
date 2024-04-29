@@ -15,4 +15,6 @@
     <string name="stamp">Stamp</string>
     <string name="image">Image</string>
     <string name="text">Text</string>
+    <string name="logIn">Log in</string>
+    <string name="singUp">Sing up</string>
 </resources>

@@ -194,28 +194,28 @@
             app:layout_constraintStart_toStartOf="parent">
 
             <Button
-                style="@style/SvgButtonStyle"
+                style="@style/ButtonStyle"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="@string/draw" />
 
             <Button
-                style="@style/SvgButtonStyle"
+                style="@style/ButtonStyle"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="@string/stamp" />
 
             <Button
-                style="@style/SvgButtonStyle"
+                style="@style/ButtonStyle"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="@string/image" />
 
             <Button
-                style="@style/SvgButtonStyle"
+                style="@style/ButtonStyle"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
