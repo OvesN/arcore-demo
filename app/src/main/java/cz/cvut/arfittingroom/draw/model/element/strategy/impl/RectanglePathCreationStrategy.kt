@@ -4,6 +4,7 @@ import cz.cvut.arfittingroom.draw.model.element.strategy.PathCreationStrategy
 import cz.cvut.arfittingroom.draw.path.DrawablePath
 
 class RectanglePathCreationStrategy: PathCreationStrategy {
+    override val name: String = "rectangle"
     override fun createPath(centerX: Float, centerY: Float, outerRadius: Float): DrawablePath {
         val path = DrawablePath()
 

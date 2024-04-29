@@ -6,6 +6,7 @@ import java.util.UUID
 
 class RemoveLayer(override val layerManager: LayerManager, override val layerId: UUID) :
     LayerCommand() {
+    override val description: String = "remove layer"
     override fun execute() {
         layerManager.removeLayer(layerId = layerId)
     }

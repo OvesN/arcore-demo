@@ -11,6 +11,7 @@ class AddElementToLayer(
     private val layerManager: LayerManager,
     private val layerId: UUID
 ) : ElementCommand() {
+    override val description: String = "add ${element.name}"
     override fun execute() {
         layerManager.addElementToLayer(element = element, layerId = layerId)
     }

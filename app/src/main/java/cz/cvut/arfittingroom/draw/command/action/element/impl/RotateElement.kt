@@ -10,6 +10,7 @@ class RotateElement(
     private val newRotationAngle: Float,
     private val oldRotationAngle: Float
 ) : ElementCommand(){
+    override val description: String = "rotate element"
     override fun execute() {
         rotatable.rotate(newRotationAngle)
     }

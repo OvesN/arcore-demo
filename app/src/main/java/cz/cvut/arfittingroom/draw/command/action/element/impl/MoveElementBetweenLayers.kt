@@ -12,6 +12,8 @@ class MoveElementBetweenLayers(
     private val newLayerId: UUID,
     private val layerManager: LayerManager
 ) : ElementCommand() {
+
+    override val description: String = "move ${element.name} from layer $oldLayerId to $newLayerId"
     override fun execute() {
         layerManager.removeElementFromLayer(
             layerId = oldLayerId,

@@ -10,6 +10,7 @@ class MoveLayer(
     private val toIndex: Int,
     override val layerId: UUID) :
     LayerCommand() {
+    override val description: String = "move layer from $fromIndex to $toIndex"
     override fun execute() {
         layerManager.moveLayer(fromIndex, toIndex)
     }

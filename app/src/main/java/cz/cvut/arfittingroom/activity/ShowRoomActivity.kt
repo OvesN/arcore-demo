@@ -6,6 +6,9 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
 import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -27,6 +30,8 @@ import cz.cvut.arfittingroom.model.enums.EMakeupType
 import cz.cvut.arfittingroom.model.enums.EModelType
 import cz.cvut.arfittingroom.service.MakeupService
 import cz.cvut.arfittingroom.service.ModelEditorService
+import cz.cvut.arfittingroom.utils.FileUtil.doesTempAnimatedMaskExist
+import cz.cvut.arfittingroom.utils.FileUtil.getNextTempMaskFrame
 import cz.cvut.arfittingroom.utils.FileUtil.getTempMaskTextureBitmap
 import cz.cvut.arfittingroom.utils.TextureCombinerUtil.combineDrawables
 import mu.KotlinLogging
@@ -43,19 +48,33 @@ class ShowRoomActivity : AppCompatActivity() {
     private var faceNodeMap = HashMap<AugmentedFace, HashMap<EModelType, AugmentedFaceNode>>()
     private var isUpdated = false
 
+    private var shouldPlayAnimation = false
+    private var gifPrepared = false
+
+    private val gifTextures = mutableListOf<Texture>()
+
+    private var frameCounter = 0
+
     @Inject
     lateinit var makeUpService: MakeupService
 
     @Inject
     lateinit var editorService: ModelEditorService
 
+    private var handler = Handler(Looper.getMainLooper())
+    private var gifRunnable: Runnable? = null
+    private var frameDelay: Long = 100 // Default frame delay (100 ms per frame)
+
     override fun onResume() {
         super.onResume()
+        resetGifState()
 
         val bitmap = getTempMaskTextureBitmap(applicationContext)
-        bitmap?.let {  createTextureAndApply(it) }
-    }
+        bitmap?.let { createTextureAndApply(it); shouldPlayAnimation = false }
 
+        shouldPlayAnimation = doesTempAnimatedMaskExist(applicationContext)
+
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -115,7 +134,14 @@ class ShowRoomActivity : AppCompatActivity() {
                     false
                 }
             }
-            if (!isUpdated) {
+            if (shouldPlayAnimation) {
+                if (!gifPrepared) {
+                    prepareAllGifTextures()
+                } else if (gifRunnable == null) {
+                    startAnimation()
+                }
+
+            } else if (!isUpdated) {
                 updateModelsOnScreen()
             }
         }
@@ -176,7 +202,8 @@ class ShowRoomActivity : AppCompatActivity() {
                 faceNode.faceRegionsRenderable = makeUpService.loadedModels[modelKey]?.model
             } else {
                 //FixME too stupid
-                makeUpService.loadedModels.values.find { it.model == modelNodesMap[modelType]?.faceRegionsRenderable }?.isActive = false
+                makeUpService.loadedModels.values.find { it.model == modelNodesMap[modelType]?.faceRegionsRenderable }?.isActive =
+                    false
 
                 modelNodesMap[modelType]?.faceRegionsRenderable =
                     makeUpService.loadedModels[modelKey]?.model
@@ -187,7 +214,6 @@ class ShowRoomActivity : AppCompatActivity() {
     private fun updateModelsOnScreen() {
         val sceneView = arFragment.arSceneView
         val modelsToUpdate = editorService.loadedModels
-
         sceneView.session?.getAllTrackables(AugmentedFace::class.java)?.forEach { face ->
             isUpdated = true
             val modelNodesMap = faceNodeMap.getOrPut(face) { HashMap() }
@@ -210,6 +236,33 @@ class ShowRoomActivity : AppCompatActivity() {
 
         }
     }
+
+    private fun prepareAllGifTextures() {
+        gifTextures.clear()
+        var counter = 0
+
+        while (true) {
+            val frameBitmap = getNextTempMaskFrame(applicationContext, counter) ?: break
+            Texture.builder()
+                .setSource(frameBitmap)
+                .build()
+                .thenAccept { texture ->
+                    gifTextures.add(texture)
+                }
+                .exceptionally { throwable ->
+                    Log.println(
+                        Log.ERROR,
+                        null,
+                        "Error creating texture for frame $counter: $throwable"
+                    )
+                    null
+                }
+            counter++
+        }
+
+        gifPrepared = true
+    }
+
 
     private fun combineTexturesAndApply() {
         combineDrawables(makeUpService.makeUpState.appliedMakeUpTypes.map {
@@ -323,5 +376,40 @@ class ShowRoomActivity : AppCompatActivity() {
                 modelInfo.isActive = true
             }
         }
+    }
+
+    private fun startAnimation() {
+        if (!gifPrepared) {
+            return
+        }
+
+        if (gifRunnable == null) {
+            gifRunnable = Runnable {
+                if (!gifPrepared) {
+                    prepareAllGifTextures()
+                } else {
+                    if (gifTextures.size > frameCounter) {
+                        applyTextureToAllFaces(gifTextures[frameCounter])
+                        frameCounter = (frameCounter + 1) % gifTextures.size
+                    }
+                    handler.postDelayed(gifRunnable!!, frameDelay)
+                }
+
+            }
+        }
+        gifRunnable?.let { handler.post(it) }
+    }
+
+    private fun stopAnimation() {
+        gifRunnable?.let { handler.removeCallbacks(it) }
+    }
+
+    private fun setSpeed(fps: Int) {
+        frameDelay = 1000L / fps
+    }
+
+    private fun resetGifState() {
+        gifPrepared = false
+        gifRunnable = null
     }
 }

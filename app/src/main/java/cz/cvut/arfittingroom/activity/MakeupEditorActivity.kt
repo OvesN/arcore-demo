@@ -66,7 +66,13 @@ class MakeupEditorActivity : AppCompatActivity() {
             toggleStrokeShape(EShape.HEART)
         }
         binding.buttonFlowersImage.setOnClickListener {
-            toggleImage(R.drawable.flowers)
+            addImage(R.drawable.flowers)
+        }
+        binding.buttonGif.setOnClickListener {
+            addGif(R.drawable.donut)
+        }
+        binding.buttonGif2.setOnClickListener {
+            addGif(R.drawable.hamburger)
         }
         slider.addOnChangeListener { _, value, _ ->
             drawView.setStrokeWidth(value)
@@ -88,7 +94,15 @@ class MakeupEditorActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
 
+        drawView.layerManager.resetAllGifs()
+        drawView.layerManager.setAllGifsToStaticMode()
+
         updateLayersButtons(drawView.layerManager.getNumOfLayers())
+    }
+
+    override fun onPause() {
+        super.onPause()
+        drawView.stopAnimation()
     }
 
     // Create buttons for layers in reverse order and select the active one
@@ -148,8 +162,11 @@ class MakeupEditorActivity : AppCompatActivity() {
         drawView.selectedElement = null
     }
 
-    private fun toggleImage(imageId: Int) {
+    private fun addImage(imageId: Int) {
         drawView.loadImage(imageId)
     }
 
+    private fun addGif(gifId: Int) {
+        drawView.loadGif(gifId)
+    }
 }

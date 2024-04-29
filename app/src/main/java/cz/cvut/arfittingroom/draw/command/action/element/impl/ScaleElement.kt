@@ -10,6 +10,7 @@ class ScaleElement(
     private val newRadius: Float,
     private val oldRadius: Float
 ) : ElementCommand() {
+    override val description: String = "scale element"
 
     override fun execute() {
         scalable.scale(newRadius)

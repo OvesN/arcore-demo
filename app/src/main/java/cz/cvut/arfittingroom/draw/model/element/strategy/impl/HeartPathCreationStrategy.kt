@@ -4,6 +4,8 @@ import cz.cvut.arfittingroom.draw.model.element.strategy.PathCreationStrategy
 import cz.cvut.arfittingroom.draw.path.DrawablePath
 
 class HeartPathCreationStrategy : PathCreationStrategy {
+    override val name: String = "heart"
+
     override fun createPath(centerX: Float, centerY: Float, outerRadius: Float): DrawablePath {
 
         val path = DrawablePath()

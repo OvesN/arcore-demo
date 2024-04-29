@@ -18,6 +18,7 @@ class Curve(
     private var path: DrawablePath,
     override val paint: Paint
 ) : Element(), Repaintable {
+    override val name: String = "Line"
 
     override var centerX: Float = 0f
     override var centerY: Float = 0f

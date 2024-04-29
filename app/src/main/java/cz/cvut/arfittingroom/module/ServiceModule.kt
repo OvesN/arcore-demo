@@ -20,4 +20,5 @@ class ServiceModule {
     @Provides
     @Singleton
     fun provideLayerManager() = LayerManager()
+
 }

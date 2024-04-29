@@ -18,6 +18,7 @@ class BoundingBox(
         color = Color.YELLOW
         style = Paint.Style.STROKE
         strokeWidth = 2f
+        pathEffect
     }
 
     var topRightCornerCoor = Coordinates(0f, 0f)
@@ -61,4 +62,15 @@ class BoundingBox(
     override fun draw(canvas: Canvas) {
         canvas.drawPath(createPath(), paint)
     }
+
+    fun contains(x: Float, y: Float) =
+        RectF(
+            rectF.left - 10,
+            rectF.top - 10,
+            rectF.right + 10,
+            rectF.bottom + 10
+        ).contains(x, y)
+
+
+
 }

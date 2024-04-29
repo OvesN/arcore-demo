@@ -6,10 +6,15 @@ import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Matrix
 import android.graphics.Paint
+import android.os.Handler
+import android.os.Looper
 import android.util.AttributeSet
+import android.util.Log
+import android.view.Gravity
 import android.view.MotionEvent
 import android.view.MotionEvent.ACTION_POINTER_UP
 import android.view.View
+import android.widget.Toast
 import androidx.annotation.ColorInt
 import androidx.core.graphics.alpha
 import com.skydoves.colorpickerview.ColorPickerDialog
@@ -30,6 +35,7 @@ import cz.cvut.arfittingroom.draw.model.PaintOptions
 import cz.cvut.arfittingroom.draw.model.element.Element
 import cz.cvut.arfittingroom.draw.model.element.impl.Curve
 import cz.cvut.arfittingroom.draw.model.element.impl.Figure
+import cz.cvut.arfittingroom.draw.model.element.impl.Gif
 import cz.cvut.arfittingroom.draw.model.element.impl.Image
 import cz.cvut.arfittingroom.draw.model.element.strategy.impl.HeartPathCreationStrategy
 import cz.cvut.arfittingroom.draw.model.element.strategy.impl.StarPathCreationStrategy
@@ -38,9 +44,14 @@ import cz.cvut.arfittingroom.draw.model.enums.EShape
 import cz.cvut.arfittingroom.draw.path.DrawablePath
 import cz.cvut.arfittingroom.draw.service.LayerManager
 import cz.cvut.arfittingroom.draw.service.UIDrawer
+import cz.cvut.arfittingroom.model.SPAN_SLOP
 import cz.cvut.arfittingroom.model.TOUCH_TO_MOVE_THRESHOLD
+import cz.cvut.arfittingroom.utils.FileUtil.adjustBitmap
+import cz.cvut.arfittingroom.utils.FileUtil.saveTempMaskFrames
 import cz.cvut.arfittingroom.utils.FileUtil.saveTempMaskTextureBitmap
 import mu.KotlinLogging
+import pl.droidsonroids.gif.GifDrawable
+import pl.droidsonroids.gif.GifDrawableBuilder
 import javax.inject.Inject
 import kotlin.math.abs
 import kotlin.math.atan2
@@ -48,8 +59,6 @@ import kotlin.math.sqrt
 
 
 private val logger = KotlinLogging.logger { }
-
-private const val SPAN_SLOP = 7
 
 
 class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
@@ -88,6 +97,9 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private var ignoreDrawing: Boolean = false
     private var canvasTransformationMatrix: Matrix = Matrix()
 
+    private var handler = Handler(Looper.getMainLooper())
+    private var gifRunnable: Runnable? = null
+    private var frameDelay: Long = 100
 
     interface OnLayerInitializedListener {
         fun onLayerInitialized(numOfLayers: Int)
@@ -97,10 +109,11 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     init {
         (context.applicationContext as? ARFittingRoomApplication)?.appComponent?.inject(this)
+
         // Add event for element scaling
         scaleGestureDetector = ScaleGestureDetector(
             context,
-            object :  ScaleGestureDetector.SimpleOnScaleGestureListener() {
+            object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
 
                 override fun onScaleBegin(detector: ScaleGestureDetector): Boolean {
                     ignoreNextOneFingerMove = true
@@ -172,6 +185,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         if (!canvasTransformationMatrix.invert(inverseMatrix)) {
             return false
         }
+
         val touchPoint = floatArrayOf(event.x, event.y)
         inverseMatrix.mapPoints(touchPoint)
         val x = touchPoint[0]
@@ -183,11 +197,13 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                 lastDownX = x
                 lastDownY = y
             }
+
             MotionEvent.ACTION_MOVE -> {
                 if (!isDistanceGreaterThanThreshold(x, y)) {
                     return true
                 }
             }
+
             MotionEvent.ACTION_UP, ACTION_POINTER_UP -> {
                 lastDownX = 0f
                 lastDownY = 0f
@@ -218,6 +234,42 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
         invalidate()
         return true
+    }
+
+    private var frameCount = 0
+    private fun startAnimation(gif: Gif) {
+        if (gifRunnable != null) {
+            stopAnimation()
+        }
+
+        Log.println(Log.INFO, null, "Start animation")
+        gifRunnable = Runnable {
+            Log.println(Log.INFO, null, "count $frameCount")
+            // Play gif three times and stop on the first frame
+            if (frameCount >= gif.gifDrawable.numberOfFrames * 3 && gif.currentFrameIndex == 0
+            ) {
+                frameCount = 0
+                stopAnimation(gif)
+            } else {
+                gif.currentFrameIndex++
+                frameCount++
+                invalidate()
+                handler.postDelayed(gifRunnable!!, frameDelay)
+            }
+        }
+        gifRunnable?.let { handler.post(it) }
+    }
+
+    fun stopAnimation(gif: Gif? = null) {
+        if (gif != null) {
+            gif.shouldDrawNextFrame = false
+            gif.currentFrameIndex = 0
+        }
+        Log.println(Log.INFO, null, "Stop animation")
+        gifRunnable?.let {
+            handler.removeCallbacks(it)
+            gifRunnable = null
+        }
     }
 
     private fun handleCanvasGesture(event: MotionEvent) {
@@ -318,6 +370,12 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                     }
 
                     selectedElement = layerManager.selectElement(x, y)
+                    // In case that we selected gif, play it's animation
+                    selectedElement.let {
+                        if (it is Gif) {
+                            startAnimation(it)
+                        }
+                    }
                     isInElementMenuMode = false
                 }
 
@@ -373,7 +431,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         return angleDelta.toFloat()
     }
 
-   private fun isDistanceGreaterThanThreshold( x2: Float, y2: Float): Boolean {
+    private fun isDistanceGreaterThanThreshold(x2: Float, y2: Float): Boolean {
         val deltaX = lastDownX - x2
         val deltaY = lastDownY - y2
 
@@ -423,6 +481,8 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             }
 
             EElementEditAction.CHANGE_COLOR -> {
+                element.setSelected(false)
+                selectedElement = null
                 showColorPickerDialog(true)
             }
 
@@ -431,6 +491,8 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                     element,
                 )
                 command?.let { addToHistory(command) }
+                element.setSelected(false)
+                selectedElement = null
             }
 
             EElementEditAction.MOVE_DOWN -> {
@@ -438,13 +500,18 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                     element,
                 )
                 command?.let { addToHistory(command) }
+                element.setSelected(false)
+                selectedElement = null
             }
             //FIXME do not work, history do not work
             EElementEditAction.MOVE_TO -> {
+                element.setSelected(false)
+                selectedElement = null
                 //TODO open menu with layers
                 return
                 val command = layerManager.moveElementTo(element, 1)
                 command?.let { addToHistory(command) }
+
             }
         }
     }
@@ -479,13 +546,27 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     }
 
     fun undo() {
-        DrawHistoryHolder.undo()
+        val command = DrawHistoryHolder.undo()
+        command?.let {
+            val toast = Toast.makeText(context, "Undo ${command.description}", Toast.LENGTH_SHORT)
+            toast.setGravity(Gravity.CENTER_HORIZONTAL, 0, 0)
+
+            toast.show()
+        }
+        stopAnimation()
         layerManager.updateLayersBitmaps()
         invalidate()
     }
 
     fun redo() {
-        DrawHistoryHolder.redo()
+        val command = DrawHistoryHolder.redo()
+        command?.let {
+            val toast = Toast.makeText(context, "Redo ${command.description}", Toast.LENGTH_SHORT)
+            toast.setGravity(Gravity.CENTER_HORIZONTAL, 0, 0)
+
+            toast.show()
+        }
+        stopAnimation()
         layerManager.updateLayersBitmaps()
         invalidate()
     }
@@ -530,6 +611,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
+
         canvasTransformationMatrix = createCanvasTransformationMatrix()
         canvas.setMatrix(canvasTransformationMatrix)
         draw(canvas, true)
@@ -547,7 +629,6 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         canvas: Canvas,
         shouldDrawFaceTexture: Boolean = true
     ) {
-        // Draw all layers
         layerManager.drawLayers(canvas, paintOptions)
 
         uiDrawer.drawSelectedElementEditIcons(canvas, selectedElement, isInElementMenuMode)
@@ -648,6 +729,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         }
     }
 
+
     fun loadImage(imageId: Int) {
         // First decode with inJustDecodeBounds=true to check dimensions
         val options = BitmapFactory.Options().apply {
@@ -656,7 +738,8 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         BitmapFactory.decodeResource(resources, imageId, options)
 
         // Calculate inSampleSize
-        options.inSampleSize = calculateInSampleSize(options, width / 3, height / 3)
+        options.inSampleSize =
+            calculateInSampleSize(options.outWidth, options.outHeight, width / 3, height / 3)
 
         // Decode bitmap with inSampleSize set
         options.inJustDecodeBounds = false
@@ -667,7 +750,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             Image(
                 width.toFloat() / 2,
                 height.toFloat() / 2,
-                width.toFloat() / 2,
+                width.toFloat() / 4,
                 imageId,
             ).apply { bitmap = imageBitmap }
         )
@@ -675,12 +758,44 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         invalidate()
     }
 
+    fun loadGif(gifId: Int) {
+        val gifDrawable = GifDrawable(resources, gifId)
+
+        val adjustedGif = GifDrawableBuilder().with(gifDrawable).from(resources, gifId).sampleSize(
+            calculateInSampleSize(
+                gifDrawable.currentFrame.width,
+                gifDrawable.currentFrame.height,
+                width / 3,
+                height / 3
+            )
+        ).build()
+
+        val gif = Gif(
+            gifId,
+            width.toFloat() / 2,
+            height.toFloat() / 2,
+            width.toFloat() / 4,
+        ).apply {
+            setDrawable(adjustedGif)
+            shouldDrawNextFrame = true
+        }
+        addElementToLayer(
+            layerManager.getActiveLayerIndex(),
+            gif
+        )
+
+        layerManager.setUpdatableElement(gif)
+
+        startAnimation(gif)
+    }
+
+
     private fun calculateInSampleSize(
-        options: BitmapFactory.Options,
+        width: Int,
+        height: Int,
         reqWidth: Int,
         reqHeight: Int
     ): Int {
-        val (height: Int, width: Int) = options.run { outHeight to outWidth }
         var inSampleSize = 1
 
         if (height > reqHeight || width > reqWidth) {
@@ -708,9 +823,18 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     fun saveBitmap(onSaved: () -> Unit) {
         layerManager.deselectAllElements()
-        saveTempMaskTextureBitmap(adjustBitmap(createBitmap()), context) {
-            onSaved()
+        if (layerManager.doesContainAnyGif()) {
+            layerManager.setAllGifsToAnimationMode()
+            layerManager.resetAllGifs()
+            saveTempMaskFrames(layerManager, height, width, context) {
+                onSaved()
+            }
+        } else {
+            saveTempMaskTextureBitmap(adjustBitmap(createBitmap(), height, width), context) {
+                onSaved()
+            }
         }
+
     }
 
     private fun createBitmap(): Bitmap {
@@ -723,36 +847,6 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         return bitmap
     }
 
-    private fun adjustBitmap(bitmap: Bitmap): Bitmap {
-        // Calculate the dimensions for the square crop
-        val newY = (height - width) / 2
-
-        // Crop the bitmap
-        val croppedBitmap = Bitmap.createBitmap(bitmap, 0, newY, width, width)
-
-        // Create a matrix for the mirroring transformation
-        val matrix = Matrix().apply {
-            postScale(
-                -1f,
-                1f,
-                croppedBitmap.width / 2f,
-                croppedBitmap.height / 2f
-            )
-        }
-
-        // Create and return the mirrored bitmap
-        val mirroredBitmap = Bitmap.createBitmap(
-            croppedBitmap,
-            0,
-            0,
-            croppedBitmap.width,
-            croppedBitmap.height,
-            matrix,
-            true
-        )
-
-        return Bitmap.createScaledBitmap(mirroredBitmap, 1024, 1024, true)
-    }
 
     fun showColorPickerDialog(setElementColor: Boolean = false) {
         ColorPickerDialog.Builder(context)
@@ -806,5 +900,6 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
         return transformationMatrix
     }
+
 
 }
