@@ -13,17 +13,31 @@ import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
+import com.google.android.filament.IndirectLight
+import com.google.android.filament.LightManager
+import com.google.android.filament.Skybox
 import com.google.ar.core.ArCoreApk
 import com.google.ar.core.AugmentedFace
 import com.google.ar.core.TrackingState
+import com.google.ar.sceneform.ArSceneView
+import com.google.ar.sceneform.Sceneform
+import com.google.ar.sceneform.rendering.Light
 import com.google.ar.sceneform.rendering.ModelRenderable
 import com.google.ar.sceneform.rendering.Renderable
 import com.google.ar.sceneform.rendering.Texture
+import com.google.ar.sceneform.ux.ArFrontFacingFragment
 import com.google.ar.sceneform.ux.AugmentedFaceNode
+import com.gorisse.thomas.sceneform.environment
+import com.gorisse.thomas.sceneform.estimatedEnvironmentLights
+import com.gorisse.thomas.sceneform.light.LightEstimationConfig
+import com.gorisse.thomas.sceneform.light.build
+import com.gorisse.thomas.sceneform.lightEstimationConfig
+import com.gorisse.thomas.sceneform.mainLight
 import cz.cvut.arfittingroom.ARFittingRoomApplication
 import cz.cvut.arfittingroom.R
 import cz.cvut.arfittingroom.databinding.ActivityShowRoomBinding
-import cz.cvut.arfittingroom.fragment.FaceArFragment
 import cz.cvut.arfittingroom.model.ModelInfo
 import cz.cvut.arfittingroom.model.enums.EAccessoryType
 import cz.cvut.arfittingroom.model.enums.EMakeupType
@@ -40,11 +54,11 @@ import javax.inject.Inject
 class ShowRoomActivity : AppCompatActivity() {
     companion object {
         const val MIN_OPENGL_VERSION = 3.0
-        private val logger = KotlinLogging.logger { }
     }
 
     private lateinit var binding: ActivityShowRoomBinding
-    private lateinit var arFragment: FaceArFragment
+    private lateinit var arFragment: ArFrontFacingFragment
+    private lateinit var arSceneView: ArSceneView
     private var faceNodeMap = HashMap<AugmentedFace, HashMap<EModelType, AugmentedFaceNode>>()
     private var isUpdated = false
 
@@ -84,16 +98,23 @@ class ShowRoomActivity : AppCompatActivity() {
             return
         }
 
-        // Inflate the layout for this activity
         binding = ActivityShowRoomBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Use the FragmentManager to find the AR Fragment by ID
-        arFragment = supportFragmentManager.findFragmentById(R.id.face_fragment) as FaceArFragment
+        supportFragmentManager.addFragmentOnAttachListener { fragmentManager: FragmentManager, fragment: Fragment ->
+            this.onAttachFragment(
+                fragmentManager,
+                fragment
+            )
+        }
 
-        val sceneView = arFragment.arSceneView
-        sceneView.cameraStreamRenderPriority = Renderable.RENDER_PRIORITY_FIRST
-        val scene = sceneView.scene
+        if (savedInstanceState == null) {
+            if (Sceneform.isSupported(this)) {
+                supportFragmentManager.beginTransaction()
+                    .add(R.id.arFragment, ArFrontFacingFragment::class.java, null)
+                    .commit()
+            }
+        }
 
         // Set click listeners
         setupButtonClickListener(binding.buttonLiner, EMakeupType.LINER)
@@ -123,36 +144,71 @@ class ShowRoomActivity : AppCompatActivity() {
             val intent = Intent(this, MakeupEditorActivity::class.java)
             startActivity(intent)
         }
+    }
 
-        scene.addOnUpdateListener {
-            // Remove any AugmentedFaceNodes associated with an AugmentedFace that stopped tracking
-            faceNodeMap.entries.removeIf { (face, nodes) ->
-                if (face.trackingState == TrackingState.STOPPED) {
-                    nodes.forEach { entry -> entry.value.setParent(null) }
-                    true
-                } else {
-                    false
-                }
-            }
-            if (shouldPlayAnimation) {
-                if (!gifPrepared) {
-                    prepareAllGifTextures()
-                } else if (gifRunnable == null) {
-                    startAnimation()
-                }
 
-            } else if (!isUpdated) {
-                updateModelsOnScreen()
+    private fun onAttachFragment(fragmentManager: FragmentManager, fragment: Fragment) {
+        if (fragment.id == R.id.arFragment) {
+            arFragment = fragment as ArFrontFacingFragment
+            arFragment.setOnViewCreatedListener { arSceneView: ArSceneView ->
+                onViewCreated(
+                    arSceneView
+                )
             }
         }
     }
 
+    private fun onViewCreated(arSceneView: ArSceneView) {
+        this.arSceneView = arSceneView
+        arSceneView.lightEstimationConfig = LightEstimationConfig.DISABLED
+        val light = LightManager.Builder(LightManager.Type.POINT)
+            .position(-0.4f, 0.0f, -0.2f)
+            .intensity(200000.0f)
+            .color(0.98f, 0.89f, 0.76f)
+            .sunAngularRadius(1.9f)
+            .sunHaloSize(10.0f)
+            .sunHaloFalloff(80.0f)
+            .castShadows(true).build()
+        arSceneView.environment?.indirectLight?.intensity = 5000f
+        arSceneView.mainLight = light
+
+        // This is important to make sure that the camera stream renders first so that
+        // the face mesh occlusion works correctly.
+        arSceneView.setCameraStreamRenderPriority(Renderable.RENDER_PRIORITY_FIRST)
+
+        // Check for face detections
+        arFragment.setOnAugmentedFaceUpdateListener {
+            this.onAugmentedFaceTrackingUpdate(
+            )
+        }
+    }
+
+    private fun onAugmentedFaceTrackingUpdate() {
+        // Remove any AugmentedFaceNodes associated with an AugmentedFace that stopped tracking
+        faceNodeMap.entries.removeIf { (face, nodes) ->
+            if (face.trackingState == TrackingState.STOPPED) {
+                nodes.forEach { entry -> entry.value.parent = null }
+                true
+            } else {
+                false
+            }
+        }
+        if (shouldPlayAnimation) {
+            if (!gifPrepared) {
+                prepareAllGifTextures()
+            } else if (gifRunnable == null) {
+                startAnimation()
+            }
+
+        } else if (!isUpdated) {
+            updateModelsOnScreen()
+        }
+    }
 
     private fun setupButtonClickListener(button: Button, makeUpType: EMakeupType) {
         val appliedMakeUpTypes = makeUpService.makeUpState.appliedMakeUpTypes
 
         button.setOnClickListener {
-            logger.info { "${makeUpType.name} button clicked" }
             if (!appliedMakeUpTypes.add(makeUpType)) appliedMakeUpTypes.remove(makeUpType)
             combineTexturesAndApply()
         }
@@ -176,7 +232,6 @@ class ShowRoomActivity : AppCompatActivity() {
         modelType: EModelType
     ) {
         button.setOnClickListener {
-            logger.info { "${accessory.name} button clicked" }
             makeUpService.loadedModels[accessory.sourceURI]?.let { model ->
                 // If the model is already loaded, toggle its application on the face nodes
                 toggleModelOnFaceNodes(model)
@@ -196,7 +251,7 @@ class ShowRoomActivity : AppCompatActivity() {
             // Check if the node for the given modelType already exists
             if (modelNodesMap[modelType] == null) {
                 val faceNode = AugmentedFaceNode(face).also { node ->
-                    node.setParent(sceneView.scene)
+                    node.parent = sceneView.scene
                 }
                 modelNodesMap[modelType] = faceNode
                 faceNode.faceRegionsRenderable = makeUpService.loadedModels[modelKey]?.model
@@ -219,7 +274,7 @@ class ShowRoomActivity : AppCompatActivity() {
             val modelNodesMap = faceNodeMap.getOrPut(face) { HashMap() }
             modelsToUpdate.forEach { entry ->
                 val faceNode = AugmentedFaceNode(face).also { node ->
-                    node.setParent(sceneView.scene)
+                    node.parent = sceneView.scene
 
                 }
                 modelNodesMap[entry.value.modelType] = faceNode
@@ -290,8 +345,8 @@ class ShowRoomActivity : AppCompatActivity() {
             .setSource(combinedBitmap)
             .build()
             .thenAccept { texture -> applyTextureToAllFaces(texture) }
-            .exceptionally { throwable ->
-                logger.error { "Error creating texture from bitmap: $throwable" }
+            .exceptionally {
+                Log.println(Log.ERROR, null, "Error during texture initialisation")
                 null
             }
 
@@ -307,7 +362,7 @@ class ShowRoomActivity : AppCompatActivity() {
             // Check if the node for the makeup already exist
             if (modelNodesMap[EModelType.MAKE_UP] == null) {
                 val faceNode = AugmentedFaceNode(face).also { node ->
-                    node.setParent(sceneView.scene)
+                    node.parent = sceneView.scene
                 }
                 modelNodesMap[EModelType.MAKE_UP] = faceNode
                 faceNode.faceMeshTexture = texture
@@ -344,13 +399,14 @@ class ShowRoomActivity : AppCompatActivity() {
         // Asynchronously load the model. Once it's loaded, apply it
         ModelRenderable.builder()
             .setSource(this, Uri.parse(uri))
+            .setIsFilamentGltf(true)
             .build()
             .thenAccept { model ->
                 makeUpService.loadedModels[uri] = ModelInfo(modelType, model, uri, true)
                 applyModel(uri, modelType)
             }
             .exceptionally { throwable ->
-                logger.error(throwable) { "Error loading model." }
+                Log.println(Log.ERROR,null, "Error loading model")
                 null
             }
     }
@@ -362,16 +418,17 @@ class ShowRoomActivity : AppCompatActivity() {
             val modelNodesMap = faceNodeMap.getOrPut(face) { HashMap() }
             val faceNode = modelNodesMap.getOrPut(modelInfo.modelType) {
                 AugmentedFaceNode(face).also { node ->
-                    node.setParent(sceneView.scene)
+                    node.parent = sceneView.scene
                 }
             }
 
-            if (faceNode.faceRegionsRenderable == modelInfo.model) {
+            if (faceNode.faceRegionsRenderable == modelInfo.model && modelInfo.isActive) {
                 // If the model is currently applied, remove it
-                faceNode.faceRegionsRenderable = null
+                faceNode.isEnabled = false
                 modelInfo.isActive = false
             } else {
                 // If the model is not applied, apply it
+                faceNode.isEnabled = true
                 faceNode.faceRegionsRenderable = modelInfo.model
                 modelInfo.isActive = true
             }

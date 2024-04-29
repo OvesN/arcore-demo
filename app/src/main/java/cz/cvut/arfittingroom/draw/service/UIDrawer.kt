@@ -86,6 +86,8 @@ class UIDrawer(private val context: Context) {
         menuItemSpacing = screenHeight * 0.025f * 1.3f
     }
 
+    //FIXME sometimes fails
+
     private fun prepareMenuBitmap(): Bitmap {
         val menuX = 0f
         val menuY = 0f
