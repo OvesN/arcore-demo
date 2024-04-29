@@ -24,4 +24,6 @@
     <string name="or">or</string>
     <string name="newAccount"><u>Create a New Account</u></string>
     <string name="return_to_main_window">Return to main window</string>
+    <string name="createAccount">Create Account\n</string>
+    <string name="repeatPassword">Repeat Password</string>
 </resources>
