@@ -15,6 +15,13 @@
     <string name="stamp">Stamp</string>
     <string name="image">Image</string>
     <string name="text">Text</string>
-    <string name="logIn">Log in</string>
-    <string name="singUp">Sing up</string>
+    <string name="logIn">Log In</string>
+    <string name="singUp">Sing Up</string>
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="welcomeBack">Welcome Back!</string>
+    <string name="enterLogIn">Enter Your Username and Password</string>
+    <string name="or">or</string>
+    <string name="newAccount"><u>Create a New Account</u></string>
+    <string name="return_to_main_window">Return to main window</string>
 </resources>
