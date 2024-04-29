@@ -4,6 +4,9 @@ import android.content.Intent
 import android.content.res.Resources
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import cz.cvut.arfittingroom.databinding.ActivityMainBinding
 import cz.cvut.arfittingroom.utils.FileUtil.deleteTempFiles
 import cz.cvut.arfittingroom.utils.ScreenUtil
@@ -11,10 +14,19 @@ import mu.KotlinLogging
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
+    private lateinit var auth: FirebaseAuth
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        auth = Firebase.auth
+
+        //TODO uncomment
+//        if (auth.currentUser != null) {
+//            startActivity(Intent(this, ShowRoomActivity::class.java))
+//        }
+
         super.onCreate(savedInstanceState)
+
 
         supportActionBar?.hide()
         ScreenUtil.screenHeight = Resources.getSystem().displayMetrics.heightPixels
@@ -34,4 +46,5 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, SignUpActivity::class.java))
         }
     }
+
 }
