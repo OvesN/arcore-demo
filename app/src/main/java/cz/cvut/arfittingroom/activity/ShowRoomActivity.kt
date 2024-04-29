@@ -15,12 +15,15 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
+import com.google.android.filament.IndirectLight
 import com.google.android.filament.LightManager
+import com.google.android.filament.Skybox
 import com.google.ar.core.ArCoreApk
 import com.google.ar.core.AugmentedFace
 import com.google.ar.core.TrackingState
 import com.google.ar.sceneform.ArSceneView
 import com.google.ar.sceneform.Sceneform
+import com.google.ar.sceneform.rendering.Light
 import com.google.ar.sceneform.rendering.ModelRenderable
 import com.google.ar.sceneform.rendering.Renderable
 import com.google.ar.sceneform.rendering.Texture
@@ -140,28 +143,6 @@ class ShowRoomActivity : AppCompatActivity() {
             val intent = Intent(this, MakeupEditorActivity::class.java)
             startActivity(intent)
         }
-
-//        arFragment.arSceneView.scene.addOnUpdateListener {
-//            // Remove any AugmentedFaceNodes associated with an AugmentedFace that stopped tracking
-//            faceNodeMap.entries.removeIf { (face, nodes) ->
-//                if (face.trackingState == TrackingState.STOPPED) {
-//                    nodes.forEach { entry -> entry.value.parent = null }
-//                    true
-//                } else {
-//                    false
-//                }
-//            }
-//            if (shouldPlayAnimation) {
-//                if (!gifPrepared) {
-//                    prepareAllGifTextures()
-//                } else if (gifRunnable == null) {
-//                    startAnimation()
-//                }
-//
-//            } else if (!isUpdated) {
-//                updateModelsOnScreen()
-//            }
-//        }
     }
 
 
@@ -179,22 +160,33 @@ class ShowRoomActivity : AppCompatActivity() {
     private fun onViewCreated(arSceneView: ArSceneView) {
         this.arSceneView = arSceneView
         arSceneView.lightEstimationConfig = LightEstimationConfig.DISABLED
-        val light = LightManager.Builder(LightManager.Type.SUN).intensity(40000f).castShadows(true).build()
-        arSceneView.environment?.indirectLight?.intensity  = 0f
+        val light = LightManager.Builder(LightManager.Type.POINT)
+            //.intensity(90000f)
+            .position(-0.4f, 0.0f, -0.25f)
+            //.direction(0.0f, 0.0f, -1.0f)
+            .intensity(200000.0f)
+            .color(0.98f, 0.89f, 0.76f)
+          //  .direction(0f, -0.7f, -0.7f)
+            //.position()
+//            .sunAngularRadius(1.9f)
+//            .sunHaloSize(10.0f)
+//            .sunHaloFalloff(80.0f)
+            .castShadows(true).build()
+        arSceneView.environment?.indirectLight?.intensity = 5000f
         arSceneView.mainLight = light
+
         // This is important to make sure that the camera stream renders first so that
         // the face mesh occlusion works correctly.
         arSceneView.setCameraStreamRenderPriority(Renderable.RENDER_PRIORITY_FIRST)
 
         // Check for face detections
-        arFragment.setOnAugmentedFaceUpdateListener { augmentedFace: AugmentedFace ->
+        arFragment.setOnAugmentedFaceUpdateListener {
             this.onAugmentedFaceTrackingUpdate(
-                augmentedFace
             )
         }
     }
 
-    private fun onAugmentedFaceTrackingUpdate(augmentedFace: AugmentedFace) {
+    private fun onAugmentedFaceTrackingUpdate() {
         // Remove any AugmentedFaceNodes associated with an AugmentedFace that stopped tracking
         faceNodeMap.entries.removeIf { (face, nodes) ->
             if (face.trackingState == TrackingState.STOPPED) {
@@ -204,7 +196,14 @@ class ShowRoomActivity : AppCompatActivity() {
                 false
             }
         }
-        if (!isUpdated) {
+        if (shouldPlayAnimation) {
+            if (!gifPrepared) {
+                prepareAllGifTextures()
+            } else if (gifRunnable == null) {
+                startAnimation()
+            }
+
+        } else if (!isUpdated) {
             updateModelsOnScreen()
         }
     }
@@ -349,7 +348,7 @@ class ShowRoomActivity : AppCompatActivity() {
             .setSource(combinedBitmap)
             .build()
             .thenAccept { texture -> applyTextureToAllFaces(texture) }
-            .exceptionally { throwable ->
+            .exceptionally {
                 Log.println(Log.ERROR, null, "Error during texture initialisation")
                 null
             }

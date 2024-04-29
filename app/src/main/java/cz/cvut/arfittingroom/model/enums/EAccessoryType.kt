@@ -2,7 +2,7 @@ package cz.cvut.arfittingroom.model.enums
 
 
 enum class EAccessoryType(val sourceURI: String) {
-    SUNGLASSES("fox.glb"),
-    YELLOW_GLASSES("yellow_sunglasses.glb"),
-    MARIO_HAT("mario_hat.glb"),
+    SUNGLASSES("heart_shaped_glasses.glb"),
+    YELLOW_GLASSES("pineapple_glasses.glb"),
+    MARIO_HAT("clown_hat.glb"),
 }
