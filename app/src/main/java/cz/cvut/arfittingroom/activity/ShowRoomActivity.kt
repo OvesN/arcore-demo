@@ -422,12 +422,13 @@ class ShowRoomActivity : AppCompatActivity() {
                 }
             }
 
-            if (faceNode.faceRegionsRenderable == modelInfo.model) {
+            if (faceNode.faceRegionsRenderable == modelInfo.model && modelInfo.isActive) {
                 // If the model is currently applied, remove it
-                faceNode.faceRegionsRenderable = null
+                faceNode.isEnabled = false
                 modelInfo.isActive = false
             } else {
                 // If the model is not applied, apply it
+                faceNode.isEnabled = true
                 faceNode.faceRegionsRenderable = modelInfo.model
                 modelInfo.isActive = true
             }
