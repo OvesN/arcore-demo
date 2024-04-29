@@ -20,10 +20,9 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         auth = Firebase.auth
 
-        //TODO uncomment
-//        if (auth.currentUser != null) {
-//            startActivity(Intent(this, ShowRoomActivity::class.java))
-//        }
+        if (auth.currentUser != null) {
+            startActivity(Intent(this, ShowRoomActivity::class.java))
+        }
 
         super.onCreate(savedInstanceState)
 

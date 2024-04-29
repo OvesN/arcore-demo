@@ -8,6 +8,8 @@ import android.graphics.Color
 import android.graphics.Matrix
 import android.graphics.Paint
 import android.graphics.RectF
+import androidx.core.graphics.drawable.toBitmap
+import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
 import cz.cvut.arfittingroom.R
 import cz.cvut.arfittingroom.draw.model.element.Element
 import cz.cvut.arfittingroom.draw.model.enums.EElementEditAction
@@ -30,8 +32,9 @@ class UIDrawer(private val context: Context) {
     private val editElementIconsBounds: HashMap<EElementEditAction, RectF> = hashMapOf()
     private val menuBitmap: Bitmap
 
-    private val faceTextureImage: Bitmap
+    private val faceTextureImage: Bitmap?
     private val faceTextureMatix: Matrix
+    private var faceTextureVector: VectorDrawableCompat? = null
 
     init {
         initializeDimensions()
@@ -53,15 +56,20 @@ class UIDrawer(private val context: Context) {
         }
 
         menuBitmap = prepareMenuBitmap()
-        faceTextureImage =
-            BitmapFactory.decodeResource(context.resources, R.drawable.facemesh)
+        faceTextureVector =
+            VectorDrawableCompat.create(context.resources, R.drawable.facemesh, null)
+        faceTextureImage = faceTextureVector?.toBitmap()
         faceTextureMatix = prepareFaceTextureMatrix()
         loadEditElementIcons()
     }
 
     private fun prepareFaceTextureMatrix(): Matrix {
-        val bitmapWidth = faceTextureImage.width
-        val bitmapHeight = faceTextureImage.height
+
+        val bitmapWidth =
+            faceTextureImage?.let { it.width } ?: faceTextureVector?.let { it.intrinsicWidth } ?: 0
+        val bitmapHeight =
+            faceTextureImage?.let { it.height } ?: faceTextureVector?.let { it.intrinsicHeight }
+            ?: 0
 
         val scale =
             (screenWidth.toFloat() / bitmapWidth).coerceAtMost(screenHeight.toFloat() / bitmapHeight)
@@ -87,7 +95,6 @@ class UIDrawer(private val context: Context) {
     }
 
     //FIXME sometimes fails
-
     private fun prepareMenuBitmap(): Bitmap {
         val menuX = 0f
         val menuY = 0f
@@ -125,23 +132,20 @@ class UIDrawer(private val context: Context) {
 
     private fun loadEditElementIcons() {
         editElementIcons[EElementEditAction.DELETE] =
-
-            BitmapFactory.decodeResource(context.resources, R.drawable.yellow_delete)
+            VectorDrawableCompat.create(context.resources, R.drawable.yellow_delete, null)?.toBitmap()!!
 
         editElementIcons[EElementEditAction.ROTATE] =
-
-            BitmapFactory.decodeResource(context.resources, R.drawable.rotate)
+            VectorDrawableCompat.create(context.resources, R.drawable.rotate, null)?.toBitmap()!!
 
         editElementIcons[EElementEditAction.SCALE] =
-
-            (BitmapFactory.decodeResource(context.resources, R.drawable.rezise))
+            VectorDrawableCompat.create(context.resources, R.drawable.rezise,null)?.toBitmap()!!
 
         editElementIcons[EElementEditAction.MENU] =
-            (BitmapFactory.decodeResource(context.resources, R.drawable.yellow_menu))
+            VectorDrawableCompat.create(context.resources, R.drawable.yellow_menu,null)?.toBitmap()!!
     }
 
     fun drawFaceTextureImage(canvas: Canvas) {
-        canvas.drawBitmap(faceTextureImage, faceTextureMatix, null)
+        faceTextureImage?.let { canvas.drawBitmap(it, faceTextureMatix, null) }
     }
 
     fun drawSelectedElementEditIcons(
