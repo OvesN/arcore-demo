@@ -11,11 +11,12 @@ import mu.KotlinLogging
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
-    private val logger = KotlinLogging.logger{}
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        supportActionBar?.hide()
         ScreenUtil.screenHeight = Resources.getSystem().displayMetrics.heightPixels
         ScreenUtil.screenWidth = Resources.getSystem().displayMetrics.widthPixels
 
@@ -25,10 +26,12 @@ class MainActivity : AppCompatActivity() {
 
         deleteTempFiles(applicationContext)
 
-        binding.buttonMakeup.setOnClickListener {
-            logger.info { "Makeup button clicked" }
-            startActivity(Intent(this, ShowRoomActivity::class.java))
-        }
 
+        binding.buttonLogIn.setOnClickListener {
+            startActivity(Intent(this, LogInActivity::class.java))
+        }
+        binding.buttonSingUp.setOnClickListener {
+            startActivity(Intent(this, SignUpActivity::class.java))
+        }
     }
 }

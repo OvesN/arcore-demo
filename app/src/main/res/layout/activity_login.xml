@@ -4,21 +4,22 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".activity.MainActivity"
+    android:background="#FFFFFF"
     android:paddingStart="20dp"
-    android:paddingEnd="20dp">
+    android:paddingEnd="20dp"
+    tools:context=".activity.LogInActivity">
 
     <ImageButton
         android:id="@+id/button_return"
         android:layout_width="wrap_content"
         android:layout_height="32dp"
-        android:layout_marginTop="30dp"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
+        android:layout_marginTop="30dp"
         android:background="@null"
+        android:contentDescription="@string/return_to_main_window"
         android:scaleType="fitCenter"
-        android:src="@drawable/return_icon"
-        android:contentDescription="@string/return_to_main_window" />
+        android:src="@drawable/return_icon" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -29,36 +30,44 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/welcomeBack"
             android:gravity="start"
-            android:textSize="40sp"
+            android:text="@string/welcomeBack"
             android:textColor="@color/colorBlack"
+            android:textSize="40sp"
             android:textStyle="bold" />
 
         <TextView
             android:layout_width="match_parent"
-            android:gravity="start"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="40dp"
+            android:gravity="start"
             android:text="@string/enterLogIn"
             android:textAllCaps="false"
-            android:layout_marginBottom="40dp"/>
+            android:textColor="@color/colorDarkGrey" />
 
         <EditText
             android:id="@+id/username"
             android:layout_width="match_parent"
             android:layout_height="60dp"
             android:autofillHints="username"
+            android:background="@drawable/input"
             android:hint="@string/username"
-            android:inputType="text" />
+            android:inputType="text"
+            android:textColor="@color/colorDarkGrey"
+            android:textColorHint="@color/colorDarkGrey" />
+
 
         <EditText
             android:id="@+id/pwd"
             android:layout_width="match_parent"
             android:layout_height="60dp"
+            android:layout_marginBottom="40dp"
             android:autofillHints="password"
+            android:background="@drawable/input"
             android:hint="@string/password"
             android:inputType="textPassword"
-            android:layout_marginBottom="40dp"/>
+            android:textColor="@color/colorDarkGrey"
+            android:textColorHint="@color/colorDarkGrey" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -87,19 +96,24 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginEnd="5dp"
                 android:text="@string/or"
                 android:textAllCaps="false"
-                android:layout_marginEnd="5dp"/>
+                android:textColor="@color/colorDarkGrey" />
 
             <TextView
                 android:id="@+id/button_sing_up"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:gravity="center"
+                android:minWidth="48dp"
+                android:minHeight="48dp"
+                android:padding="12dp"
                 android:text="@string/newAccount"
-                android:textStyle="bold"
                 android:textAllCaps="false"
                 android:textColor="@color/colorBlack"
-                android:textIsSelectable="true" />
+                android:textStyle="bold" />
+
         </LinearLayout>
 
     </LinearLayout>

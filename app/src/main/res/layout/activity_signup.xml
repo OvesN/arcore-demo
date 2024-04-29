@@ -4,8 +4,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".activity.MainActivity"
+    tools:context=".activity.SignUpActivity"
     android:paddingStart="20dp"
+    android:background="#FFFFFF"
     android:paddingEnd="20dp">
 
     <ImageButton
@@ -41,7 +42,11 @@
             android:layout_height="60dp"
             android:autofillHints="username"
             android:hint="@string/username"
-            android:inputType="text" />
+            android:inputType="text"
+            android:textColor="@color/colorDarkGrey"
+            android:textColorHint="@color/colorDarkGrey"
+            android:background="@drawable/input"/>
+
 
         <EditText
             android:id="@+id/pwd"
@@ -49,7 +54,11 @@
             android:layout_height="60dp"
             android:autofillHints="password"
             android:hint="@string/password"
-            android:inputType="textPassword" />
+            android:inputType="textPassword"
+            android:textColor="@color/colorDarkGrey"
+            android:textColorHint="@color/colorDarkGrey"
+            android:background="@drawable/input"/>
+
         <EditText
             android:id="@+id/pwd_repeat"
             android:layout_width="match_parent"
@@ -57,7 +66,10 @@
             android:autofillHints="password"
             android:hint="@string/repeatPassword"
             android:inputType="textPassword"
-            android:layout_marginBottom="40dp"/>
+            android:layout_marginBottom="40dp"
+            android:textColor="@color/colorDarkGrey"
+            android:textColorHint="@color/colorDarkGrey"
+            android:background="@drawable/input"/>
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"

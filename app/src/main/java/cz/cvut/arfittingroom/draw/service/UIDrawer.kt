@@ -54,7 +54,7 @@ class UIDrawer(private val context: Context) {
 
         menuBitmap = prepareMenuBitmap()
         faceTextureImage =
-            BitmapFactory.decodeResource(context.resources, R.drawable.canonical_face_texture)
+            BitmapFactory.decodeResource(context.resources, R.drawable.facemesh)
         faceTextureMatix = prepareFaceTextureMatrix()
         loadEditElementIcons()
     }
@@ -126,18 +126,18 @@ class UIDrawer(private val context: Context) {
     private fun loadEditElementIcons() {
         editElementIcons[EElementEditAction.DELETE] =
 
-            BitmapFactory.decodeResource(context.resources, R.drawable.delete_icon)
+            BitmapFactory.decodeResource(context.resources, R.drawable.yellow_delete)
 
         editElementIcons[EElementEditAction.ROTATE] =
 
-            BitmapFactory.decodeResource(context.resources, R.drawable.rotate_icon)
+            BitmapFactory.decodeResource(context.resources, R.drawable.rotate)
 
         editElementIcons[EElementEditAction.SCALE] =
 
-            (BitmapFactory.decodeResource(context.resources, R.drawable.scale_icon))
+            (BitmapFactory.decodeResource(context.resources, R.drawable.rezise))
 
         editElementIcons[EElementEditAction.MENU] =
-            (BitmapFactory.decodeResource(context.resources, R.drawable.menu_icon))
+            (BitmapFactory.decodeResource(context.resources, R.drawable.yellow_menu))
     }
 
     fun drawFaceTextureImage(canvas: Canvas) {
