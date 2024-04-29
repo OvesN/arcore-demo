@@ -26,4 +26,7 @@
     <string name="return_to_main_window">Return to main window</string>
     <string name="createAccount">Create Account\n</string>
     <string name="repeatPassword">Repeat Password</string>
+    <string name="logOut">Log Out</string>
+    <string name="backToEditor">Back To Editor</string>
+    <string name="hello">Hello,</string>
 </resources>
