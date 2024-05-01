@@ -22,13 +22,14 @@ class MainActivity : AppCompatActivity() {
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         auth = Firebase.auth
 
         if (auth.currentUser != null) {
             startActivity(Intent(this, ShowRoomActivity::class.java))
+            finish()
+            return
         }
-
-        super.onCreate(savedInstanceState)
 
         supportActionBar?.hide()
         ScreenUtil.screenHeight = Resources.getSystem().displayMetrics.heightPixels

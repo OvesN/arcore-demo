@@ -60,29 +60,6 @@ class Gif(
         currentFrameIndex = 0
     }
 
-    //TODO resolve later copy paste from image
-    override fun doIntersect(x: Float, y: Float): Boolean {
-        if (!boundingBox.rectF.contains(x, y)) {
-            return false
-        }
-
-        // Create an inverse matrix
-        val inverseMatrix = Matrix()
-        transformationMatrix.invert(inverseMatrix)
-
-        // Apply the inverse matrix to the (x, y) coordinates
-        val points = floatArrayOf(x, y)
-        inverseMatrix.mapPoints(points)
-
-        // Check if the point is within bitmap bounds
-        if (points[0] < 0 || points[0] >= gifDrawable.currentFrame.width || points[1] < 0 || points[1] >= gifDrawable.currentFrame.height) {
-            return false
-        }
-
-        // Check the alpha value of the corresponding pixel in the bitmap
-        val pixel = gifDrawable.currentFrame.getPixel(points[0].toInt(), points[1].toInt())
-        return (pixel and TRANSPARENT_CODE.toInt()) != 0 // Check if alpha is not 0 (transparent)
-    }
 
     private fun createTransformationMatrix(): Matrix {
         val width = gifDrawable.currentFrame.width

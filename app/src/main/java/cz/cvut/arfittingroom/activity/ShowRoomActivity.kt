@@ -9,14 +9,15 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import by.kirich1409.viewbindingdelegate.CreateMethod
 import by.kirich1409.viewbindingdelegate.viewBinding
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.target.CustomTarget
+import com.bumptech.glide.request.transition.Transition
 import com.google.android.filament.LightManager
 import com.google.ar.core.ArCoreApk
 import com.google.ar.core.AugmentedFace
@@ -28,6 +29,7 @@ import com.google.ar.sceneform.rendering.Renderable
 import com.google.ar.sceneform.rendering.Texture
 import com.google.ar.sceneform.ux.ArFrontFacingFragment
 import com.google.ar.sceneform.ux.AugmentedFaceNode
+import com.google.firebase.storage.FirebaseStorage
 import com.gorisse.thomas.sceneform.environment
 import com.gorisse.thomas.sceneform.light.LightEstimationConfig
 import com.gorisse.thomas.sceneform.light.build
@@ -48,16 +50,17 @@ import cz.cvut.arfittingroom.service.ModelEditorService
 import cz.cvut.arfittingroom.utils.FileUtil.doesTempAnimatedMaskExist
 import cz.cvut.arfittingroom.utils.FileUtil.getNextTempMaskFrame
 import cz.cvut.arfittingroom.utils.FileUtil.getTempMaskTextureBitmap
-import cz.cvut.arfittingroom.utils.TextureCombinerUtil.combineDrawables
 import javax.inject.Inject
 
-class ShowRoomActivity : AppCompatActivity() {
+class ShowRoomActivity : AppCompatActivity(), ResourceListener {
     companion object {
         const val MIN_OPENGL_VERSION = 3.0
     }
+
     private val binding: ActivityShowRoomBinding by viewBinding(createMethod = CreateMethod.INFLATE)
     private lateinit var arFragment: ArFrontFacingFragment
     private lateinit var arSceneView: ArSceneView
+    private lateinit var storage: FirebaseStorage
 
     private var faceNodeMap = HashMap<AugmentedFace, HashMap<EModelType, AugmentedFaceNode>>()
     private var isUpdated = false
@@ -104,6 +107,7 @@ class ShowRoomActivity : AppCompatActivity() {
             return
         }
 
+        storage = FirebaseStorage.getInstance()
         setContentView(binding.root)
 
         supportFragmentManager.addFragmentOnAttachListener { fragmentManager: FragmentManager, fragment: Fragment ->
@@ -165,6 +169,39 @@ class ShowRoomActivity : AppCompatActivity() {
     }
 
 
+    override fun applyImage(type: String, ref: String) {
+        makeUpService.appliedMakeUpTypes[type] = ref
+
+        makeUpService.appliedMakeUpTypes.values.forEach {
+            loadImage(it)
+        }
+    }
+
+    override fun removeImage(type: String) {
+        val appliedMakeupTypes = makeUpService.appliedMakeUpTypes
+        appliedMakeupTypes.remove(type)
+
+        // Clear faceNode with makeup
+        if (appliedMakeupTypes.isEmpty()) {
+            faceNodeMap.values
+                .mapNotNull { map -> map[EModelType.MAKEUP] }
+                .forEach { node -> node.faceMeshTexture = null }
+        } else {
+            makeUpService.appliedMakeUpTypes.values.forEach {
+                loadImage(it)
+            }
+        }
+    }
+
+
+    override fun applyModel(type: String, ref: String) {
+
+    }
+
+    override fun removeModel(type: String) {
+
+    }
+
     private fun onAttachFragment(fragmentManager: FragmentManager, fragment: Fragment) {
         if (fragment.id == R.id.arFragment) {
             arFragment = fragment as ArFrontFacingFragment
@@ -221,26 +258,6 @@ class ShowRoomActivity : AppCompatActivity() {
         } else if (!isUpdated) {
             updateModelsOnScreen()
         }
-    }
-
-    private fun setupButtonClickListener(button: Button, makeUpType: String) {
-        val appliedMakeUpTypes = makeUpService.makeUpState.appliedMakeUpTypes
-
-        button.setOnClickListener {
-            if (!appliedMakeUpTypes.add(makeUpType)) appliedMakeUpTypes.remove(makeUpType)
-            combineTexturesAndApply()
-        }
-    }
-
-    private fun editorButtonListener() {
-        editorService.loadedModels =
-            makeUpService.loadedModels.filter { (_, modelInfo) -> modelInfo.isActive }
-                .toMutableMap()
-
-        val intent = Intent(this, ModelEditorActivity::class.java)
-
-        makeUpService.loadedModels.clear()
-        startActivity(intent)
     }
 
 
@@ -300,7 +317,7 @@ class ShowRoomActivity : AppCompatActivity() {
 
                 makeUpService.loadedModels[entry.key] = entry.value
             }
-            makeUpService.makeUpState.textureBitmap?.let {
+            makeUpService.textureBitmap?.let {
                 createTextureAndApply(it)
             }
 
@@ -335,27 +352,8 @@ class ShowRoomActivity : AppCompatActivity() {
         gifPrepared = true
     }
 
-
-    private fun combineTexturesAndApply() {
-//        combineDrawables(makeUpService.makeUpState.appliedMakeUpTypes.map {
-//            ContextCompat.getDrawable(
-//                this,
-//                it.drawableId
-//            )!!
-//        }).let {
-//            if (it != null) {
-//                createTextureAndApply(it)
-//            } else {
-//                //Clean face node makeup texture
-//                faceNodeMap.values
-//                    .mapNotNull { map -> map[EModelType.MAKE_UP] }
-//                    .forEach { node -> node.faceMeshTexture = null }
-//            }
-//        }
-    }
-
     private fun createTextureAndApply(combinedBitmap: Bitmap) {
-        makeUpService.makeUpState.textureBitmap = combinedBitmap
+        makeUpService.textureBitmap = combinedBitmap
 
         // Convert Bitmap to ARCore Texture
         Texture.builder()
@@ -366,7 +364,6 @@ class ShowRoomActivity : AppCompatActivity() {
                 Log.println(Log.ERROR, null, "Error during texture initialisation")
                 null
             }
-
     }
 
     // Apply a Bitmap texture to all detected faces
@@ -377,14 +374,14 @@ class ShowRoomActivity : AppCompatActivity() {
         sceneView.session?.getAllTrackables(AugmentedFace::class.java)?.forEach { face ->
             val modelNodesMap = faceNodeMap.getOrPut(face) { HashMap() }
             // Check if the node for the makeup already exist
-            if (modelNodesMap[EModelType.MAKE_UP] == null) {
+            if (modelNodesMap[EModelType.MAKEUP] == null) {
                 val faceNode = AugmentedFaceNode(face).also { node ->
                     node.parent = sceneView.scene
                 }
-                modelNodesMap[EModelType.MAKE_UP] = faceNode
+                modelNodesMap[EModelType.MAKEUP] = faceNode
                 faceNode.faceMeshTexture = texture
             } else {
-                modelNodesMap[EModelType.MAKE_UP]?.faceMeshTexture = texture
+                modelNodesMap[EModelType.MAKEUP]?.faceMeshTexture = texture
             }
         }
     }
@@ -426,6 +423,24 @@ class ShowRoomActivity : AppCompatActivity() {
                 Log.println(Log.ERROR, null, "Error loading model")
                 null
             }
+    }
+
+    private fun loadImage(ref: String) {
+        Glide.with(this)
+            .asBitmap()
+            .load(storage.getReference(ref))
+            .into(object : CustomTarget<Bitmap>() {
+                override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
+                    makeUpService.makeUpBitmaps.add(resource)
+
+                    if (makeUpService.areMakeupBitmapsPrepared()) {
+                        val combinedBitmap = makeUpService.combineBitmaps()
+                        combinedBitmap?.let { createTextureAndApply(it) }
+                    }
+                }
+
+                override fun onLoadCleared(placeholder: android.graphics.drawable.Drawable?) {}
+            })
     }
 
     private fun toggleModelOnFaceNodes(modelInfo: ModelInfo) {
@@ -541,4 +556,6 @@ class ShowRoomActivity : AppCompatActivity() {
             .hide(looksOptionsFragment)
             .commit()
     }
+
+
 }

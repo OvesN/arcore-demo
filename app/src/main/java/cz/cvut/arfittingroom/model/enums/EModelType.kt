@@ -1,7 +1,7 @@
 package cz.cvut.arfittingroom.model.enums
 
 enum class EModelType {
-    MAKE_UP,
+    MAKEUP,
     EYES,
     TOP_HEAD,
 }
