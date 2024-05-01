@@ -7,6 +7,8 @@ import android.util.Log
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import by.kirich1409.viewbindingdelegate.CreateMethod
+import by.kirich1409.viewbindingdelegate.viewBinding
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.FirebaseNetworkException
 import com.google.firebase.auth.AuthResult
@@ -21,7 +23,7 @@ import cz.cvut.arfittingroom.databinding.ActivityLoginBinding
 
 
 class LogInActivity : AppCompatActivity() {
-    private lateinit var binding: ActivityLoginBinding
+    private val binding: ActivityLoginBinding by viewBinding(createMethod = CreateMethod.INFLATE)
     private lateinit var auth: FirebaseAuth
     private lateinit var fileStore: FirebaseFirestore
     private lateinit var usernameInput: EditText
@@ -31,8 +33,6 @@ class LogInActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         fileStore = FirebaseFirestore.getInstance()
         auth = Firebase.auth
-
-        binding = ActivityLoginBinding.inflate(layoutInflater)
 
         setContentView(binding.root)
 

@@ -4,6 +4,8 @@ import android.content.Intent
 import android.content.res.Resources
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import by.kirich1409.viewbindingdelegate.CreateMethod
+import by.kirich1409.viewbindingdelegate.viewBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.DocumentReference
@@ -15,7 +17,7 @@ import cz.cvut.arfittingroom.utils.ScreenUtil
 import mu.KotlinLogging
 
 class MainActivity : AppCompatActivity() {
-    private lateinit var binding: ActivityMainBinding
+    private val binding: ActivityMainBinding by viewBinding(createMethod = CreateMethod.INFLATE)
     private lateinit var auth: FirebaseAuth
 
 
@@ -28,12 +30,9 @@ class MainActivity : AppCompatActivity() {
 
         super.onCreate(savedInstanceState)
 
-
         supportActionBar?.hide()
         ScreenUtil.screenHeight = Resources.getSystem().displayMetrics.heightPixels
         ScreenUtil.screenWidth = Resources.getSystem().displayMetrics.widthPixels
-
-        binding = ActivityMainBinding.inflate(layoutInflater)
 
         setContentView(binding.root)
 

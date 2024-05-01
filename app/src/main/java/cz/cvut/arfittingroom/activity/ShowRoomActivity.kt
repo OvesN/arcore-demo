@@ -15,6 +15,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
+import by.kirich1409.viewbindingdelegate.CreateMethod
+import by.kirich1409.viewbindingdelegate.viewBinding
 import com.google.android.filament.LightManager
 import com.google.ar.core.ArCoreApk
 import com.google.ar.core.AugmentedFace
@@ -40,8 +42,6 @@ import cz.cvut.arfittingroom.fragment.LooksOptionsFragment
 import cz.cvut.arfittingroom.fragment.MakeupOptionsFragment
 import cz.cvut.arfittingroom.fragment.MakeupSingleOptionFragment
 import cz.cvut.arfittingroom.model.ModelInfo
-import cz.cvut.arfittingroom.model.enums.EAccessoryType
-import cz.cvut.arfittingroom.model.enums.EMakeupType
 import cz.cvut.arfittingroom.model.enums.EModelType
 import cz.cvut.arfittingroom.service.MakeupService
 import cz.cvut.arfittingroom.service.ModelEditorService
@@ -55,8 +55,7 @@ class ShowRoomActivity : AppCompatActivity() {
     companion object {
         const val MIN_OPENGL_VERSION = 3.0
     }
-
-    private lateinit var binding: ActivityShowRoomBinding
+    private val binding: ActivityShowRoomBinding by viewBinding(createMethod = CreateMethod.INFLATE)
     private lateinit var arFragment: ArFrontFacingFragment
     private lateinit var arSceneView: ArSceneView
 
@@ -105,7 +104,6 @@ class ShowRoomActivity : AppCompatActivity() {
             return
         }
 
-        binding = ActivityShowRoomBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         supportFragmentManager.addFragmentOnAttachListener { fragmentManager: FragmentManager, fragment: Fragment ->
@@ -127,7 +125,6 @@ class ShowRoomActivity : AppCompatActivity() {
         }
 
         // Set click listeners
-
         binding.makeupButton.setOnClickListener {
             showMakeupOptionsMenu()
         }
@@ -226,7 +223,7 @@ class ShowRoomActivity : AppCompatActivity() {
         }
     }
 
-    private fun setupButtonClickListener(button: Button, makeUpType: EMakeupType) {
+    private fun setupButtonClickListener(button: Button, makeUpType: String) {
         val appliedMakeUpTypes = makeUpService.makeUpState.appliedMakeUpTypes
 
         button.setOnClickListener {
@@ -247,21 +244,20 @@ class ShowRoomActivity : AppCompatActivity() {
     }
 
 
-    private fun setupButtonClickListener(
-        button: Button,
-        accessory: EAccessoryType,
-        modelType: EModelType
-    ) {
-        button.setOnClickListener {
-            makeUpService.loadedModels[accessory.sourceURI]?.let { model ->
-                // If the model is already loaded, toggle its application on the face nodes
-                toggleModelOnFaceNodes(model)
-            } ?: run {
-                // Else, handle the case where the model is not loaded
-                loadModel(accessory.sourceURI, modelType)
-            }
-        }
-    }
+//    private fun setupButtonClickListener(
+//        button: Button,
+//        accessory: EAccessoryType,
+//        modelType: EModelType
+//    ) {
+//        button.setOnClickListener {
+//            makeUpService.loadedModels[accessory.sourceURI]?.let { model ->
+//                // If the model is already loaded, toggle its application on the face nodes
+//                toggleModelOnFaceNodes(model)
+//            } ?: run {
+//                // Else, handle the case where the model is not loaded
+//                loadModel(accessory.sourceURI, modelType)
+//            }
+//        } //   }
 
 
     private fun applyModel(modelKey: String, modelType: EModelType) {
@@ -341,21 +337,21 @@ class ShowRoomActivity : AppCompatActivity() {
 
 
     private fun combineTexturesAndApply() {
-        combineDrawables(makeUpService.makeUpState.appliedMakeUpTypes.map {
-            ContextCompat.getDrawable(
-                this,
-                it.drawableId
-            )!!
-        }).let {
-            if (it != null) {
-                createTextureAndApply(it)
-            } else {
-                //Clean face node makeup texture
-                faceNodeMap.values
-                    .mapNotNull { map -> map[EModelType.MAKE_UP] }
-                    .forEach { node -> node.faceMeshTexture = null }
-            }
-        }
+//        combineDrawables(makeUpService.makeUpState.appliedMakeUpTypes.map {
+//            ContextCompat.getDrawable(
+//                this,
+//                it.drawableId
+//            )!!
+//        }).let {
+//            if (it != null) {
+//                createTextureAndApply(it)
+//            } else {
+//                //Clean face node makeup texture
+//                faceNodeMap.values
+//                    .mapNotNull { map -> map[EModelType.MAKE_UP] }
+//                    .forEach { node -> node.faceMeshTexture = null }
+//            }
+//        }
     }
 
     private fun createTextureAndApply(combinedBitmap: Bitmap) {

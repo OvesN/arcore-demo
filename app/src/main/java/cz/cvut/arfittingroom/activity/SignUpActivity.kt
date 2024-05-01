@@ -8,6 +8,8 @@ import android.view.Gravity
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import by.kirich1409.viewbindingdelegate.CreateMethod
+import by.kirich1409.viewbindingdelegate.viewBinding
 import com.google.firebase.FirebaseNetworkException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
@@ -16,12 +18,13 @@ import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 import cz.cvut.arfittingroom.databinding.ActivitySignupBinding
+import cz.cvut.arfittingroom.model.USERS_COLLECTION
 
 private val USERNAME_REGEX = "^[a-zA-Z0-9]+$".toRegex()
 
 
 class SignUpActivity : AppCompatActivity() {
-    private lateinit var binding: ActivitySignupBinding
+    private val binding: ActivitySignupBinding by viewBinding(createMethod = CreateMethod.INFLATE)
     private lateinit var auth: FirebaseAuth
     private lateinit var fileStore: FirebaseFirestore
     private lateinit var usernameInput: EditText
@@ -32,8 +35,6 @@ class SignUpActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         auth = Firebase.auth
         fileStore = FirebaseFirestore.getInstance()
-
-        binding = ActivitySignupBinding.inflate(layoutInflater)
 
         usernameInput = binding.username
         pwdInput = binding.pwd
@@ -112,7 +113,7 @@ class SignUpActivity : AppCompatActivity() {
                     val currentUser = auth.currentUser
                     Log.println(Log.INFO, null, "User with $username succsesfully created")
                     val documentReference: DocumentReference =
-                        fileStore.collection("users").document(currentUser?.uid ?: "")
+                        fileStore.collection(USERS_COLLECTION).document(currentUser?.uid ?: "")
                     val user: MutableMap<String, Any> = HashMap()
                     user["username"] = username
                     documentReference.set(user).addOnSuccessListener {

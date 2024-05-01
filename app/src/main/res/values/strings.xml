@@ -24,15 +24,16 @@
     <string name="or">or</string>
     <string name="newAccount"><u>Create a New Account</u></string>
     <string name="return_to_main_window">Return to main window</string>
-    <string name="createAccount">Create Account\n</string>
+    <string name="createAccount">Create Account</string>
     <string name="repeatPassword">Repeat Password</string>
     <string name="logOut">Log Out</string>
     <string name="backToEditor">Back To Editor</string>
     <string name="hello">Hello,</string>
     <string name="accessories">Accessories</string>
-    <string name="looks">Looks\n</string>
+    <string name="looks">Looks</string>
     <string name="mascara">Mascara</string>
-    <string name="hats">Hats\n</string>
-    <string name="earrings">Earrings\n</string>
-    <string name="piersing">Piersing</string>
+    <string name="hats">Hats</string>
+    <string name="earrings">Earrings</string>
+    <string name="piercing">Piercing</string>
+    <string name="option">Option</string>
 </resources>

@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import cz.cvut.arfittingroom.R
 
-class MakeupSingleOptionFragment:Fragment() {
+class MakeupSingleOptionFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,

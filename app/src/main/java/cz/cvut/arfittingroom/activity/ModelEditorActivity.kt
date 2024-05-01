@@ -8,6 +8,8 @@ import android.widget.Button
 import android.widget.LinearLayout
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import by.kirich1409.viewbindingdelegate.CreateMethod
+import by.kirich1409.viewbindingdelegate.viewBinding
 import com.google.ar.sceneform.HitTestResult
 import com.google.ar.sceneform.Node
 import com.google.ar.sceneform.SceneView
@@ -26,7 +28,7 @@ import javax.inject.Inject
 class ModelEditorActivity : AppCompatActivity() {
     @Inject
     lateinit var editorService: ModelEditorService
-    private lateinit var binding: ActivityModelEditorBinding
+    private val binding: ActivityModelEditorBinding by viewBinding(createMethod = CreateMethod.INFLATE)
     private lateinit var sceneView: SceneView
     private lateinit var transformationSystem: TransformationSystem
     private lateinit var modelNode: DragTransformableNode
@@ -39,9 +41,6 @@ class ModelEditorActivity : AppCompatActivity() {
         //making a transformation system so we can interact with the 3d model
         transformationSystem =
             TransformationSystem(resources.displayMetrics, FootprintSelectionVisualizer())
-
-        // Inflate the layout for this activity
-        binding = ActivityModelEditorBinding.inflate(layoutInflater)
 
         setContentView(binding.root)
         sceneView = binding.sceneView

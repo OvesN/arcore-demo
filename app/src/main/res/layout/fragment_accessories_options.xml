@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/first_line_buttons"
+    android:id="@+id/options"
     android:layout_width="match_parent"
     android:gravity="center_horizontal"
     android:layout_height="wrap_content"
     android:paddingBottom="10dp">
 
     <Button
+        android:id="@+id/hats_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@null"
@@ -17,6 +18,7 @@
         android:layout_height="match_parent"
         android:background="@color/colorLightGrey" />
     <Button
+        android:id="@+id/glasses_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@null"
@@ -27,6 +29,7 @@
         android:layout_height="match_parent"
         android:background="@color/colorLightGrey" />
     <Button
+        android:id="@+id/earrings_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@null"
@@ -37,9 +40,10 @@
         android:layout_height="match_parent"
         android:background="@color/colorLightGrey" />
     <Button
+        android:id="@+id/piercing_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@null"
-        android:text="@string/piersing"
+        android:text="@string/piercing"
         android:textAllCaps="false" />
 </LinearLayout>

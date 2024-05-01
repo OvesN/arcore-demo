@@ -8,6 +8,8 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import by.kirich1409.viewbindingdelegate.CreateMethod
+import by.kirich1409.viewbindingdelegate.viewBinding
 import com.google.android.material.slider.Slider
 import cz.cvut.arfittingroom.ARFittingRoomApplication
 import cz.cvut.arfittingroom.R
@@ -23,7 +25,7 @@ private val SELECTED_COLOR = Color.parseColor("#FF5722")
 private const val DEFAULT_COLOR = Color.TRANSPARENT
 
 class MakeupEditorActivity : AppCompatActivity() {
-    private lateinit var binding: ActivityMakeupEditorBinding
+    private val binding: ActivityMakeupEditorBinding by viewBinding(createMethod = CreateMethod.INFLATE)
     private lateinit var drawView: DrawView
     private lateinit var imageView: ImageView
     private lateinit var slider: Slider
@@ -34,12 +36,10 @@ class MakeupEditorActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         (application as ARFittingRoomApplication).appComponent.inject(this)
 
-        // Inflate the layout for this activity
-        binding = ActivityMakeupEditorBinding.inflate(layoutInflater)
         drawView = binding.drawView
         imageView = binding.faceImage
         slider = binding.strokeSizeSlider
-       // layersButtonsContainer = binding.dynamicLayerButtonsContainer
+        // layersButtonsContainer = binding.dynamicLayerButtonsContainer
         setContentView(binding.root)
 
         binding.buttonBack.setOnClickListener {
@@ -90,7 +90,7 @@ class MakeupEditorActivity : AppCompatActivity() {
         drawView.layerManager.resetAllGifs()
         drawView.layerManager.setAllGifsToStaticMode()
 
-      //  updateLayersButtons(drawView.layerManager.getNumOfLayers())
+        //  updateLayersButtons(drawView.layerManager.getNumOfLayers())
     }
 
     override fun onPause() {
@@ -110,8 +110,7 @@ class MakeupEditorActivity : AppCompatActivity() {
 
             if (i == drawView.layerManager.getActiveLayerIndex()) {
                 button.setBackgroundColor(SELECTED_COLOR)
-            }
-            else {
+            } else {
                 button.setBackgroundColor(DEFAULT_COLOR)
             }
 
@@ -144,7 +143,7 @@ class MakeupEditorActivity : AppCompatActivity() {
                     }
                 }
 
-                    // updateLayersButtons(drawView.layerManager.getNumOfLayers())
+                // updateLayersButtons(drawView.layerManager.getNumOfLayers())
             }
             .show()
     }
