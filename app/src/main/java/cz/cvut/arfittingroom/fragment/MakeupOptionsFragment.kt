@@ -5,18 +5,15 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.fragment.app.Fragment
-import by.kirich1409.viewbindingdelegate.CreateMethod
-import by.kirich1409.viewbindingdelegate.viewBinding
 import com.google.firebase.firestore.FirebaseFirestore
 import cz.cvut.arfittingroom.R
-import cz.cvut.arfittingroom.databinding.FragmentMultipleOptionsBinding
 import cz.cvut.arfittingroom.model.MAKEUP_TYPES_COLLECTION
 
 class MakeupOptionsFragment : Fragment() {
-    private val binding: FragmentMultipleOptionsBinding by viewBinding(createMethod = CreateMethod.INFLATE)
     private lateinit var firestore: FirebaseFirestore
     private val makeupOptions = mutableSetOf<String>()
 
@@ -29,15 +26,15 @@ class MakeupOptionsFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        return inflater.inflate(R.layout.fragment_multiple_options, container, false)
+        return inflater.inflate(R.layout.fragment_menu_multiple_options, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        fetchMakeupOptions()
+        getView()?.let { fetchMakeupOptions(it) }
     }
 
-    private fun fetchMakeupOptions() {
+    private fun fetchMakeupOptions(view: View) {
         firestore.collection(MAKEUP_TYPES_COLLECTION)
             .get()
             .addOnSuccessListener { result ->
@@ -51,7 +48,7 @@ class MakeupOptionsFragment : Fragment() {
                 }
 
                 if (isAdded) {
-                    updateUI()
+                    updateUI(view)
                 }
             }
             .addOnFailureListener { exception ->
@@ -61,8 +58,9 @@ class MakeupOptionsFragment : Fragment() {
             }
     }
 
-    private fun updateUI() {
-        binding.options.removeAllViews()
+    private fun updateUI(view: View) {
+        val options = view.findViewById<LinearLayout>(R.id.options)
+
         for (option in makeupOptions) {
             val button = Button(context).apply {
                 layoutParams = ViewGroup.LayoutParams(
@@ -77,14 +75,15 @@ class MakeupOptionsFragment : Fragment() {
                     Toast.makeText(context, "$option clicked", Toast.LENGTH_SHORT).show()
                 }
             }
-            binding.options.addView(button)
+            options.addView(button)
 
             if (option != makeupOptions.last()) {
                 val divider = View(context).apply {
-                    layoutParams = ViewGroup.LayoutParams(1, ViewGroup.LayoutParams.MATCH_PARENT)
+                    layoutParams = ViewGroup.LayoutParams(2, ViewGroup.LayoutParams.MATCH_PARENT)
                     background = AppCompatResources.getDrawable(context, R.color.colorLightGrey)
                 }
-                binding.options.addView(divider)
+
+                options.addView(divider)
             }
         }
     }
