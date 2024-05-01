@@ -15,22 +15,18 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
-import com.google.android.filament.IndirectLight
 import com.google.android.filament.LightManager
-import com.google.android.filament.Skybox
 import com.google.ar.core.ArCoreApk
 import com.google.ar.core.AugmentedFace
 import com.google.ar.core.TrackingState
 import com.google.ar.sceneform.ArSceneView
 import com.google.ar.sceneform.Sceneform
-import com.google.ar.sceneform.rendering.Light
 import com.google.ar.sceneform.rendering.ModelRenderable
 import com.google.ar.sceneform.rendering.Renderable
 import com.google.ar.sceneform.rendering.Texture
 import com.google.ar.sceneform.ux.ArFrontFacingFragment
 import com.google.ar.sceneform.ux.AugmentedFaceNode
 import com.gorisse.thomas.sceneform.environment
-import com.gorisse.thomas.sceneform.estimatedEnvironmentLights
 import com.gorisse.thomas.sceneform.light.LightEstimationConfig
 import com.gorisse.thomas.sceneform.light.build
 import com.gorisse.thomas.sceneform.lightEstimationConfig
@@ -38,6 +34,11 @@ import com.gorisse.thomas.sceneform.mainLight
 import cz.cvut.arfittingroom.ARFittingRoomApplication
 import cz.cvut.arfittingroom.R
 import cz.cvut.arfittingroom.databinding.ActivityShowRoomBinding
+import cz.cvut.arfittingroom.fragment.AccessoriesOptionsFragment
+import cz.cvut.arfittingroom.fragment.ColorOptionsFragment
+import cz.cvut.arfittingroom.fragment.LooksOptionsFragment
+import cz.cvut.arfittingroom.fragment.MakeupOptionsFragment
+import cz.cvut.arfittingroom.fragment.MakeupSingleOptionFragment
 import cz.cvut.arfittingroom.model.ModelInfo
 import cz.cvut.arfittingroom.model.enums.EAccessoryType
 import cz.cvut.arfittingroom.model.enums.EMakeupType
@@ -48,7 +49,6 @@ import cz.cvut.arfittingroom.utils.FileUtil.doesTempAnimatedMaskExist
 import cz.cvut.arfittingroom.utils.FileUtil.getNextTempMaskFrame
 import cz.cvut.arfittingroom.utils.FileUtil.getTempMaskTextureBitmap
 import cz.cvut.arfittingroom.utils.TextureCombinerUtil.combineDrawables
-import mu.KotlinLogging
 import javax.inject.Inject
 
 class ShowRoomActivity : AppCompatActivity() {
@@ -59,6 +59,7 @@ class ShowRoomActivity : AppCompatActivity() {
     private lateinit var binding: ActivityShowRoomBinding
     private lateinit var arFragment: ArFrontFacingFragment
     private lateinit var arSceneView: ArSceneView
+
     private var faceNodeMap = HashMap<AugmentedFace, HashMap<EModelType, AugmentedFaceNode>>()
     private var isUpdated = false
 
@@ -78,6 +79,12 @@ class ShowRoomActivity : AppCompatActivity() {
     private var handler = Handler(Looper.getMainLooper())
     private var gifRunnable: Runnable? = null
     private var frameDelay: Long = 100 // Default frame delay (100 ms per frame)
+
+    private val accessoriesOptionsFragment = AccessoriesOptionsFragment()
+    private val looksOptionsFragment = LooksOptionsFragment()
+    private val makeupOptionsFragment = MakeupOptionsFragment()
+    private val colorOptionFragment = ColorOptionsFragment()
+    private val makeupSingleOptionFragment = MakeupSingleOptionFragment()
 
     override fun onResume() {
         super.onResume()
@@ -109,6 +116,9 @@ class ShowRoomActivity : AppCompatActivity() {
         }
 
         if (savedInstanceState == null) {
+            addMenuFragments()
+            showMakeupOptionsMenu()
+
             if (Sceneform.isSupported(this)) {
                 supportFragmentManager.beginTransaction()
                     .add(R.id.arFragment, ArFrontFacingFragment::class.java, null)
@@ -117,6 +127,17 @@ class ShowRoomActivity : AppCompatActivity() {
         }
 
         // Set click listeners
+
+        binding.makeupButton.setOnClickListener {
+            showMakeupOptionsMenu()
+        }
+        binding.accessoriesButton.setOnClickListener {
+            showAccessoriesMenu()
+        }
+        binding.looksButton.setOnClickListener {
+            showLooksMenu()
+        }
+
 //        setupButtonClickListener(binding.buttonLiner, EMakeupType.LINER)
 //        setupButtonClickListener(binding.buttonBlush, EMakeupType.BLUSH)
 //        setupButtonClickListener(binding.buttonLipstick, EMakeupType.LIPSTICK)
@@ -406,7 +427,7 @@ class ShowRoomActivity : AppCompatActivity() {
                 applyModel(uri, modelType)
             }
             .exceptionally { throwable ->
-                Log.println(Log.ERROR,null, "Error loading model")
+                Log.println(Log.ERROR, null, "Error loading model")
                 null
             }
     }
@@ -468,5 +489,60 @@ class ShowRoomActivity : AppCompatActivity() {
     private fun resetGifState() {
         gifPrepared = false
         gifRunnable = null
+    }
+
+    private fun addMenuFragments() {
+        supportFragmentManager.beginTransaction()
+            .add(R.id.menu_fragment_container, makeupOptionsFragment)
+            .add(R.id.menu_fragment_container, makeupSingleOptionFragment)
+            .add(R.id.menu_fragment_container, colorOptionFragment)
+            .add(R.id.menu_fragment_container, accessoriesOptionsFragment)
+            .add(R.id.menu_fragment_container, looksOptionsFragment)
+            .commit()
+    }
+
+    private fun showMakeupOptionsMenu() {
+        resetMenu()
+        showMenuFragment(makeupOptionsFragment)
+        binding.makeupButton.setBackgroundResource(R.drawable.small_button)
+    }
+
+    private fun showAccessoriesMenu() {
+        resetMenu()
+        showMenuFragment(accessoriesOptionsFragment)
+        binding.accessoriesButton.setBackgroundResource(R.drawable.small_button)
+    }
+
+    private fun showLooksMenu() {
+        resetMenu()
+        showMenuFragment(looksOptionsFragment)
+        binding.looksButton.setBackgroundResource(R.drawable.small_button)
+    }
+
+    private fun resetMenu() {
+        for (i in 0 until binding.secondLineButtons.childCount) {
+            val child = binding.secondLineButtons.getChildAt(i)
+            child.background = null
+        }
+
+        hideMenuFragments()
+    }
+
+
+    private fun showMenuFragment(fragment: Fragment) {
+        supportFragmentManager
+            .beginTransaction()
+            .show(fragment)
+            .commit()
+    }
+
+    private fun hideMenuFragments() {
+        supportFragmentManager.beginTransaction()
+            .hide(makeupOptionsFragment)
+            .hide(makeupSingleOptionFragment)
+            .hide(colorOptionFragment)
+            .hide(accessoriesOptionsFragment)
+            .hide(looksOptionsFragment)
+            .commit()
     }
 }

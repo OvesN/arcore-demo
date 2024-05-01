@@ -60,53 +60,15 @@
         android:paddingBottom="10dp"
         android:paddingTop="20dp">
 
-        <LinearLayout
-            android:id="@+id/first_line_buttons"
-            android:layout_width="wrap_content"
+        <FrameLayout
+            android:id="@+id/menu_fragment_container"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingBottom="10dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toTopOf="@id/second_line_buttons"
-            app:layout_constraintHorizontal_bias="0.5">
+            app:layout_constraintHorizontal_bias="0.5"/>
 
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@null"
-                android:text="@string/blush"
-                android:textAllCaps="false" />
-            <View
-                android:layout_width="1dp"
-                android:layout_height="match_parent"
-                android:background="@color/colorLightGrey" />
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@null"
-                android:text="@string/lipstick"
-                android:textAllCaps="false" />
-            <View
-                android:layout_width="1dp"
-                android:layout_height="match_parent"
-                android:background="@color/colorLightGrey" />
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@null"
-                android:text="@string/liner"
-                android:textAllCaps="false" />
-            <View
-                android:layout_width="1dp"
-                android:layout_height="match_parent"
-                android:background="@color/colorLightGrey" />
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@null"
-                android:text="@string/mascara"
-                android:textAllCaps="false" />
-        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/second_line_buttons"
@@ -120,6 +82,7 @@
             app:layout_constraintBottom_toBottomOf="parent">
 
             <Button
+                android:id="@+id/makeup_button"
                 android:layout_width="100dp"
                 android:layout_height="30dp"
                 android:scaleType="fitCenter"
@@ -129,6 +92,7 @@
                 android:textAllCaps="false" />
 
             <Button
+                android:id="@+id/accessories_button"
                 android:layout_width="100dp"
                 android:layout_height="30dp"
                 android:background="@null"
@@ -137,6 +101,7 @@
                 android:textAllCaps="false" />
 
             <Button
+                android:id="@+id/looks_button"
                 android:layout_width="100dp"
                 android:layout_height="30dp"
                 android:background="@null"

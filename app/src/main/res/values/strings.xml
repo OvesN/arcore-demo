@@ -32,4 +32,7 @@
     <string name="accessories">Accessories</string>
     <string name="looks">Looks\n</string>
     <string name="mascara">Mascara</string>
+    <string name="hats">Hats\n</string>
+    <string name="earrings">Earrings\n</string>
+    <string name="piersing">Piersing</string>
 </resources>
