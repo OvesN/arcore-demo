@@ -117,30 +117,30 @@ class ShowRoomActivity : AppCompatActivity() {
         }
 
         // Set click listeners
-        setupButtonClickListener(binding.buttonLiner, EMakeupType.LINER)
-        setupButtonClickListener(binding.buttonBlush, EMakeupType.BLUSH)
-        setupButtonClickListener(binding.buttonLipstick, EMakeupType.LIPSTICK)
-        setupButtonClickListener(
-            binding.buttonYellowSunglasses,
-            EAccessoryType.YELLOW_GLASSES,
-            EModelType.EYES
-        )
-        setupButtonClickListener(
-            binding.buttonSunglasses,
-            EAccessoryType.SUNGLASSES,
-            EModelType.EYES
-        )
-        setupButtonClickListener(
-            binding.buttonMarioHat,
-            EAccessoryType.MARIO_HAT,
-            EModelType.TOP_HEAD
-        )
+//        setupButtonClickListener(binding.buttonLiner, EMakeupType.LINER)
+//        setupButtonClickListener(binding.buttonBlush, EMakeupType.BLUSH)
+//        setupButtonClickListener(binding.buttonLipstick, EMakeupType.LIPSTICK)
+//        setupButtonClickListener(
+//            binding.buttonYellowSunglasses,
+//            EAccessoryType.YELLOW_GLASSES,
+//            EModelType.EYES
+//        )
+//        setupButtonClickListener(
+//            binding.buttonSunglasses,
+//            EAccessoryType.SUNGLASSES,
+//            EModelType.EYES
+//        )
+//        setupButtonClickListener(
+//            binding.buttonMarioHat,
+//            EAccessoryType.MARIO_HAT,
+//            EModelType.TOP_HEAD
+//        )
+//
+//        binding.button3dEditor.setOnClickListener {
+//            editorButtonListener()
+//        }
 
-        binding.button3dEditor.setOnClickListener {
-            editorButtonListener()
-        }
-
-        binding.buttonMakeupEditor.setOnClickListener {
+        binding.buttonMaskEditor.setOnClickListener {
             val intent = Intent(this, MakeupEditorActivity::class.java)
             startActivity(intent)
         }

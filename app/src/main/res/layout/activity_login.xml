@@ -43,7 +43,7 @@
             android:gravity="start"
             android:text="@string/enterLogIn"
             android:textAllCaps="false"
-            android:textColor="@color/colorDarkGrey" />
+            android:textColor="@color/colorMediumGrey" />
 
         <EditText
             android:id="@+id/username"
@@ -53,8 +53,8 @@
             android:background="@drawable/input"
             android:hint="@string/username"
             android:inputType="text"
-            android:textColor="@color/colorDarkGrey"
-            android:textColorHint="@color/colorDarkGrey" />
+            android:textColor="@color/colorMediumGrey"
+            android:textColorHint="@color/colorMediumGrey" />
 
 
         <EditText
@@ -66,8 +66,8 @@
             android:background="@drawable/input"
             android:hint="@string/password"
             android:inputType="textPassword"
-            android:textColor="@color/colorDarkGrey"
-            android:textColorHint="@color/colorDarkGrey" />
+            android:textColor="@color/colorMediumGrey"
+            android:textColorHint="@color/colorMediumGrey" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -99,7 +99,7 @@
                 android:layout_marginEnd="5dp"
                 android:text="@string/or"
                 android:textAllCaps="false"
-                android:textColor="@color/colorDarkGrey" />
+                android:textColor="@color/colorMediumGrey" />
 
             <TextView
                 android:id="@+id/button_sing_up"

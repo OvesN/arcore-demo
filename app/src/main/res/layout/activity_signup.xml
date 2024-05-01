@@ -43,8 +43,8 @@
             android:autofillHints="username"
             android:hint="@string/username"
             android:inputType="text"
-            android:textColor="@color/colorDarkGrey"
-            android:textColorHint="@color/colorDarkGrey"
+            android:textColor="@color/colorMediumGrey"
+            android:textColorHint="@color/colorMediumGrey"
             android:background="@drawable/input"/>
 
 
@@ -55,8 +55,8 @@
             android:autofillHints="password"
             android:hint="@string/password"
             android:inputType="textPassword"
-            android:textColor="@color/colorDarkGrey"
-            android:textColorHint="@color/colorDarkGrey"
+            android:textColor="@color/colorMediumGrey"
+            android:textColorHint="@color/colorMediumGrey"
             android:background="@drawable/input"/>
 
         <EditText
@@ -67,8 +67,8 @@
             android:hint="@string/repeatPassword"
             android:inputType="textPassword"
             android:layout_marginBottom="40dp"
-            android:textColor="@color/colorDarkGrey"
-            android:textColorHint="@color/colorDarkGrey"
+            android:textColor="@color/colorMediumGrey"
+            android:textColorHint="@color/colorMediumGrey"
             android:background="@drawable/input"/>
 
         <androidx.constraintlayout.widget.ConstraintLayout

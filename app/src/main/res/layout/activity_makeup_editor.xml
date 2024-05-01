@@ -82,16 +82,16 @@
             android:scaleType="fitCenter"
             android:src="@drawable/clear_all" />
 
-        <!-- 3D Editor Button -->
-        <ImageButton
-            android:id="@+id/button_3d_editor"
-            android:layout_width="0dp"
-            android:layout_height="30dp"
-            android:layout_weight="1"
-            android:background="@null"
-            android:paddingLeft="45dp"
-            android:scaleType="fitCenter"
-            android:src="@drawable/_3d_editor" />
+<!--        &lt;!&ndash; 3D Editor Button &ndash;&gt;-->
+<!--        <ImageButton-->
+<!--            android:id="@+id/button_3d_editor"-->
+<!--            android:layout_width="0dp"-->
+<!--            android:layout_height="30dp"-->
+<!--            android:layout_weight="1"-->
+<!--            android:background="@null"-->
+<!--            android:paddingLeft="45dp"-->
+<!--            android:scaleType="fitCenter"-->
+<!--            android:src="@drawable/_3d_editor" />-->
     </LinearLayout>
 
 
@@ -118,7 +118,6 @@
     </RelativeLayout>
 
 
-    <!-- ConstraintLayout is used for more flexible positioning -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="100dp"
@@ -127,7 +126,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
-        <!-- Color Picker Button at the top left -->
         <ImageButton
             android:id="@+id/button_color_picker"
             android:layout_width="35dp"
@@ -141,7 +139,6 @@
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/color_picker" />
 
-        <!-- Menu Button at the top right -->
         <ImageButton
             android:id="@+id/button_menu"
             android:layout_width="35dp"
@@ -155,7 +152,6 @@
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/menu" />
 
-        <!-- OK Button at the bottom right -->
         <ImageButton
             android:id="@+id/button_ok"
             android:layout_width="35dp"
@@ -169,7 +165,6 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:srcCompat="@drawable/ok" />
 
-        <!-- Back Button at the bottom left -->
         <ImageButton
             android:id="@+id/button_back"
             android:layout_width="35dp"
@@ -194,28 +189,24 @@
             app:layout_constraintStart_toStartOf="parent">
 
             <Button
-                style="@style/ButtonStyle"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="@string/draw" />
 
             <Button
-                style="@style/ButtonStyle"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="@string/stamp" />
 
             <Button
-                style="@style/ButtonStyle"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="@string/image" />
 
             <Button
-                style="@style/ButtonStyle"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"

@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "894358034801",
+    "firebase_url": "https://glamartist-default-rtdb.firebaseio.com",
     "project_id": "glamartist",
     "storage_bucket": "glamartist.appspot.com"
   },
