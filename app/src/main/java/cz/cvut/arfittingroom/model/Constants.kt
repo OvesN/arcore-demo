@@ -13,8 +13,10 @@ const val USERS_COLLECTION = "users"
 const val MAKEUP_COLLECTION = "makeup"
 const val MAKEUP_TYPES_COLLECTION = "makeup_types"
 const val ACCESSORY_TYPES_COLLECTION = "accessory_types"
+const val COLORS_COLLECTION = "colors"
 
 
 // Firebase attributes
 const val TYPE_ATTRIBUTE = "type"
 const val REF_ATTRIBUTE = "ref"
+const val DEFAULT_COLOR_ATTRIBUTE = "default_color"

@@ -847,7 +847,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         return bitmap
     }
 
-
+    //TODO REFACTOR
     fun showColorPickerDialog(setElementColor: Boolean = false) {
         ColorPickerDialog.Builder(context)
             .setPreferenceName("MyColorPickerDialog")

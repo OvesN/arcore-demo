@@ -20,7 +20,6 @@ class MainActivity : AppCompatActivity() {
     private val binding: ActivityMainBinding by viewBinding(createMethod = CreateMethod.INFLATE)
     private lateinit var auth: FirebaseAuth
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         auth = Firebase.auth

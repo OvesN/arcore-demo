@@ -43,10 +43,12 @@ import cz.cvut.arfittingroom.fragment.ColorOptionsFragment
 import cz.cvut.arfittingroom.fragment.LooksOptionsFragment
 import cz.cvut.arfittingroom.fragment.MakeupOptionsFragment
 import cz.cvut.arfittingroom.fragment.MakeupSingleOptionFragment
+import cz.cvut.arfittingroom.model.MakeupInfo
 import cz.cvut.arfittingroom.model.ModelInfo
 import cz.cvut.arfittingroom.model.enums.EModelType
 import cz.cvut.arfittingroom.service.MakeupService
 import cz.cvut.arfittingroom.service.ModelEditorService
+import cz.cvut.arfittingroom.utils.BitmapUtil.replaceNonTransparentPixels
 import cz.cvut.arfittingroom.utils.FileUtil.doesTempAnimatedMaskExist
 import cz.cvut.arfittingroom.utils.FileUtil.getNextTempMaskFrame
 import cz.cvut.arfittingroom.utils.FileUtil.getTempMaskTextureBitmap
@@ -169,14 +171,13 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener {
     }
 
 
-    override fun applyImage(type: String, ref: String) {
-        makeUpService.appliedMakeUpTypes[type] = ref
+    override fun applyImage(type: String, ref: String, color: Int) {
+        makeUpService.appliedMakeUpTypes[type] = MakeupInfo(ref, color)
 
         makeUpService.appliedMakeUpTypes.values.forEach {
-            loadImage(it)
+            loadImage(it.ref, it.color)
         }
     }
-
     override fun removeImage(type: String) {
         val appliedMakeupTypes = makeUpService.appliedMakeUpTypes
         appliedMakeupTypes.remove(type)
@@ -188,7 +189,7 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener {
                 .forEach { node -> node.faceMeshTexture = null }
         } else {
             makeUpService.appliedMakeUpTypes.values.forEach {
-                loadImage(it)
+                loadImage(it.ref, it.color)
             }
         }
     }
@@ -425,12 +426,13 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener {
             }
     }
 
-    private fun loadImage(ref: String) {
+    private fun loadImage(ref: String, color: Int) {
         Glide.with(this)
             .asBitmap()
             .load(storage.getReference(ref))
             .into(object : CustomTarget<Bitmap>() {
                 override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
+                    replaceNonTransparentPixels(resource, color)
                     makeUpService.makeUpBitmaps.add(resource)
 
                     if (makeUpService.areMakeupBitmapsPrepared()) {

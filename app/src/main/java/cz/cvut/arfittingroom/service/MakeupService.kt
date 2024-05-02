@@ -2,11 +2,12 @@ package cz.cvut.arfittingroom.service
 
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import cz.cvut.arfittingroom.model.MakeupInfo
 import cz.cvut.arfittingroom.model.ModelInfo
 
 //TODO keep state in another way
 class MakeupService {
-    val appliedMakeUpTypes = mutableMapOf<String, String>()
+    val appliedMakeUpTypes = mutableMapOf<String, MakeupInfo>()
     var textureBitmap: Bitmap? = null
     val makeUpBitmaps = mutableListOf<Bitmap>()
     val loadedModels = mutableMapOf<String, ModelInfo>()
