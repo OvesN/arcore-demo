@@ -24,6 +24,10 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         auth = Firebase.auth
 
+        ScreenUtil.screenHeight = Resources.getSystem().displayMetrics.heightPixels
+        ScreenUtil.screenWidth = Resources.getSystem().displayMetrics.widthPixels
+        deleteTempFiles(applicationContext)
+
         if (auth.currentUser != null) {
             startActivity(Intent(this, ShowRoomActivity::class.java))
             finish()
@@ -31,12 +35,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         supportActionBar?.hide()
-        ScreenUtil.screenHeight = Resources.getSystem().displayMetrics.heightPixels
-        ScreenUtil.screenWidth = Resources.getSystem().displayMetrics.widthPixels
 
         setContentView(binding.root)
-
-        deleteTempFiles(applicationContext)
 
 
         binding.buttonLogIn.setOnClickListener {

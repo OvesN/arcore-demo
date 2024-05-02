@@ -4,11 +4,9 @@ import android.app.ActivityManager
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
-import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.telecom.Call
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -30,8 +28,9 @@ import com.google.ar.sceneform.rendering.Renderable
 import com.google.ar.sceneform.rendering.Texture
 import com.google.ar.sceneform.ux.ArFrontFacingFragment
 import com.google.ar.sceneform.ux.AugmentedFaceNode
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
-import com.google.firebase.storage.StreamDownloadTask
 import com.gorisse.thomas.sceneform.environment
 import com.gorisse.thomas.sceneform.light.LightEstimationConfig
 import com.gorisse.thomas.sceneform.light.build
@@ -41,9 +40,10 @@ import cz.cvut.arfittingroom.ARFittingRoomApplication
 import cz.cvut.arfittingroom.R
 import cz.cvut.arfittingroom.databinding.ActivityShowRoomBinding
 import cz.cvut.arfittingroom.fragment.AccessoriesOptionsFragment
-import cz.cvut.arfittingroom.fragment.ColorOptionsFragment
 import cz.cvut.arfittingroom.fragment.LooksOptionsFragment
 import cz.cvut.arfittingroom.fragment.MakeupOptionsFragment
+import cz.cvut.arfittingroom.model.LOOKS_COLLECTION
+import cz.cvut.arfittingroom.model.MASK_FRAME_FILE_NAME
 import cz.cvut.arfittingroom.model.MakeupInfo
 import cz.cvut.arfittingroom.model.ModelInfo
 import cz.cvut.arfittingroom.model.enums.ENodeType
@@ -52,8 +52,10 @@ import cz.cvut.arfittingroom.service.ModelEditorService
 import cz.cvut.arfittingroom.utils.BitmapUtil.replaceNonTransparentPixels
 import cz.cvut.arfittingroom.utils.FileUtil.doesTempAnimatedMaskExist
 import cz.cvut.arfittingroom.utils.FileUtil.getNextTempMaskFrame
+import cz.cvut.arfittingroom.utils.FileUtil.getNextTempMaskFrameInputStream
 import cz.cvut.arfittingroom.utils.FileUtil.getTempMaskTextureBitmap
-import java.util.concurrent.Callable
+import java.lang.Exception
+import java.util.UUID
 import javax.inject.Inject
 
 class ShowRoomActivity : AppCompatActivity(), ResourceListener {
@@ -62,8 +64,12 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener {
     }
 
     private val binding: ActivityShowRoomBinding by viewBinding(createMethod = CreateMethod.INFLATE)
+
     private lateinit var arFragment: ArFrontFacingFragment
     private lateinit var arSceneView: ArSceneView
+
+    private lateinit var auth: FirebaseAuth
+    private lateinit var fireStore: FirebaseFirestore
     private lateinit var storage: FirebaseStorage
 
     private var faceNodeMap = HashMap<AugmentedFace, HashMap<ENodeType, AugmentedFaceNode>>()
@@ -89,7 +95,11 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener {
     private val accessoriesOptionsFragment = AccessoriesOptionsFragment()
     private val looksOptionsFragment = LooksOptionsFragment()
     private val makeupOptionsFragment = MakeupOptionsFragment()
-    private val colorOptionFragment = ColorOptionsFragment()
+
+
+    //FIXME do not do it like that!
+    private var lookId: String = ""
+    private var shouldDownloadFormStorage: Boolean = false
 
     override fun onResume() {
         super.onResume()
@@ -99,7 +109,6 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener {
         bitmap?.let { createTextureAndApply(it); shouldPlayAnimation = false }
 
         shouldPlayAnimation = doesTempAnimatedMaskExist(applicationContext)
-
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -110,7 +119,10 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener {
             return
         }
 
+        auth = FirebaseAuth.getInstance()
+        fireStore = FirebaseFirestore.getInstance()
         storage = FirebaseStorage.getInstance()
+
         setContentView(binding.root)
 
         supportFragmentManager.addFragmentOnAttachListener { fragmentManager: FragmentManager, fragment: Fragment ->
@@ -140,6 +152,9 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener {
         }
         binding.looksButton.setOnClickListener {
             showLooksMenu()
+        }
+        binding.saveButton.setOnClickListener {
+            saveLook()
         }
 
 //        setupButtonClickListener(binding.buttonLiner, EMakeupType.LINER)
@@ -204,6 +219,14 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener {
 
     override fun removeModel(type: String) {
         //toggleModelOnFaceNodes(model)
+    }
+
+    //FIXME
+    override fun applyLook(lookId: String) {
+        stopAnimation()
+        shouldPlayAnimation = true
+        shouldDownloadFormStorage = true
+        this.lookId = lookId
     }
 
 
@@ -274,7 +297,6 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener {
             modelNodesMap[nodeType] = AugmentedFaceNode(face).also { node ->
                 node.parent = sceneView.scene
             }.apply { faceRegionsRenderable = renderable }
-
         }
     }
 
@@ -304,27 +326,64 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener {
         }
     }
 
+    //FIXME
     private fun prepareAllGifTextures() {
         gifTextures.clear()
         var counter = 0
+        var shouldContinue = true
 
-        while (true) {
-            val frameBitmap = getNextTempMaskFrame(applicationContext, counter) ?: break
-            Texture.builder()
-                .setSource(frameBitmap)
-                .build()
-                .thenAccept { texture ->
-                    gifTextures.add(texture)
+        if (shouldDownloadFormStorage) {
+
+            //FIXME AAAA
+                val ref  = storage.getReference("$LOOKS_COLLECTION/$lookId/")
+                var amont = 0
+                ref.listAll().addOnSuccessListener {
+                    amont = it.items.size
+                    repeat(amont) {index ->
+                        val fileRef  = storage.getReference("$LOOKS_COLLECTION/$lookId/${MASK_FRAME_FILE_NAME}_$index")
+                        fileRef.downloadUrl.addOnSuccessListener {
+                            Texture.builder()
+                                .setSource(applicationContext, it)
+                                .build()
+                                .thenAccept { texture ->
+                                    gifTextures.add(texture)
+                                    shouldContinue = false
+                                }
+                                .exceptionally { throwable ->
+                                    Log.println(
+                                        Log.ERROR,
+                                        null,
+                                        "Error creating texture for frame $counter: $throwable"
+                                    )
+                                    null
+                                }
+                        }
+                    }
                 }
-                .exceptionally { throwable ->
-                    Log.println(
-                        Log.ERROR,
-                        null,
-                        "Error creating texture for frame $counter: $throwable"
-                    )
-                    null
-                }
-            counter++
+
+           // }
+
+        } else {
+            while (shouldContinue) {
+                val frameBitmap =
+                    getNextTempMaskFrame(applicationContext, counter) ?: break
+
+                Texture.builder()
+                    .setSource(frameBitmap)
+                    .build()
+                    .thenAccept { texture ->
+                        gifTextures.add(texture)
+                    }
+                    .exceptionally { throwable ->
+                        Log.println(
+                            Log.ERROR,
+                            null,
+                            "Error creating texture for frame $counter: $throwable"
+                        )
+                        null
+                    }
+                counter++
+            }
         }
 
         gifPrepared = true
@@ -498,6 +557,8 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener {
 
     private fun stopAnimation() {
         gifRunnable?.let { handler.removeCallbacks(it) }
+        shouldPlayAnimation = false
+        gifPrepared = false
     }
 
     private fun setSpeed(fps: Int) {
@@ -512,7 +573,6 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener {
     private fun addMenuFragments() {
         supportFragmentManager.beginTransaction()
             .add(R.id.menu_fragment_container, makeupOptionsFragment)
-            .add(R.id.menu_fragment_container, colorOptionFragment)
             .add(R.id.menu_fragment_container, accessoriesOptionsFragment)
             .add(R.id.menu_fragment_container, looksOptionsFragment)
             .commit()
@@ -556,11 +616,54 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener {
     private fun hideMenuFragments() {
         supportFragmentManager.beginTransaction()
             .hide(makeupOptionsFragment)
-            .hide(colorOptionFragment)
             .hide(accessoriesOptionsFragment)
             .hide(looksOptionsFragment)
             .commit()
     }
 
 
+    //FIXME will not save makeup, models and one frames
+    private fun saveLook() {
+        val lookId = UUID.randomUUID()
+        saveFrames(lookId)
+
+        //TODO should be name
+        val data = hashMapOf(
+            "author" to auth.currentUser?.email
+        )
+
+        fireStore.collection(LOOKS_COLLECTION).document(lookId.toString())
+            .set(data)
+            .addOnSuccessListener {
+                Log.println(
+                    Log.INFO,
+                    null,
+                    "Look $lookId uploaded"
+                )
+                Toast.makeText(applicationContext, "Look saved successfully", Toast.LENGTH_SHORT).show()
+
+            }.addOnFailureListener { e -> Log.println(Log.ERROR, null, "onFailure: $e") }
+
+    }
+
+
+    private fun saveFrames(lookId: UUID) {
+        var counter = 0
+
+        while (true) {
+            val frameStream = getNextTempMaskFrameInputStream(applicationContext, counter) ?: break
+            val ref =
+                storage.getReference("$LOOKS_COLLECTION/$lookId/${MASK_FRAME_FILE_NAME}_$counter")
+
+            val uploadTask = ref.putStream(frameStream)
+                .addOnSuccessListener { taskSnapshot ->
+
+                }
+            uploadTask.addOnFailureListener {
+                Toast.makeText(applicationContext, it.message, Toast.LENGTH_SHORT)
+            }
+
+            counter++
+        }
+    }
 }

@@ -112,7 +112,7 @@
         </LinearLayout>
 
         <ImageButton
-            android:id="@+id/button_save"
+            android:id="@+id/save_button"
             android:layout_width="35dp"
             android:layout_height="35dp"
             android:paddingStart="0dp"
@@ -124,7 +124,7 @@
             app:srcCompat="@drawable/save" />
 
         <ImageButton
-            android:id="@+id/button_delete"
+            android:id="@+id/delete_button"
             android:layout_width="35dp"
             android:layout_height="35dp"
             android:paddingStart="10dp"

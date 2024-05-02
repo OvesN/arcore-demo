@@ -65,6 +65,21 @@ object FileUtil {
         }
     }
 
+    fun getNextTempMaskFrameInputStream(context: Context, counter: Int): FileInputStream? {
+        return try {
+            val file = File(
+                context.filesDir,
+                "${MASK_FRAMES_DIR_NAME}/${MASK_FRAME_FILE_NAME}_$counter.png"
+            )
+
+             FileInputStream(file)
+
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+
 
     fun saveTempMaskFrames(
         layerManager: LayerManager,

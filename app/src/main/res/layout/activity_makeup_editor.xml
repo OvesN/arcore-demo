@@ -25,195 +25,163 @@
         android:layout_height="match_parent"
         android:background="@android:color/transparent" />
 
-    <!-- Top UI -->
+    <!-- Placeholder for + and - buttons and dynamic layer buttons -->
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:background="@color/colorBlack"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:id="@+id/layer_controls_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="5dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
+        <!-- + button -->
+        <ImageButton
+            android:id="@+id/button_add_layer"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginEnd="5dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/add"
+            android:background="@null"/>
+
+        <!-- Placeholder for dynamic number buttons -->
         <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:orientation="horizontal">
-
-            <ImageButton
-                android:id="@+id/button_undo"
-                android:layout_width="wrap_content"
-                android:layout_height="25dp"
-                android:layout_marginEnd="4dp"
-                android:background="@null"
-                android:scaleType="fitCenter"
-                android:src="@drawable/undo" />
-
-            <ImageButton
-                android:id="@+id/button_redo"
-                android:layout_width="wrap_content"
-                android:layout_height="25dp"
-                android:layout_marginStart="4dp"
-                android:background="@null"
-                android:scaleType="fitCenter"
-                android:src="@drawable/redo" />
-        </LinearLayout>
-
-        <!-- Layers Button -->
-        <ImageButton
-            android:id="@+id/button_layers"
-            android:layout_width="0dp"
-            android:layout_height="25dp"
-            android:layout_weight="1"
-            android:background="@null"
-            android:scaleType="fitCenter"
-            android:src="@drawable/layers" />
-
-        <!-- Clear All Button -->
-        <ImageButton
-            android:id="@+id/button_clear_all"
-            android:layout_width="0dp"
-            android:layout_height="15dp"
-            android:layout_weight="1"
-            android:background="@null"
-            android:scaleType="fitCenter"
-            android:src="@drawable/clear_all" />
-
-<!--        &lt;!&ndash; 3D Editor Button &ndash;&gt;-->
-<!--        <ImageButton-->
-<!--            android:id="@+id/button_3d_editor"-->
-<!--            android:layout_width="0dp"-->
-<!--            android:layout_height="30dp"-->
-<!--            android:layout_weight="1"-->
-<!--            android:background="@null"-->
-<!--            android:paddingLeft="45dp"-->
-<!--            android:scaleType="fitCenter"-->
-<!--            android:src="@drawable/_3d_editor" />-->
+            android:id="@+id/dynamic_layer_buttons_container"
+            android:paddingTop="20dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
     </LinearLayout>
 
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:translationX="-190dp"
+        android:gravity="top|end"
+        android:orientation="vertical"
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="0dp">
+        <!-- Back Button in the top right corner -->
+        <ImageButton
+            android:id="@+id/button_back"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:layout_marginEnd="5dp"
+            android:background="@null"
+            android:src="@drawable/back_icon"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageButton
+            android:id="@+id/button_undo"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginEnd="5dp"
+            android:background="@null"
+            android:scaleType="fitCenter"
+            android:src="@drawable/undo_icon"
+            app:layout_constraintBottom_toTopOf="@id/stroke_size_slider"
+            app:layout_constraintEnd_toStartOf="@id/button_redo"
+            app:layout_constraintVertical_chainStyle="packed" />
+
+        <ImageButton
+            android:id="@+id/button_redo"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginEnd="5dp"
+            android:background="@null"
+            android:scaleType="fitCenter"
+            android:src="@drawable/redo_icon"
+            app:layout_constraintBottom_toTopOf="@id/stroke_size_slider"
+            app:layout_constraintEnd_toEndOf="parent" />
+    </LinearLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="bottom"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
         <com.google.android.material.slider.Slider
             android:id="@+id/stroke_size_slider"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_centerInParent="true"
-            android:rotation="-90"
+            android:layout_height="wrap_content"
             android:stepSize="1"
-            android:theme="@style/CustomSliderStyle"
+            android:theme="@style/MyMaterialTheme"
             android:value="10"
             android:valueFrom="1"
             android:valueTo="150"
-            app:tickVisible="false" />
-    </RelativeLayout>
-
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
-        android:layout_height="100dp"
-        android:background="@color/colorBlack"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+            android:layout_alignParentBottom="true"/>
 
         <ImageButton
             android:id="@+id/button_color_picker"
-            android:layout_width="35dp"
-            android:layout_height="35dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_above="@id/stroke_size_slider"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="5dp"
             android:background="@null"
-            android:paddingStart="10dp"
-            android:paddingTop="10dp"
-            android:paddingEnd="0dp"
             android:scaleType="fitCenter"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/color_picker" />
-
-        <ImageButton
-            android:id="@+id/button_menu"
-            android:layout_width="35dp"
-            android:layout_height="35dp"
-            android:background="@null"
-            android:paddingStart="0dp"
-            android:paddingTop="10dp"
-            android:paddingEnd="10dp"
-            android:scaleType="fitCenter"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/menu" />
-
-        <ImageButton
-            android:id="@+id/button_ok"
-            android:layout_width="35dp"
-            android:layout_height="35dp"
-            android:background="@null"
-            android:paddingStart="0dp"
-            android:paddingEnd="10dp"
-            android:paddingBottom="10dp"
-            android:scaleType="fitCenter"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:srcCompat="@drawable/ok" />
-
-        <ImageButton
-            android:id="@+id/button_back"
-            android:layout_width="35dp"
-            android:layout_height="35dp"
-            android:background="@null"
-            android:paddingStart="10dp"
-            android:paddingEnd="0dp"
-            android:paddingBottom="10dp"
-            android:scaleType="fitCenter"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:srcCompat="@drawable/back" />
-
+            android:src="@drawable/color_picker_icon" />
 
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:weightSum="4"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent">
+            android:layout_above="@id/stroke_size_slider"
+            android:layout_alignParentStart="true">
 
-            <Button
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/draw" />
-
-            <Button
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/stamp" />
-
-            <Button
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/image" />
-
-            <Button
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/text" />
+            <ImageButton
+                android:id="@+id/button_star"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_marginStart="5dp"
+                android:background="@null"
+                android:scaleType="fitCenter"
+                android:src="@drawable/star_icon" />
+            <ImageButton
+                android:id="@+id/button_heart"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginStart="5dp"
+                android:background="@null"
+                android:scaleType="fitCenter"
+                android:src="@drawable/heart_icon" />
+            <ImageButton
+                android:id="@+id/button_flowers_image"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_marginStart="5dp"
+                android:background="@null"
+                android:scaleType="fitCenter"
+                android:src="@drawable/flowers" />
+            <ImageButton
+                android:id="@+id/button_gif"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_marginStart="5dp"
+                android:background="@null"
+                android:scaleType="fitCenter"
+                android:src="@drawable/donut" />
+            <ImageButton
+                android:id="@+id/button_gif2"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_marginStart="5dp"
+                android:background="@null"
+                android:scaleType="fitCenter"
+                android:src="@drawable/hamburger" />
         </LinearLayout>
-    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </RelativeLayout>
+
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
-

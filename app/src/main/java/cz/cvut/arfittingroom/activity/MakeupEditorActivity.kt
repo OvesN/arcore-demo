@@ -39,7 +39,7 @@ class MakeupEditorActivity : AppCompatActivity() {
         drawView = binding.drawView
         imageView = binding.faceImage
         slider = binding.strokeSizeSlider
-        // layersButtonsContainer = binding.dynamicLayerButtonsContainer
+         layersButtonsContainer = binding.dynamicLayerButtonsContainer
         setContentView(binding.root)
 
         binding.buttonBack.setOnClickListener {
@@ -58,30 +58,45 @@ class MakeupEditorActivity : AppCompatActivity() {
         binding.buttonUndo.setOnClickListener {
             drawView.undo()
         }
-//        binding.buttonStar.setOnClickListener {
-//            toggleStrokeShape(EShape.STAR)
-//        }
-//        binding.buttonHeart.setOnClickListener {
-//            toggleStrokeShape(EShape.HEART)
-//        }
-//        binding.buttonFlowersImage.setOnClickListener {
-//            toggleImage(R.drawable.flowers)
-//        }
+        binding.buttonStar.setOnClickListener {
+            toggleStrokeShape(EShape.STAR)
+        }
+        binding.buttonHeart.setOnClickListener {
+            toggleStrokeShape(EShape.HEART)
+        }
+        binding.buttonFlowersImage.setOnClickListener {
+            addImage(R.drawable.flowers)
+        }
+        binding.buttonStar.setOnClickListener {
+            toggleStrokeShape(EShape.STAR)
+        }
+        binding.buttonHeart.setOnClickListener {
+            toggleStrokeShape(EShape.HEART)
+        }
+        binding.buttonFlowersImage.setOnClickListener {
+            addImage(R.drawable.flowers)
+        }
+        binding.buttonGif.setOnClickListener {
+            addGif(R.drawable.donut)
+        }
+        binding.buttonGif2.setOnClickListener {
+            addGif(R.drawable.hamburger)
+        }
         slider.addOnChangeListener { _, value, _ ->
             drawView.setStrokeWidth(value)
         }
         drawView.setStrokeWidth(slider.value)
 
         //TODO fix num or indexes or whut
-//        binding.buttonAddLayer.setOnClickListener {
-//            updateLayersButtons(drawView.addLayer() + 1)
-//        }
+        binding.buttonAddLayer.setOnClickListener {
+            updateLayersButtons(drawView.addLayer() + 1)
+        }
 
-//        drawView.setOnLayerInitializedListener(object : DrawView.OnLayerInitializedListener {
-//            override fun onLayerInitialized(numOfLayers: Int) {
-//                updateLayersButtons(numOfLayers)
-//            }
-//        })
+        drawView.setOnLayerInitializedListener(object : DrawView.OnLayerInitializedListener {
+            override fun onLayerInitialized(numOfLayers: Int) {
+                updateLayersButtons(numOfLayers)
+            }
+        })
     }
 
     override fun onResume() {
@@ -90,7 +105,7 @@ class MakeupEditorActivity : AppCompatActivity() {
         drawView.layerManager.resetAllGifs()
         drawView.layerManager.setAllGifsToStaticMode()
 
-        //  updateLayersButtons(drawView.layerManager.getNumOfLayers())
+          updateLayersButtons(drawView.layerManager.getNumOfLayers())
     }
 
     override fun onPause() {

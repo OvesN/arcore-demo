@@ -8,4 +8,6 @@ interface ResourceListener {
     fun applyModel(modelInfo: ModelInfo)
     fun removeImage(type: String)
     fun removeModel(type: String)
+
+    fun applyLook(lookId:String)
 }
