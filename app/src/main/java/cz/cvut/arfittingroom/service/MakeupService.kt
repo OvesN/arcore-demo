@@ -4,13 +4,13 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import cz.cvut.arfittingroom.model.MakeupInfo
 import cz.cvut.arfittingroom.model.ModelInfo
+import cz.cvut.arfittingroom.model.enums.ENodeType
 
-//TODO keep state in another way
 class MakeupService {
     val appliedMakeUpTypes = mutableMapOf<String, MakeupInfo>()
     var textureBitmap: Bitmap? = null
     val makeUpBitmaps = mutableListOf<Bitmap>()
-    val loadedModels = mutableMapOf<String, ModelInfo>()
+    val loadedModels = mutableMapOf<ENodeType, ModelInfo>()
 
     fun areMakeupBitmapsPrepared() =
        makeUpBitmaps.size == appliedMakeUpTypes.size

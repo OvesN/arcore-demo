@@ -83,24 +83,24 @@ class ModelEditorActivity : AppCompatActivity() {
     }
 
     private fun handleChooseModelButtonClick(modelKey: String) {
-        selectedModelKey = modelKey
-        editorService.loadedModels[modelKey]?.model?.let { updateModelView(it) }
+//        selectedModelKey = modelKey
+//        editorService.loadedModels[modelKey]?.model?.let { updateModelView(it) }
     }
 
     private fun addModelToScene() {
         if (editorService.loadedModels.isNotEmpty()) {
             val model = editorService.loadedModels.entries.first()
 
-            this.modelNode = DragTransformableNode(transformationSystem).apply {
-                setParent(sceneView.scene)
-                translationController.isEnabled = false
-                scaleController.isEnabled = true
-                scaleController.minScale = 0.01f
-                scaleController.maxScale = 2f
-                rotationController.isEnabled = true
-                localPosition = Vector3(0f, 0f, -2.3f)
-                renderable = model.value.model
-            }
+//            this.modelNode = DragTransformableNode(transformationSystem).apply {
+//                setParent(sceneView.scene)
+//                translationController.isEnabled = false
+//                scaleController.isEnabled = true
+//                scaleController.minScale = 0.01f
+//                scaleController.maxScale = 2f
+//                rotationController.isEnabled = true
+//                localPosition = Vector3(0f, 0f, -2.3f)
+//                renderable = model.value.model
+//            }
 
             selectedModelKey = model.key
         }
@@ -121,8 +121,8 @@ class ModelEditorActivity : AppCompatActivity() {
     }
 
     private fun saveSelectedColor(color: Color) {
-        val newModel = editorService.changeColor(selectedModelKey, color, 0)
-        updateModelView(newModel)
+//        val newModel = editorService.changeColor(selectedModelKey, color, 0)
+//        updateModelView(newModel)
     }
 
     private fun updateModelView(model: ModelRenderable) {

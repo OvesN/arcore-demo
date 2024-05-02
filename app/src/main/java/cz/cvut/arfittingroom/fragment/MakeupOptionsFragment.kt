@@ -32,6 +32,7 @@ import cz.cvut.arfittingroom.model.MakeupType
 import cz.cvut.arfittingroom.model.REF_ATTRIBUTE
 import cz.cvut.arfittingroom.model.TYPE_ATTRIBUTE
 import cz.cvut.arfittingroom.module.GlideApp
+import cz.cvut.arfittingroom.utils.ScreenUtil.dpToPx
 import cz.cvut.arfittingroom.utils.makeFirstLetterCapital
 
 class MakeupOptionsFragment : Fragment() {
@@ -56,7 +57,7 @@ class MakeupOptionsFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        return inflater.inflate(R.layout.fragment_menu_multiple_options, container, false)
+        return inflater.inflate(R.layout.fragment_menu_horizontal_scroll, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -317,7 +318,7 @@ class MakeupOptionsFragment : Fragment() {
     private fun applyImage(ref: String, type: String, shouldBeReplaced: Boolean = false) {
         val listener = context as? ResourceListener
         if (listener == null) {
-            Log.println(Log.ERROR, null, "Activity does not implement ImageListener")
+            Log.println(Log.ERROR, null, "Activity does not implement ResourceListener")
             return
         }
 
@@ -336,10 +337,6 @@ class MakeupOptionsFragment : Fragment() {
             layoutParams = ViewGroup.LayoutParams(2, ViewGroup.LayoutParams.MATCH_PARENT)
             background = AppCompatResources.getDrawable(context, R.color.colorLightGrey)
         }
-
-    private fun dpToPx(dp: Int, context: Context): Int {
-        return (dp * context.resources.displayMetrics.density).toInt()
-    }
 
 
     //TODO SEPARATE

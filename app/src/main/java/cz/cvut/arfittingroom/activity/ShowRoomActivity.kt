@@ -8,6 +8,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.telecom.Call
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -30,6 +31,7 @@ import com.google.ar.sceneform.rendering.Texture
 import com.google.ar.sceneform.ux.ArFrontFacingFragment
 import com.google.ar.sceneform.ux.AugmentedFaceNode
 import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StreamDownloadTask
 import com.gorisse.thomas.sceneform.environment
 import com.gorisse.thomas.sceneform.light.LightEstimationConfig
 import com.gorisse.thomas.sceneform.light.build
@@ -42,16 +44,16 @@ import cz.cvut.arfittingroom.fragment.AccessoriesOptionsFragment
 import cz.cvut.arfittingroom.fragment.ColorOptionsFragment
 import cz.cvut.arfittingroom.fragment.LooksOptionsFragment
 import cz.cvut.arfittingroom.fragment.MakeupOptionsFragment
-import cz.cvut.arfittingroom.fragment.MakeupSingleOptionFragment
 import cz.cvut.arfittingroom.model.MakeupInfo
 import cz.cvut.arfittingroom.model.ModelInfo
-import cz.cvut.arfittingroom.model.enums.EModelType
+import cz.cvut.arfittingroom.model.enums.ENodeType
 import cz.cvut.arfittingroom.service.MakeupService
 import cz.cvut.arfittingroom.service.ModelEditorService
 import cz.cvut.arfittingroom.utils.BitmapUtil.replaceNonTransparentPixels
 import cz.cvut.arfittingroom.utils.FileUtil.doesTempAnimatedMaskExist
 import cz.cvut.arfittingroom.utils.FileUtil.getNextTempMaskFrame
 import cz.cvut.arfittingroom.utils.FileUtil.getTempMaskTextureBitmap
+import java.util.concurrent.Callable
 import javax.inject.Inject
 
 class ShowRoomActivity : AppCompatActivity(), ResourceListener {
@@ -64,7 +66,7 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener {
     private lateinit var arSceneView: ArSceneView
     private lateinit var storage: FirebaseStorage
 
-    private var faceNodeMap = HashMap<AugmentedFace, HashMap<EModelType, AugmentedFaceNode>>()
+    private var faceNodeMap = HashMap<AugmentedFace, HashMap<ENodeType, AugmentedFaceNode>>()
     private var isUpdated = false
 
     private var shouldPlayAnimation = false
@@ -88,7 +90,6 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener {
     private val looksOptionsFragment = LooksOptionsFragment()
     private val makeupOptionsFragment = MakeupOptionsFragment()
     private val colorOptionFragment = ColorOptionsFragment()
-    private val makeupSingleOptionFragment = MakeupSingleOptionFragment()
 
     override fun onResume() {
         super.onResume()
@@ -178,6 +179,7 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener {
             loadImage(it.ref, it.color)
         }
     }
+
     override fun removeImage(type: String) {
         val appliedMakeupTypes = makeUpService.appliedMakeUpTypes
         appliedMakeupTypes.remove(type)
@@ -185,7 +187,7 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener {
         // Clear faceNode with makeup
         if (appliedMakeupTypes.isEmpty()) {
             faceNodeMap.values
-                .mapNotNull { map -> map[EModelType.MAKEUP] }
+                .mapNotNull { map -> map[ENodeType.MAKEUP] }
                 .forEach { node -> node.faceMeshTexture = null }
         } else {
             makeUpService.appliedMakeUpTypes.values.forEach {
@@ -195,13 +197,15 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener {
     }
 
 
-    override fun applyModel(type: String, ref: String) {
-
+    override fun applyModel(modelInfo: ModelInfo) {
+        makeUpService.loadedModels[modelInfo.nodeType] = modelInfo
+        loadModel(modelInfo.modelRef, modelInfo.nodeType)
     }
 
     override fun removeModel(type: String) {
-
+        //toggleModelOnFaceNodes(model)
     }
+
 
     private fun onAttachFragment(fragmentManager: FragmentManager, fragment: Fragment) {
         if (fragment.id == R.id.arFragment) {
@@ -262,42 +266,15 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener {
     }
 
 
-//    private fun setupButtonClickListener(
-//        button: Button,
-//        accessory: EAccessoryType,
-//        modelType: EModelType
-//    ) {
-//        button.setOnClickListener {
-//            makeUpService.loadedModels[accessory.sourceURI]?.let { model ->
-//                // If the model is already loaded, toggle its application on the face nodes
-//                toggleModelOnFaceNodes(model)
-//            } ?: run {
-//                // Else, handle the case where the model is not loaded
-//                loadModel(accessory.sourceURI, modelType)
-//            }
-//        } //   }
-
-
-    private fun applyModel(modelKey: String, modelType: EModelType) {
+    private fun applyModel(renderable: ModelRenderable, nodeType: ENodeType) {
         val sceneView = arFragment.arSceneView
         // Update nodes
         sceneView.session?.getAllTrackables(AugmentedFace::class.java)?.forEach { face ->
             val modelNodesMap = faceNodeMap.getOrPut(face) { HashMap() }
-            // Check if the node for the given modelType already exists
-            if (modelNodesMap[modelType] == null) {
-                val faceNode = AugmentedFaceNode(face).also { node ->
-                    node.parent = sceneView.scene
-                }
-                modelNodesMap[modelType] = faceNode
-                faceNode.faceRegionsRenderable = makeUpService.loadedModels[modelKey]?.model
-            } else {
-                //FixME too stupid
-                makeUpService.loadedModels.values.find { it.model == modelNodesMap[modelType]?.faceRegionsRenderable }?.isActive =
-                    false
+            modelNodesMap[nodeType] = AugmentedFaceNode(face).also { node ->
+                node.parent = sceneView.scene
+            }.apply { faceRegionsRenderable = renderable }
 
-                modelNodesMap[modelType]?.faceRegionsRenderable =
-                    makeUpService.loadedModels[modelKey]?.model
-            }
         }
     }
 
@@ -312,11 +289,11 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener {
                     node.parent = sceneView.scene
 
                 }
-                modelNodesMap[entry.value.modelType] = faceNode
-                faceNode.faceRegionsRenderable = entry.value.model
-                entry.value.isActive = true
+                modelNodesMap[entry.value.nodeType] = faceNode
+//                faceNode.faceRegionsRenderable = entry.value.model
+//                entry.value.isActive = true
 
-                makeUpService.loadedModels[entry.key] = entry.value
+                //makeUpService.loadedModels[entry.key] = entry.value
             }
             makeUpService.textureBitmap?.let {
                 createTextureAndApply(it)
@@ -375,14 +352,14 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener {
         sceneView.session?.getAllTrackables(AugmentedFace::class.java)?.forEach { face ->
             val modelNodesMap = faceNodeMap.getOrPut(face) { HashMap() }
             // Check if the node for the makeup already exist
-            if (modelNodesMap[EModelType.MAKEUP] == null) {
+            if (modelNodesMap[ENodeType.MAKEUP] == null) {
                 val faceNode = AugmentedFaceNode(face).also { node ->
                     node.parent = sceneView.scene
                 }
-                modelNodesMap[EModelType.MAKEUP] = faceNode
+                modelNodesMap[ENodeType.MAKEUP] = faceNode
                 faceNode.faceMeshTexture = texture
             } else {
-                modelNodesMap[EModelType.MAKEUP]?.faceMeshTexture = texture
+                modelNodesMap[ENodeType.MAKEUP]?.faceMeshTexture = texture
             }
         }
     }
@@ -410,20 +387,49 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener {
         return true
     }
 
-    private fun loadModel(uri: String, modelType: EModelType) {
-        // Asynchronously load the model. Once it's loaded, apply it
-        ModelRenderable.builder()
-            .setSource(this, Uri.parse(uri))
-            .setIsFilamentGltf(true)
-            .build()
-            .thenAccept { model ->
-                makeUpService.loadedModels[uri] = ModelInfo(modelType, model, uri, true)
-                applyModel(uri, modelType)
+    private fun loadModel(ref: String, modelType: ENodeType) {
+
+        storage.getReference(ref).downloadUrl.addOnSuccessListener {
+            ModelRenderable.builder()
+                .setSource(this, it)
+                .setIsFilamentGltf(true)
+                .build()
+                .thenAccept { model ->
+                    applyModel(model, modelType)
+                }
+                .exceptionally { ex ->
+                    Log.println(Log.ERROR, null, ex.message.orEmpty())
+                    null
+                }
+        }
+            .addOnFailureListener { ex ->
+                Toast.makeText(applicationContext, ex.message, Toast.LENGTH_SHORT).show()
+                Log.println(Log.ERROR, null, ex.message.orEmpty())
             }
-            .exceptionally { throwable ->
-                Log.println(Log.ERROR, null, "Error loading model")
-                null
-            }
+
+
+//        storage
+//            .getReference(ref)
+//            .getStream(StreamDownloadTask.StreamProcessor())
+//            .addOnSuccessListener {
+//                ModelRenderable.builder()
+//                    .setSource(this) { it.stream }
+//                    .setIsFilamentGltf(true)
+//                    .build()
+//                    .thenAccept { model ->
+//                        applyModel(model, modelType)
+//                    }
+//                    .exceptionally { ex ->
+//                        Log.println(Log.ERROR, null, ex.message.orEmpty())
+//                        null
+//                    }
+//            }
+//            .addOnFailureListener { ex ->
+//                Toast.makeText(applicationContext, ex.message, Toast.LENGTH_SHORT).show()
+//                Log.println(Log.ERROR, null, ex.message.orEmpty())
+//            }
+
+
     }
 
     private fun loadImage(ref: String, color: Int) {
@@ -450,22 +456,21 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener {
 
         sceneView.session?.getAllTrackables(AugmentedFace::class.java)?.forEach { face ->
             val modelNodesMap = faceNodeMap.getOrPut(face) { HashMap() }
-            val faceNode = modelNodesMap.getOrPut(modelInfo.modelType) {
+            val faceNode = modelNodesMap.getOrPut(modelInfo.nodeType) {
                 AugmentedFaceNode(face).also { node ->
                     node.parent = sceneView.scene
                 }
             }
-
-            if (faceNode.faceRegionsRenderable == modelInfo.model && modelInfo.isActive) {
-                // If the model is currently applied, remove it
-                faceNode.isEnabled = false
-                modelInfo.isActive = false
-            } else {
-                // If the model is not applied, apply it
-                faceNode.isEnabled = true
-                faceNode.faceRegionsRenderable = modelInfo.model
-                modelInfo.isActive = true
-            }
+//            if (faceNode.faceRegionsRenderable == modelInfo.model && modelInfo.isActive) {
+//                // If the model is currently applied, remove it
+//                faceNode.isEnabled = false
+//                modelInfo.isActive = false
+//            } else {
+//                // If the model is not applied, apply it
+//                faceNode.isEnabled = true
+//                faceNode.faceRegionsRenderable = modelInfo.model
+//                modelInfo.isActive = true
+//            }
         }
     }
 
@@ -507,7 +512,6 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener {
     private fun addMenuFragments() {
         supportFragmentManager.beginTransaction()
             .add(R.id.menu_fragment_container, makeupOptionsFragment)
-            .add(R.id.menu_fragment_container, makeupSingleOptionFragment)
             .add(R.id.menu_fragment_container, colorOptionFragment)
             .add(R.id.menu_fragment_container, accessoriesOptionsFragment)
             .add(R.id.menu_fragment_container, looksOptionsFragment)
@@ -552,7 +556,6 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener {
     private fun hideMenuFragments() {
         supportFragmentManager.beginTransaction()
             .hide(makeupOptionsFragment)
-            .hide(makeupSingleOptionFragment)
             .hide(colorOptionFragment)
             .hide(accessoriesOptionsFragment)
             .hide(looksOptionsFragment)
