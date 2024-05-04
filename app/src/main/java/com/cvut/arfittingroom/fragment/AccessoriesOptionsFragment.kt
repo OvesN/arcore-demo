@@ -10,7 +10,6 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.appcompat.content.res.AppCompatResources
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.cvut.arfittingroom.R
 import com.cvut.arfittingroom.activity.ResourceListener
@@ -24,6 +23,8 @@ import com.cvut.arfittingroom.model.enums.ENodeType
 import com.cvut.arfittingroom.module.GlideApp
 import com.cvut.arfittingroom.utils.ScreenUtil.dpToPx
 import com.cvut.arfittingroom.utils.UIUtil.createDivider
+import com.cvut.arfittingroom.utils.UIUtil.deselectButton
+import com.cvut.arfittingroom.utils.UIUtil.selectSquareButton
 import com.cvut.arfittingroom.utils.makeFirstLetterCapital
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
@@ -62,12 +63,7 @@ class AccessoriesOptionsFragment : Fragment() {
             .addOnSuccessListener { result ->
                 accessoriesTypes.clear()
                 for (document in result) {
-                    val docId = document.id
-                    val capitalizedDocId =
-                        docId.replaceFirstChar {
-                            if (it.isLowerCase()) it.titlecase() else it.toString()
-                        }
-                    accessoriesTypes.add(capitalizedDocId)
+                    accessoriesTypes.add(document.id.makeFirstLetterCapital())
                 }
 
                 if (isAdded) {
@@ -199,6 +195,10 @@ class AccessoriesOptionsFragment : Fragment() {
 
             options.addView(imageView)
 
+            if (selectedOptionTypeToViewId[selectedAccessoryType] == imageView.id) {
+                selectSquareButton(imageView)
+            }
+
             GlideApp.with(this)
                 .load(storage.getReference(modelInfo.imagePreviewRef))
                 .thumbnail()
@@ -211,25 +211,21 @@ class AccessoriesOptionsFragment : Fragment() {
         imageView: ImageView,
         modelInfo: ModelInfo,
     ) {
-        val selectedViewId = selectedOptionTypeToViewId[modelInfo.type]
-
-        selectedViewId?.let {
-            view.findViewById<ImageView>(it)?.background =
-                null
+        selectedOptionTypeToViewId[modelInfo.type]?.let { viewId ->
+            view.findViewById<ImageView>(viewId)?.let { deselectButton(it) }
         }
-
-        imageView.background = ContextCompat.getDrawable(imageView.context, R.drawable.border)!!
 
         applyModel(
             modelInfo,
-            shouldBeReplaced = (selectedOptionTypeToViewId[modelInfo.type] == imageView.id),
+            shouldBeRemoved = (selectedOptionTypeToViewId[modelInfo.type] == imageView.id),
         )
+
         selectedOptionTypeToViewId[modelInfo.type] = imageView.id
     }
 
     private fun applyModel(
         modelInfo: ModelInfo,
-        shouldBeReplaced: Boolean = false,
+        shouldBeRemoved: Boolean,
     ) {
         val listener = context as? ResourceListener
         if (listener == null) {
@@ -237,7 +233,7 @@ class AccessoriesOptionsFragment : Fragment() {
             return
         }
 
-        if (shouldBeReplaced) {
+        if (shouldBeRemoved) {
             selectedOptionTypeToViewId.remove(modelInfo.type)
             listener.removeModel(modelInfo.type)
         } else {

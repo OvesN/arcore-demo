@@ -16,4 +16,6 @@ interface ResourceListener {
     fun removeModel(type: String)
 
     fun applyLook(lookId: String)
+
+    fun removeLook(lookId: String)
 }

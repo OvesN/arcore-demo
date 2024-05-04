@@ -14,11 +14,10 @@ class StateService {
 
     fun areMakeupBitmapsPrepared() = makeUpBitmaps.size == appliedMakeUpTypes.size
 
-    fun combineBitmaps(): Bitmap? {
+    fun combineMakeUpBitmaps(): Bitmap? {
         if (makeUpBitmaps.isEmpty()) {
             return null
         }
-
         val bitmap =
             Bitmap.createBitmap(
                 makeUpBitmaps.first().width,

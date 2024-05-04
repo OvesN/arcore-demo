@@ -28,7 +28,12 @@ import com.cvut.arfittingroom.model.REF_ATTRIBUTE
 import com.cvut.arfittingroom.model.TYPE_ATTRIBUTE
 import com.cvut.arfittingroom.module.GlideApp
 import com.cvut.arfittingroom.utils.ScreenUtil.dpToPx
+import com.cvut.arfittingroom.utils.UIUtil.createColorOptionImage
 import com.cvut.arfittingroom.utils.UIUtil.createDivider
+import com.cvut.arfittingroom.utils.UIUtil.deselectColorButton
+import com.cvut.arfittingroom.utils.UIUtil.deselectMakeupOptionButton
+import com.cvut.arfittingroom.utils.UIUtil.selectColorButton
+import com.cvut.arfittingroom.utils.UIUtil.selectMakeupButton
 import com.cvut.arfittingroom.utils.UIUtil.showColorPickerDialog
 import com.cvut.arfittingroom.utils.makeFirstLetterCapital
 import com.google.firebase.firestore.FirebaseFirestore
@@ -45,7 +50,6 @@ class MakeupOptionsFragment : Fragment() {
     private lateinit var firestore: FirebaseFirestore
     private lateinit var storage: FirebaseStorage
 
-    // TODO REFACTOR
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         firestore = FirebaseFirestore.getInstance()
@@ -201,13 +205,18 @@ class MakeupOptionsFragment : Fragment() {
                             it.setMargins(dpToPx(10, context), 0, 0, 0)
                         }
                     scaleType = ImageView.ScaleType.FIT_CENTER
-                    background = createColorOptionImage(color)
+                    background = createColorOptionImage(requireContext(), color)
                     id = color
                     setOnClickListener {
                         selectColor(this, view, color)
                         applyImage(selectedMakeupOptionRef, selectedMakeupType)
                     }
                 }
+
+            if(selectedOptionTypeToViewId["color"] == colorImageView.id) {
+                selectColorButton(colorImageView)
+            }
+
             options.addView(colorImageView)
         }
 
@@ -239,33 +248,17 @@ class MakeupOptionsFragment : Fragment() {
         view: View,
         color: Int,
     ) {
-        selectedOptionTypeToViewId["color"]?.let {
-            val selectedView =
-                view.findViewById<ImageView>(it).apply {
-                    background = createColorOptionImage(it)
-                }
+        selectedOptionTypeToViewId["color"]?.let { viewId ->
+            view.findViewById<ImageView>(viewId)?.let { deselectColorButton(it) }
         }
 
         selectedColor = color
 
-        val layers =
-            arrayOf(
-                createColorOptionImage(color),
-                ContextCompat.getDrawable(requireContext(), R.drawable.circle_border)!!,
-            )
-
-        imageView.background = LayerDrawable(layers)
+        selectColorButton(imageView)
 
         selectedOptionTypeToViewId["color"] = imageView.id
     }
 
-    private fun createColorOptionImage(color: Int): Drawable {
-        val icon = ContextCompat.getDrawable(requireContext(), R.drawable.circle)!!.mutate()
-        val wrap = DrawableCompat.wrap(icon)
-        DrawableCompat.setTint(wrap, color)
-
-        return wrap
-    }
 
     private fun updateMakeupOptionsMenu(
         view: View,
@@ -310,11 +303,14 @@ class MakeupOptionsFragment : Fragment() {
                     id = ref.hashCode()
                     setOnClickListener {
                         selectMakeupOption(view, this, type = type, ref = ref)
-                        fetchColorOptions()
                     }
                 }
 
             options.addView(imageView)
+
+            if (selectedOptionTypeToViewId[selectedMakeupType] == imageView.id) {
+                selectMakeupButton(imageView)
+            }
 
             GlideApp.with(this)
                 .load(storage.getReference(ref))
@@ -331,20 +327,11 @@ class MakeupOptionsFragment : Fragment() {
     ) {
         selectedMakeupOptionRef = ref
 
-        val selectedViewId = selectedOptionTypeToViewId[type]
+        selectMakeupButton(imageView)
 
-        selectedViewId?.let {
-            view.findViewById<ImageView>(it)?.background =
-                ContextCompat.getDrawable(imageView.context, R.drawable.head_model)!!
+        selectedOptionTypeToViewId[type]?.let { viewId ->
+            view.findViewById<ImageView>(viewId)?.let { deselectMakeupOptionButton(it) }
         }
-
-        val layers =
-            arrayOf(
-                ContextCompat.getDrawable(imageView.context, R.drawable.head_model)!!,
-                ContextCompat.getDrawable(imageView.context, R.drawable.border)!!,
-            )
-
-        imageView.background = LayerDrawable(layers)
 
         applyImage(ref, type, shouldBeReplaced = (selectedOptionTypeToViewId[type] == imageView.id))
         selectedOptionTypeToViewId[type] = imageView.id
@@ -363,9 +350,9 @@ class MakeupOptionsFragment : Fragment() {
 
         if (shouldBeReplaced) {
             selectedOptionTypeToViewId.remove(type)
-
             listener.removeImage(type)
         } else {
+            fetchColorOptions()
             listener.applyImage(type, ref, selectedColor)
         }
     }

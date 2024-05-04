@@ -17,6 +17,7 @@ import by.kirich1409.viewbindingdelegate.viewBinding
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
+import com.bumptech.glide.signature.ObjectKey
 import com.cvut.arfittingroom.ARFittingRoomApplication
 import com.cvut.arfittingroom.R
 import com.cvut.arfittingroom.databinding.ActivityShowRoomBinding
@@ -224,6 +225,10 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener {
         shouldDownloadFormStorage = true
     }
 
+    override fun removeLook(lookId: String) {
+        TODO("Not yet implemented")
+    }
+
     private fun onAttachFragment(
         fragmentManager: FragmentManager,
         fragment: Fragment,
@@ -424,7 +429,7 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener {
 
     private fun checkIsSupportedDeviceOrFinish(): Boolean {
         if (ArCoreApk.getInstance()
-            .checkAvailability(this) == ArCoreApk.Availability.UNSUPPORTED_DEVICE_NOT_CAPABLE
+                .checkAvailability(this) == ArCoreApk.Availability.UNSUPPORTED_DEVICE_NOT_CAPABLE
         ) {
             Toast.makeText(this, "Augmented Faces requires ARCore", Toast.LENGTH_LONG).show()
             finish()
@@ -492,12 +497,14 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener {
         // }
     }
 
+
     private fun loadImage(
         ref: String,
         color: Int,
     ) {
         Glide.with(this)
             .asBitmap()
+            .signature(ObjectKey(System.currentTimeMillis()))
             .load(storage.getReference(ref))
             .into(
                 object : CustomTarget<Bitmap>() {
@@ -509,7 +516,7 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener {
                         stateService.makeUpBitmaps.add(resource)
 
                         if (stateService.areMakeupBitmapsPrepared()) {
-                            val combinedBitmap = stateService.combineBitmaps()
+                            val combinedBitmap = stateService.combineMakeUpBitmaps()
                             combinedBitmap?.let { createTextureAndApply(it) }
                         }
                     }
@@ -671,7 +678,7 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener {
             val uploadTask =
                 ref.putStream(frameStream)
                     .addOnSuccessListener { taskSnapshot ->
-                        }
+                    }
             uploadTask.addOnFailureListener {
                 Toast.makeText(applicationContext, it.message, Toast.LENGTH_SHORT).show()
             }
@@ -694,4 +701,5 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener {
     companion object {
         const val MIN_OPENGL_VERSION = 3.0
     }
+
 }

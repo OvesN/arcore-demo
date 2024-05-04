@@ -6,19 +6,23 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.LinearLayout
-import androidx.appcompat.content.res.AppCompatResources
 import androidx.fragment.app.Fragment
 import com.cvut.arfittingroom.R
 import com.cvut.arfittingroom.activity.ResourceListener
 import com.cvut.arfittingroom.model.LOOKS_COLLECTION
 import com.cvut.arfittingroom.utils.UIUtil.createDivider
+import com.cvut.arfittingroom.utils.UIUtil.deselectButton
+import com.cvut.arfittingroom.utils.UIUtil.selectSquareButton
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 
 class LooksOptionsFragment : Fragment() {
     private lateinit var firestore: FirebaseFirestore
     private lateinit var storage: FirebaseStorage
+
+    private var selectedLookViewId: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -66,9 +70,9 @@ class LooksOptionsFragment : Fragment() {
                     text = lookId
                     isAllCaps = false
                     background = null
-                    id = View.generateViewId()
+                    id = lookId.hashCode()
                     setOnClickListener {
-                        applyLook(lookId)
+                        selectLook(view, it, lookId)
                     }
                 }
             options.addView(button)
@@ -76,14 +80,28 @@ class LooksOptionsFragment : Fragment() {
         }
     }
 
-    private fun applyLook(lookId: String) {
+    private fun applyLook(lookId: String, shouldBeRemoved: Boolean) {
         val listener = context as? ResourceListener
         if (listener == null) {
             Log.println(Log.ERROR, null, "Activity does not implement ResourceListener")
             return
         }
 
-        listener.applyLook(lookId)
+        if (shouldBeRemoved) {
+            listener.removeLook(lookId)
+        }
+        else {
+            listener.applyLook(lookId)
+        }
+    }
+
+    private fun selectLook(view: View, buttonView: View, lookId: String) {
+        deselectButton(view.findViewById(selectedLookViewId))
+        selectSquareButton(buttonView)
+
+        applyLook(lookId, shouldBeRemoved = selectedLookViewId == buttonView.id)
+
+        selectedLookViewId = view.id
     }
 
 }
