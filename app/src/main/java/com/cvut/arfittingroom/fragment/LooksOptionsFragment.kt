@@ -80,26 +80,25 @@ class LooksOptionsFragment : Fragment() {
         }
     }
 
-    private fun applyLook(lookId: String, shouldBeRemoved: Boolean) {
+
+    private fun selectLook(view: View, buttonView: View, lookId: String) {
+        deselectButton(view.findViewById(selectedLookViewId))
+        selectSquareButton(buttonView)
+
         val listener = context as? ResourceListener
         if (listener == null) {
             Log.println(Log.ERROR, null, "Activity does not implement ResourceListener")
             return
         }
 
-        if (shouldBeRemoved) {
+
+        if (selectedLookViewId == buttonView.id) {
             listener.removeLook(lookId)
-        }
-        else {
+
+        } else
+        {
             listener.applyLook(lookId)
         }
-    }
-
-    private fun selectLook(view: View, buttonView: View, lookId: String) {
-        deselectButton(view.findViewById(selectedLookViewId))
-        selectSquareButton(buttonView)
-
-        applyLook(lookId, shouldBeRemoved = selectedLookViewId == buttonView.id)
 
         selectedLookViewId = view.id
     }

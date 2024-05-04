@@ -1,8 +1,6 @@
 package com.cvut.arfittingroom.fragment
 
 import android.graphics.Color
-import android.graphics.drawable.Drawable
-import android.graphics.drawable.LayerDrawable
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -13,9 +11,7 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.Toast
-import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
-import androidx.core.graphics.drawable.DrawableCompat
 import androidx.fragment.app.Fragment
 import com.cvut.arfittingroom.R
 import com.cvut.arfittingroom.activity.ResourceListener
@@ -38,8 +34,6 @@ import com.cvut.arfittingroom.utils.UIUtil.showColorPickerDialog
 import com.cvut.arfittingroom.utils.makeFirstLetterCapital
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
-import com.skydoves.colorpickerview.ColorPickerDialog
-import com.skydoves.colorpickerview.listeners.ColorEnvelopeListener
 
 class MakeupOptionsFragment : Fragment() {
     private val makeupTypes = mutableListOf<MakeupType>()
@@ -327,20 +321,27 @@ class MakeupOptionsFragment : Fragment() {
     ) {
         selectedMakeupOptionRef = ref
 
-        selectMakeupButton(imageView)
-
         selectedOptionTypeToViewId[type]?.let { viewId ->
             view.findViewById<ImageView>(viewId)?.let { deselectMakeupOptionButton(it) }
         }
 
-        applyImage(ref, type, shouldBeReplaced = (selectedOptionTypeToViewId[type] == imageView.id))
-        selectedOptionTypeToViewId[type] = imageView.id
+        val shouldRemove = selectedOptionTypeToViewId[type] == imageView.id
+
+        applyImage(ref, type, shouldRemove)
+
+        if (shouldRemove) {
+            selectedOptionTypeToViewId.remove(type)
+        }
+        else {
+            selectedOptionTypeToViewId[type] = imageView.id
+            selectMakeupButton(imageView)
+        }
     }
 
     private fun applyImage(
         ref: String,
         type: String,
-        shouldBeReplaced: Boolean = false,
+        shouldRemove: Boolean = false,
     ) {
         val listener = context as? ResourceListener
         if (listener == null) {
@@ -348,7 +349,7 @@ class MakeupOptionsFragment : Fragment() {
             return
         }
 
-        if (shouldBeReplaced) {
+        if (shouldRemove) {
             selectedOptionTypeToViewId.remove(type)
             listener.removeImage(type)
         } else {

@@ -13,7 +13,7 @@ interface ResourceListener {
 
     fun removeImage(type: String)
 
-    fun removeModel(type: String)
+    fun removeModel(slot: String)
 
     fun applyLook(lookId: String)
 

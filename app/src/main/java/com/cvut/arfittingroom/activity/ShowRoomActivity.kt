@@ -25,10 +25,10 @@ import com.cvut.arfittingroom.fragment.AccessoriesOptionsFragment
 import com.cvut.arfittingroom.fragment.LooksOptionsFragment
 import com.cvut.arfittingroom.fragment.MakeupOptionsFragment
 import com.cvut.arfittingroom.model.LOOKS_COLLECTION
+import com.cvut.arfittingroom.model.MAKEUP_SLOT
 import com.cvut.arfittingroom.model.MASK_FRAME_FILE_NAME
 import com.cvut.arfittingroom.model.MakeupInfo
 import com.cvut.arfittingroom.model.ModelInfo
-import com.cvut.arfittingroom.model.enums.ENodeType
 import com.cvut.arfittingroom.service.StateService
 import com.cvut.arfittingroom.utils.BitmapUtil.replaceNonTransparentPixels
 import com.cvut.arfittingroom.utils.FileUtil.deleteTempFiles
@@ -60,8 +60,6 @@ import javax.inject.Inject
 
 class ShowRoomActivity : AppCompatActivity(), ResourceListener {
     private val binding: ActivityShowRoomBinding by viewBinding(createMethod = CreateMethod.INFLATE)
-    private var faceNodeMap = HashMap<AugmentedFace, HashMap<ENodeType, AugmentedFaceNode>>()
-    private var isUpdated = false
     private var shouldPlayAnimation = false
     private var gifPrepared = false
     private val gifTextures = mutableListOf<Texture>()
@@ -93,7 +91,7 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener {
 
         val bitmap = getTempMaskTextureBitmap(applicationContext)
         bitmap?.let {
-            createTextureAndApply(it)
+            stateService.createTextureAndApply(it, arFragment.arSceneView)
             shouldPlayAnimation = false
         }
 
@@ -198,9 +196,7 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener {
 
         // Clear faceNode with makeup
         if (appliedMakeupTypes.isEmpty()) {
-            faceNodeMap.values
-                .mapNotNull { map -> map[ENodeType.MAKEUP] }
-                .forEach { node -> node.faceMeshTexture = null }
+            stateService.clearFaceNodeSlot(MAKEUP_SLOT)
         } else {
             stateService.appliedMakeUpTypes.values.forEach {
                 loadImage(it.ref, it.color)
@@ -209,13 +205,14 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener {
     }
 
     override fun applyModel(modelInfo: ModelInfo) {
-        stateService.loadedModels[modelInfo.nodeType] = modelInfo
-        loadModel(modelInfo.modelRef, modelInfo.nodeType)
+        stateService.addModel(modelInfo)
+        loadModel(modelInfo)
     }
 
-    override fun removeModel(type: String) {
-        // toggleModelOnFaceNodes(model)
+    override fun removeModel(slot: String) {
+        stateService.clearFaceNodeSlot(slot)
     }
+
 
     // FIXME
     override fun applyLook(lookId: String) {
@@ -270,65 +267,17 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener {
     }
 
     private fun onAugmentedFaceTrackingUpdate() {
-        // Remove any AugmentedFaceNodes associated with an AugmentedFace that stopped tracking
-        faceNodeMap.entries.removeIf { (face, nodes) ->
-            if (face.trackingState == TrackingState.STOPPED) {
-                nodes.forEach { entry -> entry.value.parent = null }
-                true
-            } else {
-                false
-            }
-        }
+        stateService.removeNodesIfFaceTrackingStopped()
+
         if (shouldPlayAnimation) {
             if (!gifPrepared) {
                 prepareAllGifTextures()
             } else if (gifRunnable == null) {
                 startAnimation()
             }
-        } else if (!isUpdated) {
-            updateModelsOnScreen()
         }
     }
 
-    private fun applyModel(
-        renderable: ModelRenderable,
-        nodeType: ENodeType,
-    ) {
-        val sceneView = arFragment.arSceneView
-        // Update nodes
-        sceneView.session?.getAllTrackables(AugmentedFace::class.java)?.forEach { face ->
-            val modelNodesMap = faceNodeMap.getOrPut(face) { HashMap() }
-            modelNodesMap[nodeType] =
-                AugmentedFaceNode(face).also { node ->
-                    node.parent = sceneView.scene
-                }.apply { faceRegionsRenderable = renderable }
-        }
-    }
-
-    private fun updateModelsOnScreen() {
-        val sceneView = arFragment.arSceneView
-        val modelsToUpdate = stateService.loadedModels
-        sceneView.session?.getAllTrackables(AugmentedFace::class.java)?.forEach { face ->
-            isUpdated = true
-            val modelNodesMap = faceNodeMap.getOrPut(face) { HashMap() }
-            modelsToUpdate.forEach { entry ->
-                val faceNode =
-                    AugmentedFaceNode(face).also { node ->
-                        node.parent = sceneView.scene
-                    }
-                modelNodesMap[entry.value.nodeType] = faceNode
-                // faceNode.faceRegionsRenderable = entry.value.model
-                // entry.value.isActive = true
-
-                // makeUpService.loadedModels[entry.key] = entry.value
-            }
-            stateService.textureBitmap?.let {
-                createTextureAndApply(it)
-            }
-
-            stateService.loadedModels.clear()
-        }
-    }
 
     // FIXME
     private fun prepareAllGifTextures() {
@@ -364,8 +313,6 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener {
                     }
                 }
             }
-
-            // }
         } else {
             while (shouldContinue) {
                 val frameBitmap =
@@ -392,40 +339,6 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener {
         gifPrepared = true
     }
 
-    private fun createTextureAndApply(combinedBitmap: Bitmap) {
-        stateService.textureBitmap = combinedBitmap
-
-        // Convert Bitmap to ARCore Texture
-        Texture.builder()
-            .setSource(combinedBitmap)
-            .build()
-            .thenAccept { texture -> applyTextureToAllFaces(texture) }
-            .exceptionally {
-                Log.println(Log.ERROR, null, "Error during texture initialisation")
-                null
-            }
-    }
-
-    // Apply a Bitmap texture to all detected faces
-    private fun applyTextureToAllFaces(texture: Texture) {
-        val sceneView = arFragment.arSceneView
-
-        // Update nodes
-        sceneView.session?.getAllTrackables(AugmentedFace::class.java)?.forEach { face ->
-            val modelNodesMap = faceNodeMap.getOrPut(face) { HashMap() }
-            // Check if the node for the makeup already exist
-            if (modelNodesMap[ENodeType.MAKEUP] == null) {
-                val faceNode =
-                    AugmentedFaceNode(face).also { node ->
-                        node.parent = sceneView.scene
-                    }
-                modelNodesMap[ENodeType.MAKEUP] = faceNode
-                faceNode.faceMeshTexture = texture
-            } else {
-                modelNodesMap[ENodeType.MAKEUP]?.faceMeshTexture = texture
-            }
-        }
-    }
 
     private fun checkIsSupportedDeviceOrFinish(): Boolean {
         if (ArCoreApk.getInstance()
@@ -452,18 +365,17 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener {
     }
 
     private fun loadModel(
-        ref: String,
-        modelType: ENodeType,
+        modelInfo: ModelInfo
     ) {
-        storage.getReference(ref)
+        storage.getReference(modelInfo.modelRef)
             .downloadUrl
             .addOnSuccessListener { uri ->
                 ModelRenderable.builder()
                     .setSource(this, uri)
                     .setIsFilamentGltf(true)
                     .build()
-                    .thenAccept { model ->
-                        applyModel(model, modelType)
+                    .thenAccept { renderable ->
+                        stateService.applyModelOnFace(arSceneView, renderable, modelInfo.slot)
                     }
                     .exceptionally { ex ->
                         Log.println(Log.ERROR, null, ex.message.orEmpty())
@@ -475,26 +387,6 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener {
                 Log.println(Log.ERROR, null, ex.message.orEmpty())
             }
 
-        // storage
-        // .getReference(ref)
-        // .getStream(StreamDownloadTask.StreamProcessor())
-        // .addOnSuccessListener {
-        // ModelRenderable.builder()
-        // .setSource(this) { it.stream }
-        // .setIsFilamentGltf(true)
-        // .build()
-        // .thenAccept { model ->
-        // applyModel(model, modelType)
-        // }
-        // .exceptionally { ex ->
-        // Log.println(Log.ERROR, null, ex.message.orEmpty())
-        // null
-        // }
-        // }
-        // .addOnFailureListener { ex ->
-        // Toast.makeText(applicationContext, ex.message, Toast.LENGTH_SHORT).show()
-        // Log.println(Log.ERROR, null, ex.message.orEmpty())
-        // }
     }
 
 
@@ -504,7 +396,6 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener {
     ) {
         Glide.with(this)
             .asBitmap()
-            .signature(ObjectKey(System.currentTimeMillis()))
             .load(storage.getReference(ref))
             .into(
                 object : CustomTarget<Bitmap>() {
@@ -512,42 +403,12 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener {
                         resource: Bitmap,
                         transition: Transition<in Bitmap>?,
                     ) {
-                        replaceNonTransparentPixels(resource, color)
-                        stateService.makeUpBitmaps.add(resource)
-
-                        if (stateService.areMakeupBitmapsPrepared()) {
-                            val combinedBitmap = stateService.combineMakeUpBitmaps()
-                            combinedBitmap?.let { createTextureAndApply(it) }
-                        }
+                       stateService.loadImage(resource, color, arSceneView)
                     }
 
                     override fun onLoadCleared(placeholder: android.graphics.drawable.Drawable?) {}
                 },
             )
-    }
-
-    private fun toggleModelOnFaceNodes(modelInfo: ModelInfo) {
-        val sceneView = arFragment.arSceneView
-
-        sceneView.session?.getAllTrackables(AugmentedFace::class.java)?.forEach { face ->
-            val modelNodesMap = faceNodeMap.getOrPut(face) { HashMap() }
-            val faceNode =
-                modelNodesMap.getOrPut(modelInfo.nodeType) {
-                    AugmentedFaceNode(face).also { node ->
-                        node.parent = sceneView.scene
-                    }
-                }
-            // if (faceNode.faceRegionsRenderable == modelInfo.model && modelInfo.isActive) {
-            // // If the model is currently applied, remove it
-            // faceNode.isEnabled = false
-            // modelInfo.isActive = false
-            // } else {
-            // // If the model is not applied, apply it
-            // faceNode.isEnabled = true
-            // faceNode.faceRegionsRenderable = modelInfo.model
-            // modelInfo.isActive = true
-            // }
-        }
     }
 
     private fun startAnimation() {
@@ -562,7 +423,7 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener {
                         prepareAllGifTextures()
                     } else {
                         if (gifTextures.size > frameCounter) {
-                            applyTextureToAllFaces(gifTextures[frameCounter])
+                            stateService.applyTextureToFaceNode(gifTextures[frameCounter], arSceneView)
                             frameCounter = (frameCounter + 1) % gifTextures.size
                         }
                         handler.postDelayed(gifRunnable!!, frameDelay)
@@ -690,13 +551,11 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener {
     private fun clearAll() {
         stopAnimation()
         deleteTempFiles(applicationContext)
-        faceNodeMap.forEach { it.value.forEach { it.value.parent = null } }
-        faceNodeMap.clear()
         stateService.clearAll()
-        isUpdated = false
 
         shouldClearEditor = true
     }
+
 
     companion object {
         const val MIN_OPENGL_VERSION = 3.0

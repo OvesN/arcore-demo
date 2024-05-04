@@ -19,7 +19,6 @@ import com.cvut.arfittingroom.model.ModelInfo
 import com.cvut.arfittingroom.model.PREVIEW_IMAGE_ATTRIBUTE
 import com.cvut.arfittingroom.model.REF_ATTRIBUTE
 import com.cvut.arfittingroom.model.TYPE_ATTRIBUTE
-import com.cvut.arfittingroom.model.enums.ENodeType
 import com.cvut.arfittingroom.module.GlideApp
 import com.cvut.arfittingroom.utils.ScreenUtil.dpToPx
 import com.cvut.arfittingroom.utils.UIUtil.createDivider
@@ -121,14 +120,15 @@ class AccessoriesOptionsFragment : Fragment() {
                     val ref = document[REF_ATTRIBUTE].toString()
                     val preview = document[PREVIEW_IMAGE_ATTRIBUTE].toString()
 
+
                     // FIXME load from db
                     val nodeType =
                         if (type == "glasses") {
-                            ENodeType.EYES
+                            "eyes"
                         } else if (type == "hats") {
-                            ENodeType.TOP_HEAD
+                            "top_head"
                         } else {
-                            ENodeType.MAKEUP
+                            "makeup"
                         }
 
                     modelsInfo.add(
@@ -215,31 +215,24 @@ class AccessoriesOptionsFragment : Fragment() {
             view.findViewById<ImageView>(viewId)?.let { deselectButton(it) }
         }
 
-        applyModel(
-            modelInfo,
-            shouldBeRemoved = (selectedOptionTypeToViewId[modelInfo.type] == imageView.id),
-        )
-
-        selectedOptionTypeToViewId[modelInfo.type] = imageView.id
-    }
-
-    private fun applyModel(
-        modelInfo: ModelInfo,
-        shouldBeRemoved: Boolean,
-    ) {
         val listener = context as? ResourceListener
         if (listener == null) {
             Log.println(Log.ERROR, null, "Activity does not implement ResourceListener")
             return
         }
 
-        if (shouldBeRemoved) {
+        if (selectedOptionTypeToViewId[modelInfo.type] == imageView.id) {
             selectedOptionTypeToViewId.remove(modelInfo.type)
-            listener.removeModel(modelInfo.type)
+            listener.removeModel(modelInfo.slot)
+
+            selectedOptionTypeToViewId.remove(modelInfo.type)
         } else {
             listener.applyModel(
                 modelInfo,
             )
+
+            selectSquareButton(imageView)
+            selectedOptionTypeToViewId[modelInfo.type] = imageView.id
         }
     }
 
