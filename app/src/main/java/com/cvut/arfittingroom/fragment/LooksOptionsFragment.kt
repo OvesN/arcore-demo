@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment
 import com.cvut.arfittingroom.R
 import com.cvut.arfittingroom.activity.ResourceListener
 import com.cvut.arfittingroom.model.LOOKS_COLLECTION
+import com.cvut.arfittingroom.utils.UIUtil.createDivider
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 
@@ -71,7 +72,7 @@ class LooksOptionsFragment : Fragment() {
                     }
                 }
             options.addView(button)
-            options.addView(createDivider())
+            options.addView(createDivider(requireContext()))
         }
     }
 
@@ -85,9 +86,4 @@ class LooksOptionsFragment : Fragment() {
         listener.applyLook(lookId)
     }
 
-    private fun createDivider() =
-        View(context).apply {
-            layoutParams = ViewGroup.LayoutParams(2, ViewGroup.LayoutParams.MATCH_PARENT)
-            background = AppCompatResources.getDrawable(context, R.color.colorLightGrey)
-        }
 }

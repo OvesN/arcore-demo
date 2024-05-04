@@ -23,6 +23,7 @@ import com.cvut.arfittingroom.model.TYPE_ATTRIBUTE
 import com.cvut.arfittingroom.model.enums.ENodeType
 import com.cvut.arfittingroom.module.GlideApp
 import com.cvut.arfittingroom.utils.ScreenUtil.dpToPx
+import com.cvut.arfittingroom.utils.UIUtil.createDivider
 import com.cvut.arfittingroom.utils.makeFirstLetterCapital
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
@@ -105,7 +106,8 @@ class AccessoriesOptionsFragment : Fragment() {
             if (type != accessoriesTypes.last()) {
                 val divider =
                     View(context).apply {
-                        layoutParams = ViewGroup.LayoutParams(2, ViewGroup.LayoutParams.MATCH_PARENT)
+                        layoutParams =
+                            ViewGroup.LayoutParams(2, ViewGroup.LayoutParams.MATCH_PARENT)
                         background = AppCompatResources.getDrawable(context, R.color.colorLightGrey)
                     }
 
@@ -177,7 +179,7 @@ class AccessoriesOptionsFragment : Fragment() {
             }
 
         options.addView(button)
-        options.addView(createDivider())
+        options.addView(createDivider(requireContext()))
 
         modelsInfo.forEach { modelInfo ->
             val imageView =
@@ -245,9 +247,4 @@ class AccessoriesOptionsFragment : Fragment() {
         }
     }
 
-    private fun createDivider() =
-        View(context).apply {
-            layoutParams = ViewGroup.LayoutParams(2, ViewGroup.LayoutParams.MATCH_PARENT)
-            background = AppCompatResources.getDrawable(context, R.color.colorLightGrey)
-        }
 }

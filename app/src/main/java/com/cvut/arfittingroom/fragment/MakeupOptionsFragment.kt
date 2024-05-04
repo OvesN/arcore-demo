@@ -28,6 +28,8 @@ import com.cvut.arfittingroom.model.REF_ATTRIBUTE
 import com.cvut.arfittingroom.model.TYPE_ATTRIBUTE
 import com.cvut.arfittingroom.module.GlideApp
 import com.cvut.arfittingroom.utils.ScreenUtil.dpToPx
+import com.cvut.arfittingroom.utils.UIUtil.createDivider
+import com.cvut.arfittingroom.utils.UIUtil.showColorPickerDialog
 import com.cvut.arfittingroom.utils.makeFirstLetterCapital
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
@@ -113,7 +115,7 @@ class MakeupOptionsFragment : Fragment() {
             options.addView(button)
 
             if (makeupType != makeupTypes.last()) {
-                options.addView(createDivider())
+                options.addView(createDivider(requireContext()))
             }
         }
     }
@@ -185,7 +187,7 @@ class MakeupOptionsFragment : Fragment() {
             .into(imageView)
 
         options.addView(imageView)
-        options.addView(createDivider())
+        options.addView(createDivider(requireContext()))
 
         // Add color options
         colors.forEach { color ->
@@ -222,7 +224,10 @@ class MakeupOptionsFragment : Fragment() {
                 scaleType = ImageView.ScaleType.FIT_CENTER
                 background = ContextCompat.getDrawable(requireContext(), R.drawable.color_picker)!!
                 setOnClickListener {
-                    showColorPickerDialog()
+                    showColorPickerDialog(requireContext()) { envelopColor ->
+                        selectedColor = envelopColor
+                        applyImage(selectedMakeupOptionRef, selectedMakeupType)
+                    }
                 }
             }
 
@@ -290,7 +295,7 @@ class MakeupOptionsFragment : Fragment() {
             }
 
         options.addView(button)
-        options.addView(createDivider())
+        options.addView(createDivider(requireContext()))
 
         imageRefs.forEach { ref ->
             val imageView =
@@ -363,33 +368,5 @@ class MakeupOptionsFragment : Fragment() {
         } else {
             listener.applyImage(type, ref, selectedColor)
         }
-    }
-
-    private fun createDivider() =
-        View(context).apply {
-            layoutParams = ViewGroup.LayoutParams(2, ViewGroup.LayoutParams.MATCH_PARENT)
-            background = AppCompatResources.getDrawable(context, R.color.colorLightGrey)
-        }
-
-    // TODO SEPARATE
-    private fun showColorPickerDialog() {
-        context?.let { ctx ->
-            ColorPickerDialog.Builder(ctx)
-                .setPreferenceName("MyColorPickerDialog")
-                .setPositiveButton(
-                    R.string.OK,
-                    ColorEnvelopeListener { envelope, _ ->
-                        selectedColor = envelope.color
-                        applyImage(selectedMakeupOptionRef, selectedMakeupType)
-                    },
-                )
-                .setNegativeButton(R.string.cancel) { dialogInterface, _ ->
-                    dialogInterface.dismiss()
-                }
-                .attachAlphaSlideBar(true)
-                .attachBrightnessSlideBar(true)
-                .setBottomSpace(12)
-                .show()
-        } ?: Log.e("ColorPickerDialog", "Context is null while trying to show color picker dialog.")
     }
 }

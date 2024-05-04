@@ -16,6 +16,8 @@ import com.cvut.arfittingroom.databinding.ActivityMakeupEditorBinding
 import com.cvut.arfittingroom.draw.DrawView
 import com.cvut.arfittingroom.draw.model.enums.ELayerEditAction
 import com.cvut.arfittingroom.draw.model.enums.EShape
+import com.cvut.arfittingroom.utils.UIUtil
+import com.cvut.arfittingroom.utils.UIUtil.showColorPickerDialog
 import com.google.android.material.slider.Slider
 
 private const val DEFAULT_COLOR = Color.TRANSPARENT
@@ -51,7 +53,11 @@ class MakeupEditorActivity : AppCompatActivity() {
             }
         }
         binding.buttonColorPicker.setOnClickListener {
-            drawView.showColorPickerDialog()
+            showColorPickerDialog(this) { envelopColor ->
+                drawView.setColor(
+                    envelopColor
+                )
+            }
         }
         binding.buttonRedo.setOnClickListener {
             drawView.redo()
@@ -150,9 +156,15 @@ class MakeupEditorActivity : AppCompatActivity() {
                 when (options[which]) {
                     ELayerEditAction.DELETE.string -> drawView.removeLayer(layerIndex)
 
-                    ELayerEditAction.MOVE_DOWN.string -> drawView.moveLayer(layerIndex, layerIndex - 1)
+                    ELayerEditAction.MOVE_DOWN.string -> drawView.moveLayer(
+                        layerIndex,
+                        layerIndex - 1
+                    )
 
-                    ELayerEditAction.MOVE_UP.string -> drawView.moveLayer(layerIndex, layerIndex + 1)
+                    ELayerEditAction.MOVE_UP.string -> drawView.moveLayer(
+                        layerIndex,
+                        layerIndex + 1
+                    )
 
                     ELayerEditAction.SELECT.string -> drawView.setActiveLayer(layerIndex)
                 }

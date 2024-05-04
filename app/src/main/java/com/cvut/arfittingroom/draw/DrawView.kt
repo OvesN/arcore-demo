@@ -47,6 +47,7 @@ import com.cvut.arfittingroom.model.TOUCH_TO_MOVE_THRESHOLD
 import com.cvut.arfittingroom.utils.FileUtil.adjustBitmap
 import com.cvut.arfittingroom.utils.FileUtil.saveTempMaskFrames
 import com.cvut.arfittingroom.utils.FileUtil.saveTempMaskTextureBitmap
+import com.cvut.arfittingroom.utils.UIUtil.showColorPickerDialog
 import com.skydoves.colorpickerview.ColorPickerDialog
 import com.skydoves.colorpickerview.listeners.ColorEnvelopeListener
 import pl.droidsonroids.gif.GifDrawable
@@ -367,7 +368,16 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     ) {
         selectedElement?.let { element ->
             element.endContinuousMove()
-            addToHistory(MoveElement(element.id, movable = element, oldX = element.centerX, oldY = element.centerY, newX = x, newY = y))
+            addToHistory(
+                MoveElement(
+                    element.id,
+                    movable = element,
+                    oldX = element.centerX,
+                    oldY = element.centerY,
+                    newX = x,
+                    newY = y
+                )
+            )
         }
         resetEditState()
     }
@@ -376,7 +386,14 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         selectedElement?.let { element ->
             val newRadius = element.outerRadius
             element.endContinuousScale()
-            addToHistory(ScaleElement(element.id, element, newRadius = newRadius, oldRadius = element.outerRadius))
+            addToHistory(
+                ScaleElement(
+                    element.id,
+                    element,
+                    newRadius = newRadius,
+                    oldRadius = element.outerRadius
+                )
+            )
         }
         resetEditState()
     }
@@ -385,7 +402,14 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         selectedElement?.let { element ->
             val newRotationAngle = element.rotationAngle
             element.endContinuousRotation()
-            addToHistory(RotateElement(element.id, element, newRotationAngle = newRotationAngle, oldRotationAngle = element.rotationAngle))
+            addToHistory(
+                RotateElement(
+                    element.id,
+                    element,
+                    newRotationAngle = newRotationAngle,
+                    oldRotationAngle = element.rotationAngle
+                )
+            )
         }
         resetEditState()
     }
@@ -476,9 +500,14 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             }
 
             EElementEditAction.CHANGE_COLOR -> {
+                selectedElement?.let {selectedElement ->
+                    showColorPickerDialog(context) { envelopColor ->
+                        repaintElement(selectedElement, envelopColor)
+                    }
+                }
+
                 element.setSelected(false)
                 selectedElement = null
-                showColorPickerDialog(true)
             }
 
             EElementEditAction.MOVE_UP -> {
@@ -589,7 +618,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         Log.println(Log.INFO, null, "Active layer is now $layerIndex")
     }
 
-    private fun setColor(newColor: Int) {
+    fun setColor(newColor: Int) {
         @ColorInt
         paintOptions.color = newColor
         paintOptions.alpha = newColor.alpha
@@ -876,32 +905,6 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         return bitmap
     }
 
-    // TODO REFACTOR
-    fun showColorPickerDialog(setElementColor: Boolean = false) {
-        ColorPickerDialog.Builder(context)
-            .setPreferenceName("MyColorPickerDialog")
-            .setPositiveButton(
-                R.string.OK,
-                ColorEnvelopeListener { envelope, _ ->
-                    run {
-                        if (setElementColor) {
-                            selectedElement?.let { element ->
-                                repaintElement(element, envelope.color)
-                            }
-                        } else {
-                            setColor(envelope.color)
-                        }
-                    }
-                },
-            )
-            .setNegativeButton(
-                R.string.cancel,
-            ) { dialogInterface, _ -> dialogInterface.dismiss() }
-            .attachAlphaSlideBar(true)
-            .attachBrightnessSlideBar(true)
-            .setBottomSpace(12)
-            .show()
-    }
 
     // TODO not only color
     private fun repaintElement(
