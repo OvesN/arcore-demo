@@ -18,28 +18,24 @@ class Curve(
     override val paint: Paint,
 ) : Element(), Repaintable {
     override val name: String = "Line"
-
     override var centerX: Float = 0f
     override var centerY: Float = 0f
     override var outerRadius: Float = 0f
-
     override var boundingBox: BoundingBox
 
-    //For continuous scaling so gradually changes will be applied to the original value
-    override var originalCenterX: Float
-    override var originalCenterY: Float
-    override var originalRadius: Float
+    // For continuous scaling so gradually changes will be applied to the original value
+    override var originalCenterX: Float = centerX
+    override var originalCenterY: Float = centerY
+    override var originalRadius: Float = outerRadius
 
     private var xdiff: Float = 0f  // No translation by default
+
     private var ydiff: Float = 0f  // No translation by default
+
     private var radiusDiff: Float = 1f  // No scaling by default
 
     init {
         boundingBox = updateBoundingBoxAndCenter()
-
-        originalCenterX = centerX
-        originalCenterY = centerY
-        originalRadius = outerRadius
     }
 
     override fun drawSpecific(canvas: Canvas) {
@@ -51,7 +47,10 @@ class Curve(
 
     // These functions are overriden because
     // we want to know the diff between old value and new value to create transformation matrix
-    override fun move(x: Float, y: Float) {
+    override fun move(
+        x: Float,
+        y: Float,
+    ) {
         centerX = x
         centerY = y
 
@@ -81,7 +80,10 @@ class Curve(
         outerRadius = originalRadius
     }
 
-    override fun doesIntersect(x: Float, y: Float): Boolean {
+    override fun doesIntersect(
+        x: Float,
+        y: Float,
+    ): Boolean {
         if (!boundingBox.rectF.contains(x, y)) {
             return false
         }
@@ -95,7 +97,7 @@ class Curve(
 
         val pm = PathMeasure(path, false)
         val pathLength = pm.length
-        val pathCoords = FloatArray(2) // Holds coordinates as [x, y]
+        val pathCoords = FloatArray(2)  // Holds coordinates as [x, y]
 
         var distance = 0f
         while (distance < pathLength) {
@@ -128,7 +130,7 @@ class Curve(
         return matrix
     }
 
-    private fun updateBoundingBoxAndCenter():BoundingBox {
+    private fun updateBoundingBoxAndCenter(): BoundingBox {
         val bounds = RectF()
         path.computeBounds(bounds, true)
 

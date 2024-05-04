@@ -1,6 +1,5 @@
 package com.cvut.arfittingroom.model
 
-
 data class ModelInfo(
     val slot: String,
     val modelRef: String,

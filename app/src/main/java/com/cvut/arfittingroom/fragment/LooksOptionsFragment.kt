@@ -6,7 +6,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.ImageView
 import android.widget.LinearLayout
 import androidx.fragment.app.Fragment
 import com.cvut.arfittingroom.R
@@ -19,10 +18,9 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 
 class LooksOptionsFragment : Fragment() {
+    private var selectedLookViewId: Int = 0
     private lateinit var firestore: FirebaseFirestore
     private lateinit var storage: FirebaseStorage
-
-    private var selectedLookViewId: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -80,8 +78,11 @@ class LooksOptionsFragment : Fragment() {
         }
     }
 
-
-    private fun selectLook(view: View, buttonView: View, lookId: String) {
+    private fun selectLook(
+        view: View,
+        buttonView: View,
+        lookId: String,
+    ) {
         deselectButton(view.findViewById(selectedLookViewId))
         selectSquareButton(buttonView)
 
@@ -91,16 +92,12 @@ class LooksOptionsFragment : Fragment() {
             return
         }
 
-
         if (selectedLookViewId == buttonView.id) {
             listener.removeLook(lookId)
-
-        } else
-        {
+        } else {
             listener.applyLook(lookId)
         }
 
         selectedLookViewId = view.id
     }
-
 }

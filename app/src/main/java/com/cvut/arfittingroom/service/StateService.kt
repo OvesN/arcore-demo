@@ -2,12 +2,10 @@ package com.cvut.arfittingroom.service
 
 import android.graphics.Bitmap
 import android.graphics.Canvas
-import android.graphics.Color
 import android.util.Log
 import com.cvut.arfittingroom.model.MAKEUP_SLOT
 import com.cvut.arfittingroom.model.MakeupInfo
 import com.cvut.arfittingroom.model.ModelInfo
-import com.cvut.arfittingroom.utils.BitmapUtil
 import com.cvut.arfittingroom.utils.BitmapUtil.replaceNonTransparentPixels
 import com.google.ar.core.AugmentedFace
 import com.google.ar.core.TrackingState
@@ -25,8 +23,6 @@ class StateService {
     private var textureBitmap: Bitmap? = null
     private val makeUpBitmaps = mutableListOf<Bitmap>()
     val loadedModels = mutableMapOf<String, ModelInfo>()
-
-
     private val faceNodeMap = HashMap<AugmentedFace, HashMap<String, AugmentedFaceNode>>()
 
     private fun areMakeupBitmapsPrepared() = makeUpBitmaps.size == appliedMakeUpTypes.size
@@ -75,7 +71,6 @@ class StateService {
         loadedModels[modelInfo.slot] = modelInfo
     }
 
-
     fun applyModelOnFace(
         sceneView: ArSceneView,
         renderable: ModelRenderable,
@@ -84,17 +79,16 @@ class StateService {
         sceneView.session?.getAllTrackables(AugmentedFace::class.java)?.forEach { face ->
             val nodesMap = faceNodeMap.getOrPut(face) { HashMap() }
 
-            val faceNode = nodesMap[slot] ?: AugmentedFaceNode(face).also { newNode ->
-                newNode.parent = sceneView.scene
-                newNode.renderable = renderable
-                nodesMap[slot] = newNode
-            }
-
-            faceNode.renderable = renderable
+            val faceNode =
+                (nodesMap[slot] ?: AugmentedFaceNode(face).also { newNode ->
+                    newNode.parent = sceneView.scene
+                    newNode.renderable = renderable
+                    nodesMap[slot] = newNode
+                }).apply {
+                    renderable = renderable
+                }
         }
-
     }
-
 
     private fun clearFaceNodes() {
         faceNodeMap.values.forEach { map ->
@@ -109,7 +103,6 @@ class StateService {
             if (face.trackingState == TrackingState.STOPPED) {
                 nodes.forEach { entry ->
                     entry.value.parent = null
-
                 }
                 true
             } else {
@@ -118,21 +111,28 @@ class StateService {
         }
     }
 
-    fun applyTextureToFaceNode(texture: Texture, sceneView: ArSceneView) {
+    fun applyTextureToFaceNode(
+        texture: Texture,
+        sceneView: ArSceneView,
+    ) {
         sceneView.session?.getAllTrackables(AugmentedFace::class.java)?.forEach { face ->
             val modelNodesMap = faceNodeMap.getOrPut(face) { HashMap() }
 
-            val faceNode = modelNodesMap.getOrPut(MAKEUP_SLOT) {
-                AugmentedFaceNode(face).apply {
-                    parent = sceneView.scene
+            val faceNode =
+                modelNodesMap.getOrPut(MAKEUP_SLOT) {
+                    AugmentedFaceNode(face).apply {
+                        parent = sceneView.scene
+                    }
+                }.apply {
+                    faceMeshTexture = texture
                 }
-            }
-
-            faceNode.faceMeshTexture = texture
         }
     }
 
-    fun createTextureAndApply(combinedBitmap: Bitmap, sceneView: ArSceneView) {
+    fun createTextureAndApply(
+        combinedBitmap: Bitmap,
+        sceneView: ArSceneView,
+    ) {
         textureBitmap = combinedBitmap
 
         // Convert Bitmap to ARCore Texture
@@ -146,7 +146,11 @@ class StateService {
             }
     }
 
-    fun loadImage(image: Bitmap, color: Int, sceneView: ArSceneView) {
+    fun loadImage(
+        image: Bitmap,
+        color: Int,
+        sceneView: ArSceneView,
+    ) {
         replaceNonTransparentPixels(image, color)
         makeUpBitmaps.add(image)
 
@@ -155,5 +159,4 @@ class StateService {
             combinedBitmap?.let { createTextureAndApply(it, sceneView) }
         }
     }
-
 }

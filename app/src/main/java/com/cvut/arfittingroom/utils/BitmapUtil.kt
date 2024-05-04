@@ -2,7 +2,6 @@ package com.cvut.arfittingroom.utils
 
 import android.graphics.Bitmap
 import android.graphics.Color
-import com.cvut.arfittingroom.model.TRANSPARENT_CODE
 
 object BitmapUtil {
     /**
@@ -14,7 +13,7 @@ object BitmapUtil {
      */
     fun replaceNonTransparentPixels(
         bitmap: Bitmap,
-        newColor: Int
+        newColor: Int,
     ) {
         val width = bitmap.width
         val height = bitmap.height
@@ -47,5 +46,4 @@ object BitmapUtil {
         // Update the bitmap with the new pixels
         bitmap.setPixels(pixels, 0, width, 0, 0, width, height)
     }
-
 }

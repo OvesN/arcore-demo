@@ -18,6 +18,7 @@ import com.cvut.arfittingroom.model.MODELS_COLLECTION
 import com.cvut.arfittingroom.model.ModelInfo
 import com.cvut.arfittingroom.model.PREVIEW_IMAGE_ATTRIBUTE
 import com.cvut.arfittingroom.model.REF_ATTRIBUTE
+import com.cvut.arfittingroom.model.SLOT_ATTRIBUTE
 import com.cvut.arfittingroom.model.TYPE_ATTRIBUTE
 import com.cvut.arfittingroom.module.GlideApp
 import com.cvut.arfittingroom.utils.ScreenUtil.dpToPx
@@ -119,21 +120,11 @@ class AccessoriesOptionsFragment : Fragment() {
                 for (document in result) {
                     val ref = document[REF_ATTRIBUTE].toString()
                     val preview = document[PREVIEW_IMAGE_ATTRIBUTE].toString()
-
-
-                    // FIXME load from db
-                    val nodeType =
-                        if (type == "glasses") {
-                            "eyes"
-                        } else if (type == "hats") {
-                            "top_head"
-                        } else {
-                            "makeup"
-                        }
+                    val slot = document[SLOT_ATTRIBUTE].toString().takeIf { it.isNotEmpty() } ?: ref
 
                     modelsInfo.add(
                         ModelInfo(
-                            nodeType,
+                            slot = slot,
                             modelRef = ref,
                             imagePreviewRef = preview,
                             type = type,

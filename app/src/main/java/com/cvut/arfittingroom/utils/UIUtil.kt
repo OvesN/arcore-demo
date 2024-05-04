@@ -13,14 +13,15 @@ import com.skydoves.colorpickerview.ColorPickerDialog
 import com.skydoves.colorpickerview.listeners.ColorEnvelopeListener
 
 object UIUtil {
-    fun createDivider(context: Context): View = View(context).apply {
-        layoutParams = ViewGroup.LayoutParams(2, ViewGroup.LayoutParams.MATCH_PARENT)
-        background = AppCompatResources.getDrawable(context, R.color.colorLightGrey)
-    }
+    fun createDivider(context: Context): View =
+        View(context).apply {
+            layoutParams = ViewGroup.LayoutParams(2, ViewGroup.LayoutParams.MATCH_PARENT)
+            background = AppCompatResources.getDrawable(context, R.color.colorLightGrey)
+        }
 
     fun showColorPickerDialog(
         context: Context,
-        onColorSelected: (Int) -> Unit
+        onColorSelected: (Int) -> Unit,
     ) {
         ColorPickerDialog.Builder(context)
             .setPreferenceName("MyColorPickerDialog")
@@ -28,7 +29,7 @@ object UIUtil {
                 R.string.OK,
                 ColorEnvelopeListener { envelope, _ ->
                     onColorSelected(envelope.color)
-                }
+                },
             )
             .setNegativeButton(R.string.cancel) { dialogInterface, _ ->
                 dialogInterface.dismiss()
@@ -38,7 +39,6 @@ object UIUtil {
             .setBottomSpace(12)
             .show()
     }
-
 
     fun selectMakeupButton(view: View) {
         val layers =
@@ -76,16 +76,14 @@ object UIUtil {
         view.background = createColorOptionImage(view.context, view.id)
     }
 
-
-    fun createColorOptionImage(context: Context, color: Int): Drawable {
+    fun createColorOptionImage(
+        context: Context,
+        color: Int,
+    ): Drawable {
         val icon = ContextCompat.getDrawable(context, R.drawable.circle)!!.mutate()
         val wrap = DrawableCompat.wrap(icon)
         DrawableCompat.setTint(wrap, color)
 
         return wrap
     }
-
-
-
-
 }

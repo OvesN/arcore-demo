@@ -207,7 +207,7 @@ class MakeupOptionsFragment : Fragment() {
                     }
                 }
 
-            if(selectedOptionTypeToViewId["color"] == colorImageView.id) {
+            if (selectedOptionTypeToViewId["color"] == colorImageView.id) {
                 selectColorButton(colorImageView)
             }
 
@@ -252,7 +252,6 @@ class MakeupOptionsFragment : Fragment() {
 
         selectedOptionTypeToViewId["color"] = imageView.id
     }
-
 
     private fun updateMakeupOptionsMenu(
         view: View,
@@ -331,8 +330,7 @@ class MakeupOptionsFragment : Fragment() {
 
         if (shouldRemove) {
             selectedOptionTypeToViewId.remove(type)
-        }
-        else {
+        } else {
             selectedOptionTypeToViewId[type] = imageView.id
             selectMakeupButton(imageView)
         }

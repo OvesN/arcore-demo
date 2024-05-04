@@ -17,7 +17,6 @@ import by.kirich1409.viewbindingdelegate.viewBinding
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
-import com.bumptech.glide.signature.ObjectKey
 import com.cvut.arfittingroom.ARFittingRoomApplication
 import com.cvut.arfittingroom.R
 import com.cvut.arfittingroom.databinding.ActivityShowRoomBinding
@@ -30,7 +29,6 @@ import com.cvut.arfittingroom.model.MASK_FRAME_FILE_NAME
 import com.cvut.arfittingroom.model.MakeupInfo
 import com.cvut.arfittingroom.model.ModelInfo
 import com.cvut.arfittingroom.service.StateService
-import com.cvut.arfittingroom.utils.BitmapUtil.replaceNonTransparentPixels
 import com.cvut.arfittingroom.utils.FileUtil.deleteTempFiles
 import com.cvut.arfittingroom.utils.FileUtil.doesTempAnimatedMaskExist
 import com.cvut.arfittingroom.utils.FileUtil.getNextTempMaskFrame
@@ -38,15 +36,12 @@ import com.cvut.arfittingroom.utils.FileUtil.getNextTempMaskFrameInputStream
 import com.cvut.arfittingroom.utils.FileUtil.getTempMaskTextureBitmap
 import com.google.android.filament.LightManager
 import com.google.ar.core.ArCoreApk
-import com.google.ar.core.AugmentedFace
-import com.google.ar.core.TrackingState
 import com.google.ar.sceneform.ArSceneView
 import com.google.ar.sceneform.Sceneform
 import com.google.ar.sceneform.rendering.ModelRenderable
 import com.google.ar.sceneform.rendering.Renderable
 import com.google.ar.sceneform.rendering.Texture
 import com.google.ar.sceneform.ux.ArFrontFacingFragment
-import com.google.ar.sceneform.ux.AugmentedFaceNode
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
@@ -213,7 +208,6 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener {
         stateService.clearFaceNodeSlot(slot)
     }
 
-
     // FIXME
     override fun applyLook(lookId: String) {
         stopAnimation()
@@ -278,7 +272,6 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener {
         }
     }
 
-
     // FIXME
     private fun prepareAllGifTextures() {
         gifTextures.clear()
@@ -339,10 +332,9 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener {
         gifPrepared = true
     }
 
-
     private fun checkIsSupportedDeviceOrFinish(): Boolean {
         if (ArCoreApk.getInstance()
-                .checkAvailability(this) == ArCoreApk.Availability.UNSUPPORTED_DEVICE_NOT_CAPABLE
+            .checkAvailability(this) == ArCoreApk.Availability.UNSUPPORTED_DEVICE_NOT_CAPABLE
         ) {
             Toast.makeText(this, "Augmented Faces requires ARCore", Toast.LENGTH_LONG).show()
             finish()
@@ -364,9 +356,7 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener {
         return true
     }
 
-    private fun loadModel(
-        modelInfo: ModelInfo
-    ) {
+    private fun loadModel(modelInfo: ModelInfo) {
         storage.getReference(modelInfo.modelRef)
             .downloadUrl
             .addOnSuccessListener { uri ->
@@ -386,9 +376,7 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener {
                 Toast.makeText(applicationContext, ex.message, Toast.LENGTH_SHORT).show()
                 Log.println(Log.ERROR, null, ex.message.orEmpty())
             }
-
     }
-
 
     private fun loadImage(
         ref: String,
@@ -403,7 +391,7 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener {
                         resource: Bitmap,
                         transition: Transition<in Bitmap>?,
                     ) {
-                       stateService.loadImage(resource, color, arSceneView)
+                        stateService.loadImage(resource, color, arSceneView)
                     }
 
                     override fun onLoadCleared(placeholder: android.graphics.drawable.Drawable?) {}
@@ -539,7 +527,7 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener {
             val uploadTask =
                 ref.putStream(frameStream)
                     .addOnSuccessListener { taskSnapshot ->
-                    }
+                        }
             uploadTask.addOnFailureListener {
                 Toast.makeText(applicationContext, it.message, Toast.LENGTH_SHORT).show()
             }
@@ -556,9 +544,7 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener {
         shouldClearEditor = true
     }
 
-
     companion object {
         const val MIN_OPENGL_VERSION = 3.0
     }
-
 }

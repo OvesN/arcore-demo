@@ -18,7 +18,6 @@ import android.widget.Toast
 import androidx.annotation.ColorInt
 import androidx.core.graphics.alpha
 import com.cvut.arfittingroom.ARFittingRoomApplication
-import com.cvut.arfittingroom.R
 import com.cvut.arfittingroom.controller.ScaleGestureDetector
 import com.cvut.arfittingroom.draw.DrawHistoryHolder.addToHistory
 import com.cvut.arfittingroom.draw.DrawHistoryHolder.clearHistory
@@ -48,8 +47,6 @@ import com.cvut.arfittingroom.utils.FileUtil.adjustBitmap
 import com.cvut.arfittingroom.utils.FileUtil.saveTempMaskFrames
 import com.cvut.arfittingroom.utils.FileUtil.saveTempMaskTextureBitmap
 import com.cvut.arfittingroom.utils.UIUtil.showColorPickerDialog
-import com.skydoves.colorpickerview.ColorPickerDialog
-import com.skydoves.colorpickerview.listeners.ColorEnvelopeListener
 import pl.droidsonroids.gif.GifDrawable
 import pl.droidsonroids.gif.GifDrawableBuilder
 import javax.inject.Inject
@@ -375,8 +372,8 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                     oldX = element.centerX,
                     oldY = element.centerY,
                     newX = x,
-                    newY = y
-                )
+                    newY = y,
+                ),
             )
         }
         resetEditState()
@@ -391,8 +388,8 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                     element.id,
                     element,
                     newRadius = newRadius,
-                    oldRadius = element.outerRadius
-                )
+                    oldRadius = element.outerRadius,
+                ),
             )
         }
         resetEditState()
@@ -407,8 +404,8 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                     element.id,
                     element,
                     newRotationAngle = newRotationAngle,
-                    oldRotationAngle = element.rotationAngle
-                )
+                    oldRotationAngle = element.rotationAngle,
+                ),
             )
         }
         resetEditState()
@@ -500,7 +497,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             }
 
             EElementEditAction.CHANGE_COLOR -> {
-                selectedElement?.let {selectedElement ->
+                selectedElement?.let { selectedElement ->
                     showColorPickerDialog(context) { envelopColor ->
                         repaintElement(selectedElement, envelopColor)
                     }
@@ -904,7 +901,6 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
         return bitmap
     }
-
 
     // TODO not only color
     private fun repaintElement(
