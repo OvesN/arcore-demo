@@ -1,13 +1,19 @@
 package com.cvut.arfittingroom.activity
 
 import android.app.ActivityManager
+import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Bundle
+import android.os.Environment
 import android.os.Handler
+import android.os.HandlerThread
 import android.os.Looper
+import android.provider.MediaStore
 import android.util.Log
+import android.view.PixelCopy
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
@@ -21,6 +27,7 @@ import com.cvut.arfittingroom.ARFittingRoomApplication
 import com.cvut.arfittingroom.R
 import com.cvut.arfittingroom.databinding.ActivityShowRoomBinding
 import com.cvut.arfittingroom.fragment.AccessoriesOptionsFragment
+import com.cvut.arfittingroom.fragment.CameraModeFragment
 import com.cvut.arfittingroom.fragment.LooksOptionsFragment
 import com.cvut.arfittingroom.fragment.MakeupOptionsFragment
 import com.cvut.arfittingroom.model.LOOKS_COLLECTION
@@ -50,10 +57,16 @@ import com.gorisse.thomas.sceneform.light.LightEstimationConfig
 import com.gorisse.thomas.sceneform.light.build
 import com.gorisse.thomas.sceneform.lightEstimationConfig
 import com.gorisse.thomas.sceneform.mainLight
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
+import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.UUID
 import javax.inject.Inject
 
-class ShowRoomActivity : AppCompatActivity(), ResourceListener {
+
+class ShowRoomActivity : AppCompatActivity(), ResourceListener, UIChangeListener {
     private val binding: ActivityShowRoomBinding by viewBinding(createMethod = CreateMethod.INFLATE)
     private var shouldPlayAnimation = false
     private var gifPrepared = false
@@ -66,6 +79,8 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener {
     private val accessoriesOptionsFragment = AccessoriesOptionsFragment()
     private val looksOptionsFragment = LooksOptionsFragment()
     private val makeupOptionsFragment = MakeupOptionsFragment()
+    private val cameraModeFragment = CameraModeFragment()
+
     private var shouldClearEditor = false
 
     // FIXME do not do it like that!
@@ -125,7 +140,6 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener {
             }
         }
 
-        // Set click listeners
         binding.makeupButton.setOnClickListener {
             showMakeupOptionsMenu()
         }
@@ -141,37 +155,17 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener {
         binding.deleteButton.setOnClickListener {
             clearAll()
         }
-
-        // setupButtonClickListener(binding.buttonLiner, EMakeupType.LINER)
-        // setupButtonClickListener(binding.buttonBlush, EMakeupType.BLUSH)
-        // setupButtonClickListener(binding.buttonLipstick, EMakeupType.LIPSTICK)
-        // setupButtonClickListener(
-        // binding.buttonYellowSunglasses,
-        // EAccessoryType.YELLOW_GLASSES,
-        // EModelType.EYES
-        // )
-        // setupButtonClickListener(
-        // binding.buttonSunglasses,
-        // EAccessoryType.SUNGLASSES,
-        // EModelType.EYES
-        // )
-        // setupButtonClickListener(
-        // binding.buttonMarioHat,
-        // EAccessoryType.MARIO_HAT,
-        // EModelType.TOP_HEAD
-        // )
-        // 
-        // binding.button3dEditor.setOnClickListener {
-        // editorButtonListener()
-        // }
-
-        binding.buttonMaskEditor.setOnClickListener {
+        binding.cameraModeButton.setOnClickListener {
+            showCameraModeUI()
+        }
+        binding.maskEditorButton.setOnClickListener {
             val intent = Intent(this, MakeupEditorActivity::class.java)
             intent.putExtra("shouldClearEditor", shouldClearEditor)
             startActivity(intent)
             finish()
         }
     }
+
 
     override fun applyImage(
         type: String,
@@ -334,7 +328,7 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener {
 
     private fun checkIsSupportedDeviceOrFinish(): Boolean {
         if (ArCoreApk.getInstance()
-            .checkAvailability(this) == ArCoreApk.Availability.UNSUPPORTED_DEVICE_NOT_CAPABLE
+                .checkAvailability(this) == ArCoreApk.Availability.UNSUPPORTED_DEVICE_NOT_CAPABLE
         ) {
             Toast.makeText(this, "Augmented Faces requires ARCore", Toast.LENGTH_LONG).show()
             finish()
@@ -411,7 +405,10 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener {
                         prepareAllGifTextures()
                     } else {
                         if (gifTextures.size > frameCounter) {
-                            stateService.applyTextureToFaceNode(gifTextures[frameCounter], arSceneView)
+                            stateService.applyTextureToFaceNode(
+                                gifTextures[frameCounter],
+                                arSceneView
+                            )
                             frameCounter = (frameCounter + 1) % gifTextures.size
                         }
                         handler.postDelayed(gifRunnable!!, frameDelay)
@@ -443,25 +440,33 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener {
             .add(R.id.menu_fragment_container, makeupOptionsFragment)
             .add(R.id.menu_fragment_container, accessoriesOptionsFragment)
             .add(R.id.menu_fragment_container, looksOptionsFragment)
+            .add(R.id.fragment_container, cameraModeFragment)
+            .hide(cameraModeFragment)
             .commit()
     }
 
     private fun showMakeupOptionsMenu() {
         resetMenu()
-        showMenuFragment(makeupOptionsFragment)
+        showFragment(makeupOptionsFragment)
         binding.makeupButton.setBackgroundResource(R.drawable.small_button)
     }
 
     private fun showAccessoriesMenu() {
         resetMenu()
-        showMenuFragment(accessoriesOptionsFragment)
+        showFragment(accessoriesOptionsFragment)
         binding.accessoriesButton.setBackgroundResource(R.drawable.small_button)
     }
 
     private fun showLooksMenu() {
         resetMenu()
-        showMenuFragment(looksOptionsFragment)
+        showFragment(looksOptionsFragment)
         binding.looksButton.setBackgroundResource(R.drawable.small_button)
+    }
+
+    private fun showCameraModeUI() {
+        findViewById<View>(R.id.top_ui).visibility = View.GONE
+        findViewById<View>(R.id.bottom_ui).visibility = View.GONE
+        showFragment(cameraModeFragment)
     }
 
     private fun resetMenu() {
@@ -475,7 +480,7 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener {
         hideMenuFragments()
     }
 
-    private fun showMenuFragment(fragment: Fragment) {
+    private fun showFragment(fragment: Fragment) {
         supportFragmentManager
             .beginTransaction()
             .show(fragment)
@@ -527,7 +532,7 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener {
             val uploadTask =
                 ref.putStream(frameStream)
                     .addOnSuccessListener { taskSnapshot ->
-                        }
+                    }
             uploadTask.addOnFailureListener {
                 Toast.makeText(applicationContext, it.message, Toast.LENGTH_SHORT).show()
             }
@@ -546,5 +551,13 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener {
 
     companion object {
         const val MIN_OPENGL_VERSION = 3.0
+    }
+
+    override fun showMainLayout() {
+        findViewById<View>(R.id.top_ui).visibility = View.VISIBLE
+        findViewById<View>(R.id.bottom_ui).visibility = View.VISIBLE
+        supportFragmentManager.beginTransaction()
+            .hide(cameraModeFragment)
+            .commit()
     }
 }
