@@ -43,6 +43,7 @@ object DrawHistoryHolder {
 
     fun clearHistory() {
         globalHistory.clear()
+        undoneActions.clear()
     }
 
 }

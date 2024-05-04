@@ -77,8 +77,8 @@ class ModelEditorActivity : AppCompatActivity() {
         }
 
         binding.buttonBack.setOnClickListener{
-            val intent = Intent(this, ShowRoomActivity::class.java)
-            startActivity(intent)
+            startActivity( Intent(this, ShowRoomActivity::class.java))
+            finish()
         }
     }
 

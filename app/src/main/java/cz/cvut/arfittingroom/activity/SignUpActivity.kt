@@ -59,6 +59,7 @@ class SignUpActivity : AppCompatActivity() {
 
         binding.buttonReturn.setOnClickListener {
             startActivity(Intent(this, MainActivity::class.java))
+            finish()
         }
     }
 
@@ -123,6 +124,7 @@ class SignUpActivity : AppCompatActivity() {
                             "onSuccess: user Profile is created for $username"
                         )
                         startActivity(Intent(this, ShowRoomActivity::class.java))
+                        finish()
                     }.addOnFailureListener { e -> Log.println(Log.ERROR, null, "onFailure: $e") }
 
                 } else {

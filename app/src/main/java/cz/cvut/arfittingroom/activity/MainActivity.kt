@@ -41,9 +41,11 @@ class MainActivity : AppCompatActivity() {
 
         binding.buttonLogIn.setOnClickListener {
             startActivity(Intent(this, LogInActivity::class.java))
+            finish()
         }
         binding.buttonSingUp.setOnClickListener {
             startActivity(Intent(this, SignUpActivity::class.java))
+            finish()
         }
     }
 

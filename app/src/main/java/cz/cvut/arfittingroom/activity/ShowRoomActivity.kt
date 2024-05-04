@@ -3,6 +3,7 @@ package cz.cvut.arfittingroom.activity
 import android.app.ActivityManager
 import android.content.Context
 import android.content.Intent
+import android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.os.Handler
@@ -50,11 +51,11 @@ import cz.cvut.arfittingroom.model.enums.ENodeType
 import cz.cvut.arfittingroom.service.MakeupService
 import cz.cvut.arfittingroom.service.ModelEditorService
 import cz.cvut.arfittingroom.utils.BitmapUtil.replaceNonTransparentPixels
+import cz.cvut.arfittingroom.utils.FileUtil.deleteTempFiles
 import cz.cvut.arfittingroom.utils.FileUtil.doesTempAnimatedMaskExist
 import cz.cvut.arfittingroom.utils.FileUtil.getNextTempMaskFrame
 import cz.cvut.arfittingroom.utils.FileUtil.getNextTempMaskFrameInputStream
 import cz.cvut.arfittingroom.utils.FileUtil.getTempMaskTextureBitmap
-import java.lang.Exception
 import java.util.UUID
 import javax.inject.Inject
 
@@ -96,6 +97,7 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener {
     private val looksOptionsFragment = LooksOptionsFragment()
     private val makeupOptionsFragment = MakeupOptionsFragment()
 
+    private var shouldClearEditor = false
 
     //FIXME do not do it like that!
     private var lookId: String = ""
@@ -156,6 +158,9 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener {
         binding.saveButton.setOnClickListener {
             saveLook()
         }
+        binding.deleteButton.setOnClickListener {
+            clearAll()
+        }
 
 //        setupButtonClickListener(binding.buttonLiner, EMakeupType.LINER)
 //        setupButtonClickListener(binding.buttonBlush, EMakeupType.BLUSH)
@@ -182,10 +187,11 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener {
 
         binding.buttonMaskEditor.setOnClickListener {
             val intent = Intent(this, MakeupEditorActivity::class.java)
+            intent.putExtra("shouldClearEditor", shouldClearEditor)
             startActivity(intent)
+            finish()
         }
     }
-
 
     override fun applyImage(type: String, ref: String, color: Int) {
         makeUpService.appliedMakeUpTypes[type] = MakeupInfo(ref, color)
@@ -224,9 +230,10 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener {
     //FIXME
     override fun applyLook(lookId: String) {
         stopAnimation()
+        this.lookId = lookId
         shouldPlayAnimation = true
         shouldDownloadFormStorage = true
-        this.lookId = lookId
+
     }
 
 
@@ -557,6 +564,8 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener {
 
     private fun stopAnimation() {
         gifRunnable?.let { handler.removeCallbacks(it) }
+        gifRunnable = null
+
         shouldPlayAnimation = false
         gifPrepared = false
     }
@@ -643,7 +652,6 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener {
                 Toast.makeText(applicationContext, "Look saved successfully", Toast.LENGTH_SHORT).show()
 
             }.addOnFailureListener { e -> Log.println(Log.ERROR, null, "onFailure: $e") }
-
     }
 
 
@@ -660,10 +668,21 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener {
 
                 }
             uploadTask.addOnFailureListener {
-                Toast.makeText(applicationContext, it.message, Toast.LENGTH_SHORT)
+                Toast.makeText(applicationContext, it.message, Toast.LENGTH_SHORT).show()
             }
 
             counter++
         }
+    }
+
+    private fun clearAll() {
+        stopAnimation()
+        deleteTempFiles(applicationContext)
+        faceNodeMap.forEach { it.value.forEach { it.value.parent = null  } }
+        faceNodeMap.clear()
+        makeUpService.clearAll()
+        isUpdated = false
+
+        shouldClearEditor = true
     }
 }

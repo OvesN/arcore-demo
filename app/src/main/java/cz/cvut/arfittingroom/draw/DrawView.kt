@@ -890,7 +890,6 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         invalidate()
     }
 
-
     private fun createCanvasTransformationMatrix(): Matrix {
         val transformationMatrix = Matrix()
 
@@ -899,6 +898,5 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
         return transformationMatrix
     }
-
 
 }

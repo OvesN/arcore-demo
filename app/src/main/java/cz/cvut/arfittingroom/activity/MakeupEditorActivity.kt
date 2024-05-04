@@ -39,14 +39,18 @@ class MakeupEditorActivity : AppCompatActivity() {
         drawView = binding.drawView
         imageView = binding.faceImage
         slider = binding.strokeSizeSlider
-         layersButtonsContainer = binding.dynamicLayerButtonsContainer
+        layersButtonsContainer = binding.dynamicLayerButtonsContainer
         setContentView(binding.root)
+
+        if (intent.getBooleanExtra("shouldClearEditor", false)) {
+            drawView.clearCanvas()
+        }
 
         binding.buttonBack.setOnClickListener {
             drawView.saveBitmap {
                 // This code will be executed after the bitmap is saved
-                val intent = Intent(this, ShowRoomActivity::class.java)
-                startActivity(intent)
+                startActivity(Intent(this, ShowRoomActivity::class.java))
+                finish()
             }
         }
         binding.buttonColorPicker.setOnClickListener {
@@ -105,7 +109,7 @@ class MakeupEditorActivity : AppCompatActivity() {
         drawView.layerManager.resetAllGifs()
         drawView.layerManager.setAllGifsToStaticMode()
 
-          updateLayersButtons(drawView.layerManager.getNumOfLayers())
+        updateLayersButtons(drawView.layerManager.getNumOfLayers())
     }
 
     override fun onPause() {

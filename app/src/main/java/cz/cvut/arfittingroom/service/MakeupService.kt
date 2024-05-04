@@ -32,4 +32,12 @@ class MakeupService {
 
         return bitmap
     }
+
+    fun clearAll() {
+        loadedModels.clear()
+        textureBitmap = null
+        appliedMakeUpTypes.clear()
+        loadedModels.clear()
+    }
+
 }

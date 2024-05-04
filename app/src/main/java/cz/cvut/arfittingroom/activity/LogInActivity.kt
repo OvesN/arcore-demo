@@ -47,10 +47,12 @@ class LogInActivity : AppCompatActivity() {
 
         binding.buttonSingUp.setOnClickListener {
             startActivity(Intent(this, SignUpActivity::class.java))
+            finish()
         }
 
         binding.buttonReturn.setOnClickListener {
             startActivity(Intent(this, MainActivity::class.java))
+            finish()
         }
     }
 
@@ -82,6 +84,7 @@ class LogInActivity : AppCompatActivity() {
                     Log.println(Log.INFO, null, "User $username logged in")
                     Toast.makeText( baseContext, "Logged in Successfully", Toast.LENGTH_SHORT).show()
                     startActivity(Intent(this, ShowRoomActivity::class.java))
+                    finish()
                 } else {
 
                     Log.println(Log.ERROR, null, "createUserWithEmail:failure ${task.exception}")
