@@ -36,4 +36,6 @@
     <string name="earrings">Earrings</string>
     <string name="piercing">Piercing</string>
     <string name="option">Option</string>
+    <string name="video">Video</string>
+    <string name="photo">Photo</string>
 </resources>

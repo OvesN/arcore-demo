@@ -79,14 +79,13 @@ class StateService {
         sceneView.session?.getAllTrackables(AugmentedFace::class.java)?.forEach { face ->
             val nodesMap = faceNodeMap.getOrPut(face) { HashMap() }
 
-            val faceNode =
-                (nodesMap[slot] ?: AugmentedFaceNode(face).also { newNode ->
-                    newNode.parent = sceneView.scene
-                    newNode.renderable = renderable
-                    nodesMap[slot] = newNode
-                }).apply {
-                    renderable = renderable
-                }
+            nodesMap[slot] ?: AugmentedFaceNode(face).also { newNode ->
+                newNode.parent = sceneView.scene
+                newNode.renderable = renderable
+                nodesMap[slot] = newNode
+            }.apply {
+                this.renderable = renderable
+            }
         }
     }
 
