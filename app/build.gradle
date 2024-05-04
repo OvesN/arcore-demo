@@ -1,3 +1,6 @@
+plugins {
+	id("com.diffplug.spotless") version "6.25.0"
+}
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
@@ -5,80 +8,102 @@ apply plugin: 'kotlin-parcelize'
 apply plugin: 'com.google.gms.google-services'
 
 android {
-    compileSdkVersion 34
-    kotlinOptions {
-        jvmTarget = "17"
-    }
+	compileSdkVersion 34
+	kotlinOptions {
+		jvmTarget = "17"
+	}
 
-    defaultConfig {
-        applicationId "cz.cvut.arfittingroom"
-        minSdkVersion 29
-        targetSdkVersion 34
-        versionCode 1
-        versionName "1.0"
+	defaultConfig {
+		applicationId "com.cvut.arfittingroom"
+		minSdkVersion 29
+		targetSdkVersion 34
+		versionCode 1
+		versionName "1.0"
 
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-    }
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
-    }
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-        }
-    }
-    namespace 'cz.cvut.arfittingroom'
+		testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+	}
+	compileOptions {
+		sourceCompatibility JavaVersion.VERSION_17
+		targetCompatibility JavaVersion.VERSION_17
+	}
+	buildTypes {
+		release {
+			minifyEnabled false
+			proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+		}
+	}
+	namespace 'com.cvut.arfittingroom'
 
-    buildFeatures {
-        viewBinding = true
-    }
+	buildFeatures {
+		viewBinding = true
+	}
+}
 
+spotless {
+	ratchetFrom 'origin/main'
+
+	format 'misc', {
+		target '*.gradle', '.gitattributes', '.gitignore'
+
+		trimTrailingWhitespace()
+		indentWithTabs()
+		endWithNewline()
+	}
+	java {
+		googleJavaFormat('1.10.0').aosp().reflowLongStrings().skipJavadocFormatting()
+		formatAnnotations()
+	}
+	kotlin {
+		target '**/*.kt'
+		ktfmt()
+		ktlint()
+
+		diktat('1.2.5').configFile('./diktat-analysis.yml')
+	}
 }
 
 dependencies {
-    // AndroidX Libraries
-    implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-    implementation 'androidx.core:core-ktx:1.13.0'
-    implementation 'androidx.recyclerview:recyclerview:1.3.2'
-    implementation 'androidx.palette:palette-ktx:1.0.0'
+	// AndroidX Libraries
+	implementation 'androidx.appcompat:appcompat:1.6.1'
+	implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+	implementation 'androidx.core:core-ktx:1.13.1'
+	implementation 'androidx.recyclerview:recyclerview:1.3.2'
+	implementation 'androidx.palette:palette-ktx:1.0.0'
 
-    // Google Material
-    implementation 'com.google.android.material:material:1.11.0'
+	// Google Material
+	implementation 'com.google.android.material:material:1.11.0'
 
-    // Firebase
-    implementation(platform("com.google.firebase:firebase-bom:32.8.1"))
-    implementation 'com.google.firebase:firebase-firestore'
-    implementation 'com.google.firebase:firebase-storage'
-    implementation 'com.google.firebase:firebase-auth'
-    implementation 'com.firebaseui:firebase-ui-storage:8.0.2'
+	// Firebase
+	implementation(platform("com.google.firebase:firebase-bom:32.8.1"))
+	implementation 'com.google.firebase:firebase-firestore'
+	implementation 'com.google.firebase:firebase-storage'
+	implementation 'com.google.firebase:firebase-auth'
+	implementation 'com.firebaseui:firebase-ui-storage:8.0.2'
 
-    // AR and 3D Libraries
-    implementation 'com.google.ar:core:1.42.0'
-    implementation "com.gorisse.thomas.sceneform:sceneform:1.23.0"
+	// AR and 3D Libraries
+	implementation 'com.google.ar:core:1.42.0'
+	implementation "com.gorisse.thomas.sceneform:sceneform:1.23.0"
 
-    // Third-party Libraries
-    implementation 'com.github.bumptech.glide:glide:4.16.0'
-    kapt 'com.github.bumptech.glide:compiler:4.16.0'
-    implementation 'pl.droidsonroids.gif:android-gif-drawable:1.2.28'
-    implementation 'com.github.kirich1409:viewbindingpropertydelegate-full:1.5.9'
-    implementation 'com.github.skydoves:colorpickerview:2.3.0'
-    implementation 'io.github.microutils:kotlin-logging-jvm:2.0.11'
+	// Third-party Libraries
+	implementation 'com.github.bumptech.glide:glide:4.16.0'
+	kapt 'com.github.bumptech.glide:compiler:4.16.0'
+	implementation 'pl.droidsonroids.gif:android-gif-drawable:1.2.28'
+	implementation 'com.github.kirich1409:viewbindingpropertydelegate-full:1.5.9'
+	implementation 'com.github.skydoves:colorpickerview:2.3.0'
+	implementation 'io.github.microutils:kotlin-logging-jvm:2.0.11'
 
-    // Dagger Dependency Injection
-    implementation "com.google.dagger:dagger:2.48.1"
-    implementation "com.google.dagger:dagger-android:2.48.1"
-    implementation "com.google.dagger:dagger-android-support:2.48.1"
-    kapt "com.google.dagger:dagger-compiler:2.48.1"
-    kapt "com.google.dagger:dagger-android-processor:2.48.1"
+	// Dagger Dependency Injection
+	implementation "com.google.dagger:dagger:2.48.1"
+	implementation "com.google.dagger:dagger-android:2.48.1"
+	implementation "com.google.dagger:dagger-android-support:2.48.1"
+	kapt "com.google.dagger:dagger-compiler:2.48.1"
+	kapt "com.google.dagger:dagger-android-processor:2.48.1"
 
-    // Support Libraries
-    implementation 'com.android.support:multidex:1.0.3'
+	// Support Libraries
+	implementation 'com.android.support:multidex:1.0.3'
 
-    // Testing Libraries
-    testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+	// Testing Libraries
+	testImplementation 'junit:junit:4.13.2'
+	androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+	androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
 }
