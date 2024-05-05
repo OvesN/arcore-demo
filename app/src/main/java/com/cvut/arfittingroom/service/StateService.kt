@@ -97,15 +97,23 @@ class StateService {
         faceNodeMap.clear()
     }
 
-    fun removeNodesIfFaceTrackingStopped() {
-        faceNodeMap.entries.removeIf { (face, nodes) ->
-            if (face.trackingState == TrackingState.STOPPED) {
+    fun hideNodesIfFaceTrackingStopped() {
+        faceNodeMap.entries.forEach { (face, nodes) ->
+            if (face.trackingState == TrackingState.STOPPED
+                || face.trackingState == TrackingState.PAUSED
+            ) {
                 nodes.forEach { entry ->
-                    entry.value.parent = null
+                    if (entry.value.isEnabled) {
+                        entry.value.isEnabled = false
+                    }
                 }
-                true
+
             } else {
-                false
+                nodes.forEach { entry ->
+                    if (!entry.value.isEnabled) {
+                        entry.value.isEnabled = true
+                    }
+                }
             }
         }
     }

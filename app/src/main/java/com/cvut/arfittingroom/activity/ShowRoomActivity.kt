@@ -1,18 +1,13 @@
 package com.cvut.arfittingroom.activity
 
 import android.app.ActivityManager
-import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Bundle
-import android.os.Environment
 import android.os.Handler
-import android.os.HandlerThread
 import android.os.Looper
-import android.provider.MediaStore
 import android.util.Log
-import android.view.PixelCopy
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -43,6 +38,7 @@ import com.cvut.arfittingroom.utils.FileUtil.getNextTempMaskFrameInputStream
 import com.cvut.arfittingroom.utils.FileUtil.getTempMaskTextureBitmap
 import com.google.android.filament.LightManager
 import com.google.ar.core.ArCoreApk
+import com.google.ar.core.AugmentedFace
 import com.google.ar.sceneform.ArSceneView
 import com.google.ar.sceneform.Sceneform
 import com.google.ar.sceneform.rendering.ModelRenderable
@@ -57,11 +53,6 @@ import com.gorisse.thomas.sceneform.light.LightEstimationConfig
 import com.gorisse.thomas.sceneform.light.build
 import com.gorisse.thomas.sceneform.lightEstimationConfig
 import com.gorisse.thomas.sceneform.mainLight
-import java.io.File
-import java.io.FileOutputStream
-import java.io.IOException
-import java.text.SimpleDateFormat
-import java.util.Calendar
 import java.util.UUID
 import javax.inject.Inject
 
@@ -249,13 +240,15 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener, UIChangeListener
         arSceneView.setCameraStreamRenderPriority(Renderable.RENDER_PRIORITY_FIRST)
 
         // Check for face detections
+
         arFragment.setOnAugmentedFaceUpdateListener {
-            this.onAugmentedFaceTrackingUpdate()
+            stateService.hideNodesIfFaceTrackingStopped()
         }
+
     }
 
     private fun onAugmentedFaceTrackingUpdate() {
-        stateService.removeNodesIfFaceTrackingStopped()
+        stateService.hideNodesIfFaceTrackingStopped()
 
         if (shouldPlayAnimation) {
             if (!gifPrepared) {
