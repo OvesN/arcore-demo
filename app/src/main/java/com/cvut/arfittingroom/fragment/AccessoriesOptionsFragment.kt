@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.Toast
@@ -169,8 +170,8 @@ class AccessoriesOptionsFragment : Fragment() {
         options.addView(createDivider(requireContext()))
 
         modelsInfo.forEach { modelInfo ->
-            val imageView =
-                ImageView(context).apply {
+            val imageButton =
+                ImageButton(context).apply {
                     layoutParams =
                         ViewGroup.LayoutParams(
                             dpToPx(100, context),
@@ -184,16 +185,16 @@ class AccessoriesOptionsFragment : Fragment() {
                     }
                 }
 
-            options.addView(imageView)
+            options.addView(imageButton)
 
-            if (selectedOptionTypeToViewId[selectedAccessoryType] == imageView.id) {
-                selectSquareButton(imageView)
+            if (selectedOptionTypeToViewId[selectedAccessoryType] == imageButton.id) {
+                selectSquareButton(imageButton)
             }
 
             GlideApp.with(this)
                 .load(storage.getReference(modelInfo.imagePreviewRef))
                 .thumbnail()
-                .into(imageView)
+                .into(imageButton)
         }
     }
 

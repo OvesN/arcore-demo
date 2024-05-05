@@ -20,6 +20,8 @@ import com.cvut.arfittingroom.R
 import com.cvut.arfittingroom.activity.UIChangeListener
 import com.cvut.arfittingroom.model.enums.ECameraMode
 import com.google.ar.core.Frame
+import com.google.ar.sceneform.ux.ArFragment
+import com.google.ar.sceneform.ux.ArFrontFacingFragment
 import java.io.IOException
 
 
@@ -27,6 +29,7 @@ class CameraModeFragment : Fragment() {
     private var activeCameraMode = ECameraMode.PHOTO
     private lateinit var videoButton: Button
     private lateinit var photoButton: Button
+    lateinit var arFragment: ArFrontFacingFragment
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -56,6 +59,16 @@ class CameraModeFragment : Fragment() {
             videoButton.background = null
         }
 
+        view.findViewById<ImageButton>(R.id.camera_button).setOnClickListener {
+            when (activeCameraMode) {
+                ECameraMode.PHOTO -> takePhoto()
+                ECameraMode.VIDEO
+
+                -> {
+                }
+            }
+
+        }
     }
 
     private fun showMainLayout() {
@@ -69,38 +82,36 @@ class CameraModeFragment : Fragment() {
     }
 
     private fun takePhoto() {
-//        val bitmap = Bitmap.createBitmap(
-//            arFragment.requireView().width,
-//            arFragment.requireView().height,
-//            Bitmap.Config.ARGB_8888
-//        )
-//        val handlerThread = HandlerThread("PixelCopier")
-//        handlerThread.start()
-//        // Make the request to copy..
-//        PixelCopy.request(arSceneView, bitmap, { copyResult ->
-//            if (copyResult === PixelCopy.SUCCESS) {
-//                try {
-//                    saveBitmapToDisk(bitmap)
-//                } catch (e: IOException) {
-//                    val toast = Toast.makeText(
-//                        this, e.toString(),
-//                        Toast.LENGTH_LONG
-//                    )
-//                    toast.show()
-//                    return@request
-//                }
-////                    SnackbarUtility.showSnackbarTypeLong(
-////                        settingsButton,
-////                        "Screenshot saved in /Pictures/Screenshots"
-////                    )
-//            } else {
-////                    SnackbarUtility.showSnackbarTypeLong(
-////                        settingsButton,
-////                        "Failed to take screenshot"
-////                    )
-//            }
-//            handlerThread.quitSafely()
-//        }, Handler(handlerThread.looper))
+        val bitmap = Bitmap.createBitmap(
+            arFragment.requireView().width,
+            arFragment.requireView().height,
+            Bitmap.Config.ARGB_8888
+        )
+        val handlerThread = HandlerThread("PixelCopier")
+        handlerThread.start()
+        PixelCopy.request(arFragment.arSceneView, bitmap, { copyResult ->
+            if (copyResult == PixelCopy.SUCCESS) {
+                try {
+                    saveBitmapToDisk(bitmap)
+                } catch (e: IOException) {
+                    Toast.makeText(
+                        requireContext(), e.toString(),
+                        Toast.LENGTH_LONG
+                    ).show()
+                    return@request
+                }
+                Toast.makeText(
+                    requireContext(), "Photo saved in gallery",
+                    Toast.LENGTH_LONG
+                ).show()
+            } else {
+                Toast.makeText(
+                    requireContext(), "Failed to take a photo",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+            handlerThread.quitSafely()
+        }, Handler(handlerThread.looper))
 
     }
 

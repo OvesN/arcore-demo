@@ -8,6 +8,7 @@ import android.view.View
 import android.view.View.TEXT_ALIGNMENT_CENTER
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.Toast
@@ -163,8 +164,8 @@ class MakeupOptionsFragment : Fragment() {
         options.removeAllViews()
 
         // Add makeup option button
-        val imageView =
-            ImageView(context).apply {
+        val imageButton =
+            ImageButton(context).apply {
                 layoutParams =
                     ViewGroup.LayoutParams(
                         dpToPx(100, context),
@@ -182,15 +183,15 @@ class MakeupOptionsFragment : Fragment() {
         GlideApp.with(this)
             .load(storage.getReference(selectedMakeupOptionRef))
             .thumbnail()
-            .into(imageView)
+            .into(imageButton)
 
-        options.addView(imageView)
+        options.addView(imageButton)
         options.addView(createDivider(requireContext()))
 
         // Add color options
         colors.forEach { color ->
-            val colorImageView =
-                ImageView(context).apply {
+            val colorImageButton =
+                ImageButton(context).apply {
                     layoutParams =
                         LinearLayout.LayoutParams(
                             dpToPx(40, context),
@@ -207,16 +208,16 @@ class MakeupOptionsFragment : Fragment() {
                     }
                 }
 
-            if (selectedOptionTypeToViewId["color"] == colorImageView.id) {
-                selectColorButton(colorImageView)
+            if (selectedOptionTypeToViewId["color"] == colorImageButton.id) {
+                selectColorButton(colorImageButton)
             }
 
-            options.addView(colorImageView)
+            options.addView(colorImageButton)
         }
 
         // Add color picker
-        val colorPickerImageView =
-            ImageView(context).apply {
+        val colorPickerImageButton =
+            ImageButton(context).apply {
                 layoutParams =
                     LinearLayout.LayoutParams(
                         dpToPx(40, context),
@@ -234,7 +235,7 @@ class MakeupOptionsFragment : Fragment() {
                 }
             }
 
-        options.addView(colorPickerImageView)
+        options.addView(colorPickerImageButton)
     }
 
     private fun selectColor(
@@ -284,8 +285,8 @@ class MakeupOptionsFragment : Fragment() {
         options.addView(createDivider(requireContext()))
 
         imageRefs.forEach { ref ->
-            val imageView =
-                ImageView(context).apply {
+            val imageButton =
+                ImageButton(context).apply {
                     layoutParams =
                         ViewGroup.LayoutParams(
                             dpToPx(100, context),
@@ -299,16 +300,16 @@ class MakeupOptionsFragment : Fragment() {
                     }
                 }
 
-            options.addView(imageView)
+            options.addView(imageButton)
 
-            if (selectedOptionTypeToViewId[selectedMakeupType] == imageView.id) {
-                selectMakeupButton(imageView)
+            if (selectedOptionTypeToViewId[selectedMakeupType] == imageButton.id) {
+                selectMakeupButton(imageButton)
             }
 
             GlideApp.with(this)
                 .load(storage.getReference(ref))
                 .thumbnail()
-                .into(imageView)
+                .into(imageButton)
         }
     }
 

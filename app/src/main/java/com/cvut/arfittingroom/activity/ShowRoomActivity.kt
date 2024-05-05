@@ -83,6 +83,7 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener, UIChangeListener
     private lateinit var fireStore: FirebaseFirestore
     private lateinit var storage: FirebaseStorage
 
+
     @Inject
     lateinit var stateService: StateService
 
@@ -459,7 +460,9 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener, UIChangeListener
     private fun showCameraModeUI() {
         findViewById<View>(R.id.top_ui).visibility = View.GONE
         findViewById<View>(R.id.bottom_ui).visibility = View.GONE
+        cameraModeFragment.arFragment = arFragment
         showFragment(cameraModeFragment)
+
     }
 
     private fun resetMenu() {

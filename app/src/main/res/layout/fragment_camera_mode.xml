@@ -58,8 +58,8 @@
                 android:textAllCaps="false" />
         </LinearLayout>
 
-        <ImageView
-            android:id="@+id/circle_image_view"
+        <ImageButton
+            android:id="@+id/camera_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="15dp"
