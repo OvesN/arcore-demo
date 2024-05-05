@@ -22,4 +22,13 @@
         <item name="android:gravity">center</item>
     </style>
 
+    <style name="mytoast">
+        <item name="stTextBold">true</item>
+        <item name="stTextColor">#000000</item>
+        <item name="stColorBackground">@color/colorLightGrey</item>
+        <item name="stLength">SHORT</item>
+        <item name="stGravity">top</item>
+        <item name="stRadius">5dp</item>
+    </style>
+
 </resources>

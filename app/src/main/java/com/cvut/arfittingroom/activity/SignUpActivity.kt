@@ -9,6 +9,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import by.kirich1409.viewbindingdelegate.CreateMethod
 import by.kirich1409.viewbindingdelegate.viewBinding
+import com.cvut.arfittingroom.R
 import com.cvut.arfittingroom.databinding.ActivitySignupBinding
 import com.cvut.arfittingroom.model.USERS_COLLECTION
 import com.google.firebase.FirebaseNetworkException
@@ -18,6 +19,7 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
+import io.github.muddz.styleabletoast.StyleableToast
 
 private val USERNAME_REGEX = "^[a-zA-Z0-9]+$".toRegex()
 
@@ -42,10 +44,10 @@ class SignUpActivity : AppCompatActivity() {
 
         binding.buttonSignUp.setOnClickListener {
             if (validateInput(
-                usernameInput.text.trim().toString(),
-                pwdInput.text.trim().toString(),
-                repeatPwdInput.text.trim().toString(),
-            )
+                    usernameInput.text.trim().toString(),
+                    pwdInput.text.trim().toString(),
+                    repeatPwdInput.text.trim().toString(),
+                )
             ) {
                 createAccount(
                     "${usernameInput.text.trim()}@glamartist.com",
@@ -128,6 +130,12 @@ class SignUpActivity : AppCompatActivity() {
                             null,
                             "onSuccess: user Profile is created for $username",
                         )
+                        StyleableToast.makeText(
+                            applicationContext,
+                            "user Profile is created for $username",
+                            R.style.mytoast
+                        ).show()
+
                         startActivity(Intent(this, ShowRoomActivity::class.java))
                         finish()
                     }.addOnFailureListener { ex -> Log.println(Log.ERROR, null, "onFailure: $ex") }
@@ -136,20 +144,11 @@ class SignUpActivity : AppCompatActivity() {
                     val errorMsg =
                         when (task.exception) {
                             is FirebaseAuthUserCollisionException -> "This username is taken! Try another one"
-
                             is FirebaseNetworkException -> "Network error"
                             else -> "Something went wrong, please, try again"
                         }
 
-                    val toast =
-                        Toast.makeText(
-                            baseContext,
-                            errorMsg,
-                            Toast.LENGTH_SHORT,
-                        )
-                    toast.setGravity(Gravity.CENTER_HORIZONTAL, 0, 0)
-
-                    toast.show()
+                    StyleableToast.makeText(applicationContext, errorMsg, R.style.mytoast).show()
                 }
             }
     }

@@ -35,6 +35,7 @@ import com.cvut.arfittingroom.utils.UIUtil.showColorPickerDialog
 import com.cvut.arfittingroom.utils.makeFirstLetterCapital
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
+import io.github.muddz.styleabletoast.StyleableToast
 
 class MakeupOptionsFragment : Fragment() {
     private val makeupTypes = mutableListOf<MakeupType>()
@@ -83,9 +84,9 @@ class MakeupOptionsFragment : Fragment() {
                     updateMakeupTypesMenu(view)
                 }
             }
-            .addOnFailureListener { exception ->
+            .addOnFailureListener { ex ->
                 if (isAdded) {
-                    Toast.makeText(context, exception.message, Toast.LENGTH_SHORT).show()
+                    StyleableToast.makeText(requireContext(), ex.message, R.style.mytoast).show()
                 }
             }
     }
@@ -134,9 +135,9 @@ class MakeupOptionsFragment : Fragment() {
 
                 selectedMakeupType = type
             }
-            .addOnFailureListener { exception ->
+            .addOnFailureListener { ex ->
                 if (isAdded) {
-                    Toast.makeText(context, exception.message, Toast.LENGTH_SHORT).show()
+                    StyleableToast.makeText(requireContext(), ex.message,  R.style.mytoast).show();
                 }
             }
     }
@@ -149,9 +150,9 @@ class MakeupOptionsFragment : Fragment() {
                     updateColorOptionsMenu(view, result.map { Color.parseColor(it.id) })
                 }
             }
-            .addOnFailureListener { exception ->
+            .addOnFailureListener { ex ->
                 if (isAdded) {
-                    Toast.makeText(context, exception.message, Toast.LENGTH_SHORT).show()
+                    StyleableToast.makeText(requireContext(),  ex.message,  R.style.mytoast).show();
                 }
             }
     }

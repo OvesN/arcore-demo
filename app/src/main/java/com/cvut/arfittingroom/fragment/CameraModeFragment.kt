@@ -5,8 +5,10 @@ import android.graphics.Bitmap
 import android.os.Bundle
 import android.os.Handler
 import android.os.HandlerThread
+import android.os.Looper
 import android.provider.MediaStore
 import android.util.Log
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.PixelCopy
 import android.view.View
@@ -19,9 +21,12 @@ import androidx.fragment.app.Fragment
 import com.cvut.arfittingroom.R
 import com.cvut.arfittingroom.activity.UIChangeListener
 import com.cvut.arfittingroom.model.enums.ECameraMode
+import com.cvut.arfittingroom.utils.UIUtil
+import com.cvut.arfittingroom.utils.UIUtil.animateButton
 import com.google.ar.core.Frame
 import com.google.ar.sceneform.ux.ArFragment
 import com.google.ar.sceneform.ux.ArFrontFacingFragment
+import io.github.muddz.styleabletoast.StyleableToast
 import java.io.IOException
 
 
@@ -47,6 +52,8 @@ class CameraModeFragment : Fragment() {
         videoButton = view.findViewById(R.id.video_button)
         photoButton = view.findViewById(R.id.photo_button)
 
+        photoButton.background =  ContextCompat.getDrawable(requireContext(), R.drawable.small_button)
+
         videoButton.setOnClickListener {
             activeCameraMode = ECameraMode.VIDEO
             it.background = ContextCompat.getDrawable(requireContext(), R.drawable.small_button)
@@ -61,7 +68,7 @@ class CameraModeFragment : Fragment() {
 
         view.findViewById<ImageButton>(R.id.camera_button).setOnClickListener {
             when (activeCameraMode) {
-                ECameraMode.PHOTO -> takePhoto()
+                ECameraMode.PHOTO -> { animateButton(it); takePhoto()}
                 ECameraMode.VIDEO
 
                 -> {
@@ -89,32 +96,28 @@ class CameraModeFragment : Fragment() {
         )
         val handlerThread = HandlerThread("PixelCopier")
         handlerThread.start()
+
         PixelCopy.request(arFragment.arSceneView, bitmap, { copyResult ->
             if (copyResult == PixelCopy.SUCCESS) {
                 try {
                     saveBitmapToDisk(bitmap)
-                } catch (e: IOException) {
-                    Toast.makeText(
-                        requireContext(), e.toString(),
-                        Toast.LENGTH_LONG
-                    ).show()
-                    return@request
+                    Handler(Looper.getMainLooper()).post {
+                        StyleableToast.makeText(requireContext(), "Photo saved to gallery", R.style.mytoast).show()
+                    }
+                } catch (ex: IOException) {
+                    Handler(Looper.getMainLooper()).post {
+                        StyleableToast.makeText(requireContext(), ex.toString(), R.style.mytoast).show()
+                    }
                 }
-                Toast.makeText(
-                    requireContext(), "Photo saved in gallery",
-                    Toast.LENGTH_LONG
-                ).show()
             } else {
-                Toast.makeText(
-                    requireContext(), "Failed to take a photo",
-                    Toast.LENGTH_LONG
-                ).show()
+                Handler(Looper.getMainLooper()).post {
+                    StyleableToast.makeText(requireContext(), "Failed to save a photo", R.style.mytoast).show()
+                }
             }
             handlerThread.quitSafely()
         }, Handler(handlerThread.looper))
 
     }
-
 
     private fun saveBitmapToDisk(bitmap: Bitmap) {
 

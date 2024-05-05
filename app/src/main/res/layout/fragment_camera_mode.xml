@@ -44,7 +44,7 @@
                 android:layout_width="70dp"
                 android:layout_height="30dp"
                 android:background="@null"
-                android:backgroundTint="@color/colorDarkGrey"
+                android:backgroundTint="@color/colorMediumGrey"
                 android:text="@string/photo"
                 android:textAllCaps="false" />
 

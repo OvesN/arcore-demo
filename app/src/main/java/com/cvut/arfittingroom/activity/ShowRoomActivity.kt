@@ -53,6 +53,7 @@ import com.gorisse.thomas.sceneform.light.LightEstimationConfig
 import com.gorisse.thomas.sceneform.light.build
 import com.gorisse.thomas.sceneform.lightEstimationConfig
 import com.gorisse.thomas.sceneform.mainLight
+import io.github.muddz.styleabletoast.StyleableToast
 import java.util.UUID
 import javax.inject.Inject
 
@@ -324,7 +325,7 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener, UIChangeListener
         if (ArCoreApk.getInstance()
                 .checkAvailability(this) == ArCoreApk.Availability.UNSUPPORTED_DEVICE_NOT_CAPABLE
         ) {
-            Toast.makeText(this, "Augmented Faces requires ARCore", Toast.LENGTH_LONG).show()
+            StyleableToast.makeText(this, "Augmented Faces requires ARCore",  R.style.mytoast).show();
             finish()
             return false
         }
@@ -335,8 +336,7 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener, UIChangeListener
 
         openGlVersionString?.let {
             if (java.lang.Double.parseDouble(openGlVersionString) < MIN_OPENGL_VERSION) {
-                Toast.makeText(this, "Sceneform requires OpenGL ES 3.0 or later", Toast.LENGTH_LONG)
-                    .show()
+                StyleableToast.makeText(this, "Sceneform requires OpenGL ES 3.0 or later",  R.style.mytoast).show();
                 finish()
                 return false
             }
@@ -361,7 +361,7 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener, UIChangeListener
                     }
             }
             .addOnFailureListener { ex ->
-                Toast.makeText(applicationContext, ex.message, Toast.LENGTH_SHORT).show()
+                StyleableToast.makeText(applicationContext,  ex.message,  R.style.mytoast).show();
                 Log.println(Log.ERROR, null, ex.message.orEmpty())
             }
     }
@@ -511,8 +511,7 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener, UIChangeListener
                     null,
                     "Look $lookId uploaded",
                 )
-                Toast.makeText(applicationContext, "Look saved successfully", Toast.LENGTH_SHORT)
-                    .show()
+                StyleableToast.makeText(applicationContext, "Look saved successfully", R.style.mytoast).show()
             }
             .addOnFailureListener { ex -> Log.println(Log.ERROR, null, "onFailure: $ex") }
     }
@@ -530,7 +529,7 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener, UIChangeListener
                     .addOnSuccessListener { taskSnapshot ->
                     }
             uploadTask.addOnFailureListener {
-                Toast.makeText(applicationContext, it.message, Toast.LENGTH_SHORT).show()
+                StyleableToast.makeText(applicationContext, it.message,  R.style.mytoast).show();
             }
 
             counter++

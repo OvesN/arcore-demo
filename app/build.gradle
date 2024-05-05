@@ -91,6 +91,7 @@ dependencies {
 	implementation 'com.github.kirich1409:viewbindingpropertydelegate-full:1.5.9'
 	implementation 'com.github.skydoves:colorpickerview:2.3.0'
 	implementation 'io.github.microutils:kotlin-logging-jvm:2.0.11'
+	implementation 'io.github.muddz:styleabletoast:2.4.0'
 
 	// Dagger Dependency Injection
 	implementation "com.google.dagger:dagger:2.48.1"

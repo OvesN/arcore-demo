@@ -29,6 +29,7 @@ import com.cvut.arfittingroom.utils.UIUtil.selectSquareButton
 import com.cvut.arfittingroom.utils.makeFirstLetterCapital
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
+import io.github.muddz.styleabletoast.StyleableToast
 
 class AccessoriesOptionsFragment : Fragment() {
     private val accessoriesTypes = mutableSetOf<String>()
@@ -71,9 +72,9 @@ class AccessoriesOptionsFragment : Fragment() {
                     updateAccessoriesTypesMenu(view)
                 }
             }
-            .addOnFailureListener { exception ->
+            .addOnFailureListener { ex ->
                 if (isAdded) {
-                    Toast.makeText(context, exception.message, Toast.LENGTH_SHORT).show()
+                    StyleableToast.makeText(requireContext(), ex.message,  R.style.mytoast).show();
                 }
             }
     }
@@ -134,9 +135,9 @@ class AccessoriesOptionsFragment : Fragment() {
                 }
                 view?.let { updateModelsOptionsMenu(it) }
             }
-            .addOnFailureListener { exception ->
+            .addOnFailureListener { ex ->
                 if (isAdded) {
-                    Toast.makeText(context, exception.message, Toast.LENGTH_SHORT).show()
+                    StyleableToast.makeText(requireContext(), ex.message,  R.style.mytoast).show();
                 }
             }
     }

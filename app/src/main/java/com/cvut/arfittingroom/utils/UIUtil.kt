@@ -1,14 +1,18 @@
 package com.cvut.arfittingroom.utils
 
+import android.animation.AnimatorSet
+import android.animation.ObjectAnimator
 import android.content.Context
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.LayerDrawable
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AccelerateDecelerateInterpolator
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import com.cvut.arfittingroom.R
+import com.google.android.material.snackbar.Snackbar
 import com.skydoves.colorpickerview.ColorPickerDialog
 import com.skydoves.colorpickerview.listeners.ColorEnvelopeListener
 
@@ -85,5 +89,33 @@ object UIUtil {
         DrawableCompat.setTint(wrap, color)
 
         return wrap
+    }
+
+
+    fun animateButton(view: View) {
+        val scaleUpX = ObjectAnimator.ofFloat(view, "scaleX", 1.0f, 1.5f)
+        val scaleUpY = ObjectAnimator.ofFloat(view, "scaleY", 1.0f, 1.5f)
+        val scaleDownX = ObjectAnimator.ofFloat(view, "scaleX", 1.5f, 1.0f)
+        val scaleDownY = ObjectAnimator.ofFloat(view, "scaleY", 1.5f, 1.0f)
+
+        scaleUpX.duration = 150
+        scaleUpY.duration = 150
+        scaleDownX.duration = 150
+        scaleDownY.duration = 150
+
+        val scaleUp = AnimatorSet().apply {
+            play(scaleUpX).with(scaleUpY)
+            interpolator = AccelerateDecelerateInterpolator()
+        }
+
+        val scaleDown = AnimatorSet().apply {
+            play(scaleDownX).with(scaleDownY)
+            interpolator = AccelerateDecelerateInterpolator()
+        }
+
+        AnimatorSet().apply {
+            playSequentially(scaleUp, scaleDown)
+            start()
+        }
     }
 }

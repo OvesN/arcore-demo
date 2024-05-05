@@ -18,6 +18,7 @@ import android.widget.Toast
 import androidx.annotation.ColorInt
 import androidx.core.graphics.alpha
 import com.cvut.arfittingroom.ARFittingRoomApplication
+import com.cvut.arfittingroom.R
 import com.cvut.arfittingroom.controller.ScaleGestureDetector
 import com.cvut.arfittingroom.draw.DrawHistoryHolder.addToHistory
 import com.cvut.arfittingroom.draw.DrawHistoryHolder.clearHistory
@@ -47,6 +48,7 @@ import com.cvut.arfittingroom.utils.FileUtil.adjustBitmap
 import com.cvut.arfittingroom.utils.FileUtil.saveTempMaskFrames
 import com.cvut.arfittingroom.utils.FileUtil.saveTempMaskTextureBitmap
 import com.cvut.arfittingroom.utils.UIUtil.showColorPickerDialog
+import io.github.muddz.styleabletoast.StyleableToast
 import pl.droidsonroids.gif.GifDrawable
 import pl.droidsonroids.gif.GifDrawableBuilder
 import javax.inject.Inject
@@ -578,10 +580,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     fun undo() {
         val command = DrawHistoryHolder.undo()
         command?.let {
-            val toast = Toast.makeText(context, "Undo ${command.description}", Toast.LENGTH_SHORT)
-            toast.setGravity(Gravity.CENTER_HORIZONTAL, 0, 0)
-
-            toast.show()
+            StyleableToast.makeText(context, "Undo ${command.description}",  R.style.mytoast).show();
         }
         stopAnimation()
         layerManager.updateLayersBitmaps()
@@ -591,10 +590,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     fun redo() {
         val command = DrawHistoryHolder.redo()
         command?.let {
-            val toast = Toast.makeText(context, "Redo ${command.description}", Toast.LENGTH_SHORT)
-            toast.setGravity(Gravity.CENTER_HORIZONTAL, 0, 0)
-
-            toast.show()
+            StyleableToast.makeText(context, "Redo ${command.description}",  R.style.mytoast).show();
         }
         stopAnimation()
         layerManager.updateLayersBitmaps()

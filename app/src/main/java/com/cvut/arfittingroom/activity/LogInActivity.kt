@@ -8,6 +8,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import by.kirich1409.viewbindingdelegate.CreateMethod
 import by.kirich1409.viewbindingdelegate.viewBinding
+import com.cvut.arfittingroom.R
 import com.cvut.arfittingroom.databinding.ActivityLoginBinding
 import com.google.firebase.FirebaseNetworkException
 import com.google.firebase.auth.FirebaseAuth
@@ -15,6 +16,7 @@ import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
+import io.github.muddz.styleabletoast.StyleableToast
 
 class LogInActivity : AppCompatActivity() {
     private val binding: ActivityLoginBinding by viewBinding(createMethod = CreateMethod.INFLATE)
@@ -78,7 +80,7 @@ class LogInActivity : AppCompatActivity() {
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     Log.println(Log.INFO, null, "User $username logged in")
-                    Toast.makeText(baseContext, "Logged in Successfully", Toast.LENGTH_SHORT).show()
+                    StyleableToast.makeText(baseContext, "Logged in Successfully!",  R.style.mytoast).show();
                     startActivity(Intent(this, ShowRoomActivity::class.java))
                     finish()
                 } else {
@@ -90,11 +92,8 @@ class LogInActivity : AppCompatActivity() {
                             is FirebaseNetworkException -> "Network error"
                             else -> "Something went wrong, please, try again"
                         }
-                    Toast.makeText(
-                        baseContext,
-                        errorMsg,
-                        Toast.LENGTH_SHORT,
-                    ).show()
+
+                    StyleableToast.makeText(baseContext, errorMsg,  R.style.mytoast).show();
                 }
             }
     }
