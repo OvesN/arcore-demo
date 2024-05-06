@@ -1,6 +1,5 @@
 package com.cvut.arfittingroom.fragment
 
-import android.content.res.Resources
 import android.os.Bundle
 import android.util.Log
 import android.view.Gravity
@@ -12,7 +11,6 @@ import android.widget.GridLayout
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.ScrollView
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
@@ -32,11 +30,8 @@ import com.cvut.arfittingroom.utils.UIUtil.deselectButton
 import com.cvut.arfittingroom.utils.UIUtil.selectSquareButton
 import com.cvut.arfittingroom.utils.makeFirstLetterCapital
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.persistentCacheSettings
 import com.google.firebase.storage.FirebaseStorage
 import io.github.muddz.styleabletoast.StyleableToast
-import java.util.UUID
-
 
 class AccessoriesOptionsFragment : Fragment() {
     private val accessoriesTypes = mutableSetOf<String>()
@@ -161,9 +156,10 @@ class AccessoriesOptionsFragment : Fragment() {
         val options = view.findViewById<GridLayout>(R.id.vertical_options)
         options.removeAllViews()
 
-        val typeButton = view.findViewById<Button>(R.id.type_button)
-        typeButton.text =
-            selectedAccessoryType.makeFirstLetterCapital().chunked(10).joinToString("\n")
+        val typeButton = view.findViewById<Button>(R.id.type_button).apply {
+            text =
+                selectedAccessoryType.makeFirstLetterCapital().chunked(10).joinToString("\n")
+        }
         typeButton.setOnClickListener {
             // Return back
             fetchAccessoriesTypes(view)
@@ -171,7 +167,7 @@ class AccessoriesOptionsFragment : Fragment() {
 
         options.post {
             val imageWidth =
-                (options.width - options.paddingStart - options.paddingEnd)/ NUM_OF_ELEMENTS_IN_ROW
+                (options.width - options.paddingStart - options.paddingEnd) / NUM_OF_ELEMENTS_IN_ROW
 
             modelsInfo.forEach { modelInfo ->
                 val imageButton =
@@ -184,12 +180,13 @@ class AccessoriesOptionsFragment : Fragment() {
                         }
                     }
 
-                val params = GridLayout.LayoutParams()
-                params.columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
-                params.rowSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
-                params.height = ViewGroup.LayoutParams.WRAP_CONTENT
-                params.height = dpToPx(100, requireContext())
-                params.width = imageWidth
+                val params = GridLayout.LayoutParams().apply {
+                    columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
+                    rowSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
+                    height = ViewGroup.LayoutParams.WRAP_CONTENT
+                    height = dpToPx(100, requireContext())
+                    width = imageWidth
+                }
 
                 params.setGravity(Gravity.START)
 
@@ -205,7 +202,6 @@ class AccessoriesOptionsFragment : Fragment() {
                     .into(imageButton)
             }
         }
-
     }
 
     private fun selectAccessoriesOption(

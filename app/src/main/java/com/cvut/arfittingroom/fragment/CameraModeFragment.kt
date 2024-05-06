@@ -84,10 +84,11 @@ class CameraModeFragment : Fragment() {
 
         cameraButton.setOnClickListener { button ->
             when (activeCameraMode) {
-                ECameraMode.PHOTO -> arFragment?.let {
-                    animateButton(button)
-                    takePhoto(it)
-                }
+                ECameraMode.PHOTO ->
+                    arFragment?.let {
+                        animateButton(button)
+                        takePhoto(it)
+                    }
 
                 ECameraMode.VIDEO -> {
                     animateButton(button)

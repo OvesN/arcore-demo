@@ -38,8 +38,8 @@ object UIUtil {
             .setNegativeButton(R.string.cancel) { dialogInterface, _ ->
                 dialogInterface.dismiss()
             }
-            //.setSingleChoiceItems()
-            //.setView()
+            // .setSingleChoiceItems()
+            // .setView()
             .attachAlphaSlideBar(true)
             .attachBrightnessSlideBar(true)
             .setBottomSpace(12)

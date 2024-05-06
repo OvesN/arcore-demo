@@ -56,9 +56,10 @@ import io.github.muddz.styleabletoast.StyleableToast
 import java.util.UUID
 import javax.inject.Inject
 
-class ShowRoomActivity : AppCompatActivity(),
-ResourceListener,
-UIChangeListener {
+class ShowRoomActivity :
+    AppCompatActivity(),
+    ResourceListener,
+    UIChangeListener {
     private val binding: ActivityShowRoomBinding by viewBinding(createMethod = CreateMethod.INFLATE)
     private var shouldPlayAnimation = false
     private var gifPrepared = false
@@ -78,7 +79,6 @@ UIChangeListener {
     private val makeupOptionsFragment = MakeupOptionsFragment()
     private val cameraModeFragment = CameraModeFragment()
     private val profileFragment = ProfileFragment()
-
     private lateinit var arFragment: ArFrontFacingFragment
     private lateinit var arSceneView: ArSceneView
     private lateinit var auth: FirebaseAuth
