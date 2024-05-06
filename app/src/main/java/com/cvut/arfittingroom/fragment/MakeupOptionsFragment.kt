@@ -41,7 +41,7 @@ class MakeupOptionsFragment : Fragment() {
     private var selectedMakeupOptionRef: String = ""
     private var selectedColor: Int = Color.WHITE
     private var selectedMakeupType: String = ""
-    private val selectedOptionTypeToViewId = mutableMapOf<String, Int>()
+    val selectedOptionTypeToViewId = mutableMapOf<String, Int>()
     private lateinit var firestore: FirebaseFirestore
     private lateinit var storage: FirebaseStorage
 

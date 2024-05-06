@@ -18,7 +18,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 
 class LooksOptionsFragment : Fragment() {
-    private var selectedLookViewId: Int = 0
+    var selectedLookViewId: Int = 0
     private lateinit var firestore: FirebaseFirestore
     private lateinit var storage: FirebaseStorage
 

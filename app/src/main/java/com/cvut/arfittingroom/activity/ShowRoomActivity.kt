@@ -92,18 +92,6 @@ class ShowRoomActivity :
     @Inject
     lateinit var stateService: StateService
 
-    override fun onResume() {
-        super.onResume()
-        resetGifState()
-
-        val bitmap = getTempMaskTextureBitmap(applicationContext)
-        bitmap?.let {
-            stateService.createTextureAndApply(it, arFragment.arSceneView, MASK_TEXTURE_SLOT)
-            shouldPlayAnimation = false
-        }
-
-        shouldPlayAnimation = doesTempAnimatedMaskExist(applicationContext)
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -162,11 +150,6 @@ class ShowRoomActivity :
             showProfileUI()
         }
         binding.maskEditorButton.setOnClickListener {
-//            val intent = Intent(this, MakeupEditorFragment::class.java)
-//            intent.putExtra("shouldClearEditor", shouldClearEditor)
-//            startActivity(intent)
-//            finish()
-
             showMakeupEditorUI()
         }
     }
@@ -424,7 +407,8 @@ class ShowRoomActivity :
                             )
                             frameCounter = (frameCounter + 1) % gifTextures.size
                         }
-                        handler.postDelayed(gifRunnable!!, frameDelay)
+
+                        gifRunnable?.let { handler.postDelayed(it, frameDelay) }
                     }
                 }
         }
@@ -497,10 +481,10 @@ class ShowRoomActivity :
         findViewById<View>(R.id.top_ui).visibility = View.GONE
         findViewById<View>(R.id.bottom_ui).visibility = View.GONE
         val fragmentManager = supportFragmentManager
-        val existingFragment = fragmentManager.findFragmentByTag(MakeupEditorFragment.MAKEUP_EDITOR_FRAGMENT_TAG)
+        val existingFragment =
+            fragmentManager.findFragmentByTag(MakeupEditorFragment.MAKEUP_EDITOR_FRAGMENT_TAG)
 
         if (existingFragment == null) {
-            val makeupEditorFragment = MakeupEditorFragment()
             fragmentManager.beginTransaction()
                 .add(
                     R.id.makeup_editor_fragment_container,
@@ -509,8 +493,10 @@ class ShowRoomActivity :
                 )
                 .commit()
         } else {
-            showFragment(existingFragment)
+            showFragment(makeupEditorFragment)
         }
+
+        makeupEditorFragment.applyBackgroundBitmap(stateService.textureBitmap)
     }
 
     private fun resetMenu() {
@@ -591,6 +577,9 @@ class ShowRoomActivity :
     private fun clearAll() {
         stopAnimation()
         deleteTempFiles(applicationContext)
+        accessoriesOptionsFragment.selectedSlotToViewId.clear()
+        looksOptionsFragment.selectedLookViewId = 0
+        makeupOptionsFragment.selectedOptionTypeToViewId.clear()
         stateService.clearAll()
         makeupEditorFragment.clearAll()
     }
@@ -598,13 +587,24 @@ class ShowRoomActivity :
     override fun showMainLayout() {
         findViewById<View>(R.id.top_ui).visibility = View.VISIBLE
         findViewById<View>(R.id.bottom_ui).visibility = View.VISIBLE
-        val makeupEditor = supportFragmentManager.findFragmentByTag(MakeupEditorFragment.MAKEUP_EDITOR_FRAGMENT_TAG)
+        val makeupEditor =
+            supportFragmentManager.findFragmentByTag(MakeupEditorFragment.MAKEUP_EDITOR_FRAGMENT_TAG)
 
         val transaction = supportFragmentManager
             .beginTransaction()
             .remove(cameraModeFragment)
+
         makeupEditor?.let { transaction.hide(makeupEditor) }
         transaction.commit()
+        resetGifState()
+
+        val bitmap = getTempMaskTextureBitmap(applicationContext)
+        bitmap?.let {
+            stateService.createTextureAndApply(it, arFragment.arSceneView, MASK_TEXTURE_SLOT)
+            shouldPlayAnimation = false
+        }
+
+        shouldPlayAnimation = doesTempAnimatedMaskExist(applicationContext)
     }
 
     companion object {

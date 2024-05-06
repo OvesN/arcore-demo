@@ -21,7 +21,7 @@ import com.google.ar.sceneform.ux.AugmentedFaceNode
  */
 class StateService {
     val appliedMakeUpTypes = mutableMapOf<String, MakeupInfo>()
-    private var textureBitmap: Bitmap? = null
+    var textureBitmap: Bitmap? = null
     private val makeUpBitmaps = mutableListOf<Bitmap>()
     private val loadedModels = mutableMapOf<String, ModelInfo>()
     val faceNodesInfo = FaceNodesInfo(null, mutableMapOf())

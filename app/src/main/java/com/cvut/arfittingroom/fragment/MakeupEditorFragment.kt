@@ -1,5 +1,6 @@
 package com.cvut.arfittingroom.fragment
 
+import android.graphics.Bitmap
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
@@ -27,6 +28,7 @@ private const val DEFAULT_COLOR = Color.TRANSPARENT
 private val SELECTED_COLOR = Color.parseColor("#FF5722")
 
 class MakeupEditorFragment : Fragment() {
+    var backgroundBitmap: Bitmap? = null
     private lateinit var drawView: DrawView
     private lateinit var imageView: ImageView
     private lateinit var slider: Slider
@@ -41,6 +43,7 @@ class MakeupEditorFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         drawView = view.findViewById(R.id.draw_view)
+        drawView.applyBitmapBackground(backgroundBitmap)
         imageView = view.findViewById(R.id.face_image)
         slider = view.findViewById(R.id.stroke_size_slider)
         layersButtonsContainer = view.findViewById(R.id.dynamic_layer_buttons_container)
@@ -217,12 +220,21 @@ class MakeupEditorFragment : Fragment() {
     }
 
     fun clearAll() {
-        drawView.clearCanvas()
+        if (::drawView.isInitialized) {
+            drawView.clearCanvas()
+        }
+    }
+
+
+    fun applyBackgroundBitmap(bitmap: Bitmap?) {
+        backgroundBitmap = bitmap
+        if (::drawView.isInitialized) {
+            drawView.applyBitmapBackground(backgroundBitmap)
+        }
     }
 
     companion object {
         const val MAKEUP_EDITOR_FRAGMENT_TAG ="MakeupEditorFragmentTag"
     }
-
 
 }

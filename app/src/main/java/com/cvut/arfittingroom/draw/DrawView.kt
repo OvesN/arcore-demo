@@ -643,9 +643,10 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         canvas: Canvas,
         shouldDrawFaceTexture: Boolean = true,
     ) {
+        uiDrawer.drawBackground(canvas)
         layerManager.drawLayers(canvas, paintOptions)
-
         uiDrawer.drawSelectedElementEditIcons(canvas, selectedElement, isInElementMenuMode)
+
         if (shouldDrawFaceTexture) {
             uiDrawer.drawFaceTextureImage(canvas)
         }
@@ -916,6 +917,10 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         transformationMatrix.postScale(canvasScaleFactor, canvasScaleFactor, pivotX, pivotY)
 
         return transformationMatrix
+    }
+
+    fun applyBitmapBackground(bitmap: Bitmap?) {
+        uiDrawer.backgroundBitmap = bitmap
     }
 
     interface OnLayerInitializedListener {
