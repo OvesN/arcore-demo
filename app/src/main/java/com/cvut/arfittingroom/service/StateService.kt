@@ -99,15 +99,14 @@ class StateService {
 
     fun hideNodesIfFaceTrackingStopped() {
         faceNodeMap.entries.forEach { (face, nodes) ->
-            if (face.trackingState == TrackingState.STOPPED
-                || face.trackingState == TrackingState.PAUSED
+            if (face.trackingState == TrackingState.STOPPED ||
+                face.trackingState == TrackingState.PAUSED
             ) {
                 nodes.forEach { entry ->
                     if (entry.value.isEnabled) {
                         entry.value.isEnabled = false
                     }
                 }
-
             } else {
                 nodes.forEach { entry ->
                     if (!entry.value.isEnabled) {

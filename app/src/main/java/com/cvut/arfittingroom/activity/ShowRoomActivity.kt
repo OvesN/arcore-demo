@@ -9,7 +9,6 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.view.View
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
@@ -38,7 +37,6 @@ import com.cvut.arfittingroom.utils.FileUtil.getNextTempMaskFrameInputStream
 import com.cvut.arfittingroom.utils.FileUtil.getTempMaskTextureBitmap
 import com.google.android.filament.LightManager
 import com.google.ar.core.ArCoreApk
-import com.google.ar.core.AugmentedFace
 import com.google.ar.sceneform.ArSceneView
 import com.google.ar.sceneform.Sceneform
 import com.google.ar.sceneform.rendering.ModelRenderable
@@ -57,8 +55,9 @@ import io.github.muddz.styleabletoast.StyleableToast
 import java.util.UUID
 import javax.inject.Inject
 
-
-class ShowRoomActivity : AppCompatActivity(), ResourceListener, UIChangeListener {
+class ShowRoomActivity : AppCompatActivity(),
+ResourceListener,
+UIChangeListener {
     private val binding: ActivityShowRoomBinding by viewBinding(createMethod = CreateMethod.INFLATE)
     private var shouldPlayAnimation = false
     private var gifPrepared = false
@@ -68,22 +67,20 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener, UIChangeListener
     private var gifRunnable: Runnable? = null
 
     private var frameDelay: Long = 100  // Default frame delay (100 ms per frame)
-
     private var shouldClearEditor = false
 
     // FIXME do not do it like that!
     private var lookId: String = ""
     private var shouldDownloadFormStorage: Boolean = false
+    private val accessoriesOptionsFragment = AccessoriesOptionsFragment()
+    private val looksOptionsFragment = LooksOptionsFragment()
+    private val makeupOptionsFragment = MakeupOptionsFragment()
+    private val cameraModeFragment = CameraModeFragment()
     private lateinit var arFragment: ArFrontFacingFragment
     private lateinit var arSceneView: ArSceneView
     private lateinit var auth: FirebaseAuth
     private lateinit var fireStore: FirebaseFirestore
     private lateinit var storage: FirebaseStorage
-
-    private val accessoriesOptionsFragment = AccessoriesOptionsFragment()
-    private val looksOptionsFragment = LooksOptionsFragment()
-    private val makeupOptionsFragment = MakeupOptionsFragment()
-    private val cameraModeFragment = CameraModeFragment()
 
     @Inject
     lateinit var stateService: StateService
@@ -130,9 +127,8 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener, UIChangeListener
                 supportFragmentManager.beginTransaction()
                     .add(R.id.arFragment, ArFrontFacingFragment::class.java, null)
                     .commit()
-            }
-            else {
-                StyleableToast.makeText(this, "Sceneform is not supported",  R.style.mytoast)
+            } else {
+                StyleableToast.makeText(this, "Sceneform is not supported", R.style.mytoast)
                 finish()
             }
         }
@@ -162,7 +158,6 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener, UIChangeListener
             finish()
         }
     }
-
 
     override fun applyImage(
         type: String,
@@ -250,7 +245,6 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener, UIChangeListener
         arFragment.setOnAugmentedFaceUpdateListener {
             stateService.hideNodesIfFaceTrackingStopped()
         }
-
     }
 
     private fun onAugmentedFaceTrackingUpdate() {
@@ -327,9 +321,9 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener, UIChangeListener
 
     private fun checkIsSupportedDeviceOrFinish(): Boolean {
         if (ArCoreApk.getInstance()
-                .checkAvailability(this) == ArCoreApk.Availability.UNSUPPORTED_DEVICE_NOT_CAPABLE
+            .checkAvailability(this) == ArCoreApk.Availability.UNSUPPORTED_DEVICE_NOT_CAPABLE
         ) {
-            StyleableToast.makeText(this, "Augmented Faces requires ARCore",  R.style.mytoast).show();
+            StyleableToast.makeText(this, "Augmented Faces requires ARCore", R.style.mytoast).show()
             finish()
             return false
         }
@@ -340,7 +334,7 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener, UIChangeListener
 
         openGlVersionString?.let {
             if (java.lang.Double.parseDouble(openGlVersionString) < MIN_OPENGL_VERSION) {
-                StyleableToast.makeText(this, "Sceneform requires OpenGL ES 3.0 or later",  R.style.mytoast).show();
+                StyleableToast.makeText(this, "Sceneform requires OpenGL ES 3.0 or later", R.style.mytoast).show()
                 finish()
                 return false
             }
@@ -365,7 +359,7 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener, UIChangeListener
                     }
             }
             .addOnFailureListener { ex ->
-                StyleableToast.makeText(applicationContext,  ex.message,  R.style.mytoast).show();
+                StyleableToast.makeText(applicationContext, ex.message, R.style.mytoast).show()
                 Log.println(Log.ERROR, null, ex.message.orEmpty())
             }
     }
@@ -405,7 +399,7 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener, UIChangeListener
                         if (gifTextures.size > frameCounter) {
                             stateService.applyTextureToFaceNode(
                                 gifTextures[frameCounter],
-                                arSceneView
+                                arSceneView,
                             )
                             frameCounter = (frameCounter + 1) % gifTextures.size
                         }
@@ -530,9 +524,9 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener, UIChangeListener
             val uploadTask =
                 ref.putStream(frameStream)
                     .addOnSuccessListener { taskSnapshot ->
-                    }
+                        }
             uploadTask.addOnFailureListener {
-                StyleableToast.makeText(applicationContext, it.message,  R.style.mytoast).show();
+                StyleableToast.makeText(applicationContext, it.message, R.style.mytoast).show()
             }
 
             counter++
@@ -547,15 +541,15 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener, UIChangeListener
         shouldClearEditor = true
     }
 
-    companion object {
-        const val MIN_OPENGL_VERSION = 3.0
-    }
-
     override fun showMainLayout() {
         findViewById<View>(R.id.top_ui).visibility = View.VISIBLE
         findViewById<View>(R.id.bottom_ui).visibility = View.VISIBLE
         supportFragmentManager.beginTransaction()
             .hide(cameraModeFragment)
             .commit()
+    }
+
+    companion object {
+        const val MIN_OPENGL_VERSION = 3.0
     }
 }

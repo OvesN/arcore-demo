@@ -4,7 +4,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.EditText
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import by.kirich1409.viewbindingdelegate.CreateMethod
 import by.kirich1409.viewbindingdelegate.viewBinding
@@ -80,7 +79,7 @@ class LogInActivity : AppCompatActivity() {
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     Log.println(Log.INFO, null, "User $username logged in")
-                    StyleableToast.makeText(baseContext, "Logged in Successfully!",  R.style.mytoast).show();
+                    StyleableToast.makeText(baseContext, "Logged in Successfully!", R.style.mytoast).show()
                     startActivity(Intent(this, ShowRoomActivity::class.java))
                     finish()
                 } else {
@@ -93,7 +92,7 @@ class LogInActivity : AppCompatActivity() {
                             else -> "Something went wrong, please, try again"
                         }
 
-                    StyleableToast.makeText(baseContext, errorMsg,  R.style.mytoast).show();
+                    StyleableToast.makeText(baseContext, errorMsg, R.style.mytoast).show()
                 }
             }
     }

@@ -2,11 +2,9 @@ package com.cvut.arfittingroom.fragment
 
 import android.content.ContentValues
 import android.graphics.Bitmap
-import android.graphics.drawable.GradientDrawable.Orientation
 import android.media.CamcorderProfile
 import android.media.MediaScannerConnection
 import android.os.Bundle
-import android.os.Environment
 import android.os.Handler
 import android.os.HandlerThread
 import android.os.Looper
@@ -19,7 +17,6 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.TextView
-import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.cvut.arfittingroom.R
@@ -31,21 +28,17 @@ import com.google.ar.sceneform.ux.ArFrontFacingFragment
 import io.github.muddz.styleabletoast.StyleableToast
 import java.io.IOException
 
-
 class CameraModeFragment : Fragment() {
     private var activeCameraMode = ECameraMode.PHOTO
+    private var timerHandler: Handler? = null
+    private var timerRunnable: Runnable? = null
+    private var startTime: Long = 0
+    private var arFragment: ArFrontFacingFragment? = null
+    private val videoRecorder = VideoRecorder()
     private lateinit var videoButton: Button
     private lateinit var photoButton: Button
     private lateinit var cameraButton: ImageButton
     private lateinit var timer: TextView
-
-    private var timerHandler: Handler? = null
-    private var timerRunnable: Runnable? = null
-    private var startTime: Long = 0
-
-    private var arFragment: ArFrontFacingFragment? = null
-
-    private val videoRecorder = VideoRecorder()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -53,7 +46,10 @@ class CameraModeFragment : Fragment() {
         savedInstanceState: Bundle?,
     ): View? = inflater.inflate(R.layout.fragment_camera_mode, container, false)
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
         super.onViewCreated(view, savedInstanceState)
 
         val orientation = resources.configuration.orientation
@@ -88,12 +84,14 @@ class CameraModeFragment : Fragment() {
 
         cameraButton.setOnClickListener { button ->
             when (activeCameraMode) {
-                ECameraMode.PHOTO -> {
-                    arFragment?.let { animateButton(button); takePhoto(it) }
+                ECameraMode.PHOTO -> arFragment?.let {
+                    animateButton(button)
+                    takePhoto(it)
                 }
 
                 ECameraMode.VIDEO -> {
-                    animateButton(button); toggleRecording()
+                    animateButton(button)
+                    toggleRecording()
                 }
             }
         }
@@ -124,7 +122,7 @@ class CameraModeFragment : Fragment() {
 
             requireContext().contentResolver.insert(
                 MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
-                values
+                values,
             )
 
             // This will make file visible in gallery
@@ -132,14 +130,13 @@ class CameraModeFragment : Fragment() {
                 requireContext(),
                 arrayOf(videoPath),
                 null,
-                null
+                null,
             )
 
             StyleableToast.makeText(requireContext(), "Video saved in gallery", R.style.mytoast)
                 .show()
         }
     }
-
 
     private fun showMainLayout() {
         val listener = context as? UIChangeListener
@@ -155,19 +152,20 @@ class CameraModeFragment : Fragment() {
         timer.visibility = View.VISIBLE
         timerHandler = Handler(Looper.getMainLooper())
         startTime = System.currentTimeMillis()
-        timerRunnable = object : Runnable {
-            override fun run() {
-                val millis = System.currentTimeMillis() - startTime
-                val seconds = (millis / 1000) % 60
-                val minutes = (millis / (1000 * 60)) % 60
-                val hours = (millis / (1000 * 60 * 60)) % 24
-                timer.text = String.format("%02d:%02d:%02d", hours, minutes, seconds)
-                timerHandler?.postDelayed(
-                    this,
-                    500
-                )
+        timerRunnable =
+            object : Runnable {
+                override fun run() {
+                    val millis = System.currentTimeMillis() - startTime
+                    val seconds = (millis / 1000) % 60
+                    val minutes = (millis / (1000 * 60)) % 60
+                    val hours = (millis / (1000 * 60 * 60)) % 24
+                    timer.text = String.format("%02d:%02d:%02d", hours, minutes, seconds)
+                    timerHandler?.postDelayed(
+                        this,
+                        500,
+                    )
+                }
             }
-        }
         timerRunnable?.let { timerHandler?.postDelayed(it, 0) }
     }
 
@@ -177,11 +175,12 @@ class CameraModeFragment : Fragment() {
     }
 
     private fun takePhoto(arFragment: ArFrontFacingFragment) {
-        val bitmap = Bitmap.createBitmap(
-            arFragment.requireView().width,
-            arFragment.requireView().height,
-            Bitmap.Config.ARGB_8888
-        )
+        val bitmap =
+            Bitmap.createBitmap(
+                arFragment.requireView().width,
+                arFragment.requireView().height,
+                Bitmap.Config.ARGB_8888,
+            )
         val handlerThread = HandlerThread("PixelCopier")
         handlerThread.start()
 
@@ -193,7 +192,7 @@ class CameraModeFragment : Fragment() {
                         StyleableToast.makeText(
                             requireContext(),
                             "Photo saved in gallery",
-                            R.style.mytoast
+                            R.style.mytoast,
                         ).show()
                     }
                 } catch (ex: IOException) {
@@ -207,26 +206,27 @@ class CameraModeFragment : Fragment() {
                     StyleableToast.makeText(
                         requireContext(),
                         "Failed to save a photo",
-                        R.style.mytoast
+                        R.style.mytoast,
                     ).show()
                 }
             }
             handlerThread.quitSafely()
         }, Handler(handlerThread.looper))
-
     }
 
     private fun saveBitmapToDisk(bitmap: Bitmap) {
-        val contentValues = ContentValues().apply {
-            put(MediaStore.MediaColumns.DISPLAY_NAME, "AR_Image_${System.currentTimeMillis()}.jpg")
-            put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
-            put(MediaStore.MediaColumns.RELATIVE_PATH, "Pictures/GlamARtist")
-        }
+        val contentValues =
+            ContentValues().apply {
+                put(MediaStore.MediaColumns.DISPLAY_NAME, "AR_Image_${System.currentTimeMillis()}.jpg")
+                put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
+                put(MediaStore.MediaColumns.RELATIVE_PATH, "Pictures/GlamARtist")
+            }
 
-        val uri = requireContext().contentResolver.insert(
-            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-            contentValues
-        )
+        val uri =
+            requireContext().contentResolver.insert(
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                contentValues,
+            )
         uri?.let {
             requireContext().contentResolver.openOutputStream(it).use { outputStream ->
                 if (outputStream != null) {

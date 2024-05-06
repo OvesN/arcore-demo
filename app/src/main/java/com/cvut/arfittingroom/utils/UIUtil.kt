@@ -12,7 +12,6 @@ import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import com.cvut.arfittingroom.R
-import com.google.android.material.snackbar.Snackbar
 import com.skydoves.colorpickerview.ColorPickerDialog
 import com.skydoves.colorpickerview.listeners.ColorEnvelopeListener
 
@@ -91,7 +90,6 @@ object UIUtil {
         return wrap
     }
 
-
     fun animateButton(view: View) {
         val scaleUpX = ObjectAnimator.ofFloat(view, "scaleX", 1.0f, 1.5f)
         val scaleUpY = ObjectAnimator.ofFloat(view, "scaleY", 1.0f, 1.5f)
@@ -103,15 +101,17 @@ object UIUtil {
         scaleDownX.duration = 150
         scaleDownY.duration = 150
 
-        val scaleUp = AnimatorSet().apply {
-            play(scaleUpX).with(scaleUpY)
-            interpolator = AccelerateDecelerateInterpolator()
-        }
+        val scaleUp =
+            AnimatorSet().apply {
+                play(scaleUpX).with(scaleUpY)
+                interpolator = AccelerateDecelerateInterpolator()
+            }
 
-        val scaleDown = AnimatorSet().apply {
-            play(scaleDownX).with(scaleDownY)
-            interpolator = AccelerateDecelerateInterpolator()
-        }
+        val scaleDown =
+            AnimatorSet().apply {
+                play(scaleDownX).with(scaleDownY)
+                interpolator = AccelerateDecelerateInterpolator()
+            }
 
         AnimatorSet().apply {
             playSequentially(scaleUp, scaleDown)

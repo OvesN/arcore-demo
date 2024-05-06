@@ -9,7 +9,6 @@ import android.widget.Button
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.Toast
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.fragment.app.Fragment
 import com.cvut.arfittingroom.R
@@ -74,7 +73,7 @@ class AccessoriesOptionsFragment : Fragment() {
             }
             .addOnFailureListener { ex ->
                 if (isAdded) {
-                    StyleableToast.makeText(requireContext(), ex.message,  R.style.mytoast).show();
+                    StyleableToast.makeText(requireContext(), ex.message, R.style.mytoast).show()
                 }
             }
     }
@@ -137,7 +136,7 @@ class AccessoriesOptionsFragment : Fragment() {
             }
             .addOnFailureListener { ex ->
                 if (isAdded) {
-                    StyleableToast.makeText(requireContext(), ex.message,  R.style.mytoast).show();
+                    StyleableToast.makeText(requireContext(), ex.message, R.style.mytoast).show()
                 }
             }
     }
@@ -228,5 +227,4 @@ class AccessoriesOptionsFragment : Fragment() {
             selectedOptionTypeToViewId[modelInfo.type] = imageView.id
         }
     }
-
 }

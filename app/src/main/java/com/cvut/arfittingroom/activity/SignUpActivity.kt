@@ -3,9 +3,7 @@ package com.cvut.arfittingroom.activity
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.view.Gravity
 import android.widget.EditText
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import by.kirich1409.viewbindingdelegate.CreateMethod
 import by.kirich1409.viewbindingdelegate.viewBinding
@@ -44,10 +42,10 @@ class SignUpActivity : AppCompatActivity() {
 
         binding.buttonSignUp.setOnClickListener {
             if (validateInput(
-                    usernameInput.text.trim().toString(),
-                    pwdInput.text.trim().toString(),
-                    repeatPwdInput.text.trim().toString(),
-                )
+                usernameInput.text.trim().toString(),
+                pwdInput.text.trim().toString(),
+                repeatPwdInput.text.trim().toString(),
+            )
             ) {
                 createAccount(
                     "${usernameInput.text.trim()}@glamartist.com",
@@ -133,7 +131,7 @@ class SignUpActivity : AppCompatActivity() {
                         StyleableToast.makeText(
                             applicationContext,
                             "user Profile is created for $username",
-                            R.style.mytoast
+                            R.style.mytoast,
                         ).show()
 
                         startActivity(Intent(this, ShowRoomActivity::class.java))

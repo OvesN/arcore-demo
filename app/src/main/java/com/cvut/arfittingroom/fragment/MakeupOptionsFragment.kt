@@ -11,7 +11,6 @@ import android.widget.Button
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.cvut.arfittingroom.R
@@ -33,7 +32,6 @@ import com.cvut.arfittingroom.utils.UIUtil.selectColorButton
 import com.cvut.arfittingroom.utils.UIUtil.selectMakeupButton
 import com.cvut.arfittingroom.utils.UIUtil.showColorPickerDialog
 import com.cvut.arfittingroom.utils.makeFirstLetterCapital
-import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import io.github.muddz.styleabletoast.StyleableToast
@@ -122,27 +120,25 @@ class MakeupOptionsFragment : Fragment() {
     }
 
     private fun fetchMakeupOptions(type: String) {
-            firestore.collection(MAKEUP_COLLECTION)
-                .whereEqualTo(TYPE_ATTRIBUTE, type)
-                .get()
-                .addOnSuccessListener { result ->
-                    val imageRefs =
-                        result.map { document ->
-                            document.getString(REF_ATTRIBUTE)!!
-                        }
-                    view?.let {
-                        updateMakeupOptionsMenu(it, imageRefs, type)
+        firestore.collection(MAKEUP_COLLECTION)
+            .whereEqualTo(TYPE_ATTRIBUTE, type)
+            .get()
+            .addOnSuccessListener { result ->
+                val imageRefs =
+                    result.map { document ->
+                        document.getString(REF_ATTRIBUTE)!!
                     }
-
-                    selectedMakeupType = type
-                }
-                .addOnFailureListener { ex ->
-                    if (isAdded) {
-                        StyleableToast.makeText(requireContext(), ex.message,  R.style.mytoast).show();
-                    }
+                view?.let {
+                    updateMakeupOptionsMenu(it, imageRefs, type)
                 }
 
-
+                selectedMakeupType = type
+            }
+            .addOnFailureListener { ex ->
+                if (isAdded) {
+                    StyleableToast.makeText(requireContext(), ex.message, R.style.mytoast).show()
+                }
+            }
     }
 
     private fun fetchColorOptions() {
@@ -155,7 +151,7 @@ class MakeupOptionsFragment : Fragment() {
             }
             .addOnFailureListener { ex ->
                 if (isAdded) {
-                    StyleableToast.makeText(requireContext(),  ex.message,  R.style.mytoast).show();
+                    StyleableToast.makeText(requireContext(), ex.message, R.style.mytoast).show()
                 }
             }
     }

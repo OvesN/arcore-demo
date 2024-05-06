@@ -10,11 +10,9 @@ import android.os.Handler
 import android.os.Looper
 import android.util.AttributeSet
 import android.util.Log
-import android.view.Gravity
 import android.view.MotionEvent
 import android.view.MotionEvent.ACTION_POINTER_UP
 import android.view.View
-import android.widget.Toast
 import androidx.annotation.ColorInt
 import androidx.core.graphics.alpha
 import com.cvut.arfittingroom.ARFittingRoomApplication
@@ -580,7 +578,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     fun undo() {
         val command = DrawHistoryHolder.undo()
         command?.let {
-            StyleableToast.makeText(context, "Undo ${command.description}",  R.style.mytoast).show();
+            StyleableToast.makeText(context, "Undo ${command.description}", R.style.mytoast).show()
         }
         stopAnimation()
         layerManager.updateLayersBitmaps()
@@ -590,7 +588,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     fun redo() {
         val command = DrawHistoryHolder.redo()
         command?.let {
-            StyleableToast.makeText(context, "Redo ${command.description}",  R.style.mytoast).show();
+            StyleableToast.makeText(context, "Redo ${command.description}", R.style.mytoast).show()
         }
         stopAnimation()
         layerManager.updateLayersBitmaps()
