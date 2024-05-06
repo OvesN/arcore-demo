@@ -24,6 +24,7 @@ object UIUtil {
 
     fun showColorPickerDialog(
         context: Context,
+        shouldShowFillOption: Boolean = false,
         onColorSelected: (Int) -> Unit,
     ) {
         ColorPickerDialog.Builder(context)
@@ -37,6 +38,8 @@ object UIUtil {
             .setNegativeButton(R.string.cancel) { dialogInterface, _ ->
                 dialogInterface.dismiss()
             }
+            //.setSingleChoiceItems()
+            //.setView()
             .attachAlphaSlideBar(true)
             .attachBrightnessSlideBar(true)
             .setBottomSpace(12)

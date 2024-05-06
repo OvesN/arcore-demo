@@ -55,7 +55,7 @@ class MakeupOptionsFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?,
-    ): View = inflater.inflate(R.layout.fragment_menu_horizontal_scroll, container, false)
+    ): View = inflater.inflate(R.layout.fragment_menu, container, false)
 
     override fun onViewCreated(
         view: View,
@@ -91,7 +91,7 @@ class MakeupOptionsFragment : Fragment() {
     }
 
     private fun updateMakeupTypesMenu(view: View) {
-        val options = view.findViewById<LinearLayout>(R.id.options)
+        val options = view.findViewById<LinearLayout>(R.id.horizontal_options)
         options.removeAllViews()
 
         for (makeupType in makeupTypes) {
@@ -160,7 +160,7 @@ class MakeupOptionsFragment : Fragment() {
         view: View,
         colors: List<Int>,
     ) {
-        val options = view.findViewById<LinearLayout>(R.id.options)
+        val options = view.findViewById<LinearLayout>(R.id.horizontal_options)
         options.removeAllViews()
 
         // Add makeup option button
@@ -259,7 +259,7 @@ class MakeupOptionsFragment : Fragment() {
         imageRefs: List<String>,
         type: String,
     ) {
-        val options = view.findViewById<LinearLayout>(R.id.options)
+        val options = view.findViewById<LinearLayout>(R.id.horizontal_options)
         options.removeAllViews()
 
         val button =

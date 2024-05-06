@@ -32,7 +32,7 @@ class LooksOptionsFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?,
-    ): View? = inflater.inflate(R.layout.fragment_menu_horizontal_scroll, container, false)
+    ): View? = inflater.inflate(R.layout.fragment_menu, container, false)
 
     override fun onViewCreated(
         view: View,
@@ -54,7 +54,7 @@ class LooksOptionsFragment : Fragment() {
         view: View,
         lookIds: List<String>,
     ) {
-        val options = view.findViewById<LinearLayout>(R.id.options)
+        val options = view.findViewById<LinearLayout>(R.id.horizontal_options)
         options.removeAllViews()
 
         for (lookId in lookIds) {
