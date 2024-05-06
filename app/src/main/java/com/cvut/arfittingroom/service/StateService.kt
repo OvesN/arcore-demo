@@ -57,12 +57,10 @@ class StateService {
     fun clearFaceNodeSlot(slot: String) {
         loadedModels.remove(slot)
 
-        val iterator = faceNodeMap.entries.iterator()
-        while (iterator.hasNext()) {
-            val entry = iterator.next()
-            entry.value[slot]?.let {
+        faceNodeMap.forEach { (_, nodesMap) ->
+            nodesMap[slot]?.let {
                 it.parent = null
-                iterator.remove()
+                nodesMap.remove(slot)
             }
         }
     }

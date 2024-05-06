@@ -33,7 +33,7 @@ import io.github.muddz.styleabletoast.StyleableToast
 class AccessoriesOptionsFragment : Fragment() {
     private val accessoriesTypes = mutableSetOf<String>()
     private val modelsInfo = mutableListOf<ModelInfo>()
-    private val selectedOptionTypeToViewId = mutableMapOf<String, Int>()
+    private val selectedSlotToViewId = mutableMapOf<String, Int>()
     private var selectedAccessoryType: String = ""
     private lateinit var firestore: FirebaseFirestore
     private lateinit var storage: FirebaseStorage
@@ -121,7 +121,7 @@ class AccessoriesOptionsFragment : Fragment() {
                 for (document in result) {
                     val ref = document[REF_ATTRIBUTE].toString()
                     val preview = document[PREVIEW_IMAGE_ATTRIBUTE].toString()
-                    val slot = document[SLOT_ATTRIBUTE].toString().takeIf { it.isNotEmpty() } ?: ref
+                    val slot = document[SLOT_ATTRIBUTE]?.toString() ?: ref
 
                     modelsInfo.add(
                         ModelInfo(
@@ -187,7 +187,7 @@ class AccessoriesOptionsFragment : Fragment() {
 
             options.addView(imageButton)
 
-            if (selectedOptionTypeToViewId[selectedAccessoryType] == imageButton.id) {
+            if (selectedSlotToViewId.values.contains(imageButton.id)) {
                 selectSquareButton(imageButton)
             }
 
@@ -203,7 +203,7 @@ class AccessoriesOptionsFragment : Fragment() {
         imageView: ImageView,
         modelInfo: ModelInfo,
     ) {
-        selectedOptionTypeToViewId[modelInfo.type]?.let { viewId ->
+        selectedSlotToViewId[modelInfo.slot]?.let { viewId ->
             view.findViewById<ImageView>(viewId)?.let { deselectButton(it) }
         }
 
@@ -213,18 +213,18 @@ class AccessoriesOptionsFragment : Fragment() {
             return
         }
 
-        if (selectedOptionTypeToViewId[modelInfo.type] == imageView.id) {
-            selectedOptionTypeToViewId.remove(modelInfo.type)
+        if (selectedSlotToViewId[modelInfo.slot] == imageView.id) {
+            selectedSlotToViewId.remove(modelInfo.slot)
             listener.removeModel(modelInfo.slot)
 
-            selectedOptionTypeToViewId.remove(modelInfo.type)
+            selectedSlotToViewId.remove(modelInfo.slot)
         } else {
             listener.applyModel(
                 modelInfo,
             )
 
             selectSquareButton(imageView)
-            selectedOptionTypeToViewId[modelInfo.type] = imageView.id
+            selectedSlotToViewId[modelInfo.slot] = imageView.id
         }
     }
 }
