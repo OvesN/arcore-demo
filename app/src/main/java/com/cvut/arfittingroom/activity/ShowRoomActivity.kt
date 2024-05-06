@@ -496,7 +496,7 @@ class ShowRoomActivity :
             showFragment(makeupEditorFragment)
         }
 
-        makeupEditorFragment.applyBackgroundBitmap(stateService.textureBitmap)
+        makeupEditorFragment.applyBackgroundBitmap(stateService.makeupTextureBitmap)
     }
 
     private fun resetMenu() {

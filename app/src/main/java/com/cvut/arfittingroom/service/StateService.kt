@@ -21,7 +21,7 @@ import com.google.ar.sceneform.ux.AugmentedFaceNode
  */
 class StateService {
     val appliedMakeUpTypes = mutableMapOf<String, MakeupInfo>()
-    var textureBitmap: Bitmap? = null
+    var makeupTextureBitmap: Bitmap? = null
     private val makeUpBitmaps = mutableListOf<Bitmap>()
     private val loadedModels = mutableMapOf<String, ModelInfo>()
     val faceNodesInfo = FaceNodesInfo(null, mutableMapOf())
@@ -50,7 +50,7 @@ class StateService {
     fun clearAll() {
         loadedModels.clear()
         clearFaceNodes()
-        textureBitmap = null
+        makeupTextureBitmap = null
         appliedMakeUpTypes.clear()
         loadedModels.clear()
     }
@@ -141,8 +141,6 @@ class StateService {
         sceneView: ArSceneView,
         slot: String
     ) {
-        textureBitmap = combinedBitmap
-
         // Convert Bitmap to ARCore Texture
         Texture.builder()
             .setSource(combinedBitmap)
@@ -163,8 +161,8 @@ class StateService {
         makeUpBitmaps.add(image)
 
         if (areMakeupBitmapsPrepared()) {
-            val combinedBitmap = combineMakeUpBitmaps()
-            combinedBitmap?.let { createTextureAndApply(it, sceneView, MAKEUP_SLOT) }
+            makeupTextureBitmap = combineMakeUpBitmaps()
+            makeupTextureBitmap?.let { createTextureAndApply(it, sceneView, MAKEUP_SLOT) }
         }
     }
 

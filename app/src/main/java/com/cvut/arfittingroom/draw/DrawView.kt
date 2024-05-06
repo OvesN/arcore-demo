@@ -13,7 +13,6 @@ import android.util.Log
 import android.view.MotionEvent
 import android.view.MotionEvent.ACTION_POINTER_UP
 import android.view.View
-import android.view.ViewTreeObserver
 import androidx.annotation.ColorInt
 import androidx.core.graphics.alpha
 import com.cvut.arfittingroom.ARFittingRoomApplication
@@ -641,13 +640,16 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     private fun draw(
         canvas: Canvas,
-        shouldDrawFaceTexture: Boolean = true,
+        shouldDrawBackground: Boolean = true,
     ) {
-        uiDrawer.drawBackground(canvas)
+        if (shouldDrawBackground) {
+            uiDrawer.drawBackground(canvas)
+        }
+
         layerManager.drawLayers(canvas, paintOptions)
         uiDrawer.drawSelectedElementEditIcons(canvas, selectedElement, isInElementMenuMode)
 
-        if (shouldDrawFaceTexture) {
+        if (shouldDrawBackground) {
             uiDrawer.drawFaceTextureImage(canvas)
         }
     }
@@ -920,7 +922,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     }
 
     fun applyBitmapBackground(bitmap: Bitmap?) {
-        uiDrawer.backgroundBitmap = bitmap
+        uiDrawer.setBackgroundBitmap(bitmap)
     }
 
     interface OnLayerInitializedListener {

@@ -30,7 +30,8 @@ class UIDrawer(private val context: Context) {
     private val editElementIconsBounds: HashMap<EElementEditAction, RectF> = hashMapOf()
     private val menuBitmap: Bitmap
     private val faceTextureBitmap: Bitmap?
-    var backgroundBitmap: Bitmap? = null
+    private var backgroundBitmap: Bitmap? = null
+    private var backgroundBitmapMatrix = Matrix()
     private val faceTextureMatrix: Matrix
     private var faceTextureVector: VectorDrawableCompat? = null
 
@@ -60,15 +61,15 @@ class UIDrawer(private val context: Context) {
         faceTextureVector =
             VectorDrawableCompat.create(context.resources, R.drawable.facemesh, null)
         faceTextureBitmap = faceTextureVector?.toBitmap()
-        faceTextureMatrix = prepareFaceTextureMatrix()
+        faceTextureMatrix = prepareMatrix(faceTextureBitmap)
         loadEditElementIcons()
     }
 
-    private fun prepareFaceTextureMatrix(): Matrix {
+    private fun prepareMatrix(bitmap: Bitmap?): Matrix {
         val bitmapWidth =
-            faceTextureBitmap?.let { it.width } ?: faceTextureVector?.let { it.intrinsicWidth } ?: 0
+            bitmap?.width ?: faceTextureVector?.intrinsicWidth ?: 0
         val bitmapHeight =
-            faceTextureBitmap?.let { it.height } ?: faceTextureVector?.let { it.intrinsicHeight }
+            bitmap?.height ?: faceTextureVector?.intrinsicHeight
                 ?: 0
 
         val scale =
@@ -242,12 +243,17 @@ class UIDrawer(private val context: Context) {
         }
     }
 
+    fun setBackgroundBitmap(bitmap: Bitmap?) {
+        backgroundBitmap = bitmap
+        backgroundBitmapMatrix = prepareMatrix(bitmap)
+    }
+
     fun checkEditButtons(
         x: Float,
         y: Float,
     ): EElementEditAction? = editElementIconsBounds.entries.firstOrNull { it.value.contains(x, y) }?.key
 
     fun drawBackground(canvas: Canvas) {
-        backgroundBitmap?.let { canvas.drawBitmap(it, faceTextureMatrix, null) }
+        backgroundBitmap?.let { canvas.drawBitmap(it, backgroundBitmapMatrix, null) }
     }
 }
