@@ -173,7 +173,6 @@ class AccessoriesOptionsFragment : Fragment() {
             val imageWidth =
                 (options.width - options.paddingStart - options.paddingEnd)/ NUM_OF_ELEMENTS_IN_ROW
 
-
             modelsInfo.forEach { modelInfo ->
                 val imageButton =
                     ImageButton(context).apply {
