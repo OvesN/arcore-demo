@@ -24,6 +24,7 @@ import com.cvut.arfittingroom.fragment.AccessoriesOptionsFragment
 import com.cvut.arfittingroom.fragment.CameraModeFragment
 import com.cvut.arfittingroom.fragment.LooksOptionsFragment
 import com.cvut.arfittingroom.fragment.MakeupOptionsFragment
+import com.cvut.arfittingroom.fragment.ProfileFragment
 import com.cvut.arfittingroom.model.LOOKS_COLLECTION
 import com.cvut.arfittingroom.model.MAKEUP_SLOT
 import com.cvut.arfittingroom.model.MASK_FRAME_FILE_NAME
@@ -76,6 +77,8 @@ UIChangeListener {
     private val looksOptionsFragment = LooksOptionsFragment()
     private val makeupOptionsFragment = MakeupOptionsFragment()
     private val cameraModeFragment = CameraModeFragment()
+    private val profileFragment = ProfileFragment()
+
     private lateinit var arFragment: ArFrontFacingFragment
     private lateinit var arSceneView: ArSceneView
     private lateinit var auth: FirebaseAuth
@@ -150,6 +153,9 @@ UIChangeListener {
         }
         binding.cameraModeButton.setOnClickListener {
             showCameraModeUI()
+        }
+        binding.profileButton.setOnClickListener {
+            showProfileUI()
         }
         binding.maskEditorButton.setOnClickListener {
             val intent = Intent(this, MakeupEditorActivity::class.java)
@@ -433,7 +439,9 @@ UIChangeListener {
             .add(R.id.menu_fragment_container, accessoriesOptionsFragment)
             .add(R.id.menu_fragment_container, looksOptionsFragment)
             .add(R.id.fragment_container, cameraModeFragment)
+            .add(R.id.fragment_container, profileFragment)
             .hide(cameraModeFragment)
+            .hide(profileFragment)
             .commit()
     }
 
@@ -460,6 +468,12 @@ UIChangeListener {
         findViewById<View>(R.id.bottom_ui).visibility = View.GONE
         cameraModeFragment.setARFragment(arFragment)
         showFragment(cameraModeFragment)
+    }
+
+    private fun showProfileUI() {
+        findViewById<View>(R.id.top_ui).visibility = View.GONE
+        findViewById<View>(R.id.bottom_ui).visibility = View.GONE
+        showFragment(profileFragment)
     }
 
     private fun resetMenu() {
@@ -546,6 +560,7 @@ UIChangeListener {
         findViewById<View>(R.id.bottom_ui).visibility = View.VISIBLE
         supportFragmentManager.beginTransaction()
             .hide(cameraModeFragment)
+            .hide(profileFragment)
             .commit()
     }
 

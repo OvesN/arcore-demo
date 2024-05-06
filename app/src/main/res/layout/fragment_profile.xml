@@ -6,14 +6,14 @@
     android:background="@drawable/main_window_background">
 
     <Button
-        android:id="@+id/button_back_to_editor"
+        android:id="@+id/back_to_editor_button"
         style="@style/LongButtonStyle"
         android:layout_width="0dp"
         android:layout_height="35dp"
         android:text="@string/backToEditor"
         android:textAllCaps="false"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/button_log_out"
+        app:layout_constraintBottom_toTopOf="@+id/log_out_button"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintVertical_chainStyle="packed"
@@ -21,14 +21,14 @@
     app:layout_constraintWidth_percent="0.7" />
 
     <Button
-        android:id="@+id/button_log_out"
+        android:id="@+id/log_out_button"
         style="@style/LongButtonStyle"
         android:layout_width="0dp"
         android:layout_height="35dp"
         android:layout_marginTop="15dp"
         android:text="@string/logOut"
         android:textAllCaps="false"
-        app:layout_constraintTop_toBottomOf="@id/button_back_to_editor"
+        app:layout_constraintTop_toBottomOf="@id/back_to_editor_button"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

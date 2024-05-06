@@ -23,7 +23,7 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageButton
-            android:id="@+id/button_profile"
+            android:id="@+id/profile_button"
             android:layout_width="50dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
@@ -42,7 +42,7 @@
             android:src="@drawable/camera_mode"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/mask_editor_button"
-            app:layout_constraintStart_toEndOf="@id/button_profile"
+            app:layout_constraintStart_toEndOf="@id/profile_button"
             app:layout_constraintTop_toTopOf="parent" />
 
         <ImageButton
