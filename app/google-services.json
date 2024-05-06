@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "894358034801",
+    "firebase_url": "https://glamartist-default-rtdb.firebaseio.com",
+    "project_id": "glamartist",
+    "storage_bucket": "glamartist.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:894358034801:android:f6610df45f0cae82f43ed0",
+        "android_client_info": {
+          "package_name": "com.cvut.arfittingroom"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDgmW7ciG1xc6cyZjPIMoQl6qQ6hSrj1jk"
+        },
+        {
+          "current_key": "AIzaSyB-D3CE9GSj8t3cvyzb0WU-8TJSYb4ggPs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:894358034801:android:58aa22e3d65080d9f43ed0",
+        "android_client_info": {
+          "package_name": "cz.cvut.arfittingroom"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDgmW7ciG1xc6cyZjPIMoQl6qQ6hSrj1jk"
+        },
+        {
+          "current_key": "AIzaSyB-D3CE9GSj8t3cvyzb0WU-8TJSYb4ggPs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

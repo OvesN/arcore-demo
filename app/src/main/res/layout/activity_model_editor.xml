@@ -21,7 +21,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="end|top"
         android:background="@null"
-        android:src="@drawable/back_icon" />
+        android:src="@drawable/return_icon" />
 
     <Button
         android:id="@+id/button_change_color"

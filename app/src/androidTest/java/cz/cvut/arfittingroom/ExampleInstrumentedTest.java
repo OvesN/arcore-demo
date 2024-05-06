@@ -1,4 +1,4 @@
-package cz.cvut.arfittingroom;
+package com.cvut.arfittingroom;
 
 import android.content.Context;
 

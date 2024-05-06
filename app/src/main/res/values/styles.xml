@@ -2,14 +2,33 @@
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
-        <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
     <style name="MyMaterialTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
-        <!-- Add attributes here -->
         <item name="colorPrimary">@color/colorBlue</item>
     </style>
+
+    <style name="CustomSliderStyle" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="colorPrimary">#FFFFFF</item>
+    </style>
+
+    <style name="LongButtonStyle" parent="Widget.AppCompat.Button">
+        <item name="android:background">@drawable/button</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:gravity">center</item>
+    </style>
+
+    <style name="mytoast">
+        <item name="stTextBold">true</item>
+        <item name="stTextColor">#000000</item>
+        <item name="stColorBackground">@color/colorLightGrey</item>
+        <item name="stLength">SHORT</item>
+        <item name="stGravity">top</item>
+        <item name="stRadius">5dp</item>
+    </style>
+
 </resources>

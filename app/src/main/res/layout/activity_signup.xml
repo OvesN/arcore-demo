@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activity.SignUpActivity"
+    android:paddingStart="20dp"
+    android:background="#FFFFFF"
+    android:paddingEnd="20dp">
+
+    <ImageButton
+        android:id="@+id/button_return"
+        android:layout_width="wrap_content"
+        android:layout_height="32dp"
+        android:layout_marginTop="30dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:background="@null"
+        android:scaleType="fitCenter"
+        android:src="@drawable/return_icon"
+        android:contentDescription="@string/return_to_main_window" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/createAccount"
+            android:gravity="start"
+            android:textSize="40sp"
+            android:textColor="@color/colorBlack"
+            android:textStyle="bold" />
+
+        <EditText
+            android:id="@+id/username"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:autofillHints="username"
+            android:hint="@string/username"
+            android:inputType="text"
+            android:textColor="@color/colorMediumGrey"
+            android:textColorHint="@color/colorMediumGrey"
+            android:background="@drawable/input"/>
+
+
+        <EditText
+            android:id="@+id/pwd"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:autofillHints="password"
+            android:hint="@string/password"
+            android:inputType="textPassword"
+            android:textColor="@color/colorMediumGrey"
+            android:textColorHint="@color/colorMediumGrey"
+            android:background="@drawable/input"/>
+
+        <EditText
+            android:id="@+id/pwd_repeat"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:autofillHints="password"
+            android:hint="@string/repeatPassword"
+            android:inputType="textPassword"
+            android:layout_marginBottom="40dp"
+            android:textColor="@color/colorMediumGrey"
+            android:textColorHint="@color/colorMediumGrey"
+            android:background="@drawable/input"/>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <Button
+                android:id="@+id/button_sign_up"
+                style="@style/LongButtonStyle"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:text="@string/singUp"
+                android:textAllCaps="false"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintWidth_percent="0.9" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </LinearLayout>
+
+</RelativeLayout>

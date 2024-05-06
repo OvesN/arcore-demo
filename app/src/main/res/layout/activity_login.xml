@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF"
+    android:paddingStart="20dp"
+    android:paddingEnd="20dp"
+    tools:context=".activity.LogInActivity">
+
+    <ImageButton
+        android:id="@+id/button_return"
+        android:layout_width="wrap_content"
+        android:layout_height="32dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="30dp"
+        android:background="@null"
+        android:contentDescription="@string/return_to_main_window"
+        android:scaleType="fitCenter"
+        android:src="@drawable/return_icon" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="start"
+            android:text="@string/welcomeBack"
+            android:textColor="@color/colorBlack"
+            android:textSize="40sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="40dp"
+            android:gravity="start"
+            android:text="@string/enterLogIn"
+            android:textAllCaps="false"
+            android:textColor="@color/colorMediumGrey" />
+
+        <EditText
+            android:id="@+id/username"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:autofillHints="username"
+            android:background="@drawable/input"
+            android:hint="@string/username"
+            android:inputType="text"
+            android:textColor="@color/colorMediumGrey"
+            android:textColorHint="@color/colorMediumGrey" />
+
+
+        <EditText
+            android:id="@+id/pwd"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_marginBottom="40dp"
+            android:autofillHints="password"
+            android:background="@drawable/input"
+            android:hint="@string/password"
+            android:inputType="textPassword"
+            android:textColor="@color/colorMediumGrey"
+            android:textColorHint="@color/colorMediumGrey" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <Button
+                android:id="@+id/button_log_in"
+                style="@style/LongButtonStyle"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:text="@string/logIn"
+                android:textAllCaps="false"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintWidth_percent="0.9" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="5dp"
+                android:text="@string/or"
+                android:textAllCaps="false"
+                android:textColor="@color/colorMediumGrey" />
+
+            <TextView
+                android:id="@+id/button_sing_up"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:minWidth="48dp"
+                android:minHeight="48dp"
+                android:padding="12dp"
+                android:text="@string/newAccount"
+                android:textAllCaps="false"
+                android:textColor="@color/colorBlack"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</RelativeLayout>
