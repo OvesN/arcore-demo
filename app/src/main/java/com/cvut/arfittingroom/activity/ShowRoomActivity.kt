@@ -68,10 +68,6 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener, UIChangeListener
     private var gifRunnable: Runnable? = null
 
     private var frameDelay: Long = 100  // Default frame delay (100 ms per frame)
-    private val accessoriesOptionsFragment = AccessoriesOptionsFragment()
-    private val looksOptionsFragment = LooksOptionsFragment()
-    private val makeupOptionsFragment = MakeupOptionsFragment()
-    private val cameraModeFragment = CameraModeFragment()
 
     private var shouldClearEditor = false
 
@@ -84,6 +80,10 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener, UIChangeListener
     private lateinit var fireStore: FirebaseFirestore
     private lateinit var storage: FirebaseStorage
 
+    private val accessoriesOptionsFragment = AccessoriesOptionsFragment()
+    private val looksOptionsFragment = LooksOptionsFragment()
+    private val makeupOptionsFragment = MakeupOptionsFragment()
+    private val cameraModeFragment = CameraModeFragment()
 
     @Inject
     lateinit var stateService: StateService
@@ -130,6 +130,10 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener, UIChangeListener
                 supportFragmentManager.beginTransaction()
                     .add(R.id.arFragment, ArFrontFacingFragment::class.java, null)
                     .commit()
+            }
+            else {
+                StyleableToast.makeText(this, "Sceneform is not supported",  R.style.mytoast)
+                finish()
             }
         }
 
@@ -460,9 +464,8 @@ class ShowRoomActivity : AppCompatActivity(), ResourceListener, UIChangeListener
     private fun showCameraModeUI() {
         findViewById<View>(R.id.top_ui).visibility = View.GONE
         findViewById<View>(R.id.bottom_ui).visibility = View.GONE
-        cameraModeFragment.arFragment = arFragment
+        cameraModeFragment.setARFragment(arFragment)
         showFragment(cameraModeFragment)
-
     }
 
     private fun resetMenu() {

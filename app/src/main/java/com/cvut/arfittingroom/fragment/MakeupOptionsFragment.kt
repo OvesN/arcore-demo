@@ -33,6 +33,7 @@ import com.cvut.arfittingroom.utils.UIUtil.selectColorButton
 import com.cvut.arfittingroom.utils.UIUtil.selectMakeupButton
 import com.cvut.arfittingroom.utils.UIUtil.showColorPickerDialog
 import com.cvut.arfittingroom.utils.makeFirstLetterCapital
+import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import io.github.muddz.styleabletoast.StyleableToast
@@ -121,25 +122,27 @@ class MakeupOptionsFragment : Fragment() {
     }
 
     private fun fetchMakeupOptions(type: String) {
-        firestore.collection(MAKEUP_COLLECTION)
-            .whereEqualTo(TYPE_ATTRIBUTE, type)
-            .get()
-            .addOnSuccessListener { result ->
-                val imageRefs =
-                    result.map { document ->
-                        document.getString(REF_ATTRIBUTE)!!
+            firestore.collection(MAKEUP_COLLECTION)
+                .whereEqualTo(TYPE_ATTRIBUTE, type)
+                .get()
+                .addOnSuccessListener { result ->
+                    val imageRefs =
+                        result.map { document ->
+                            document.getString(REF_ATTRIBUTE)!!
+                        }
+                    view?.let {
+                        updateMakeupOptionsMenu(it, imageRefs, type)
                     }
-                view?.let {
-                    updateMakeupOptionsMenu(it, imageRefs, type)
+
+                    selectedMakeupType = type
+                }
+                .addOnFailureListener { ex ->
+                    if (isAdded) {
+                        StyleableToast.makeText(requireContext(), ex.message,  R.style.mytoast).show();
+                    }
                 }
 
-                selectedMakeupType = type
-            }
-            .addOnFailureListener { ex ->
-                if (isAdded) {
-                    StyleableToast.makeText(requireContext(), ex.message,  R.style.mytoast).show();
-                }
-            }
+
     }
 
     private fun fetchColorOptions() {
