@@ -28,6 +28,7 @@ import com.cvut.arfittingroom.fragment.ProfileFragment
 import com.cvut.arfittingroom.model.LOOKS_COLLECTION
 import com.cvut.arfittingroom.model.MAKEUP_SLOT
 import com.cvut.arfittingroom.model.MASK_FRAME_FILE_NAME
+import com.cvut.arfittingroom.model.MASK_TEXTURE_SLOT
 import com.cvut.arfittingroom.model.MakeupInfo
 import com.cvut.arfittingroom.model.ModelInfo
 import com.cvut.arfittingroom.service.StateService
@@ -38,6 +39,7 @@ import com.cvut.arfittingroom.utils.FileUtil.getNextTempMaskFrameInputStream
 import com.cvut.arfittingroom.utils.FileUtil.getTempMaskTextureBitmap
 import com.google.android.filament.LightManager
 import com.google.ar.core.ArCoreApk
+import com.google.ar.core.AugmentedFace
 import com.google.ar.sceneform.ArSceneView
 import com.google.ar.sceneform.Sceneform
 import com.google.ar.sceneform.rendering.ModelRenderable
@@ -85,6 +87,7 @@ class ShowRoomActivity :
     private lateinit var fireStore: FirebaseFirestore
     private lateinit var storage: FirebaseStorage
 
+
     @Inject
     lateinit var stateService: StateService
 
@@ -94,7 +97,7 @@ class ShowRoomActivity :
 
         val bitmap = getTempMaskTextureBitmap(applicationContext)
         bitmap?.let {
-            stateService.createTextureAndApply(it, arFragment.arSceneView)
+            stateService.createTextureAndApply(it, arFragment.arSceneView, MASK_TEXTURE_SLOT)
             shouldPlayAnimation = false
         }
 
@@ -248,13 +251,17 @@ class ShowRoomActivity :
 
         // Check for face detections
 
-        arFragment.setOnAugmentedFaceUpdateListener {
-            stateService.hideNodesIfFaceTrackingStopped()
+        arFragment.setOnAugmentedFaceUpdateListener { face ->
+            onAugmentedFaceTrackingUpdate(face)
         }
     }
 
-    private fun onAugmentedFaceTrackingUpdate() {
+    private fun onAugmentedFaceTrackingUpdate(face: AugmentedFace) {
         stateService.hideNodesIfFaceTrackingStopped()
+
+        if (stateService.faceNodesInfo.augmentedFace != face) {
+            stateService.reapplyNodesForNewFace(face, arSceneView)
+        }
 
         if (shouldPlayAnimation) {
             if (!gifPrepared) {
@@ -406,6 +413,7 @@ class ShowRoomActivity :
                             stateService.applyTextureToFaceNode(
                                 gifTextures[frameCounter],
                                 arSceneView,
+                                MASK_TEXTURE_SLOT,
                             )
                             frameCounter = (frameCounter + 1) % gifTextures.size
                         }

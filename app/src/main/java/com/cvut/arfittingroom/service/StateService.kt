@@ -3,6 +3,7 @@ package com.cvut.arfittingroom.service
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.util.Log
+import com.cvut.arfittingroom.model.FaceNodesInfo
 import com.cvut.arfittingroom.model.MAKEUP_SLOT
 import com.cvut.arfittingroom.model.MakeupInfo
 import com.cvut.arfittingroom.model.ModelInfo
@@ -22,8 +23,8 @@ class StateService {
     val appliedMakeUpTypes = mutableMapOf<String, MakeupInfo>()
     private var textureBitmap: Bitmap? = null
     private val makeUpBitmaps = mutableListOf<Bitmap>()
-    val loadedModels = mutableMapOf<String, ModelInfo>()
-    private val faceNodeMap = HashMap<AugmentedFace, HashMap<String, AugmentedFaceNode>>()
+    private val loadedModels = mutableMapOf<String, ModelInfo>()
+    val faceNodesInfo = FaceNodesInfo(null, mutableMapOf())
 
     private fun areMakeupBitmapsPrepared() = makeUpBitmaps.size == appliedMakeUpTypes.size
 
@@ -57,12 +58,11 @@ class StateService {
     fun clearFaceNodeSlot(slot: String) {
         loadedModels.remove(slot)
 
-        faceNodeMap.forEach { (_, nodesMap) ->
-            nodesMap[slot]?.let {
-                it.parent = null
-                nodesMap.remove(slot)
-            }
+        faceNodesInfo.slotToFaceNodeMap[slot]?.let {
+            it.parent = null
+            faceNodesInfo.slotToFaceNodeMap.remove(slot)
         }
+
     }
 
     fun addModel(modelInfo: ModelInfo) {
@@ -75,12 +75,14 @@ class StateService {
         slot: String,
     ) {
         sceneView.session?.getAllTrackables(AugmentedFace::class.java)?.forEach { face ->
-            val nodesMap = faceNodeMap.getOrPut(face) { HashMap() }
+            if (faceNodesInfo.augmentedFace != face) {
+                reapplyNodesForNewFace(face, sceneView)
+            }
 
-            nodesMap[slot] ?: AugmentedFaceNode(face).also { newNode ->
+            faceNodesInfo.slotToFaceNodeMap[slot] ?: AugmentedFaceNode(face).also { newNode ->
                 newNode.parent = sceneView.scene
                 newNode.renderable = renderable
-                nodesMap[slot] = newNode
+                faceNodesInfo.slotToFaceNodeMap[slot] = newNode
             }.apply {
                 this.renderable = renderable
             }
@@ -88,27 +90,25 @@ class StateService {
     }
 
     private fun clearFaceNodes() {
-        faceNodeMap.values.forEach { map ->
-            map.values.forEach { it.parent = null }
+        faceNodesInfo.slotToFaceNodeMap.values.forEach {
+            it.parent = null
         }
 
-        faceNodeMap.clear()
+        faceNodesInfo.slotToFaceNodeMap.clear()
     }
 
     fun hideNodesIfFaceTrackingStopped() {
-        faceNodeMap.entries.forEach { (face, nodes) ->
-            if (face.trackingState == TrackingState.STOPPED ||
-                face.trackingState == TrackingState.PAUSED
-            ) {
-                nodes.forEach { entry ->
-                    if (entry.value.isEnabled) {
-                        entry.value.isEnabled = false
+        faceNodesInfo.augmentedFace?.let { augmentedFace ->
+            if (augmentedFace.trackingState == TrackingState.STOPPED || augmentedFace.trackingState == TrackingState.PAUSED) {
+                faceNodesInfo.slotToFaceNodeMap.values.forEach { node ->
+                    if (node.isEnabled) {
+                        node.isEnabled = false
                     }
                 }
             } else {
-                nodes.forEach { entry ->
-                    if (!entry.value.isEnabled) {
-                        entry.value.isEnabled = true
+                faceNodesInfo.slotToFaceNodeMap.values.forEach { node ->
+                    if (!node.isEnabled) {
+                        node.isEnabled = true
                     }
                 }
             }
@@ -118,12 +118,15 @@ class StateService {
     fun applyTextureToFaceNode(
         texture: Texture,
         sceneView: ArSceneView,
+        slot: String
     ) {
         sceneView.session?.getAllTrackables(AugmentedFace::class.java)?.forEach { face ->
-            val modelNodesMap = faceNodeMap.getOrPut(face) { HashMap() }
+            if (faceNodesInfo.augmentedFace != face) {
+                reapplyNodesForNewFace(face,sceneView)
+            }
 
             val faceNode =
-                modelNodesMap.getOrPut(MAKEUP_SLOT) {
+                faceNodesInfo.slotToFaceNodeMap.getOrPut(slot) {
                     AugmentedFaceNode(face).apply {
                         parent = sceneView.scene
                     }
@@ -136,6 +139,7 @@ class StateService {
     fun createTextureAndApply(
         combinedBitmap: Bitmap,
         sceneView: ArSceneView,
+        slot: String
     ) {
         textureBitmap = combinedBitmap
 
@@ -143,7 +147,7 @@ class StateService {
         Texture.builder()
             .setSource(combinedBitmap)
             .build()
-            .thenAccept { texture -> applyTextureToFaceNode(texture, sceneView) }
+            .thenAccept { texture -> applyTextureToFaceNode(texture, sceneView, slot) }
             .exceptionally {
                 Log.println(Log.ERROR, null, "Error during texture initialisation")
                 null
@@ -160,7 +164,16 @@ class StateService {
 
         if (areMakeupBitmapsPrepared()) {
             val combinedBitmap = combineMakeUpBitmaps()
-            combinedBitmap?.let { createTextureAndApply(it, sceneView) }
+            combinedBitmap?.let { createTextureAndApply(it, sceneView, MAKEUP_SLOT) }
+        }
+    }
+
+    fun reapplyNodesForNewFace(face: AugmentedFace, sceneView: ArSceneView) {
+        faceNodesInfo.augmentedFace = face
+
+        faceNodesInfo.slotToFaceNodeMap.values.forEach {
+            it.parent = sceneView.scene
+            it.augmentedFace = face
         }
     }
 }

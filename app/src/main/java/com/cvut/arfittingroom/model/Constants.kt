@@ -5,6 +5,7 @@ const val MASK_FRAME_FILE_NAME = "frame"
 const val MASK_FRAMES_DIR_NAME = "mask_frames"
 
 const val MAKEUP_SLOT = "makeup"
+const val MASK_TEXTURE_SLOT = "mask"
 
 const val TRANSPARENT_CODE = 0xFF_000_000
 const val TOUCH_TO_MOVE_THRESHOLD = 20f
