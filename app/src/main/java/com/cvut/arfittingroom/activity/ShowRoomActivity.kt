@@ -2,7 +2,6 @@ package com.cvut.arfittingroom.activity
 
 import android.app.ActivityManager
 import android.content.Context
-import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.os.Handler
@@ -23,6 +22,7 @@ import com.cvut.arfittingroom.databinding.ActivityShowRoomBinding
 import com.cvut.arfittingroom.fragment.AccessoriesOptionsFragment
 import com.cvut.arfittingroom.fragment.CameraModeFragment
 import com.cvut.arfittingroom.fragment.LooksOptionsFragment
+import com.cvut.arfittingroom.fragment.MakeupEditorFragment
 import com.cvut.arfittingroom.fragment.MakeupOptionsFragment
 import com.cvut.arfittingroom.fragment.ProfileFragment
 import com.cvut.arfittingroom.model.LOOKS_COLLECTION
@@ -71,7 +71,6 @@ class ShowRoomActivity :
     private var gifRunnable: Runnable? = null
 
     private var frameDelay: Long = 100  // Default frame delay (100 ms per frame)
-    private var shouldClearEditor = false
 
     // FIXME do not do it like that!
     private var lookId: String = ""
@@ -81,6 +80,8 @@ class ShowRoomActivity :
     private val makeupOptionsFragment = MakeupOptionsFragment()
     private val cameraModeFragment = CameraModeFragment()
     private val profileFragment = ProfileFragment()
+    private val makeupEditorFragment = MakeupEditorFragment()
+
     private lateinit var arFragment: ArFrontFacingFragment
     private lateinit var arSceneView: ArSceneView
     private lateinit var auth: FirebaseAuth
@@ -161,10 +162,12 @@ class ShowRoomActivity :
             showProfileUI()
         }
         binding.maskEditorButton.setOnClickListener {
-            val intent = Intent(this, MakeupEditorActivity::class.java)
-            intent.putExtra("shouldClearEditor", shouldClearEditor)
-            startActivity(intent)
-            finish()
+//            val intent = Intent(this, MakeupEditorFragment::class.java)
+//            intent.putExtra("shouldClearEditor", shouldClearEditor)
+//            startActivity(intent)
+//            finish()
+
+            showMakeupEditorUI()
         }
     }
 
@@ -334,7 +337,7 @@ class ShowRoomActivity :
 
     private fun checkIsSupportedDeviceOrFinish(): Boolean {
         if (ArCoreApk.getInstance()
-            .checkAvailability(this) == ArCoreApk.Availability.UNSUPPORTED_DEVICE_NOT_CAPABLE
+                .checkAvailability(this) == ArCoreApk.Availability.UNSUPPORTED_DEVICE_NOT_CAPABLE
         ) {
             StyleableToast.makeText(this, "Augmented Faces requires ARCore", R.style.mytoast).show()
             finish()
@@ -347,7 +350,11 @@ class ShowRoomActivity :
 
         openGlVersionString?.let {
             if (java.lang.Double.parseDouble(openGlVersionString) < MIN_OPENGL_VERSION) {
-                StyleableToast.makeText(this, "Sceneform requires OpenGL ES 3.0 or later", R.style.mytoast).show()
+                StyleableToast.makeText(
+                    this,
+                    "Sceneform requires OpenGL ES 3.0 or later",
+                    R.style.mytoast
+                ).show()
                 finish()
                 return false
             }
@@ -446,10 +453,6 @@ class ShowRoomActivity :
             .add(R.id.menu_fragment_container, makeupOptionsFragment)
             .add(R.id.menu_fragment_container, accessoriesOptionsFragment)
             .add(R.id.menu_fragment_container, looksOptionsFragment)
-            .add(R.id.fragment_container, cameraModeFragment)
-            .add(R.id.fragment_container, profileFragment)
-            .hide(cameraModeFragment)
-            .hide(profileFragment)
             .commit()
     }
 
@@ -474,14 +477,40 @@ class ShowRoomActivity :
     private fun showCameraModeUI() {
         findViewById<View>(R.id.top_ui).visibility = View.GONE
         findViewById<View>(R.id.bottom_ui).visibility = View.GONE
+        supportFragmentManager
+            .beginTransaction()
+            .replace(R.id.fragment_container, cameraModeFragment)
+            .commit()
         cameraModeFragment.setARFragment(arFragment)
-        showFragment(cameraModeFragment)
     }
 
     private fun showProfileUI() {
         findViewById<View>(R.id.top_ui).visibility = View.GONE
         findViewById<View>(R.id.bottom_ui).visibility = View.GONE
-        showFragment(profileFragment)
+        supportFragmentManager
+            .beginTransaction()
+            .replace(R.id.fragment_container, profileFragment)
+            .commit()
+    }
+
+    private fun showMakeupEditorUI() {
+        findViewById<View>(R.id.top_ui).visibility = View.GONE
+        findViewById<View>(R.id.bottom_ui).visibility = View.GONE
+        val fragmentManager = supportFragmentManager
+        val existingFragment = fragmentManager.findFragmentByTag(MakeupEditorFragment.MAKEUP_EDITOR_FRAGMENT_TAG)
+
+        if (existingFragment == null) {
+            val makeupEditorFragment = MakeupEditorFragment()
+            fragmentManager.beginTransaction()
+                .add(
+                    R.id.makeup_editor_fragment_container,
+                    makeupEditorFragment,
+                    MakeupEditorFragment.MAKEUP_EDITOR_FRAGMENT_TAG
+                )
+                .commit()
+        } else {
+            showFragment(existingFragment)
+        }
     }
 
     private fun resetMenu() {
@@ -530,7 +559,11 @@ class ShowRoomActivity :
                     null,
                     "Look $lookId uploaded",
                 )
-                StyleableToast.makeText(applicationContext, "Look saved successfully", R.style.mytoast).show()
+                StyleableToast.makeText(
+                    applicationContext,
+                    "Look saved successfully",
+                    R.style.mytoast
+                ).show()
             }
             .addOnFailureListener { ex -> Log.println(Log.ERROR, null, "onFailure: $ex") }
     }
@@ -546,7 +579,7 @@ class ShowRoomActivity :
             val uploadTask =
                 ref.putStream(frameStream)
                     .addOnSuccessListener { taskSnapshot ->
-                        }
+                    }
             uploadTask.addOnFailureListener {
                 StyleableToast.makeText(applicationContext, it.message, R.style.mytoast).show()
             }
@@ -559,17 +592,19 @@ class ShowRoomActivity :
         stopAnimation()
         deleteTempFiles(applicationContext)
         stateService.clearAll()
-
-        shouldClearEditor = true
+        makeupEditorFragment.clearAll()
     }
 
     override fun showMainLayout() {
         findViewById<View>(R.id.top_ui).visibility = View.VISIBLE
         findViewById<View>(R.id.bottom_ui).visibility = View.VISIBLE
-        supportFragmentManager.beginTransaction()
-            .hide(cameraModeFragment)
-            .hide(profileFragment)
-            .commit()
+        val makeupEditor = supportFragmentManager.findFragmentByTag(MakeupEditorFragment.MAKEUP_EDITOR_FRAGMENT_TAG)
+
+        val transaction = supportFragmentManager
+            .beginTransaction()
+            .remove(cameraModeFragment)
+        makeupEditor?.let { transaction.hide(makeupEditor) }
+        transaction.commit()
     }
 
     companion object {

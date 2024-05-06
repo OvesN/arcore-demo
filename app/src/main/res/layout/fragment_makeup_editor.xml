@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".activity.MakeupEditorActivity">
+    tools:context=".fragment.MakeupEditorFragment">
 
     <ImageView
         android:id="@+id/face_image"

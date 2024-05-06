@@ -13,6 +13,7 @@ import android.util.Log
 import android.view.MotionEvent
 import android.view.MotionEvent.ACTION_POINTER_UP
 import android.view.View
+import android.view.ViewTreeObserver
 import androidx.annotation.ColorInt
 import androidx.core.graphics.alpha
 import com.cvut.arfittingroom.ARFittingRoomApplication
@@ -82,7 +83,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private var handler = Handler(Looper.getMainLooper())
     private var gifRunnable: Runnable? = null
     private var frameDelay: Long = 100
-    private var layerInitializedListener: OnLayerInitializedListener? = null
+    var layerInitializedListener: OnLayerInitializedListener? = null
     private var lastDownX = 0f
     private var lastDownY = 0f
     private var frameCount = 0
@@ -155,15 +156,8 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                 },
             )
 
-        // Post a runnable to the view, which will be executed after the view is laid out
-        post {
-            if (layerManager.getNumOfLayers() == 0) {
-                layerManager.addLayer(width, height)
-
-                layerInitializedListener?.onLayerInitialized(layerManager.getNumOfLayers())
-            }
-        }
     }
+
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
         val inverseMatrix = Matrix()

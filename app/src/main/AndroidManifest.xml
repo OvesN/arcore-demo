@@ -47,7 +47,7 @@
             android:theme="@style/Theme.AppCompat.NoActionBar"
             android:screenOrientation="locked"/>
 
-        <activity android:name=".activity.MakeupEditorActivity"
+        <activity android:name=".fragment.MakeupEditorFragment"
             android:configChanges="orientation|screenSize"
             android:theme="@style/Theme.AppCompat.NoActionBar"
             android:screenOrientation="locked"/>
