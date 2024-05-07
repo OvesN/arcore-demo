@@ -42,6 +42,13 @@ object FileUtil {
             null
         }
 
+    fun getTempMaskTextureStream(context: Context): FileInputStream? =
+        try {
+            context.openFileInput(MASK_TEXTURE_FILE_NAME)
+        } catch (e: Exception) {
+            null
+        }
+
     fun doesTempAnimatedMaskExist(context: Context): Boolean {
         val imagesDir = File(context.filesDir, MASK_FRAMES_DIR_NAME)
 
@@ -75,13 +82,7 @@ object FileUtil {
         counter: Int,
     ): FileInputStream? =
         try {
-            val file =
-                File(
-                    context.filesDir,
-                    "$MASK_FRAMES_DIR_NAME/${MASK_FRAME_FILE_NAME}_$counter.png",
-                )
-
-            FileInputStream(file)
+            context.openFileInput("$MASK_FRAMES_DIR_NAME/${MASK_FRAME_FILE_NAME}_$counter.png")
         } catch (e: Exception) {
             null
         }

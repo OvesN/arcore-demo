@@ -5,6 +5,7 @@ import android.graphics.Canvas
 import android.util.Log
 import com.cvut.arfittingroom.model.FaceNodesInfo
 import com.cvut.arfittingroom.model.MAKEUP_SLOT
+import com.cvut.arfittingroom.model.MASK_TEXTURE_SLOT
 import com.cvut.arfittingroom.model.MakeupInfo
 import com.cvut.arfittingroom.model.ModelInfo
 import com.cvut.arfittingroom.utils.BitmapUtil.replaceNonTransparentPixels
@@ -25,6 +26,10 @@ class StateService {
     private val makeUpBitmaps = mutableListOf<Bitmap>()
     private val loadedModels = mutableMapOf<String, ModelInfo>()
     val faceNodesInfo = FaceNodesInfo(null, mutableMapOf())
+
+    init {
+        faceNodesInfo.slotToFaceNodeMap[MAKEUP_SLOT] = AugmentedFaceNode()
+    }
 
     private fun areMakeupBitmapsPrepared() = makeUpBitmaps.size == appliedMakeUpTypes.size
 

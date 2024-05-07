@@ -28,7 +28,7 @@ private const val DEFAULT_COLOR = Color.TRANSPARENT
 private val SELECTED_COLOR = Color.parseColor("#FF5722")
 
 class MakeupEditorFragment : Fragment() {
-    var backgroundBitmap: Bitmap? = null
+    private var backgroundBitmap: Bitmap? = null
     private lateinit var drawView: DrawView
     private lateinit var imageView: ImageView
     private lateinit var slider: Slider
@@ -216,6 +216,7 @@ class MakeupEditorFragment : Fragment() {
             Log.println(Log.ERROR, null, "Activity does not implement ResourceListener")
             return
         }
+        drawView.layerManager.setAllGifsToStaticMode()
         listener.showMainLayout()
     }
 

@@ -37,6 +37,7 @@ import com.cvut.arfittingroom.utils.FileUtil.doesTempAnimatedMaskExist
 import com.cvut.arfittingroom.utils.FileUtil.getNextTempMaskFrame
 import com.cvut.arfittingroom.utils.FileUtil.getNextTempMaskFrameInputStream
 import com.cvut.arfittingroom.utils.FileUtil.getTempMaskTextureBitmap
+import com.cvut.arfittingroom.utils.FileUtil.getTempMaskTextureStream
 import com.google.android.filament.LightManager
 import com.google.ar.core.ArCoreApk
 import com.google.ar.core.AugmentedFace
@@ -528,6 +529,7 @@ class ShowRoomActivity :
     // FIXME will not save makeup, models and one frames
     private fun saveLook() {
         val lookId = UUID.randomUUID()
+
         saveFrames(lookId)
 
         // TODO should be name
@@ -557,21 +559,36 @@ class ShowRoomActivity :
     private fun saveFrames(lookId: UUID) {
         var counter = 0
 
-        while (true) {
-            val frameStream = getNextTempMaskFrameInputStream(applicationContext, counter) ?: break
-            val ref =
-                storage.getReference("$LOOKS_COLLECTION/$lookId/${MASK_FRAME_FILE_NAME}_$counter")
+        if (doesTempAnimatedMaskExist(applicationContext)) {
+            while (true) {
+                val frameStream = getNextTempMaskFrameInputStream(applicationContext, counter) ?: break
+                val ref =
+                    storage.getReference("$LOOKS_COLLECTION/$lookId/${MASK_FRAME_FILE_NAME}_$counter")
 
-            val uploadTask =
-                ref.putStream(frameStream)
-                    .addOnSuccessListener { taskSnapshot ->
-                    }
-            uploadTask.addOnFailureListener {
-                StyleableToast.makeText(applicationContext, it.message, R.style.mytoast).show()
+                val uploadTask =
+                    ref.putStream(frameStream)
+
+                uploadTask.addOnFailureListener {
+                    StyleableToast.makeText(applicationContext, it.message, R.style.mytoast).show()
+                }
+
+                counter++
             }
-
-            counter++
         }
+        else {
+            val frameStream = getTempMaskTextureStream(applicationContext)
+//            frameStream?.let {  }
+//            val ref =
+//                storage.getReference("$LOOKS_COLLECTION/$lookId/${MASK_FRAME_FILE_NAME}")
+//
+//            val uploadTask =
+//                ref.putStream(frameStream)
+
+//            uploadTask.addOnFailureListener {
+//                StyleableToast.makeText(applicationContext, it.message, R.style.mytoast).show()
+//            }
+        }
+
     }
 
     private fun clearAll() {
