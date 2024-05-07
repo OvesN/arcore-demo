@@ -1,5 +1,6 @@
 package com.cvut.arfittingroom.activity
 
+import com.cvut.arfittingroom.model.LookInfo
 import com.cvut.arfittingroom.model.ModelInfo
 
 interface ResourceListener {
@@ -15,7 +16,7 @@ interface ResourceListener {
 
     fun removeModel(slot: String)
 
-    fun applyLook(lookId: String)
+    fun applyLook(lookInfo: LookInfo)
 
     fun removeLook(lookId: String)
 }

@@ -25,12 +25,20 @@ import com.cvut.arfittingroom.fragment.LooksOptionsFragment
 import com.cvut.arfittingroom.fragment.MakeupEditorFragment
 import com.cvut.arfittingroom.fragment.MakeupOptionsFragment
 import com.cvut.arfittingroom.fragment.ProfileFragment
+import com.cvut.arfittingroom.model.APPLIED_MAKEUP_ATTRIBUTE
+import com.cvut.arfittingroom.model.APPLIED_MODELS_ATTRIBUTE
+import com.cvut.arfittingroom.model.AUTHOR_ATTRIBUTE
+import com.cvut.arfittingroom.model.HISTORY_ATTRIBUTE
+import com.cvut.arfittingroom.model.IS_ANIMATED_ATTRIBUTE
 import com.cvut.arfittingroom.model.LOOKS_COLLECTION
+import com.cvut.arfittingroom.model.LookInfo
 import com.cvut.arfittingroom.model.MAKEUP_SLOT
 import com.cvut.arfittingroom.model.MASK_FRAME_FILE_NAME
 import com.cvut.arfittingroom.model.MASK_TEXTURE_SLOT
 import com.cvut.arfittingroom.model.MakeupInfo
 import com.cvut.arfittingroom.model.ModelInfo
+import com.cvut.arfittingroom.model.NAME_ATTRIBUTE
+import com.cvut.arfittingroom.model.PREVIEW_IMAGE_ATTRIBUTE
 import com.cvut.arfittingroom.service.StateService
 import com.cvut.arfittingroom.utils.FileUtil.deleteTempFiles
 import com.cvut.arfittingroom.utils.FileUtil.doesTempAnimatedMaskExist
@@ -42,6 +50,7 @@ import com.google.android.filament.LightManager
 import com.google.ar.core.ArCoreApk
 import com.google.ar.core.AugmentedFace
 import com.google.ar.sceneform.ArSceneView
+import com.google.ar.sceneform.Node
 import com.google.ar.sceneform.Sceneform
 import com.google.ar.sceneform.rendering.ModelRenderable
 import com.google.ar.sceneform.rendering.Renderable
@@ -191,9 +200,9 @@ class ShowRoomActivity :
     }
 
     // FIXME
-    override fun applyLook(lookId: String) {
-        stopAnimation()
-        this.lookId = lookId
+    override fun applyLook(lookInfo: LookInfo) {
+        clearAll()
+        this.lookId = lookInfo.lookId
         shouldPlayAnimation = true
         shouldDownloadFormStorage = true
     }
@@ -526,16 +535,25 @@ class ShowRoomActivity :
             .commit()
     }
 
-    // FIXME will not save makeup, models and one frames
+    //TODO history, preview, lookname
     private fun saveLook() {
         val lookId = UUID.randomUUID()
+        val isAnimated = doesTempAnimatedMaskExist(applicationContext)
+        if (isAnimated) {
+            saveFrames(lookId)
+        } else {
+            saveMask(lookId)
+        }
 
-        saveFrames(lookId)
-
-        // TODO should be name
         val data =
             hashMapOf(
-                "author" to auth.currentUser?.email,
+                AUTHOR_ATTRIBUTE to auth.currentUser?.email?.substringBefore("@"),
+                IS_ANIMATED_ATTRIBUTE to isAnimated,
+                APPLIED_MAKEUP_ATTRIBUTE to stateService.getAppliedMakeupList(),
+                APPLIED_MODELS_ATTRIBUTE to stateService.getAppliedModelsList(),
+                HISTORY_ATTRIBUTE to "",
+                NAME_ATTRIBUTE to "",
+                PREVIEW_IMAGE_ATTRIBUTE to ""
             )
 
         fireStore.collection(LOOKS_COLLECTION)
@@ -556,41 +574,49 @@ class ShowRoomActivity :
             .addOnFailureListener { ex -> Log.println(Log.ERROR, null, "onFailure: $ex") }
     }
 
+    private fun createPreview() {
+
+
+    }
+
     private fun saveFrames(lookId: UUID) {
         var counter = 0
 
-        if (doesTempAnimatedMaskExist(applicationContext)) {
-            while (true) {
-                val frameStream = getNextTempMaskFrameInputStream(applicationContext, counter) ?: break
-                val ref =
-                    storage.getReference("$LOOKS_COLLECTION/$lookId/${MASK_FRAME_FILE_NAME}_$counter")
 
-                val uploadTask =
-                    ref.putStream(frameStream)
+        while (true) {
+            val frameStream =
+                getNextTempMaskFrameInputStream(applicationContext, counter) ?: break
+            val ref =
+                storage.getReference("$LOOKS_COLLECTION/$lookId/${MASK_FRAME_FILE_NAME}_$counter")
 
-                uploadTask.addOnFailureListener {
-                    StyleableToast.makeText(applicationContext, it.message, R.style.mytoast).show()
-                }
+            val uploadTask =
+                ref.putStream(frameStream)
 
-                counter++
+            uploadTask.addOnFailureListener {
+                StyleableToast.makeText(applicationContext, it.message, R.style.mytoast).show()
             }
-        }
-        else {
-            val frameStream = getTempMaskTextureStream(applicationContext)
-//            frameStream?.let {  }
-//            val ref =
-//                storage.getReference("$LOOKS_COLLECTION/$lookId/${MASK_FRAME_FILE_NAME}")
-//
-//            val uploadTask =
-//                ref.putStream(frameStream)
 
-//            uploadTask.addOnFailureListener {
-//                StyleableToast.makeText(applicationContext, it.message, R.style.mytoast).show()
-//            }
+            counter++
         }
 
     }
 
+    private fun saveMask(lookId: UUID) {
+        val frameStream = getTempMaskTextureStream(applicationContext)
+        frameStream?.let {
+            val ref =
+                storage.getReference("$LOOKS_COLLECTION/$lookId/${MASK_FRAME_FILE_NAME}")
+
+            val uploadTask =
+                ref.putStream(it)
+
+            uploadTask.addOnFailureListener { ex ->
+                StyleableToast.makeText(applicationContext, ex.message, R.style.mytoast).show()
+            }
+        }
+    }
+
+    //TODO clear selected items in menu
     private fun clearAll() {
         stopAnimation()
         deleteTempFiles(applicationContext)

@@ -10,12 +10,20 @@ import android.widget.LinearLayout
 import androidx.fragment.app.Fragment
 import com.cvut.arfittingroom.R
 import com.cvut.arfittingroom.activity.ResourceListener
+import com.cvut.arfittingroom.model.APPLIED_MAKEUP_ATTRIBUTE
+import com.cvut.arfittingroom.model.APPLIED_MODELS_ATTRIBUTE
+import com.cvut.arfittingroom.model.HISTORY_ATTRIBUTE
 import com.cvut.arfittingroom.model.LOOKS_COLLECTION
+import com.cvut.arfittingroom.model.LookInfo
+import com.cvut.arfittingroom.model.NAME_ATTRIBUTE
+import com.cvut.arfittingroom.model.PREVIEW_IMAGE_ATTRIBUTE
 import com.cvut.arfittingroom.utils.UIUtil.createDivider
 import com.cvut.arfittingroom.utils.UIUtil.deselectButton
 import com.cvut.arfittingroom.utils.UIUtil.selectSquareButton
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.toObject
 import com.google.firebase.storage.FirebaseStorage
+import io.github.muddz.styleabletoast.StyleableToast
 
 class LooksOptionsFragment : Fragment() {
     var selectedLookViewId: Int = 0
@@ -95,9 +103,46 @@ class LooksOptionsFragment : Fragment() {
         if (selectedLookViewId == buttonView.id) {
             listener.removeLook(lookId)
         } else {
-            listener.applyLook(lookId)
+            getLookByIdAndApply(lookId)
         }
 
         selectedLookViewId = view.id
     }
+
+    private fun getLookByIdAndApply(lookId: String) {
+        firestore.collection(LOOKS_COLLECTION).document(lookId).get()
+
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val lookInfo = LookInfo(
+                        lookId = lookId,
+                        appliedMakeup = document.get(APPLIED_MAKEUP_ATTRIBUTE) as? List<String>
+                            ?: emptyList(),
+                        appliedModels = document.get(APPLIED_MODELS_ATTRIBUTE) as? List<String>
+                            ?: emptyList(),
+                        history = document.getString(HISTORY_ATTRIBUTE) ?: "",
+                        name = document.get(NAME_ATTRIBUTE).toString(),
+                        previewRef = document.get(PREVIEW_IMAGE_ATTRIBUTE)?.toString() ?: ""
+                    )
+
+                    val listener = context as? ResourceListener
+                    if (listener == null) {
+                        Log.println(Log.ERROR, null, "Activity does not implement ResourceListener")
+                    } else {
+                        listener.applyLook(lookInfo)
+                    }
+
+                } else {
+                    StyleableToast.makeText(
+                        requireContext(),
+                        "Look does not exist",
+                        R.style.mytoast
+                    ).show()
+                }
+            }
+            .addOnFailureListener { ex ->
+                StyleableToast.makeText(requireContext(), ex.message, R.style.mytoast).show()
+            }
+    }
+
 }

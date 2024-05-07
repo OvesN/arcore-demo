@@ -5,13 +5,13 @@ import android.graphics.Canvas
 import android.util.Log
 import com.cvut.arfittingroom.model.FaceNodesInfo
 import com.cvut.arfittingroom.model.MAKEUP_SLOT
-import com.cvut.arfittingroom.model.MASK_TEXTURE_SLOT
 import com.cvut.arfittingroom.model.MakeupInfo
 import com.cvut.arfittingroom.model.ModelInfo
 import com.cvut.arfittingroom.utils.BitmapUtil.replaceNonTransparentPixels
 import com.google.ar.core.AugmentedFace
 import com.google.ar.core.TrackingState
 import com.google.ar.sceneform.ArSceneView
+import com.google.ar.sceneform.rendering.Material
 import com.google.ar.sceneform.rendering.ModelRenderable
 import com.google.ar.sceneform.rendering.Texture
 import com.google.ar.sceneform.ux.AugmentedFaceNode
@@ -24,7 +24,7 @@ class StateService {
     val appliedMakeUpTypes = mutableMapOf<String, MakeupInfo>()
     var makeupTextureBitmap: Bitmap? = null
     private val makeUpBitmaps = mutableListOf<Bitmap>()
-    private val loadedModels = mutableMapOf<String, ModelInfo>()
+    private val appliedModels = mutableMapOf<String, ModelInfo>()
     val faceNodesInfo = FaceNodesInfo(null, mutableMapOf())
 
     init {
@@ -53,15 +53,15 @@ class StateService {
     }
 
     fun clearAll() {
-        loadedModels.clear()
+        appliedModels.clear()
         clearFaceNodes()
         makeupTextureBitmap = null
         appliedMakeUpTypes.clear()
-        loadedModels.clear()
+        appliedModels.clear()
     }
 
     fun clearFaceNodeSlot(slot: String) {
-        loadedModels.remove(slot)
+        appliedModels.remove(slot)
 
         faceNodesInfo.slotToFaceNodeMap[slot]?.let {
             it.parent = null
@@ -71,7 +71,7 @@ class StateService {
     }
 
     fun addModel(modelInfo: ModelInfo) {
-        loadedModels[modelInfo.slot] = modelInfo
+        appliedModels[modelInfo.slot] = modelInfo
     }
 
     fun applyModelOnFace(
@@ -127,7 +127,7 @@ class StateService {
     ) {
         sceneView.session?.getAllTrackables(AugmentedFace::class.java)?.forEach { face ->
             if (faceNodesInfo.augmentedFace != face) {
-                reapplyNodesForNewFace(face,sceneView)
+                reapplyNodesForNewFace(face, sceneView)
             }
 
             val faceNode =
@@ -179,4 +179,8 @@ class StateService {
             it.augmentedFace = face
         }
     }
+
+    fun getAppliedModelsList() = appliedModels.values
+    fun getAppliedMakeupList() = appliedMakeUpTypes.values
+
 }
