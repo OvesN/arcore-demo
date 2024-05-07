@@ -26,7 +26,7 @@ import com.google.firebase.storage.FirebaseStorage
 import io.github.muddz.styleabletoast.StyleableToast
 
 class LooksOptionsFragment : Fragment() {
-    var selectedLookViewId: Int = 0
+    private var selectedLookViewId: Int = 0
     private lateinit var firestore: FirebaseFirestore
     private lateinit var storage: FirebaseStorage
 
@@ -145,4 +145,8 @@ class LooksOptionsFragment : Fragment() {
             }
     }
 
+    fun resetMenu() {
+        selectedLookViewId = 0
+        fetchLooks(requireView())
+    }
 }

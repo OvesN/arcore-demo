@@ -164,6 +164,16 @@ class ShowRoomActivity :
         }
     }
 
+    override fun onPause() {
+        super.onPause()
+        arSceneView.pause()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        arSceneView.resume()
+    }
+
     override fun applyImage(
         type: String,
         ref: String,
@@ -576,12 +586,10 @@ class ShowRoomActivity :
 
     private fun createPreview() {
 
-
     }
 
     private fun saveFrames(lookId: UUID) {
         var counter = 0
-
 
         while (true) {
             val frameStream =
@@ -616,13 +624,14 @@ class ShowRoomActivity :
         }
     }
 
-    //TODO clear selected items in menu
     private fun clearAll() {
         stopAnimation()
         deleteTempFiles(applicationContext)
-        accessoriesOptionsFragment.selectedSlotToViewId.clear()
-        looksOptionsFragment.selectedLookViewId = 0
-        makeupOptionsFragment.selectedOptionTypeToViewId.clear()
+
+        accessoriesOptionsFragment.resetMenu()
+        makeupOptionsFragment.resetMenu()
+        looksOptionsFragment.resetMenu()
+
         stateService.clearAll()
         makeupEditorFragment.clearAll()
     }

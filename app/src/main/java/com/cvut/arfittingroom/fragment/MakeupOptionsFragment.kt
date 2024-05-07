@@ -41,7 +41,7 @@ class MakeupOptionsFragment : Fragment() {
     private var selectedMakeupOptionRef: String = ""
     private var selectedColor: Int = Color.WHITE
     private var selectedMakeupType: String = ""
-    val selectedOptionTypeToViewId = mutableMapOf<String, Int>()
+    private val selectedOptionTypeToViewId = mutableMapOf<String, Int>()
     private lateinit var firestore: FirebaseFirestore
     private lateinit var storage: FirebaseStorage
 
@@ -162,6 +162,7 @@ class MakeupOptionsFragment : Fragment() {
     ) {
         val options = view.findViewById<LinearLayout>(R.id.horizontal_options)
         options.removeAllViews()
+        selectedOptionTypeToViewId["color"] = 0
 
         // Add makeup option button
         val imageButton =
@@ -204,13 +205,9 @@ class MakeupOptionsFragment : Fragment() {
                     id = color
                     setOnClickListener {
                         selectColor(this, view, color)
-                        applyImage(selectedMakeupOptionRef, selectedMakeupType)
+                        toggleMakeup(selectedMakeupOptionRef, selectedMakeupType)
                     }
                 }
-
-            if (selectedOptionTypeToViewId["color"] == colorImageButton.id) {
-                selectColorButton(colorImageButton)
-            }
 
             options.addView(colorImageButton)
         }
@@ -230,7 +227,7 @@ class MakeupOptionsFragment : Fragment() {
                 setOnClickListener {
                     showColorPickerDialog(requireContext()) { envelopColor ->
                         selectedColor = envelopColor
-                        applyImage(selectedMakeupOptionRef, selectedMakeupType)
+                        toggleMakeup(selectedMakeupOptionRef, selectedMakeupType)
                     }
                 }
             }
@@ -327,17 +324,18 @@ class MakeupOptionsFragment : Fragment() {
 
         val shouldRemove = selectedOptionTypeToViewId[type] == imageView.id
 
-        applyImage(ref, type, shouldRemove)
+        toggleMakeup(ref, type, shouldRemove)
 
         if (shouldRemove) {
             selectedOptionTypeToViewId.remove(type)
         } else {
             selectedOptionTypeToViewId[type] = imageView.id
             selectMakeupButton(imageView)
+            fetchColorOptions()
         }
     }
 
-    private fun applyImage(
+    private fun toggleMakeup(
         ref: String,
         type: String,
         shouldRemove: Boolean = false,
@@ -352,8 +350,12 @@ class MakeupOptionsFragment : Fragment() {
             selectedOptionTypeToViewId.remove(type)
             listener.removeImage(type)
         } else {
-            fetchColorOptions()
             listener.applyImage(type, ref, selectedColor)
         }
+    }
+
+    fun resetMenu(){
+        selectedOptionTypeToViewId.clear()
+        fetchMakeupTypes(requireView())
     }
 }

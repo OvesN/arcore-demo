@@ -36,7 +36,7 @@ import io.github.muddz.styleabletoast.StyleableToast
 class AccessoriesOptionsFragment : Fragment() {
     private val accessoriesTypes = mutableSetOf<String>()
     private val modelsInfo = mutableListOf<ModelInfo>()
-    val selectedSlotToViewId = mutableMapOf<String, Int>()
+    private val selectedSlotToViewId = mutableMapOf<String, Int>()
     private var selectedAccessoryType: String = ""
     private lateinit var firestore: FirebaseFirestore
     private lateinit var storage: FirebaseStorage
@@ -232,5 +232,11 @@ class AccessoriesOptionsFragment : Fragment() {
             selectSquareButton(imageView)
             selectedSlotToViewId[modelInfo.slot] = imageView.id
         }
+    }
+
+
+    fun resetMenu() {
+        selectedSlotToViewId.clear()
+        fetchAccessoriesTypes(requireView())
     }
 }
