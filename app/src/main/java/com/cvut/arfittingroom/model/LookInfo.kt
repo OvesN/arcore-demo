@@ -1,15 +1,15 @@
 package com.cvut.arfittingroom.model
 
-import com.google.gson.annotations.SerializedName
+import com.google.firebase.firestore.PropertyName
 
 data class LookInfo(
-    @SerializedName("look_id") val lookId: String = "",
-    @SerializedName("author") val author: String = "",
-    @SerializedName("applied_makeup") val appliedMakeup: List<MakeupInfo> = emptyList(),
-    @SerializedName("applied_models") val appliedModels: List<ModelInfo> = emptyList(),
-    @SerializedName("history") val history: String = "",
-    @SerializedName("name") val name: String,
-    @SerializedName("image_preview_ref") val imagePreviewRef: String = "",
-    @SerializedName("is_animated") val isAnimated: Boolean = false,
-    @SerializedName("is_public") val isPublic: Boolean = false,
+    @get:PropertyName("look_id") @set:PropertyName("look_id") var lookId: String = "",
+    @get:PropertyName("author") @set:PropertyName("author") var author: String = "",
+    @get:PropertyName("applied_makeup") @set:PropertyName("applied_makeup") var appliedMakeup: List<MakeupInfo> = emptyList(),
+    @get:PropertyName("applied_models") @set:PropertyName("applied_models") var appliedModels: List<ModelInfo> = emptyList(),
+    @get:PropertyName("history") @set:PropertyName("history") var history: String = "",
+    @get:PropertyName("name") @set:PropertyName("name") var name: String = "",
+    @get:PropertyName("image_preview_ref") @set:PropertyName("image_preview_ref") var imagePreviewRef: String = "",
+    @get:PropertyName("is_animated") @set:PropertyName("is_animated") var isAnimated: Boolean = false,
+    @get:PropertyName("is_public") @set:PropertyName("is_public") var isPublic: Boolean = false,
 )

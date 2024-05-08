@@ -1,9 +1,11 @@
 package com.cvut.arfittingroom.model
 
-import com.google.gson.annotations.SerializedName
+import com.google.firebase.firestore.PropertyName
+
+
 
 data class MakeupInfo(
-    @SerializedName("ref") val ref: String,
-    @SerializedName("type") val type: String,
-    @SerializedName("color") val color: Int
+    @get:PropertyName("ref") @set:PropertyName("ref") var ref: String = "",
+    @get:PropertyName("type") @set:PropertyName("type") var type: String = "",
+    @get:PropertyName("color") @set:PropertyName("color") var color: Int = -1
 )

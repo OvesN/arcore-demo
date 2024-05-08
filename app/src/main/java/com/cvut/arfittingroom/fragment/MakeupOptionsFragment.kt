@@ -28,9 +28,9 @@ import com.cvut.arfittingroom.utils.ScreenUtil.dpToPx
 import com.cvut.arfittingroom.utils.UIUtil.createColorOptionImage
 import com.cvut.arfittingroom.utils.UIUtil.createDivider
 import com.cvut.arfittingroom.utils.UIUtil.deselectColorButton
-import com.cvut.arfittingroom.utils.UIUtil.deselectMakeupOptionButton
+import com.cvut.arfittingroom.utils.UIUtil.deselectHeadBackgroundButton
 import com.cvut.arfittingroom.utils.UIUtil.selectColorButton
-import com.cvut.arfittingroom.utils.UIUtil.selectMakeupButton
+import com.cvut.arfittingroom.utils.UIUtil.selectHeadBackgroundButton
 import com.cvut.arfittingroom.utils.UIUtil.showColorPickerDialog
 import com.cvut.arfittingroom.utils.makeFirstLetterCapital
 import com.google.firebase.firestore.FirebaseFirestore
@@ -301,7 +301,7 @@ class MakeupOptionsFragment : Fragment() {
             options.addView(imageButton)
 
             if (selectedOptionTypeToViewId[selectedMakeupType] == imageButton.id) {
-                selectMakeupButton(imageButton)
+                selectHeadBackgroundButton(imageButton)
             }
 
             GlideApp.with(this)
@@ -320,7 +320,7 @@ class MakeupOptionsFragment : Fragment() {
         selectedMakeupOptionRef = ref
 
         selectedOptionTypeToViewId[type]?.let { viewId ->
-            view.findViewById<ImageView>(viewId)?.let { deselectMakeupOptionButton(it) }
+            view.findViewById<ImageView>(viewId)?.let { deselectHeadBackgroundButton(it) }
         }
 
         val shouldRemove = selectedOptionTypeToViewId[type] == imageView.id
@@ -331,7 +331,7 @@ class MakeupOptionsFragment : Fragment() {
             selectedOptionTypeToViewId.remove(type)
         } else {
             selectedOptionTypeToViewId[type] = imageView.id
-            selectMakeupButton(imageView)
+            selectHeadBackgroundButton(imageView)
             fetchColorOptions()
         }
     }

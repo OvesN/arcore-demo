@@ -2,7 +2,6 @@ package com.cvut.arfittingroom.fragment
 
 import android.os.Bundle
 import android.util.Log
-import android.view.Display.Mode
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -18,17 +17,14 @@ import androidx.fragment.app.Fragment
 import com.cvut.arfittingroom.R
 import com.cvut.arfittingroom.activity.ResourceListener
 import com.cvut.arfittingroom.model.ACCESSORY_TYPES_COLLECTION
-import com.cvut.arfittingroom.model.LookInfo
 import com.cvut.arfittingroom.model.MODELS_COLLECTION
 import com.cvut.arfittingroom.model.ModelInfo
-import com.cvut.arfittingroom.model.NUM_OF_ELEMENTS_IN_ROW_SMALL_MENU
+import com.cvut.arfittingroom.model.NUM_OF_ELEMENTS_IN_ROW
 import com.cvut.arfittingroom.model.PREVIEW_IMAGE_ATTRIBUTE
 import com.cvut.arfittingroom.model.REF_ATTRIBUTE
 import com.cvut.arfittingroom.model.SLOT_ATTRIBUTE
 import com.cvut.arfittingroom.model.TYPE_ATTRIBUTE
 import com.cvut.arfittingroom.module.GlideApp
-import com.cvut.arfittingroom.utils.DeserializationUtil
-import com.cvut.arfittingroom.utils.DeserializationUtil.deserializeFromMap
 import com.cvut.arfittingroom.utils.ScreenUtil.dpToPx
 import com.cvut.arfittingroom.utils.UIUtil.deselectButton
 import com.cvut.arfittingroom.utils.UIUtil.selectSquareButton
@@ -171,7 +167,7 @@ class AccessoriesOptionsFragment : Fragment() {
 
         options.post {
             val imageWidth =
-                (options.width - options.paddingStart - options.paddingEnd) / NUM_OF_ELEMENTS_IN_ROW_SMALL_MENU
+                (options.width - options.paddingStart - options.paddingEnd) / NUM_OF_ELEMENTS_IN_ROW
 
             modelsInfo.forEach { modelInfo ->
                 val imageButton =

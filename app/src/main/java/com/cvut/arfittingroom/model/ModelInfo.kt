@@ -1,10 +1,11 @@
 package com.cvut.arfittingroom.model
 
-import com.google.gson.annotations.SerializedName
+import com.google.firebase.firestore.PropertyName
+
 
 data class ModelInfo(
-    @SerializedName("slot")val slot: String,
-    @SerializedName("model_ref")val modelRef: String,
-    @SerializedName("image_preview_ref")val imagePreviewRef: String,
-    @SerializedName("type")val type: String,
+    @get:PropertyName("slot") @set:PropertyName("slot") var slot: String = "",
+    @get:PropertyName("model_ref") @set:PropertyName("model_ref") var modelRef: String = "",
+    @get:PropertyName("image_preview_ref") @set:PropertyName("image_preview_ref") var imagePreviewRef: String = "",
+    @get:PropertyName("type") @set:PropertyName("type") var type: String = "",
 )

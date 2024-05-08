@@ -32,14 +32,7 @@ import com.cvut.arfittingroom.fragment.LooksOptionsFragment
 import com.cvut.arfittingroom.fragment.MakeupEditorFragment
 import com.cvut.arfittingroom.fragment.MakeupOptionsFragment
 import com.cvut.arfittingroom.fragment.ProfileFragment
-import com.cvut.arfittingroom.model.APPLIED_MAKEUP_ATTRIBUTE
-import com.cvut.arfittingroom.model.APPLIED_MODELS_ATTRIBUTE
-import com.cvut.arfittingroom.model.AUTHOR_ATTRIBUTE
-import com.cvut.arfittingroom.model.HISTORY_ATTRIBUTE
-import com.cvut.arfittingroom.model.IS_ANIMATED_ATTRIBUTE
-import com.cvut.arfittingroom.model.IS_PUBLIC_ATTRIBUTE
 import com.cvut.arfittingroom.model.LOOKS_COLLECTION
-import com.cvut.arfittingroom.model.LOOK_ID_ATTRIBUTE
 import com.cvut.arfittingroom.model.LookInfo
 import com.cvut.arfittingroom.model.MAKEUP_SLOT
 import com.cvut.arfittingroom.model.MASK_FRAME_FILE_NAME
@@ -47,9 +40,7 @@ import com.cvut.arfittingroom.model.MASK_TEXTURE_SLOT
 import com.cvut.arfittingroom.model.MAX_LOOK_NAME_LENGTH
 import com.cvut.arfittingroom.model.MakeupInfo
 import com.cvut.arfittingroom.model.ModelInfo
-import com.cvut.arfittingroom.model.NAME_ATTRIBUTE
 import com.cvut.arfittingroom.model.PREVIEW_COLLECTION
-import com.cvut.arfittingroom.model.PREVIEW_IMAGE_ATTRIBUTE
 import com.cvut.arfittingroom.service.StateService
 import com.cvut.arfittingroom.utils.FileUtil.deleteTempFiles
 import com.cvut.arfittingroom.utils.FileUtil.doesTempAnimatedMaskExist
@@ -57,8 +48,6 @@ import com.cvut.arfittingroom.utils.FileUtil.getNextTempMaskFrame
 import com.cvut.arfittingroom.utils.FileUtil.getNextTempMaskFrameInputStream
 import com.cvut.arfittingroom.utils.FileUtil.getTempMaskTextureBitmap
 import com.cvut.arfittingroom.utils.FileUtil.getTempMaskTextureStream
-import com.cvut.arfittingroom.utils.SerializationUtil.serializeToJson
-import com.cvut.arfittingroom.utils.SerializationUtil.serializeToStringOfJson
 import com.google.android.filament.LightManager
 import com.google.ar.core.ArCoreApk
 import com.google.ar.core.AugmentedFace
@@ -79,6 +68,7 @@ import com.gorisse.thomas.sceneform.mainLight
 import io.github.muddz.styleabletoast.StyleableToast
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
+import java.lang.Exception
 import java.util.UUID
 import javax.inject.Inject
 
@@ -232,7 +222,10 @@ class ShowRoomActivity :
         makeupEditorFragment.clearAll()
 
         lookInfo.appliedMakeup.forEach {
-            applyMakeup(it)
+            stateService.appliedMakeUpTypes[it.type] = it
+        }
+        stateService.appliedMakeUpTypes.values.forEach {
+            loadImage(it.ref, it.color)
         }
 
         lookInfo.appliedModels.forEach {
@@ -240,13 +233,53 @@ class ShowRoomActivity :
         }
 
         this.lookId = lookInfo.lookId
+
         shouldPlayAnimation = lookInfo.isAnimated
+
+        if (lookInfo.isAnimated) {
+
+        }
+        else {
+            downloadLookTextureAndApply(lookId)
+        }
         shouldDownloadFormStorage = true
+    }
+
+    private fun prepareLookFrames() {
+
+    }
+    private fun downloadLookTextureAndApply(lookId: String) {
+        val ref = try {
+            storage.getReference("$LOOKS_COLLECTION/$lookId/${MASK_FRAME_FILE_NAME}")
+        } catch (ex: Exception) {
+            StyleableToast.makeText(this, ex.message, R.style.mytoast).show()
+            return
+        }
+
+        ref.downloadUrl.addOnSuccessListener { uri ->
+            Texture.builder()
+                .setSource(applicationContext, uri)
+                .build()
+                .thenAccept { texture ->
+                    stateService.applyTextureToFaceNode(texture, arSceneView, MASK_TEXTURE_SLOT)
+                }
+                .exceptionally { throwable ->
+                    Log.println(
+                        Log.ERROR,
+                        null,
+                        "Error creating texture: $throwable",
+                    )
+                    null
+                }
+
+        }.addOnFailureListener { ex ->
+            StyleableToast.makeText(this, ex.message, R.style.mytoast).show()
+        }
+
     }
 
     override fun removeLook(lookId: String) {
         clearAll()
-        TODO("Not yet implemented")
     }
 
     private fun onAttachFragment(
@@ -314,7 +347,12 @@ class ShowRoomActivity :
 
         if (shouldDownloadFormStorage) {
             // FIXME AAAA
-            val ref = storage.getReference("$LOOKS_COLLECTION/$lookId/")
+            val ref = try {
+                storage.getReference("$LOOKS_COLLECTION/$lookId/")
+            } catch (e: Exception) {
+                StyleableToast.makeText(this, e.message, R.style.mytoast).show()
+                return
+            }
             var amont = 0
             ref.listAll().addOnSuccessListener { listResult ->
                 amont = listResult.items.size
@@ -586,16 +624,16 @@ class ShowRoomActivity :
         }
 
         val data =
-            hashMapOf(
-                IS_PUBLIC_ATTRIBUTE to isPublic,
-                LOOK_ID_ATTRIBUTE to lookId.toString(),
-                AUTHOR_ATTRIBUTE to auth.currentUser?.email?.substringBefore("@"),
-                IS_ANIMATED_ATTRIBUTE to isAnimated,
-                APPLIED_MAKEUP_ATTRIBUTE to serializeToStringOfJson(stateService.getAppliedMakeupList()),
-                APPLIED_MODELS_ATTRIBUTE to serializeToStringOfJson(stateService.getAppliedModelsList()),
-                HISTORY_ATTRIBUTE to "",
-                NAME_ATTRIBUTE to name,
-                PREVIEW_IMAGE_ATTRIBUTE to createPreview(lookId)
+            LookInfo(
+                isPublic = isPublic,
+                lookId = lookId.toString(),
+                author = auth.currentUser?.email?.substringBefore("@").orEmpty(),
+                isAnimated = isAnimated,
+                appliedMakeup = stateService.getAppliedMakeupList(),
+                appliedModels = stateService.getAppliedModelsList(),
+                history = "",
+                name = name,
+                imagePreviewRef = createPreview(lookId)
             )
 
         fireStore.collection(LOOKS_COLLECTION)

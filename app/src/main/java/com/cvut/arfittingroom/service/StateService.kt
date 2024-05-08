@@ -2,9 +2,9 @@ package com.cvut.arfittingroom.service
 
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.Matrix
 import android.util.Log
 import com.cvut.arfittingroom.model.FaceNodesInfo
-import com.cvut.arfittingroom.model.LookInfo
 import com.cvut.arfittingroom.model.MAKEUP_SLOT
 import com.cvut.arfittingroom.model.MakeupInfo
 import com.cvut.arfittingroom.model.ModelInfo
@@ -12,7 +12,6 @@ import com.cvut.arfittingroom.utils.BitmapUtil.replaceNonTransparentPixels
 import com.google.ar.core.AugmentedFace
 import com.google.ar.core.TrackingState
 import com.google.ar.sceneform.ArSceneView
-import com.google.ar.sceneform.rendering.Material
 import com.google.ar.sceneform.rendering.ModelRenderable
 import com.google.ar.sceneform.rendering.Texture
 import com.google.ar.sceneform.ux.AugmentedFaceNode
@@ -38,19 +37,24 @@ class StateService {
         if (makeUpBitmaps.isEmpty()) {
             return null
         }
-        val bitmap =
-            Bitmap.createBitmap(
-                makeUpBitmaps.first().width,
-                makeUpBitmaps.first().height,
-                Bitmap.Config.ARGB_8888,
-            )
-        val canvas = Canvas(bitmap)
 
-        makeUpBitmaps.forEach { canvas.drawBitmap(it, 0f, 0f, null) }
+        val combinedBitmap = Bitmap.createBitmap(1024, 1024, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(combinedBitmap)
+
+        makeUpBitmaps.forEach {
+            val scale = (1024f / it.width).coerceAtMost(1024f / it.height)
+
+            val matrix = Matrix().apply {
+                postScale(scale, scale)
+                postTranslate((1024 - it.width * scale) / 2, (1024 - it.height * scale) / 2)
+            }
+
+            canvas.drawBitmap(it, matrix, null)
+        }
 
         makeUpBitmaps.clear()
 
-        return bitmap
+        return combinedBitmap
     }
 
     fun clearAll() {
@@ -58,6 +62,7 @@ class StateService {
         makeupTextureBitmap = null
         appliedMakeUpTypes.clear()
         appliedModels.clear()
+        makeUpBitmaps.clear()
         clearFaceNodes()
     }
 
@@ -142,13 +147,13 @@ class StateService {
     }
 
     fun createTextureAndApply(
-        combinedBitmap: Bitmap,
+        bitmap: Bitmap,
         sceneView: ArSceneView,
         slot: String
     ) {
         // Convert Bitmap to ARCore Texture
         Texture.builder()
-            .setSource(combinedBitmap)
+            .setSource(bitmap)
             .build()
             .thenAccept { texture -> applyTextureToFaceNode(texture, sceneView, slot) }
             .exceptionally {

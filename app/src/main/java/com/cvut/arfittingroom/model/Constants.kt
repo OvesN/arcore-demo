@@ -11,8 +11,8 @@ const val TRANSPARENT_CODE = 0xFF_000_000
 const val TOUCH_TO_MOVE_THRESHOLD = 20f
 const val SPAN_SLOP = 7
 
-const val NUM_OF_ELEMENTS_IN_ROW_SMALL_MENU = 3
-const val NUM_OF_ELEMENTS_IN_ROW = 4
+const val NUM_OF_ELEMENTS_IN_ROW = 3
+
 const val MAX_LOOK_NAME_LENGTH = 50
 
 // Firebase collections paths
