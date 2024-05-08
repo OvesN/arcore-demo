@@ -70,6 +70,6 @@ class Mapper {
             id = layer.id.toString(),
             isVisible = layer.isVisible,
             index = index,
-            elements = layer.getAllElementsIds().map { it.toString() }
+            elements = layer.elements.keys.map { it.toString() }
         )
 }

@@ -20,8 +20,13 @@ import com.cvut.arfittingroom.activity.UIChangeListener
 import com.cvut.arfittingroom.draw.DrawView
 import com.cvut.arfittingroom.draw.model.enums.ELayerEditAction
 import com.cvut.arfittingroom.draw.model.enums.EShape
+import com.cvut.arfittingroom.model.to.drawhistory.DrawHistoryTO
+import com.cvut.arfittingroom.model.to.drawhistory.ElementTO
+import com.cvut.arfittingroom.model.to.drawhistory.LayerTO
+import com.cvut.arfittingroom.service.Mapper
 import com.cvut.arfittingroom.utils.UIUtil
 import com.google.android.material.slider.Slider
+import javax.inject.Inject
 
 private const val DEFAULT_COLOR = Color.TRANSPARENT
 private val SELECTED_COLOR = Color.parseColor("#FF5722")
@@ -32,6 +37,9 @@ class MakeupEditorFragment : Fragment() {
     private lateinit var imageView: ImageView
     private lateinit var slider: Slider
     private lateinit var layersButtonsContainer: LinearLayout
+
+    @Inject
+    lateinit var mapper: Mapper
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -231,6 +239,23 @@ class MakeupEditorFragment : Fragment() {
         if (::drawView.isInitialized) {
             drawView.applyBitmapBackground(backgroundBitmap)
         }
+    }
+
+
+    fun serializeEditorState(): DrawHistoryTO {
+        val layers = drawView.layerManager.layers
+        val elementsTO = mutableListOf<ElementTO>()
+        val layersTO = mutableListOf<LayerTO>()
+
+        layers.forEachIndexed { index, layer ->
+            elementsTO.addAll(layer.elements.values.map { mapper.elementToElementTO(it) })
+            layersTO.add(mapper.layerToLayerTO(layer, index))
+        }
+
+        return DrawHistoryTO(
+            elements = elementsTO,
+            layers = layersTO
+        )
     }
 
     companion object {

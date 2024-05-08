@@ -790,10 +790,10 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         addElementToLayer(
             layerManager.getActiveLayerIndex(),
             Image(
+                imageId.toString(),
                 width.toFloat() / 2,
                 height.toFloat() / 2,
                 width.toFloat() / 4,
-                imageId,
             ).apply { bitmap = imageBitmap },
         )
 
@@ -818,7 +818,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
         val gif =
             Gif(
-                gifId,
+                gifId.toString(),
                 width.toFloat() / 2,
                 height.toFloat() / 2,
                 width.toFloat() / 4,

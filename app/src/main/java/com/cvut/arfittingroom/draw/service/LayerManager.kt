@@ -14,7 +14,7 @@ import java.util.UUID
 private val logger = KotlinLogging.logger {}
 
 class LayerManager {
-    private val layers = mutableListOf<Layer>()
+    val layers = mutableListOf<Layer>()
     private val idToLayerMap = HashMap<UUID, Layer>()
     private var activeLayerIndex = 0
     private var layersBelowActiveLayerBitmap: Bitmap? = null

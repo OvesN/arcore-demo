@@ -617,7 +617,6 @@ class ShowRoomActivity :
             .commit()
     }
 
-    // TODO history
     private fun saveLook(
         isPublic: Boolean,
         name: String,
@@ -639,7 +638,7 @@ class ShowRoomActivity :
                 isAnimated = isAnimated,
                 appliedMakeup = stateService.getAppliedMakeupList(),
                 appliedModels = stateService.getAppliedModelsList(),
-                history = "",
+                history = makeupEditorFragment.serializeEditorState(),
                 name = name,
                 imagePreviewRef = createPreview(lookId),
             )

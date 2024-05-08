@@ -17,7 +17,7 @@ class Layer(
     val id: UUID = UUID.randomUUID(),
 ) {
     var isVisible: Boolean = true
-    private val elements = HashMap<UUID, Element>()
+    val elements = HashMap<UUID, Element>()
     private val elementsToDraw = LinkedList<Element>()
     var curPath = DrawablePath()
     private val curPaint =
@@ -252,6 +252,4 @@ class Layer(
         }
     }
 
-    fun getAllElementsIds() =
-        elements.keys.toList()
 }
