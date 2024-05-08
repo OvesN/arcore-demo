@@ -13,6 +13,7 @@ const val SPAN_SLOP = 7
 const val PREVIEW_BITMAP_SIZE = 400
 const val BITMAP_SIZE = 1024
 const val NUM_OF_ELEMENTS_IN_ROW = 3
+const val NUM_OF_ELEMENTS_IN_ROW_BIG_MENU = 4
 const val MAX_LOOK_NAME_LENGTH = 50
 
 // Firebase collections paths

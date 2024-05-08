@@ -7,9 +7,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.CheckBox
 import android.widget.GridLayout
 import android.widget.ImageButton
 import android.widget.ImageView
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.cvut.arfittingroom.R
@@ -19,17 +21,15 @@ import com.cvut.arfittingroom.model.IS_PUBLIC_ATTRIBUTE
 import com.cvut.arfittingroom.model.LOOKS_COLLECTION
 import com.cvut.arfittingroom.model.LookInfo
 import com.cvut.arfittingroom.model.NUM_OF_ELEMENTS_IN_ROW
+import com.cvut.arfittingroom.model.NUM_OF_ELEMENTS_IN_ROW_BIG_MENU
 import com.cvut.arfittingroom.module.GlideApp
-import com.cvut.arfittingroom.utils.ScreenUtil
-import com.cvut.arfittingroom.utils.UIUtil.deselectButton
 import com.cvut.arfittingroom.utils.UIUtil.deselectLookButton
-import com.cvut.arfittingroom.utils.UIUtil.selectHeadBackgroundButton
 import com.cvut.arfittingroom.utils.UIUtil.selectLookButton
-import com.cvut.arfittingroom.utils.UIUtil.selectSquareButton
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.Filter
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
+import io.github.muddz.styleabletoast.StyleableToast
 
 class LooksOptionsFragment : Fragment() {
     private var selectedLookViewId: Int = 0
@@ -37,62 +37,87 @@ class LooksOptionsFragment : Fragment() {
     private lateinit var auth: FirebaseAuth
     private lateinit var storage: FirebaseStorage
     private val looks = mutableMapOf<String, LookInfo>()
+    private lateinit var filter: Filter
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         firestore = FirebaseFirestore.getInstance()
         storage = FirebaseStorage.getInstance()
         auth = FirebaseAuth.getInstance()
+        filter = Filter.or(
+            Filter.equalTo(IS_PUBLIC_ATTRIBUTE, true),
+            Filter.equalTo(
+                AUTHOR_ATTRIBUTE,
+                auth.currentUser?.let { it.email?.substringBefore("@") })
+        )
     }
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?,
-    ): View? = inflater.inflate(R.layout.fragment_menu, container, false)
+    ): View? = inflater.inflate(R.layout.fragment_look_menu, container, false)
 
     override fun onViewCreated(
         view: View,
         savedInstanceState: Bundle?,
     ) {
         super.onViewCreated(view, savedInstanceState)
-        view.findViewById<View>(R.id.divider).visibility = View.GONE
-        view.findViewById<View>(R.id.type_button).visibility = View.GONE
         view.findViewById<View>(R.id.vertical_scroll_view).visibility = View.VISIBLE
+        view.findViewById<GridLayout>(R.id.vertical_options).columnCount =
+            NUM_OF_ELEMENTS_IN_ROW_BIG_MENU
+        view.findViewById<CheckBox>(R.id.my_looks_filter)
+            .setOnCheckedChangeListener { _, isChecked ->
+                filter = if (isChecked) {
+                    Filter.equalTo(
+                        AUTHOR_ATTRIBUTE,
+                        auth.currentUser?.let { it.email?.substringBefore("@") })
+                } else {
+                    Filter.or(
+                        Filter.equalTo(IS_PUBLIC_ATTRIBUTE, true),
+                        Filter.equalTo(
+                            AUTHOR_ATTRIBUTE,
+                            auth.currentUser?.let { it.email?.substringBefore("@") })
+                    )
+                }
+
+                fetchLooks()
+            }
     }
 
     fun fetchLooks() {
         looks.clear()
-
         firestore.collection(LOOKS_COLLECTION)
             .where(
-                Filter.or(
-                    Filter.equalTo(IS_PUBLIC_ATTRIBUTE, true),
-                    Filter.equalTo(
-                        AUTHOR_ATTRIBUTE,
-                        auth.currentUser?.let { it.email?.substringBefore("@") })
-                )
+                filter
             )
             .get().addOnSuccessListener { result ->
                 result.documents.forEach { look ->
                     val lookInfo = look.toObject(LookInfo::class.java)
-
-                    lookInfo?.let {  looks[it.lookId] = it }
+                    lookInfo?.let { looks[it.lookId] = it }
                 }
 
                 updateLooksOptionsMenu()
             }
+            .addOnFailureListener { ex ->
+                StyleableToast.makeText(
+                    requireContext(),
+                    ex.message,
+                    Toast.LENGTH_SHORT,
+                    R.style.mytoast
+                ).show()
+            }
     }
 
     private fun updateLooksOptionsMenu(
-
     ) {
         val options = requireView().findViewById<GridLayout>(R.id.vertical_options)
         options.removeAllViews()
 
         options.post {
             val imageWidth =
-                (options.width - options.paddingStart - options.paddingEnd) / NUM_OF_ELEMENTS_IN_ROW
+                (options.width - options.paddingStart - options.paddingEnd) / NUM_OF_ELEMENTS_IN_ROW_BIG_MENU
 
             looks.values.forEach { lookInfo ->
                 val button = if (lookInfo.imagePreviewRef.isNotEmpty()) {
@@ -101,7 +126,7 @@ class LooksOptionsFragment : Fragment() {
                         background = ContextCompat.getDrawable(context, R.drawable.head_model)
                         id = lookInfo.lookId.hashCode()
                         setOnClickListener {
-                            selectLook( requireView(), it, lookInfo)
+                            selectLook(requireView(), it, lookInfo)
                         }
                     }
                 } else {
@@ -110,7 +135,7 @@ class LooksOptionsFragment : Fragment() {
                         background = null
                         id = lookInfo.lookId.hashCode()
                         setOnClickListener {
-                            selectLook( requireView(), it, lookInfo)
+                            selectLook(requireView(), it, lookInfo)
                         }
                     }
                 }
