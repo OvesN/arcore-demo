@@ -119,20 +119,15 @@ class StateService {
         sceneView: ArSceneView,
         slot: String
     ) {
-        sceneView.session?.getAllTrackables(AugmentedFace::class.java)?.forEach { face ->
-            if (faceNodesInfo.augmentedFace != face) {
-                reapplyNodesForNewFace(face, sceneView)
-            }
-
-            val faceNode =
-                faceNodesInfo.slotToFaceNodeMap.getOrPut(slot) {
-                    AugmentedFaceNode(face).apply {
-                        parent = sceneView.scene
-                    }
-                }.apply {
-                    faceMeshTexture = texture
+        val faceNode =
+            faceNodesInfo.slotToFaceNodeMap.getOrPut(slot) {
+                AugmentedFaceNode().apply {
+                    parent = sceneView.scene
+                    augmentedFace = faceNodesInfo.augmentedFace
                 }
-        }
+            }.apply {
+                faceMeshTexture = texture
+            }
     }
 
     fun createTextureAndApply(

@@ -57,6 +57,12 @@ object FileUtil {
         return imagesDir.exists() && imagesDir.isDirectory && imagesDir.list()?.isNotEmpty() == true
     }
 
+    fun getNumberOfFrames(context: Context): Int {
+        val imagesDir = File(context.filesDir, MASK_FRAMES_DIR_NAME)
+
+        return imagesDir.list()?.size ?: 0
+    }
+
     fun getNextTempMaskFrame(
         context: Context,
         counter: Int,
@@ -81,13 +87,18 @@ object FileUtil {
 
     fun getNextTempMaskFrameInputStream(
         context: Context,
-        counter: Int,
-    ): FileInputStream? =
-        try {
-            context.openFileInput("$MASK_FRAMES_DIR_NAME/${MASK_FRAME_FILE_NAME}_$counter.png")
+        counter: Int
+    ): FileInputStream? {
+        return try {
+            val directory = File(context.filesDir, MASK_FRAMES_DIR_NAME)
+            val fileName = "${MASK_FRAME_FILE_NAME}_$counter.png"
+            val file = File(directory, fileName)
+
+            FileInputStream(file)
         } catch (e: Exception) {
             null
         }
+    }
 
     fun saveTempMaskFrames(
         layerManager: LayerManager,
