@@ -40,8 +40,11 @@ import com.cvut.arfittingroom.model.MASK_TEXTURE_SLOT
 import com.cvut.arfittingroom.model.MAX_LOOK_NAME_LENGTH
 import com.cvut.arfittingroom.model.MakeupInfo
 import com.cvut.arfittingroom.model.ModelInfo
+import com.cvut.arfittingroom.model.PREVIEW_BITMAP_SIZE
 import com.cvut.arfittingroom.model.PREVIEW_COLLECTION
 import com.cvut.arfittingroom.service.StateService
+import com.cvut.arfittingroom.utils.BitmapUtil
+import com.cvut.arfittingroom.utils.BitmapUtil.combineBitmaps
 import com.cvut.arfittingroom.utils.FileUtil.deleteTempFiles
 import com.cvut.arfittingroom.utils.FileUtil.doesTempAnimatedMaskExist
 import com.cvut.arfittingroom.utils.FileUtil.getNextTempMaskFrame
@@ -238,8 +241,7 @@ class ShowRoomActivity :
 
         if (lookInfo.isAnimated) {
 
-        }
-        else {
+        } else {
             downloadLookTextureAndApply(lookId)
         }
         shouldDownloadFormStorage = true
@@ -248,6 +250,7 @@ class ShowRoomActivity :
     private fun prepareLookFrames() {
 
     }
+
     private fun downloadLookTextureAndApply(lookId: String) {
         val ref = try {
             storage.getReference("$LOOKS_COLLECTION/$lookId/${MASK_FRAME_FILE_NAME}")
@@ -673,20 +676,11 @@ class ShowRoomActivity :
             return ""
         }
 
-        val combinedBitmap = Bitmap.createBitmap(400, 400, Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(combinedBitmap)
-        val paint = Paint().apply {
-            isFilterBitmap = true
-        }
-        listOf(stateService.makeupTextureBitmap, firstFrameBitmap).forEach { originalBitmap ->
-            originalBitmap?.let {
-                val scaledBitmap = Bitmap.createScaledBitmap(it, 400, 400, true)
-
-                canvas.drawBitmap(scaledBitmap, 0f, 0f, paint)
-
-                scaledBitmap.recycle()
-            }
-        }
+        val combinedBitmap = combineBitmaps(
+            listOfNotNull(stateService.makeupTextureBitmap, firstFrameBitmap),
+            PREVIEW_BITMAP_SIZE,
+            PREVIEW_BITMAP_SIZE
+        )
 
         val ref =
             storage.getReference("$PREVIEW_COLLECTION/$lookId")

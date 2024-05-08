@@ -19,12 +19,12 @@
       android:fillColor="#00000000"
       android:strokeColor="#ffffff"/>
   <path
-      android:pathData="M94.5,97.4L83.1,107.5L91,93.01L115.5,85L149.94,93.01V100.68L119,93.01L94.5,97.4Z"
+      android:pathData="M94.5,101.39L83.1,111.5L91,97.01L115.5,89L149.94,97.01V104.68L119,97.01L94.5,101.39Z"
       android:strokeWidth="0.3"
       android:fillColor="#00000000"
       android:strokeColor="#ffffff"/>
   <path
-      android:pathData="M248.55,98.77L261,110L252.37,93.9L225.61,85L188,93.9V102.43L221.79,93.9L248.55,98.77Z"
+      android:pathData="M248.55,102.77L261,114L252.37,97.9L225.61,89L188,97.9V106.43L221.79,97.9L248.55,102.77Z"
       android:strokeWidth="0.3"
       android:fillColor="#00000000"
       android:strokeColor="#ffffff"/>
@@ -34,22 +34,22 @@
       android:fillColor="#00000000"
       android:strokeColor="#ffffff"/>
   <path
-      android:pathData="M111,117.5L100,122.5L105.5,127L113,130.5L121.5,132L131,130.5L140.5,129L145.5,127L142,122.5L135,118.5L127,116.5H123L111,117.5Z"
+      android:pathData="M111,121.5L100,126.5L105.5,131L113,134.5L121.5,136L131,134.5L140.5,133L145.5,131L142,126.5L135,122.5L127,120.5H123L111,121.5Z"
       android:strokeWidth="0.3"
       android:fillColor="#00000000"
       android:strokeColor="#ffffff"/>
   <path
-      android:pathData="M204.5,119.5L197,126.5L203.5,130L212.5,131H221.5L228,130L236,126.5L241.5,122.5L238.5,119.5L231,117L223,116H213.5L204.5,119.5Z"
+      android:pathData="M204.5,123.5L197,130.5L203.5,134L212.5,135H221.5L228,134L236,130.5L241.5,126.5L238.5,123.5L231,121L223,120H213.5L204.5,123.5Z"
       android:strokeWidth="0.3"
       android:fillColor="#00000000"
       android:strokeColor="#ffffff"/>
   <path
-      android:pathData="M117,117V122.4L117.97,126L121.35,129H127.14L129.55,126L131,122.4V117"
+      android:pathData="M117,121V126.4L117.97,130L121.35,133H127.14L129.55,130L131,126.4V121"
       android:strokeWidth="0.3"
       android:fillColor="#00000000"
       android:strokeColor="#ffffff"/>
   <path
-      android:pathData="M213,117V121.95L214.03,125.25L217.65,128H223.86L226.45,125.25L228,121.95V117"
+      android:pathData="M213,121V125.95L214.03,129.25L217.65,132H223.86L226.45,129.25L228,125.95V121"
       android:strokeWidth="0.3"
       android:fillColor="#00000000"
       android:strokeColor="#ffffff"/>

@@ -5,9 +5,11 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import com.cvut.arfittingroom.draw.service.LayerManager
+import com.cvut.arfittingroom.model.BITMAP_SIZE
 import com.cvut.arfittingroom.model.MASK_FRAMES_DIR_NAME
 import com.cvut.arfittingroom.model.MASK_FRAME_FILE_NAME
 import com.cvut.arfittingroom.model.MASK_TEXTURE_FILE_NAME
+import com.cvut.arfittingroom.utils.BitmapUtil.adjustBitmapFromEditor
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -106,7 +108,7 @@ object FileUtil {
                 val file = File(imagesDir, fileName)
                 FileOutputStream(file).use { fos ->
                     val bitmap =
-                        adjustBitmap(layerManager.createBitmapFromAllLayers(), height, width)
+                        adjustBitmapFromEditor(layerManager.createBitmapFromAllLayers(), height, width)
                     bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos)
                 }
             }
@@ -128,40 +130,4 @@ object FileUtil {
         }
     }
 
-    fun adjustBitmap(
-        bitmap: Bitmap,
-        height: Int,
-        width: Int,
-    ): Bitmap {
-        // Calculate the dimensions for the square crop
-        val newY = (height - width) / 2
-
-        // Crop the bitmap
-        val croppedBitmap = Bitmap.createBitmap(bitmap, 0, newY, width, width)
-
-        // Create a matrix for the mirroring transformation
-        val matrix =
-            Matrix().apply {
-                postScale(
-                    -1f,
-                    1f,
-                    croppedBitmap.width / 2f,
-                    croppedBitmap.height / 2f,
-                )
-            }
-
-        // Create and return the mirrored bitmap
-        val mirroredBitmap =
-            Bitmap.createBitmap(
-                croppedBitmap,
-                0,
-                0,
-                croppedBitmap.width,
-                croppedBitmap.height,
-                matrix,
-                true,
-            )
-
-        return Bitmap.createScaledBitmap(mirroredBitmap, 1024, 1024, true)
-    }
 }

@@ -42,7 +42,7 @@ import com.cvut.arfittingroom.draw.service.LayerManager
 import com.cvut.arfittingroom.draw.service.UIDrawer
 import com.cvut.arfittingroom.model.SPAN_SLOP
 import com.cvut.arfittingroom.model.TOUCH_TO_MOVE_THRESHOLD
-import com.cvut.arfittingroom.utils.FileUtil.adjustBitmap
+import com.cvut.arfittingroom.utils.BitmapUtil.adjustBitmapFromEditor
 import com.cvut.arfittingroom.utils.FileUtil.deleteTempFiles
 import com.cvut.arfittingroom.utils.FileUtil.saveTempMaskFrames
 import com.cvut.arfittingroom.utils.FileUtil.saveTempMaskTextureBitmap
@@ -879,7 +879,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                 onSaved()
             }
         } else {
-            saveTempMaskTextureBitmap(adjustBitmap(createBitmap(), height, width), context) {
+            saveTempMaskTextureBitmap(adjustBitmapFromEditor(createBitmap(), height, width), context) {
                 onSaved()
             }
         }
