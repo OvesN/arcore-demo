@@ -32,13 +32,13 @@ import com.cvut.arfittingroom.fragment.MakeupEditorFragment
 import com.cvut.arfittingroom.fragment.MakeupOptionsFragment
 import com.cvut.arfittingroom.fragment.ProfileFragment
 import com.cvut.arfittingroom.model.LOOKS_COLLECTION
-import com.cvut.arfittingroom.model.LookInfo
+import com.cvut.arfittingroom.model.to.LookTO
 import com.cvut.arfittingroom.model.MAKEUP_SLOT
 import com.cvut.arfittingroom.model.MASK_FRAME_FILE_NAME
 import com.cvut.arfittingroom.model.MASK_TEXTURE_SLOT
 import com.cvut.arfittingroom.model.MAX_LOOK_NAME_LENGTH
-import com.cvut.arfittingroom.model.MakeupInfo
-import com.cvut.arfittingroom.model.ModelInfo
+import com.cvut.arfittingroom.model.to.MakeupTO
+import com.cvut.arfittingroom.model.to.ModelTO
 import com.cvut.arfittingroom.model.PREVIEW_BITMAP_SIZE
 import com.cvut.arfittingroom.model.PREVIEW_COLLECTION
 import com.cvut.arfittingroom.service.StateService
@@ -173,8 +173,8 @@ class ShowRoomActivity :
         arSceneView.resume()
     }
 
-    override fun applyMakeup(makeupInfo: MakeupInfo) {
-        stateService.appliedMakeUpTypes[makeupInfo.type] = makeupInfo
+    override fun applyMakeup(makeupTO: MakeupTO) {
+        stateService.appliedMakeUpTypes[makeupTO.type] = makeupTO
 
         stateService.appliedMakeUpTypes.values.forEach {
             loadImage(it.ref, it.color)
@@ -195,43 +195,43 @@ class ShowRoomActivity :
         }
     }
 
-    override fun applyModel(modelInfo: ModelInfo) {
-        stateService.addModel(modelInfo)
-        loadModel(modelInfo)
+    override fun applyModel(modelTO: ModelTO) {
+        stateService.addModel(modelTO)
+        loadModel(modelTO)
     }
 
     override fun removeModel(slot: String) {
         stateService.clearFaceNodeSlot(slot)
     }
 
-    override fun applyLook(lookInfo: LookInfo) {
+    override fun applyLook(lookTO: LookTO) {
         if (DrawHistoryHolder.isNotEmpty()) {
-            showWarningDialog(lookInfo)
+            showWarningDialog(lookTO)
         } else {
             stopAnimation()
-            accessoriesOptionsFragment.applyState(lookInfo.appliedModels)
-            makeupOptionsFragment.applyState(lookInfo.appliedMakeup)
+            accessoriesOptionsFragment.applyState(lookTO.appliedModels)
+            makeupOptionsFragment.applyState(lookTO.appliedMakeup)
 
-            lookInfo.appliedMakeup.forEach {
+            lookTO.appliedMakeup.forEach {
                 stateService.appliedMakeUpTypes[it.type] = it
             }
             stateService.appliedMakeUpTypes.values.forEach {
                 loadImage(it.ref, it.color)
             }
 
-            lookInfo.appliedModels.forEach {
+            lookTO.appliedModels.forEach {
                 applyModel(it)
             }
 
-            if (lookInfo.isAnimated) {
-                downloadLookFrames(lookInfo.lookId)
+            if (lookTO.isAnimated) {
+                downloadLookFrames(lookTO.lookId)
             } else {
-                downloadLookTextureAndApply(lookInfo.lookId)
+                downloadLookTextureAndApply(lookTO.lookId)
             }
         }
     }
 
-    private fun showWarningDialog(lookInfo: LookInfo) {
+    private fun showWarningDialog(lookTO: LookTO) {
         val dialogView = LayoutInflater.from(this).inflate(R.layout.popup_apply_look, null)
 
         val dialog =
@@ -246,7 +246,7 @@ class ShowRoomActivity :
         dialogView.findViewById<Button>(R.id.continue_button).setOnClickListener {
             stateService.clearAll()
             makeupEditorFragment.clearAll()
-            applyLook(lookInfo)
+            applyLook(lookTO)
             dialog.dismiss()
         }
 
@@ -451,8 +451,8 @@ class ShowRoomActivity :
         return true
     }
 
-    private fun loadModel(modelInfo: ModelInfo) {
-        storage.getReference(modelInfo.modelRef)
+    private fun loadModel(modelTO: ModelTO) {
+        storage.getReference(modelTO.modelRef)
             .downloadUrl
             .addOnSuccessListener { uri ->
                 ModelRenderable.builder()
@@ -460,7 +460,7 @@ class ShowRoomActivity :
                     .setIsFilamentGltf(true)
                     .build()
                     .thenAccept { renderable ->
-                        stateService.applyModelOnFace(arSceneView, renderable, modelInfo.slot)
+                        stateService.applyModelOnFace(arSceneView, renderable, modelTO.slot)
                     }
                     .exceptionally { ex ->
                         Log.println(Log.ERROR, null, ex.message.orEmpty())
@@ -632,7 +632,7 @@ class ShowRoomActivity :
         }
 
         val data =
-            LookInfo(
+            LookTO(
                 isPublic = isPublic,
                 lookId = lookId,
                 author = auth.currentUserUsername(),

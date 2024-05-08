@@ -9,10 +9,10 @@ import com.cvut.arfittingroom.model.TRANSPARENT_CODE
 import kotlin.math.max
 
 class Image(
+    val resourceRef: String,
     override var centerX: Float,
     override var centerY: Float,
     override var outerRadius: Float,
-    val resourceId: Int,
 ) : Element() {
     override val name: String = "image"
     override var boundingBox: BoundingBox = createBoundingBox()

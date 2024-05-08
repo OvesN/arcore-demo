@@ -5,8 +5,8 @@ import android.util.Log
 import com.cvut.arfittingroom.model.BITMAP_SIZE
 import com.cvut.arfittingroom.model.FaceNodesInfo
 import com.cvut.arfittingroom.model.MAKEUP_SLOT
-import com.cvut.arfittingroom.model.MakeupInfo
-import com.cvut.arfittingroom.model.ModelInfo
+import com.cvut.arfittingroom.model.to.MakeupTO
+import com.cvut.arfittingroom.model.to.ModelTO
 import com.cvut.arfittingroom.utils.BitmapUtil.combineBitmaps
 import com.cvut.arfittingroom.utils.BitmapUtil.replaceNonTransparentPixels
 import com.google.ar.core.AugmentedFace
@@ -21,10 +21,10 @@ import com.google.ar.sceneform.ux.AugmentedFaceNode
  *
  */
 class StateService {
-    val appliedMakeUpTypes = mutableMapOf<String, MakeupInfo>()
+    val appliedMakeUpTypes = mutableMapOf<String, MakeupTO>()
     var makeupTextureBitmap: Bitmap? = null
     private val makeUpBitmaps = mutableListOf<Bitmap>()
-    private val appliedModels = mutableMapOf<String, ModelInfo>()
+    private val appliedModels = mutableMapOf<String, ModelTO>()
     val faceNodesInfo = FaceNodesInfo(null, mutableMapOf())
 
     init {
@@ -62,8 +62,8 @@ class StateService {
         }
     }
 
-    fun addModel(modelInfo: ModelInfo) {
-        appliedModels[modelInfo.slot] = modelInfo
+    fun addModel(modelTO: ModelTO) {
+        appliedModels[modelTO.slot] = modelTO
     }
 
     fun applyModelOnFace(

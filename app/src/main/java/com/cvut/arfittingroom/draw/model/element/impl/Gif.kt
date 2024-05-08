@@ -10,7 +10,7 @@ import pl.droidsonroids.gif.GifDrawable
 import kotlin.math.max
 
 class Gif(
-    private val gifId: Int,
+    val resourceRef: String,
     override var centerX: Float,
     override var centerY: Float,
     override var outerRadius: Float,

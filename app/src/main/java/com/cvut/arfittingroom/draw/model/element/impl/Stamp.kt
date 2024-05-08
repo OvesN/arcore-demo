@@ -8,7 +8,7 @@ import com.cvut.arfittingroom.draw.model.element.Element
 import com.cvut.arfittingroom.draw.model.element.strategy.PathCreationStrategy
 import com.cvut.arfittingroom.draw.path.DrawablePath
 
-class Figure(
+class Stamp(
     override var centerX: Float,
     override var centerY: Float,
     override var outerRadius: Float,

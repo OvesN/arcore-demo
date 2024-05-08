@@ -14,7 +14,7 @@ import kotlin.math.max
 private const val PROXIMITY_THRESHOLD = 60f  // pixels
 
 class Curve(
-    private var path: DrawablePath,
+    var path: DrawablePath,
     override val paint: Paint,
 ) : Element(), Repaintable {
     override val name: String = "Line"

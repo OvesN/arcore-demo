@@ -251,4 +251,7 @@ class Layer(
             }
         }
     }
+
+    fun getAllElementsIds() =
+        elements.keys.toList()
 }

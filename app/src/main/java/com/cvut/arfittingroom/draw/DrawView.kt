@@ -30,7 +30,7 @@ import com.cvut.arfittingroom.draw.command.action.element.impl.ScaleElement
 import com.cvut.arfittingroom.draw.model.PaintOptions
 import com.cvut.arfittingroom.draw.model.element.Element
 import com.cvut.arfittingroom.draw.model.element.impl.Curve
-import com.cvut.arfittingroom.draw.model.element.impl.Figure
+import com.cvut.arfittingroom.draw.model.element.impl.Stamp
 import com.cvut.arfittingroom.draw.model.element.impl.Gif
 import com.cvut.arfittingroom.draw.model.element.impl.Image
 import com.cvut.arfittingroom.draw.model.element.strategy.impl.HeartPathCreationStrategy
@@ -705,7 +705,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         outerRadius: Float,
     ) {
         val heart =
-            Figure(
+            Stamp(
                 centerX,
                 centerY,
                 outerRadius,
@@ -727,7 +727,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         outerRadius: Float,
     ) {
         val star =
-            Figure(
+            Stamp(
                 centerX,
                 centerY,
                 outerRadius,
