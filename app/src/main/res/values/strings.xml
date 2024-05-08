@@ -43,4 +43,9 @@
     <string name="look_name">Look name</string>
     <string name="save">Save</string>
     <string name="save_look">Save look?</string>
+    <string name="discard">Discard all changes?</string>
+    <string name="discard_button">Discard</string>
+    <string name="apply">Apply</string>
+    <string name="look_changes">Applying a look will erase all unsaved changes</string>
+    <string name="continue_button">Continue</string>
 </resources>

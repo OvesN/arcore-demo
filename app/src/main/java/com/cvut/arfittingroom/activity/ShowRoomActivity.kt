@@ -24,6 +24,7 @@ import com.bumptech.glide.request.transition.Transition
 import com.cvut.arfittingroom.ARFittingRoomApplication
 import com.cvut.arfittingroom.R
 import com.cvut.arfittingroom.databinding.ActivityShowRoomBinding
+import com.cvut.arfittingroom.draw.DrawHistoryHolder
 import com.cvut.arfittingroom.fragment.AccessoriesOptionsFragment
 import com.cvut.arfittingroom.fragment.CameraModeFragment
 import com.cvut.arfittingroom.fragment.LooksOptionsFragment
@@ -151,7 +152,7 @@ class ShowRoomActivity :
             showSaveLookDialog()
         }
         binding.deleteButton.setOnClickListener {
-            clearAll()
+            showClearAllDialog()
         }
         binding.cameraModeButton.setOnClickListener {
             showCameraModeUI()
@@ -210,34 +211,73 @@ class ShowRoomActivity :
     }
 
     override fun applyLook(lookInfo: LookInfo) {
-        stopAnimation()
-        accessoriesOptionsFragment.applyState(lookInfo.appliedModels)
-        makeupOptionsFragment.applyState(lookInfo.appliedMakeup)
-
-        stateService.clearAll()
-        makeupEditorFragment.clearAll()
-
-        lookInfo.appliedMakeup.forEach {
-            stateService.appliedMakeUpTypes[it.type] = it
-        }
-        stateService.appliedMakeUpTypes.values.forEach {
-            loadImage(it.ref, it.color)
-        }
-
-        lookInfo.appliedModels.forEach {
-            applyModel(it)
-        }
-
-
-        if (lookInfo.isAnimated) {
-            downloadLookFrames(lookInfo.lookId)
-
+        if (!DrawHistoryHolder.isEmpty()) {
+            showWarningDialog(lookInfo)
         } else {
-            downloadLookTextureAndApply(lookInfo.lookId)
-        }
+            stopAnimation()
+            accessoriesOptionsFragment.applyState(lookInfo.appliedModels)
+            makeupOptionsFragment.applyState(lookInfo.appliedMakeup)
 
+            lookInfo.appliedMakeup.forEach {
+                stateService.appliedMakeUpTypes[it.type] = it
+            }
+            stateService.appliedMakeUpTypes.values.forEach {
+                loadImage(it.ref, it.color)
+            }
+
+            lookInfo.appliedModels.forEach {
+                applyModel(it)
+            }
+
+            if (lookInfo.isAnimated) {
+                downloadLookFrames(lookInfo.lookId)
+
+            } else {
+                downloadLookTextureAndApply(lookInfo.lookId)
+            }
+        }
     }
 
+    private fun showWarningDialog(lookInfo: LookInfo) {
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.popup_apply_look, null)
+
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .create()
+
+        dialogView.findViewById<Button>(R.id.cancel_popup_button).setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialogView.findViewById<Button>(R.id.continue_button).setOnClickListener {
+            stateService.clearAll()
+            makeupEditorFragment.clearAll()
+            applyLook(lookInfo)
+            dialog.dismiss()
+
+        }
+
+        dialog.show()
+    }
+
+    private fun showClearAllDialog() {
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.popup_clear_all, null)
+
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .create()
+
+        dialogView.findViewById<Button>(R.id.cancel_popup_button).setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialogView.findViewById<Button>(R.id.discard_button).setOnClickListener {
+            clearAll()
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
 
     private fun downloadLookTextureAndApply(lookId: String) {
         val ref = try {
@@ -270,7 +310,12 @@ class ShowRoomActivity :
     }
 
     override fun removeLook(lookId: String) {
-        clearAll()
+        stopAnimation()
+        accessoriesOptionsFragment.resetMenu()
+        makeupOptionsFragment.resetMenu()
+
+        stateService.clearAll()
+        makeupEditorFragment.clearAll()
     }
 
     private fun onAttachFragment(
@@ -371,7 +416,7 @@ class ShowRoomActivity :
                 .build()
                 .thenAccept { texture ->
                     gifTextures.add(texture)
-                    if(index == numberOfFrames - 1) {
+                    if (index == numberOfFrames - 1) {
                         startAnimation()
                     }
 
@@ -717,12 +762,14 @@ class ShowRoomActivity :
     override fun showMainLayout() {
         findViewById<View>(R.id.top_ui).visibility = View.VISIBLE
         findViewById<View>(R.id.bottom_ui).visibility = View.VISIBLE
+
         val makeupEditor =
             supportFragmentManager.findFragmentByTag(MakeupEditorFragment.MAKEUP_EDITOR_FRAGMENT_TAG)
 
         val transaction = supportFragmentManager
             .beginTransaction()
             .remove(cameraModeFragment)
+            .remove(profileFragment)
 
         makeupEditor?.let { transaction.hide(makeupEditor) }
         transaction.commit()
