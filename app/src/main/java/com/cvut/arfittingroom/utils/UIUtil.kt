@@ -25,10 +25,12 @@ object UIUtil {
 
     fun showColorPickerDialog(
         context: Context,
+        initialColor:Int,
         shouldShowFillOption: Boolean = false,
         onColorSelected: (Int) -> Unit,
+
     ) {
-        ColorPickerDialog.Builder(context)
+        val builder = ColorPickerDialog.Builder(context)
             .setPreferenceName("MyColorPickerDialog")
             .setPositiveButton(
                 R.string.OK,
@@ -39,10 +41,14 @@ object UIUtil {
             .setNegativeButton(R.string.cancel) { dialogInterface, _ ->
                 dialogInterface.dismiss()
             }
+
             .attachAlphaSlideBar(true)
             .attachBrightnessSlideBar(true)
             .setBottomSpace(12)
-            .show()
+
+        builder.colorPickerView.setInitialColor(initialColor)
+
+        builder.show()
     }
 
     fun selectLookButton(view: View) {

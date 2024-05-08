@@ -56,12 +56,11 @@ import kotlin.math.atan2
 import kotlin.math.sqrt
 
 class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
-    private var paintOptions = PaintOptions()
+    var paintOptions = PaintOptions()
     private var curX = 0f
     private var curY = 0f
     private var startX = 0f
     private var startY = 0f
-    private var isStrokeWidthBarEnabled = false
     private var elementScaleFactor = 1.0f
     private var canvasScaleFactor = 1.0f
     private val scaleGestureDetector: ScaleGestureDetector
@@ -490,7 +489,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
             EElementEditAction.CHANGE_COLOR -> {
                 selectedElement?.let { selectedElement ->
-                    showColorPickerDialog(context) { envelopColor ->
+                    showColorPickerDialog(context, paintOptions.color) { envelopColor ->
                         repaintElement(selectedElement, envelopColor)
                     }
                 }
@@ -605,16 +604,10 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         @ColorInt
         paintOptions.color = newColor
         paintOptions.alpha = newColor.alpha
-        if (isStrokeWidthBarEnabled) {
-            invalidate()
-        }
     }
 
     fun setStrokeWidth(newStrokeWidth: Float) {
         paintOptions.strokeWidth = newStrokeWidth
-        if (isStrokeWidthBarEnabled) {
-            invalidate()
-        }
     }
 
     fun setOnLayerInitializedListener(listener: OnLayerInitializedListener) {

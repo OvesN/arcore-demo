@@ -65,7 +65,7 @@ class MakeupEditorFragment : Fragment() {
         }
 
         view.findViewById<ImageButton>(R.id.button_color_picker).setOnClickListener {
-            UIUtil.showColorPickerDialog(requireContext()) { envelopColor ->
+            UIUtil.showColorPickerDialog(requireContext(), drawView.paintOptions.color) { envelopColor ->
                 drawView.setColor(
                     envelopColor,
                 )

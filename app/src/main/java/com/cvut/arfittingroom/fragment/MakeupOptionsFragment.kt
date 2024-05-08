@@ -226,7 +226,7 @@ class MakeupOptionsFragment : Fragment() {
                 scaleType = ImageView.ScaleType.FIT_CENTER
                 background = ContextCompat.getDrawable(requireContext(), R.drawable.color_picker)!!
                 setOnClickListener {
-                    showColorPickerDialog(requireContext()) { envelopColor ->
+                    showColorPickerDialog(requireContext(), selectedColor) { envelopColor ->
                         selectedColor = envelopColor
                         toggleMakeup(selectedMakeupOptionRef, selectedMakeupType)
                     }
