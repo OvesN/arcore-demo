@@ -3,11 +3,11 @@ package com.cvut.arfittingroom.utils
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.Matrix
 import com.cvut.arfittingroom.draw.service.LayerManager
 import com.cvut.arfittingroom.model.MASK_FRAMES_DIR_NAME
 import com.cvut.arfittingroom.model.MASK_FRAME_FILE_NAME
 import com.cvut.arfittingroom.model.MASK_TEXTURE_FILE_NAME
+import com.cvut.arfittingroom.utils.BitmapUtil.adjustBitmapFromEditor
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -42,10 +42,23 @@ object FileUtil {
             null
         }
 
+    fun getTempMaskTextureStream(context: Context): FileInputStream? =
+        try {
+            context.openFileInput(MASK_TEXTURE_FILE_NAME)
+        } catch (e: Exception) {
+            null
+        }
+
     fun doesTempAnimatedMaskExist(context: Context): Boolean {
         val imagesDir = File(context.filesDir, MASK_FRAMES_DIR_NAME)
 
         return imagesDir.exists() && imagesDir.isDirectory && imagesDir.list()?.isNotEmpty() == true
+    }
+
+    fun getNumberOfFrames(context: Context): Int {
+        val imagesDir = File(context.filesDir, MASK_FRAMES_DIR_NAME)
+
+        return imagesDir.list()?.size ?: 0
     }
 
     fun getNextTempMaskFrame(
@@ -73,18 +86,15 @@ object FileUtil {
     fun getNextTempMaskFrameInputStream(
         context: Context,
         counter: Int,
-    ): FileInputStream? =
-        try {
-            val file =
-                File(
-                    context.filesDir,
-                    "$MASK_FRAMES_DIR_NAME/${MASK_FRAME_FILE_NAME}_$counter.png",
-                )
+    ): FileInputStream? = try {
+        val directory = File(context.filesDir, MASK_FRAMES_DIR_NAME)
+        val fileName = "${MASK_FRAME_FILE_NAME}_$counter.png"
+        val file = File(directory, fileName)
 
-            FileInputStream(file)
-        } catch (e: Exception) {
-            null
-        }
+        FileInputStream(file)
+    } catch (e: Exception) {
+        null
+    }
 
     fun saveTempMaskFrames(
         layerManager: LayerManager,
@@ -105,7 +115,7 @@ object FileUtil {
                 val file = File(imagesDir, fileName)
                 FileOutputStream(file).use { fos ->
                     val bitmap =
-                        adjustBitmap(layerManager.createBitmapFromAllLayers(), height, width)
+                        adjustBitmapFromEditor(layerManager.createBitmapFromAllLayers(), height, width)
                     bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos)
                 }
             }
@@ -125,42 +135,5 @@ object FileUtil {
                 file.delete()
             }
         }
-    }
-
-    fun adjustBitmap(
-        bitmap: Bitmap,
-        height: Int,
-        width: Int,
-    ): Bitmap {
-        // Calculate the dimensions for the square crop
-        val newY = (height - width) / 2
-
-        // Crop the bitmap
-        val croppedBitmap = Bitmap.createBitmap(bitmap, 0, newY, width, width)
-
-        // Create a matrix for the mirroring transformation
-        val matrix =
-            Matrix().apply {
-                postScale(
-                    -1f,
-                    1f,
-                    croppedBitmap.width / 2f,
-                    croppedBitmap.height / 2f,
-                )
-            }
-
-        // Create and return the mirrored bitmap
-        val mirroredBitmap =
-            Bitmap.createBitmap(
-                croppedBitmap,
-                0,
-                0,
-                croppedBitmap.width,
-                croppedBitmap.height,
-                matrix,
-                true,
-            )
-
-        return Bitmap.createScaledBitmap(mirroredBitmap, 1024, 1024, true)
     }
 }

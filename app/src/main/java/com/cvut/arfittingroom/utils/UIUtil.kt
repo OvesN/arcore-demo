@@ -8,6 +8,7 @@ import android.graphics.drawable.LayerDrawable
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AccelerateDecelerateInterpolator
+import android.widget.ImageView
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
@@ -38,15 +39,29 @@ object UIUtil {
             .setNegativeButton(R.string.cancel) { dialogInterface, _ ->
                 dialogInterface.dismiss()
             }
-            // .setSingleChoiceItems()
-            // .setView()
             .attachAlphaSlideBar(true)
             .attachBrightnessSlideBar(true)
             .setBottomSpace(12)
             .show()
     }
 
-    fun selectMakeupButton(view: View) {
+    fun selectLookButton(view: View) {
+        if (view is ImageView) {
+            selectHeadBackgroundButton(view)
+        } else {
+            deselectHeadBackgroundButton(view)
+        }
+    }
+
+    fun deselectLookButton(view: View) {
+        if (view is ImageView) {
+            deselectHeadBackgroundButton(view)
+        } else {
+            deselectButton(view)
+        }
+    }
+
+    fun selectHeadBackgroundButton(view: View) {
         val layers =
             arrayOf(
                 ContextCompat.getDrawable(view.context, R.drawable.head_model)!!,
@@ -56,7 +71,7 @@ object UIUtil {
         view.background = LayerDrawable(layers)
     }
 
-    fun deselectMakeupOptionButton(view: View) {
+    fun deselectHeadBackgroundButton(view: View) {
         view.background = ContextCompat.getDrawable(view.context, R.drawable.head_model)!!
     }
 

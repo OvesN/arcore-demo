@@ -1,7 +1,10 @@
 package com.cvut.arfittingroom.utils
 
 import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.Matrix
+import com.cvut.arfittingroom.model.BITMAP_SIZE
 
 object BitmapUtil {
     /**
@@ -21,7 +24,6 @@ object BitmapUtil {
 
         bitmap.getPixels(pixels, 0, width, 0, 0, width, height)
 
-        // Extract the components of the new color
         val newAlpha = Color.alpha(newColor)
         val newRed = Color.red(newColor)
         val newGreen = Color.green(newColor)
@@ -31,19 +33,72 @@ object BitmapUtil {
             val oldColor = pixels[i]
             val oldAlpha = Color.alpha(oldColor)
 
-            // Calculate new alpha based on original alpha and the alpha of the new color
             val combinedAlpha = (oldAlpha * newAlpha) / 255
 
-            // Blend other color components based on new combined alpha
             val red = (Color.red(oldColor) * (255 - newAlpha) / 255) + (newRed * newAlpha / 255)
-            val green = (Color.green(oldColor) * (255 - newAlpha) / 255) + (newGreen * newAlpha / 255)
+            val green =
+                (Color.green(oldColor) * (255 - newAlpha) / 255) + (newGreen * newAlpha / 255)
             val blue = (Color.blue(oldColor) * (255 - newAlpha) / 255) + (newBlue * newAlpha / 255)
 
-            // Apply the new pixel color to the array
             pixels[i] = Color.argb(combinedAlpha, red, green, blue)
         }
 
-        // Update the bitmap with the new pixels
         bitmap.setPixels(pixels, 0, width, 0, 0, width, height)
+    }
+
+    fun combineBitmaps(
+        bitmaps: List<Bitmap>,
+        width: Int,
+        height: Int,
+    ): Bitmap {
+        val combinedBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(combinedBitmap)
+
+        bitmaps.forEach {
+            val scale = (width.toFloat() / it.width).coerceAtMost(height.toFloat() / it.height)
+
+            val matrix =
+                Matrix().apply {
+                    postScale(scale, scale)
+                    postTranslate((width.toFloat() - it.width * scale) / 2, (height.toFloat() - it.height * scale) / 2)
+                }
+
+            canvas.drawBitmap(it, matrix, null)
+        }
+
+        return combinedBitmap
+    }
+
+    fun adjustBitmapFromEditor(
+        bitmap: Bitmap,
+        height: Int,
+        width: Int,
+    ): Bitmap {
+        val newY = (height - width) / 2
+
+        val croppedBitmap = Bitmap.createBitmap(bitmap, 0, newY, width, width)
+
+        val matrix =
+            Matrix().apply {
+                postScale(
+                    -1f,
+                    1f,
+                    croppedBitmap.width / 2f,
+                    croppedBitmap.height / 2f,
+                )
+            }
+
+        val mirroredBitmap =
+            Bitmap.createBitmap(
+                croppedBitmap,
+                0,
+                0,
+                croppedBitmap.width,
+                croppedBitmap.height,
+                matrix,
+                true,
+            )
+
+        return Bitmap.createScaledBitmap(mirroredBitmap, BITMAP_SIZE, BITMAP_SIZE, true)
     }
 }

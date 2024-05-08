@@ -1,14 +1,18 @@
 package com.cvut.arfittingroom.activity
 
 import android.app.ActivityManager
+import android.app.AlertDialog
 import android.content.Context
-import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
+import android.widget.Button
+import android.widget.CheckBox
+import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
@@ -20,24 +24,36 @@ import com.bumptech.glide.request.transition.Transition
 import com.cvut.arfittingroom.ARFittingRoomApplication
 import com.cvut.arfittingroom.R
 import com.cvut.arfittingroom.databinding.ActivityShowRoomBinding
+import com.cvut.arfittingroom.draw.DrawHistoryHolder
 import com.cvut.arfittingroom.fragment.AccessoriesOptionsFragment
 import com.cvut.arfittingroom.fragment.CameraModeFragment
 import com.cvut.arfittingroom.fragment.LooksOptionsFragment
+import com.cvut.arfittingroom.fragment.MakeupEditorFragment
 import com.cvut.arfittingroom.fragment.MakeupOptionsFragment
 import com.cvut.arfittingroom.fragment.ProfileFragment
 import com.cvut.arfittingroom.model.LOOKS_COLLECTION
+import com.cvut.arfittingroom.model.LookInfo
 import com.cvut.arfittingroom.model.MAKEUP_SLOT
 import com.cvut.arfittingroom.model.MASK_FRAME_FILE_NAME
+import com.cvut.arfittingroom.model.MASK_TEXTURE_SLOT
+import com.cvut.arfittingroom.model.MAX_LOOK_NAME_LENGTH
 import com.cvut.arfittingroom.model.MakeupInfo
 import com.cvut.arfittingroom.model.ModelInfo
+import com.cvut.arfittingroom.model.PREVIEW_BITMAP_SIZE
+import com.cvut.arfittingroom.model.PREVIEW_COLLECTION
 import com.cvut.arfittingroom.service.StateService
+import com.cvut.arfittingroom.utils.BitmapUtil.combineBitmaps
 import com.cvut.arfittingroom.utils.FileUtil.deleteTempFiles
 import com.cvut.arfittingroom.utils.FileUtil.doesTempAnimatedMaskExist
 import com.cvut.arfittingroom.utils.FileUtil.getNextTempMaskFrame
 import com.cvut.arfittingroom.utils.FileUtil.getNextTempMaskFrameInputStream
+import com.cvut.arfittingroom.utils.FileUtil.getNumberOfFrames
 import com.cvut.arfittingroom.utils.FileUtil.getTempMaskTextureBitmap
+import com.cvut.arfittingroom.utils.FileUtil.getTempMaskTextureStream
+import com.cvut.arfittingroom.utils.currentUserUsername
 import com.google.android.filament.LightManager
 import com.google.ar.core.ArCoreApk
+import com.google.ar.core.AugmentedFace
 import com.google.ar.sceneform.ArSceneView
 import com.google.ar.sceneform.Sceneform
 import com.google.ar.sceneform.rendering.ModelRenderable
@@ -53,6 +69,9 @@ import com.gorisse.thomas.sceneform.light.build
 import com.gorisse.thomas.sceneform.lightEstimationConfig
 import com.gorisse.thomas.sceneform.mainLight
 import io.github.muddz.styleabletoast.StyleableToast
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import java.lang.Exception
 import java.util.UUID
 import javax.inject.Inject
 
@@ -61,24 +80,18 @@ class ShowRoomActivity :
     ResourceListener,
     UIChangeListener {
     private val binding: ActivityShowRoomBinding by viewBinding(createMethod = CreateMethod.INFLATE)
-    private var shouldPlayAnimation = false
-    private var gifPrepared = false
     private val gifTextures = mutableListOf<Texture>()
     private var frameCounter = 0
     private var handler = Handler(Looper.getMainLooper())
     private var gifRunnable: Runnable? = null
 
     private var frameDelay: Long = 100  // Default frame delay (100 ms per frame)
-    private var shouldClearEditor = false
-
-    // FIXME do not do it like that!
-    private var lookId: String = ""
-    private var shouldDownloadFormStorage: Boolean = false
     private val accessoriesOptionsFragment = AccessoriesOptionsFragment()
     private val looksOptionsFragment = LooksOptionsFragment()
     private val makeupOptionsFragment = MakeupOptionsFragment()
     private val cameraModeFragment = CameraModeFragment()
     private val profileFragment = ProfileFragment()
+    private val makeupEditorFragment = MakeupEditorFragment()
     private lateinit var arFragment: ArFrontFacingFragment
     private lateinit var arSceneView: ArSceneView
     private lateinit var auth: FirebaseAuth
@@ -87,19 +100,6 @@ class ShowRoomActivity :
 
     @Inject
     lateinit var stateService: StateService
-
-    override fun onResume() {
-        super.onResume()
-        resetGifState()
-
-        val bitmap = getTempMaskTextureBitmap(applicationContext)
-        bitmap?.let {
-            stateService.createTextureAndApply(it, arFragment.arSceneView)
-            shouldPlayAnimation = false
-        }
-
-        shouldPlayAnimation = doesTempAnimatedMaskExist(applicationContext)
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -146,10 +146,10 @@ class ShowRoomActivity :
             showLooksMenu()
         }
         binding.saveButton.setOnClickListener {
-            saveLook()
+            showSaveLookDialog()
         }
         binding.deleteButton.setOnClickListener {
-            clearAll()
+            showClearAllDialog()
         }
         binding.cameraModeButton.setOnClickListener {
             showCameraModeUI()
@@ -158,26 +158,30 @@ class ShowRoomActivity :
             showProfileUI()
         }
         binding.maskEditorButton.setOnClickListener {
-            val intent = Intent(this, MakeupEditorActivity::class.java)
-            intent.putExtra("shouldClearEditor", shouldClearEditor)
-            startActivity(intent)
-            finish()
+            showMakeupEditorUI()
+            arSceneView.pause()
         }
     }
 
-    override fun applyImage(
-        type: String,
-        ref: String,
-        color: Int,
-    ) {
-        stateService.appliedMakeUpTypes[type] = MakeupInfo(ref, color)
+    override fun onPause() {
+        super.onPause()
+        arSceneView.pause()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        arSceneView.resume()
+    }
+
+    override fun applyMakeup(makeupInfo: MakeupInfo) {
+        stateService.appliedMakeUpTypes[makeupInfo.type] = makeupInfo
 
         stateService.appliedMakeUpTypes.values.forEach {
             loadImage(it.ref, it.color)
         }
     }
 
-    override fun removeImage(type: String) {
+    override fun removeMakeup(type: String) {
         val appliedMakeupTypes = stateService.appliedMakeUpTypes
         appliedMakeupTypes.remove(type)
 
@@ -200,16 +204,111 @@ class ShowRoomActivity :
         stateService.clearFaceNodeSlot(slot)
     }
 
-    // FIXME
-    override fun applyLook(lookId: String) {
-        stopAnimation()
-        this.lookId = lookId
-        shouldPlayAnimation = true
-        shouldDownloadFormStorage = true
+    override fun applyLook(lookInfo: LookInfo) {
+        if (DrawHistoryHolder.isNotEmpty()) {
+            showWarningDialog(lookInfo)
+        } else {
+            stopAnimation()
+            accessoriesOptionsFragment.applyState(lookInfo.appliedModels)
+            makeupOptionsFragment.applyState(lookInfo.appliedMakeup)
+
+            lookInfo.appliedMakeup.forEach {
+                stateService.appliedMakeUpTypes[it.type] = it
+            }
+            stateService.appliedMakeUpTypes.values.forEach {
+                loadImage(it.ref, it.color)
+            }
+
+            lookInfo.appliedModels.forEach {
+                applyModel(it)
+            }
+
+            if (lookInfo.isAnimated) {
+                downloadLookFrames(lookInfo.lookId)
+            } else {
+                downloadLookTextureAndApply(lookInfo.lookId)
+            }
+        }
+    }
+
+    private fun showWarningDialog(lookInfo: LookInfo) {
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.popup_apply_look, null)
+
+        val dialog =
+            AlertDialog.Builder(this)
+                .setView(dialogView)
+                .create()
+
+        dialogView.findViewById<Button>(R.id.cancel_popup_button).setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialogView.findViewById<Button>(R.id.continue_button).setOnClickListener {
+            stateService.clearAll()
+            makeupEditorFragment.clearAll()
+            applyLook(lookInfo)
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
+
+    private fun showClearAllDialog() {
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.popup_clear_all, null)
+
+        val dialog =
+            AlertDialog.Builder(this)
+                .setView(dialogView)
+                .create()
+
+        dialogView.findViewById<Button>(R.id.cancel_popup_button).setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialogView.findViewById<Button>(R.id.discard_button).setOnClickListener {
+            clearAll()
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
+
+    private fun downloadLookTextureAndApply(lookId: String) {
+        val ref =
+            try {
+                storage.getReference("$LOOKS_COLLECTION/$lookId/$MASK_FRAME_FILE_NAME")
+            } catch (ex: Exception) {
+                StyleableToast.makeText(this, ex.message, R.style.mytoast).show()
+                return
+            }
+
+        ref.downloadUrl.addOnSuccessListener { uri ->
+            Texture.builder()
+                .setSource(applicationContext, uri)
+                .build()
+                .thenAccept { texture ->
+                    stateService.applyTextureToFaceNode(texture, arSceneView, MASK_TEXTURE_SLOT)
+                }
+                .exceptionally { throwable ->
+                    Log.println(
+                        Log.ERROR,
+                        null,
+                        "Error creating texture: $throwable",
+                    )
+                    null
+                }
+        }.addOnFailureListener { ex ->
+            StyleableToast.makeText(this, ex.message, R.style.mytoast).show()
+        }
     }
 
     override fun removeLook(lookId: String) {
-        TODO("Not yet implemented")
+        stopAnimation()
+        accessoriesOptionsFragment.resetMenu()
+        makeupOptionsFragment.resetMenu()
+
+        stateService.clearAll()
+        makeupEditorFragment.clearAll()
     }
 
     private fun onAttachFragment(
@@ -248,81 +347,81 @@ class ShowRoomActivity :
 
         // Check for face detections
 
-        arFragment.setOnAugmentedFaceUpdateListener {
-            stateService.hideNodesIfFaceTrackingStopped()
+        arFragment.setOnAugmentedFaceUpdateListener { face ->
+            onAugmentedFaceTrackingUpdate(face)
         }
     }
 
-    private fun onAugmentedFaceTrackingUpdate() {
+    private fun onAugmentedFaceTrackingUpdate(face: AugmentedFace) {
         stateService.hideNodesIfFaceTrackingStopped()
 
-        if (shouldPlayAnimation) {
-            if (!gifPrepared) {
-                prepareAllGifTextures()
-            } else if (gifRunnable == null) {
-                startAnimation()
+        if (stateService.faceNodesInfo.augmentedFace != face) {
+            stateService.reapplyNodesForNewFace(face, arSceneView)
+        }
+    }
+
+    private fun downloadLookFrames(lookId: String) {
+        val ref =
+            try {
+                storage.getReference("$LOOKS_COLLECTION/$lookId/")
+            } catch (e: Exception) {
+                StyleableToast.makeText(this, e.message, R.style.mytoast).show()
+                return
+            }
+        ref.listAll().addOnSuccessListener { listResult ->
+            val amount = listResult.items.size
+            repeat(amount) { index ->
+                val fileRef =
+                    storage.getReference("$LOOKS_COLLECTION/$lookId/${MASK_FRAME_FILE_NAME}_$index")
+                fileRef.downloadUrl.addOnSuccessListener { uri ->
+                    Texture.builder()
+                        .setSource(applicationContext, uri)
+                        .build()
+                        .thenAccept { texture ->
+                            gifTextures.add(texture)
+
+                            if (index == amount - 1) {
+                                startAnimation()
+                            }
+                        }
+                        .exceptionally { throwable ->
+                            Log.println(
+                                Log.ERROR,
+                                null,
+                                "Error creating texture for frame $index: $throwable",
+                            )
+                            null
+                        }
+                }
             }
         }
     }
 
-    // FIXME
     private fun prepareAllGifTextures() {
         gifTextures.clear()
-        var counter = 0
-        var shouldContinue = true
+        val numberOfFrames = getNumberOfFrames(this)
+        repeat(numberOfFrames) { index ->
+            val frameBitmap =
+                getNextTempMaskFrame(applicationContext, index)
 
-        if (shouldDownloadFormStorage) {
-            // FIXME AAAA
-            val ref = storage.getReference("$LOOKS_COLLECTION/$lookId/")
-            var amont = 0
-            ref.listAll().addOnSuccessListener { listResult ->
-                amont = listResult.items.size
-                repeat(amont) { index ->
-                    val fileRef =
-                        storage.getReference("$LOOKS_COLLECTION/$lookId/${MASK_FRAME_FILE_NAME}_$index")
-                    fileRef.downloadUrl.addOnSuccessListener { uri ->
-                        Texture.builder()
-                            .setSource(applicationContext, uri)
-                            .build()
-                            .thenAccept { texture ->
-                                gifTextures.add(texture)
-                                shouldContinue = false
-                            }
-                            .exceptionally { throwable ->
-                                Log.println(
-                                    Log.ERROR,
-                                    null,
-                                    "Error creating texture for frame $counter: $throwable",
-                                )
-                                null
-                            }
+            Texture.builder()
+                .setSource(frameBitmap)
+                .build()
+                .thenAccept { texture ->
+                    gifTextures.add(texture)
+                    if (index == numberOfFrames - 1) {
+                        startAnimation()
                     }
                 }
-            }
-        } else {
-            while (shouldContinue) {
-                val frameBitmap =
-                    getNextTempMaskFrame(applicationContext, counter) ?: break
-
-                Texture.builder()
-                    .setSource(frameBitmap)
-                    .build()
-                    .thenAccept { texture ->
-                        gifTextures.add(texture)
-                    }
-                    .exceptionally { throwable ->
-                        Log.println(
-                            Log.ERROR,
-                            null,
-                            "Error creating texture for frame $counter: $throwable",
-                        )
-                        null
-                    }
-                counter++
-            }
+                .exceptionally { throwable ->
+                    Log.println(
+                        Log.ERROR,
+                        null,
+                        "Error creating texture for frame $index: $throwable",
+                    )
+                    null
+                }
         }
-
-        gifPrepared = true
     }
 
     private fun checkIsSupportedDeviceOrFinish(): Boolean {
@@ -340,7 +439,11 @@ class ShowRoomActivity :
 
         openGlVersionString?.let {
             if (java.lang.Double.parseDouble(openGlVersionString) < MIN_OPENGL_VERSION) {
-                StyleableToast.makeText(this, "Sceneform requires OpenGL ES 3.0 or later", R.style.mytoast).show()
+                StyleableToast.makeText(
+                    this,
+                    "Sceneform requires OpenGL ES 3.0 or later",
+                    R.style.mytoast,
+                ).show()
                 finish()
                 return false
             }
@@ -392,45 +495,32 @@ class ShowRoomActivity :
     }
 
     private fun startAnimation() {
-        if (!gifPrepared) {
-            return
-        }
-
         if (gifRunnable == null) {
             gifRunnable =
                 Runnable {
-                    if (!gifPrepared) {
-                        prepareAllGifTextures()
-                    } else {
-                        if (gifTextures.size > frameCounter) {
-                            stateService.applyTextureToFaceNode(
-                                gifTextures[frameCounter],
-                                arSceneView,
-                            )
-                            frameCounter = (frameCounter + 1) % gifTextures.size
-                        }
-                        handler.postDelayed(gifRunnable!!, frameDelay)
+                    if (gifTextures.size > frameCounter) {
+                        stateService.applyTextureToFaceNode(
+                            gifTextures[frameCounter],
+                            arSceneView,
+                            MASK_TEXTURE_SLOT,
+                        )
+                        frameCounter = (frameCounter + 1) % gifTextures.size
                     }
+
+                    gifRunnable?.let { handler.postDelayed(it, frameDelay) }
                 }
         }
         gifRunnable?.let { handler.post(it) }
     }
 
     private fun stopAnimation() {
+        gifTextures.clear()
         gifRunnable?.let { handler.removeCallbacks(it) }
         gifRunnable = null
-
-        shouldPlayAnimation = false
-        gifPrepared = false
     }
 
     private fun setSpeed(fps: Int) {
         frameDelay = 1000L / fps
-    }
-
-    private fun resetGifState() {
-        gifPrepared = false
-        gifRunnable = null
     }
 
     private fun addMenuFragments() {
@@ -438,10 +528,6 @@ class ShowRoomActivity :
             .add(R.id.menu_fragment_container, makeupOptionsFragment)
             .add(R.id.menu_fragment_container, accessoriesOptionsFragment)
             .add(R.id.menu_fragment_container, looksOptionsFragment)
-            .add(R.id.fragment_container, cameraModeFragment)
-            .add(R.id.fragment_container, profileFragment)
-            .hide(cameraModeFragment)
-            .hide(profileFragment)
             .commit()
     }
 
@@ -460,20 +546,49 @@ class ShowRoomActivity :
     private fun showLooksMenu() {
         resetMenu()
         showFragment(looksOptionsFragment)
+        looksOptionsFragment.fetchLooks()
         binding.looksButton.setBackgroundResource(R.drawable.small_button)
     }
 
     private fun showCameraModeUI() {
         findViewById<View>(R.id.top_ui).visibility = View.GONE
         findViewById<View>(R.id.bottom_ui).visibility = View.GONE
+        supportFragmentManager
+            .beginTransaction()
+            .replace(R.id.fragment_container, cameraModeFragment)
+            .commit()
         cameraModeFragment.setARFragment(arFragment)
-        showFragment(cameraModeFragment)
     }
 
     private fun showProfileUI() {
         findViewById<View>(R.id.top_ui).visibility = View.GONE
         findViewById<View>(R.id.bottom_ui).visibility = View.GONE
-        showFragment(profileFragment)
+        supportFragmentManager
+            .beginTransaction()
+            .replace(R.id.fragment_container, profileFragment)
+            .commit()
+    }
+
+    private fun showMakeupEditorUI() {
+        findViewById<View>(R.id.top_ui).visibility = View.GONE
+        findViewById<View>(R.id.bottom_ui).visibility = View.GONE
+        val fragmentManager = supportFragmentManager
+        val existingFragment =
+            fragmentManager.findFragmentByTag(MakeupEditorFragment.MAKEUP_EDITOR_FRAGMENT_TAG)
+
+        if (existingFragment == null) {
+            fragmentManager.beginTransaction()
+                .add(
+                    R.id.makeup_editor_fragment_container,
+                    makeupEditorFragment,
+                    MakeupEditorFragment.MAKEUP_EDITOR_FRAGMENT_TAG,
+                )
+                .commit()
+        } else {
+            showFragment(makeupEditorFragment)
+        }
+
+        makeupEditorFragment.applyBackgroundBitmap(stateService.makeupTextureBitmap)
     }
 
     private fun resetMenu() {
@@ -502,19 +617,35 @@ class ShowRoomActivity :
             .commit()
     }
 
-    // FIXME will not save makeup, models and one frames
-    private fun saveLook() {
-        val lookId = UUID.randomUUID()
-        saveFrames(lookId)
+    // TODO history
+    private fun saveLook(
+        isPublic: Boolean,
+        name: String,
+    ) {
+        val lookId = UUID.randomUUID().toString()
+        val isAnimated = doesTempAnimatedMaskExist(applicationContext)
 
-        // TODO should be name
+        if (isAnimated) {
+            saveFrames(lookId)
+        } else {
+            saveMaskTexture(lookId)
+        }
+
         val data =
-            hashMapOf(
-                "author" to auth.currentUser?.email,
+            LookInfo(
+                isPublic = isPublic,
+                lookId = lookId,
+                author = auth.currentUserUsername(),
+                isAnimated = isAnimated,
+                appliedMakeup = stateService.getAppliedMakeupList(),
+                appliedModels = stateService.getAppliedModelsList(),
+                history = "",
+                name = name,
+                imagePreviewRef = createPreview(lookId),
             )
 
         fireStore.collection(LOOKS_COLLECTION)
-            .document(lookId.toString())
+            .document(lookId)
             .set(data)
             .addOnSuccessListener {
                 Log.println(
@@ -522,23 +653,71 @@ class ShowRoomActivity :
                     null,
                     "Look $lookId uploaded",
                 )
-                StyleableToast.makeText(applicationContext, "Look saved successfully", R.style.mytoast).show()
+                StyleableToast.makeText(
+                    applicationContext,
+                    "Look saved successfully",
+                    R.style.mytoast,
+                ).show()
+
+                looksOptionsFragment.fetchLooks()
             }
             .addOnFailureListener { ex -> Log.println(Log.ERROR, null, "onFailure: $ex") }
     }
 
-    private fun saveFrames(lookId: UUID) {
+    /**
+     * Create preview image for look, if no makeup or texture were added to the look,
+     * look name will be used as preview
+     *
+     * @return reference to storage for preview image or empty string if there is no preview
+     */
+    private fun createPreview(lookId: String): String {
+        val isAnimated = doesTempAnimatedMaskExist(applicationContext)
+
+        val firstFrameBitmap =
+            if (isAnimated) {
+                getNextTempMaskFrame(this, 0)
+            } else {
+                getTempMaskTextureBitmap(this)
+            }
+
+        if (firstFrameBitmap == null && stateService.makeupTextureBitmap == null) {
+            return ""
+        }
+
+        val combinedBitmap =
+            combineBitmaps(
+                listOfNotNull(stateService.makeupTextureBitmap, firstFrameBitmap),
+                PREVIEW_BITMAP_SIZE,
+                PREVIEW_BITMAP_SIZE,
+            )
+
+        val ref =
+            storage.getReference("$PREVIEW_COLLECTION/$lookId")
+        val stream = ByteArrayOutputStream()
+        combinedBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
+
+        val uploadTask =
+            ref.putStream(ByteArrayInputStream(stream.toByteArray()))
+
+        uploadTask.addOnFailureListener {
+            StyleableToast.makeText(applicationContext, it.message, R.style.mytoast).show()
+        }
+
+        return "$PREVIEW_COLLECTION/$lookId"
+    }
+
+    private fun saveFrames(lookId: String) {
         var counter = 0
 
         while (true) {
-            val frameStream = getNextTempMaskFrameInputStream(applicationContext, counter) ?: break
+            val frameStream =
+                getNextTempMaskFrameInputStream(applicationContext, counter) ?: break
             val ref =
                 storage.getReference("$LOOKS_COLLECTION/$lookId/${MASK_FRAME_FILE_NAME}_$counter")
 
             val uploadTask =
                 ref.putStream(frameStream)
-                    .addOnSuccessListener { taskSnapshot ->
-                        }
+
             uploadTask.addOnFailureListener {
                 StyleableToast.makeText(applicationContext, it.message, R.style.mytoast).show()
             }
@@ -547,21 +726,87 @@ class ShowRoomActivity :
         }
     }
 
+    private fun saveMaskTexture(lookId: String) {
+        val frameStream = getTempMaskTextureStream(applicationContext)
+        frameStream?.let {
+            val ref =
+                storage.getReference("$LOOKS_COLLECTION/$lookId/$MASK_FRAME_FILE_NAME")
+
+            val uploadTask =
+                ref.putStream(it)
+
+            uploadTask.addOnFailureListener { ex ->
+                StyleableToast.makeText(applicationContext, ex.message, R.style.mytoast).show()
+            }
+        }
+    }
+
     private fun clearAll() {
         stopAnimation()
         deleteTempFiles(applicationContext)
-        stateService.clearAll()
 
-        shouldClearEditor = true
+        accessoriesOptionsFragment.resetMenu()
+        makeupOptionsFragment.resetMenu()
+        looksOptionsFragment.resetMenu()
+
+        stateService.clearAll()
+        makeupEditorFragment.clearAll()
     }
 
     override fun showMainLayout() {
         findViewById<View>(R.id.top_ui).visibility = View.VISIBLE
         findViewById<View>(R.id.bottom_ui).visibility = View.VISIBLE
-        supportFragmentManager.beginTransaction()
-            .hide(cameraModeFragment)
-            .hide(profileFragment)
-            .commit()
+
+        val makeupEditor =
+            supportFragmentManager.findFragmentByTag(MakeupEditorFragment.MAKEUP_EDITOR_FRAGMENT_TAG)
+
+        val transaction =
+            supportFragmentManager
+                .beginTransaction()
+                .remove(cameraModeFragment)
+                .remove(profileFragment)
+
+        makeupEditor?.let { transaction.hide(makeupEditor) }
+        transaction.commit()
+
+        arSceneView.resume()
+
+        val bitmap = getTempMaskTextureBitmap(applicationContext)
+        bitmap?.let {
+            stateService.createTextureAndApply(it, arFragment.arSceneView, MASK_TEXTURE_SLOT)
+        }
+
+        if (doesTempAnimatedMaskExist(applicationContext)) {
+            prepareAllGifTextures()
+        }
+    }
+
+    private fun showSaveLookDialog() {
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.popup_save_look, null)
+        val checkbox = dialogView.findViewById<CheckBox>(R.id.is_public_checkbox)
+        val editText = dialogView.findViewById<EditText>(R.id.look_name_input)
+
+        val dialog =
+            AlertDialog.Builder(this)
+                .setView(dialogView)
+                .create()
+
+        dialogView.findViewById<Button>(R.id.cancel_popup_button).setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialogView.findViewById<Button>(R.id.save_look_button).setOnClickListener {
+            if (editText.text.isEmpty()) {
+                editText.error = "Name should contain at least 1 symbol"
+            } else if (editText.text.toString().length > MAX_LOOK_NAME_LENGTH) {
+                editText.error = "Name should contain no more than $MAX_LOOK_NAME_LENGTH symbols"
+            } else {
+                saveLook(checkbox.isChecked, editText.text.toString())
+                dialog.dismiss()
+            }
+        }
+
+        dialog.show()
     }
 
     companion object {

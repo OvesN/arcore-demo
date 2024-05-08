@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment
 import com.cvut.arfittingroom.R
 import com.cvut.arfittingroom.activity.MainActivity
 import com.cvut.arfittingroom.activity.UIChangeListener
+import com.cvut.arfittingroom.utils.currentUserUsername
 import com.google.firebase.auth.FirebaseAuth
 
 class ProfileFragment : Fragment() {
@@ -30,7 +31,7 @@ class ProfileFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         auth = FirebaseAuth.getInstance()
 
-        view.findViewById<TextView>(R.id.username).text = auth.currentUser?.email?.substringBefore('@')
+        view.findViewById<TextView>(R.id.username).text = auth.currentUserUsername()
 
         view.findViewById<Button>(R.id.back_to_editor_button).setOnClickListener {
             showMainLayout()

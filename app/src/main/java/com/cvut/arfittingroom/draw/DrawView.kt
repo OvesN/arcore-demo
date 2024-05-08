@@ -42,7 +42,8 @@ import com.cvut.arfittingroom.draw.service.LayerManager
 import com.cvut.arfittingroom.draw.service.UIDrawer
 import com.cvut.arfittingroom.model.SPAN_SLOP
 import com.cvut.arfittingroom.model.TOUCH_TO_MOVE_THRESHOLD
-import com.cvut.arfittingroom.utils.FileUtil.adjustBitmap
+import com.cvut.arfittingroom.utils.BitmapUtil.adjustBitmapFromEditor
+import com.cvut.arfittingroom.utils.FileUtil.deleteTempFiles
 import com.cvut.arfittingroom.utils.FileUtil.saveTempMaskFrames
 import com.cvut.arfittingroom.utils.FileUtil.saveTempMaskTextureBitmap
 import com.cvut.arfittingroom.utils.UIUtil.showColorPickerDialog
@@ -82,7 +83,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private var handler = Handler(Looper.getMainLooper())
     private var gifRunnable: Runnable? = null
     private var frameDelay: Long = 100
-    private var layerInitializedListener: OnLayerInitializedListener? = null
+    var layerInitializedListener: OnLayerInitializedListener? = null
     private var lastDownX = 0f
     private var lastDownY = 0f
     private var frameCount = 0
@@ -154,15 +155,6 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                     }
                 },
             )
-
-        // Post a runnable to the view, which will be executed after the view is laid out
-        post {
-            if (layerManager.getNumOfLayers() == 0) {
-                layerManager.addLayer(width, height)
-
-                layerInitializedListener?.onLayerInitialized(layerManager.getNumOfLayers())
-            }
-        }
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
@@ -647,12 +639,16 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     private fun draw(
         canvas: Canvas,
-        shouldDrawFaceTexture: Boolean = true,
+        shouldDrawBackground: Boolean = true,
     ) {
-        layerManager.drawLayers(canvas, paintOptions)
+        if (shouldDrawBackground) {
+            uiDrawer.drawBackground(canvas)
+        }
 
+        layerManager.drawLayers(canvas, paintOptions)
         uiDrawer.drawSelectedElementEditIcons(canvas, selectedElement, isInElementMenuMode)
-        if (shouldDrawFaceTexture) {
+
+        if (shouldDrawBackground) {
             uiDrawer.drawFaceTextureImage(canvas)
         }
     }
@@ -872,6 +868,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     }
 
     fun saveBitmap(onSaved: () -> Unit) {
+        deleteTempFiles(context)
         layerManager.deselectAllElements()
         if (layerManager.doesContainAnyGif()) {
             layerManager.setAllGifsToAnimationMode()
@@ -880,7 +877,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                 onSaved()
             }
         } else {
-            saveTempMaskTextureBitmap(adjustBitmap(createBitmap(), height, width), context) {
+            saveTempMaskTextureBitmap(adjustBitmapFromEditor(createBitmap(), height, width), context) {
                 onSaved()
             }
         }
@@ -922,6 +919,10 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         transformationMatrix.postScale(canvasScaleFactor, canvasScaleFactor, pivotX, pivotY)
 
         return transformationMatrix
+    }
+
+    fun applyBitmapBackground(bitmap: Bitmap?) {
+        uiDrawer.setBackgroundBitmap(bitmap)
     }
 
     interface OnLayerInitializedListener {

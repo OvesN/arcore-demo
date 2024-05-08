@@ -1,8 +1,10 @@
 package com.cvut.arfittingroom.model
 
+import com.google.firebase.firestore.PropertyName
+
 data class ModelInfo(
-    val slot: String,
-    val modelRef: String,
-    val imagePreviewRef: String,
-    val type: String,
+    @get:PropertyName("slot") @set:PropertyName("slot") var slot: String = "",
+    @get:PropertyName("model_ref") @set:PropertyName("model_ref") var modelRef: String = "",
+    @get:PropertyName("image_preview_ref") @set:PropertyName("image_preview_ref") var imagePreviewRef: String = "",
+    @get:PropertyName("type") @set:PropertyName("type") var type: String = "",
 )

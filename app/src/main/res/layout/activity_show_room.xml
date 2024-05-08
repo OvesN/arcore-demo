@@ -12,6 +12,11 @@
         android:layout_height="match_parent" />
 
     <FrameLayout
+        android:id="@+id/makeup_editor_fragment_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <FrameLayout
         android:id="@+id/fragment_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
@@ -65,7 +70,7 @@
         android:layout_gravity="bottom"
         android:background="@color/colorTransparentBlack"
         android:paddingBottom="10dp"
-        android:paddingTop="20dp">
+        android:paddingTop="10dp">
 
         <FrameLayout
             android:id="@+id/menu_fragment_container"

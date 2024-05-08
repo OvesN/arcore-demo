@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="300dp"
+    android:layout_height="wrap_content"
+    android:background="#000000"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:text="@string/discard"
+        android:textAllCaps="false"
+        android:textColor="#FFFFFF"
+        android:textSize="25sp"
+        android:paddingBottom="40dp"
+        android:textStyle="bold"/>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/cancel_popup_button"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:layout_marginEnd="5dp"
+            android:background="@drawable/small_button"
+            android:text="@string/cancel"
+            android:textAllCaps="false" />
+
+        <Button
+            android:id="@+id/discard_button"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:background="@drawable/small_button"
+            android:backgroundTint="@color/colorActive"
+            android:text="@string/discard_button"
+            android:textAllCaps="false" />
+    </LinearLayout>
+
+</LinearLayout>
