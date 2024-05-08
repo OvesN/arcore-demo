@@ -1,13 +1,20 @@
 package com.cvut.arfittingroom.activity
 
 import android.app.ActivityManager
+import android.app.AlertDialog
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Paint
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
+import android.widget.Button
+import android.widget.CheckBox
+import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
@@ -30,14 +37,18 @@ import com.cvut.arfittingroom.model.APPLIED_MODELS_ATTRIBUTE
 import com.cvut.arfittingroom.model.AUTHOR_ATTRIBUTE
 import com.cvut.arfittingroom.model.HISTORY_ATTRIBUTE
 import com.cvut.arfittingroom.model.IS_ANIMATED_ATTRIBUTE
+import com.cvut.arfittingroom.model.IS_PUBLIC_ATTRIBUTE
 import com.cvut.arfittingroom.model.LOOKS_COLLECTION
+import com.cvut.arfittingroom.model.LOOK_ID_ATTRIBUTE
 import com.cvut.arfittingroom.model.LookInfo
 import com.cvut.arfittingroom.model.MAKEUP_SLOT
 import com.cvut.arfittingroom.model.MASK_FRAME_FILE_NAME
 import com.cvut.arfittingroom.model.MASK_TEXTURE_SLOT
+import com.cvut.arfittingroom.model.MAX_LOOK_NAME_LENGTH
 import com.cvut.arfittingroom.model.MakeupInfo
 import com.cvut.arfittingroom.model.ModelInfo
 import com.cvut.arfittingroom.model.NAME_ATTRIBUTE
+import com.cvut.arfittingroom.model.PREVIEW_COLLECTION
 import com.cvut.arfittingroom.model.PREVIEW_IMAGE_ATTRIBUTE
 import com.cvut.arfittingroom.service.StateService
 import com.cvut.arfittingroom.utils.FileUtil.deleteTempFiles
@@ -46,11 +57,12 @@ import com.cvut.arfittingroom.utils.FileUtil.getNextTempMaskFrame
 import com.cvut.arfittingroom.utils.FileUtil.getNextTempMaskFrameInputStream
 import com.cvut.arfittingroom.utils.FileUtil.getTempMaskTextureBitmap
 import com.cvut.arfittingroom.utils.FileUtil.getTempMaskTextureStream
+import com.cvut.arfittingroom.utils.SerializationUtil.serializeToJson
+import com.cvut.arfittingroom.utils.SerializationUtil.serializeToStringOfJson
 import com.google.android.filament.LightManager
 import com.google.ar.core.ArCoreApk
 import com.google.ar.core.AugmentedFace
 import com.google.ar.sceneform.ArSceneView
-import com.google.ar.sceneform.Node
 import com.google.ar.sceneform.Sceneform
 import com.google.ar.sceneform.rendering.ModelRenderable
 import com.google.ar.sceneform.rendering.Renderable
@@ -65,6 +77,8 @@ import com.gorisse.thomas.sceneform.light.build
 import com.gorisse.thomas.sceneform.lightEstimationConfig
 import com.gorisse.thomas.sceneform.mainLight
 import io.github.muddz.styleabletoast.StyleableToast
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
 import java.util.UUID
 import javax.inject.Inject
 
@@ -148,7 +162,7 @@ class ShowRoomActivity :
             showLooksMenu()
         }
         binding.saveButton.setOnClickListener {
-            saveLook()
+            showSaveLookDialog()
         }
         binding.deleteButton.setOnClickListener {
             clearAll()
@@ -164,6 +178,7 @@ class ShowRoomActivity :
         }
     }
 
+
     override fun onPause() {
         super.onPause()
         arSceneView.pause()
@@ -174,19 +189,17 @@ class ShowRoomActivity :
         arSceneView.resume()
     }
 
-    override fun applyImage(
-        type: String,
-        ref: String,
-        color: Int,
+    override fun applyMakeup(
+        makeupInfo: MakeupInfo,
     ) {
-        stateService.appliedMakeUpTypes[type] = MakeupInfo(ref, color)
+        stateService.appliedMakeUpTypes[makeupInfo.type] = makeupInfo
 
         stateService.appliedMakeUpTypes.values.forEach {
             loadImage(it.ref, it.color)
         }
     }
 
-    override fun removeImage(type: String) {
+    override fun removeMakeup(type: String) {
         val appliedMakeupTypes = stateService.appliedMakeUpTypes
         appliedMakeupTypes.remove(type)
 
@@ -211,13 +224,28 @@ class ShowRoomActivity :
 
     // FIXME
     override fun applyLook(lookInfo: LookInfo) {
-        clearAll()
+        stopAnimation()
+        accessoriesOptionsFragment.applyState(lookInfo.appliedModels)
+        makeupOptionsFragment.applyState(lookInfo.appliedMakeup)
+
+        stateService.clearAll()
+        makeupEditorFragment.clearAll()
+
+        lookInfo.appliedMakeup.forEach {
+            applyMakeup(it)
+        }
+
+        lookInfo.appliedModels.forEach {
+            applyModel(it)
+        }
+
         this.lookId = lookInfo.lookId
-        shouldPlayAnimation = true
+        shouldPlayAnimation = lookInfo.isAnimated
         shouldDownloadFormStorage = true
     }
 
     override fun removeLook(lookId: String) {
+        clearAll()
         TODO("Not yet implemented")
     }
 
@@ -475,6 +503,7 @@ class ShowRoomActivity :
     private fun showLooksMenu() {
         resetMenu()
         showFragment(looksOptionsFragment)
+        looksOptionsFragment.fetchLooks()
         binding.looksButton.setBackgroundResource(R.drawable.small_button)
     }
 
@@ -545,25 +574,28 @@ class ShowRoomActivity :
             .commit()
     }
 
-    //TODO history, preview, lookname
-    private fun saveLook() {
+    //TODO history
+    private fun saveLook(isPublic: Boolean, name: String) {
         val lookId = UUID.randomUUID()
         val isAnimated = doesTempAnimatedMaskExist(applicationContext)
+
         if (isAnimated) {
             saveFrames(lookId)
         } else {
-            saveMask(lookId)
+            saveMaskTexture(lookId)
         }
 
         val data =
             hashMapOf(
+                IS_PUBLIC_ATTRIBUTE to isPublic,
+                LOOK_ID_ATTRIBUTE to lookId.toString(),
                 AUTHOR_ATTRIBUTE to auth.currentUser?.email?.substringBefore("@"),
                 IS_ANIMATED_ATTRIBUTE to isAnimated,
-                APPLIED_MAKEUP_ATTRIBUTE to stateService.getAppliedMakeupList(),
-                APPLIED_MODELS_ATTRIBUTE to stateService.getAppliedModelsList(),
+                APPLIED_MAKEUP_ATTRIBUTE to serializeToStringOfJson(stateService.getAppliedMakeupList()),
+                APPLIED_MODELS_ATTRIBUTE to serializeToStringOfJson(stateService.getAppliedModelsList()),
                 HISTORY_ATTRIBUTE to "",
-                NAME_ATTRIBUTE to "",
-                PREVIEW_IMAGE_ATTRIBUTE to ""
+                NAME_ATTRIBUTE to name,
+                PREVIEW_IMAGE_ATTRIBUTE to createPreview(lookId)
             )
 
         fireStore.collection(LOOKS_COLLECTION)
@@ -584,8 +616,53 @@ class ShowRoomActivity :
             .addOnFailureListener { ex -> Log.println(Log.ERROR, null, "onFailure: $ex") }
     }
 
-    private fun createPreview() {
+    /**
+     * Create preview image for look, if no makeup or texture were added to the look,
+     * look name will be used as preview
+     *
+     * @return reference to storage for preview image or empty string if there is no preview
+     */
+    private fun createPreview(lookId: UUID): String {
+        val isAnimated = doesTempAnimatedMaskExist(applicationContext)
 
+        val firstFrameBitmap = if (isAnimated) {
+            getNextTempMaskFrame(this, 0)
+        } else {
+            getTempMaskTextureBitmap(this)
+        }
+
+        if (firstFrameBitmap == null && stateService.makeupTextureBitmap == null) {
+            return ""
+        }
+
+        val combinedBitmap = Bitmap.createBitmap(400, 400, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(combinedBitmap)
+        val paint = Paint().apply {
+            isFilterBitmap = true
+        }
+        listOf(stateService.makeupTextureBitmap, firstFrameBitmap).forEach { originalBitmap ->
+            originalBitmap?.let {
+                val scaledBitmap = Bitmap.createScaledBitmap(it, 400, 400, true)
+
+                canvas.drawBitmap(scaledBitmap, 0f, 0f, paint)
+
+                scaledBitmap.recycle()
+            }
+        }
+
+        val ref =
+            storage.getReference("$PREVIEW_COLLECTION/$lookId")
+        val stream = ByteArrayOutputStream()
+        combinedBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
+
+        val uploadTask =
+            ref.putStream(ByteArrayInputStream(stream.toByteArray()))
+
+        uploadTask.addOnFailureListener {
+            StyleableToast.makeText(applicationContext, it.message, R.style.mytoast).show()
+        }
+
+        return "$PREVIEW_COLLECTION/$lookId"
     }
 
     private fun saveFrames(lookId: UUID) {
@@ -609,7 +686,7 @@ class ShowRoomActivity :
 
     }
 
-    private fun saveMask(lookId: UUID) {
+    private fun saveMaskTexture(lookId: UUID) {
         val frameStream = getTempMaskTextureStream(applicationContext)
         frameStream?.let {
             val ref =
@@ -657,6 +734,33 @@ class ShowRoomActivity :
         }
 
         shouldPlayAnimation = doesTempAnimatedMaskExist(applicationContext)
+    }
+
+    private fun showSaveLookDialog() {
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.popup_save_look, null)
+        val checkbox = dialogView.findViewById<CheckBox>(R.id.is_public_checkbox)
+        val editText = dialogView.findViewById<EditText>(R.id.look_name_input)
+
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .create()
+
+        dialogView.findViewById<Button>(R.id.cancel_popup_button).setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialogView.findViewById<Button>(R.id.save_look_button).setOnClickListener {
+            if (editText.text.isEmpty()) {
+                editText.error = "Name should contain at least 1 symbol"
+            } else if (editText.text.toString().length > MAX_LOOK_NAME_LENGTH) {
+                editText.error = "Name should contain no more than $MAX_LOOK_NAME_LENGTH symbols"
+            } else {
+                saveLook(checkbox.isChecked, editText.text.toString())
+                dialog.dismiss()
+            }
+        }
+
+        dialog.show()
     }
 
     companion object {

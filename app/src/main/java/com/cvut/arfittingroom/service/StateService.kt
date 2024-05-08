@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.util.Log
 import com.cvut.arfittingroom.model.FaceNodesInfo
+import com.cvut.arfittingroom.model.LookInfo
 import com.cvut.arfittingroom.model.MAKEUP_SLOT
 import com.cvut.arfittingroom.model.MakeupInfo
 import com.cvut.arfittingroom.model.ModelInfo
@@ -54,10 +55,10 @@ class StateService {
 
     fun clearAll() {
         appliedModels.clear()
-        clearFaceNodes()
         makeupTextureBitmap = null
         appliedMakeUpTypes.clear()
         appliedModels.clear()
+        clearFaceNodes()
     }
 
     fun clearFaceNodeSlot(slot: String) {
@@ -98,7 +99,6 @@ class StateService {
         faceNodesInfo.slotToFaceNodeMap.values.forEach {
             it.parent = null
         }
-
         faceNodesInfo.slotToFaceNodeMap.clear()
     }
 
@@ -180,7 +180,7 @@ class StateService {
         }
     }
 
-    fun getAppliedModelsList() = appliedModels.values
-    fun getAppliedMakeupList() = appliedMakeUpTypes.values
+    fun getAppliedModelsList() = appliedModels.values.toList()
+    fun getAppliedMakeupList() = appliedMakeUpTypes.values.toList()
 
 }

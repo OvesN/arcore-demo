@@ -19,6 +19,7 @@ import com.cvut.arfittingroom.model.COLORS_COLLECTION
 import com.cvut.arfittingroom.model.DEFAULT_COLOR_ATTRIBUTE
 import com.cvut.arfittingroom.model.MAKEUP_COLLECTION
 import com.cvut.arfittingroom.model.MAKEUP_TYPES_COLLECTION
+import com.cvut.arfittingroom.model.MakeupInfo
 import com.cvut.arfittingroom.model.MakeupType
 import com.cvut.arfittingroom.model.REF_ATTRIBUTE
 import com.cvut.arfittingroom.model.TYPE_ATTRIBUTE
@@ -348,9 +349,17 @@ class MakeupOptionsFragment : Fragment() {
 
         if (shouldRemove) {
             selectedOptionTypeToViewId.remove(type)
-            listener.removeImage(type)
+            listener.removeMakeup(type)
         } else {
-            listener.applyImage(type, ref, selectedColor)
+            listener.applyMakeup(MakeupInfo(ref = ref, type = type, color = selectedColor))
+        }
+    }
+
+    fun applyState(selectedMakeup: List<MakeupInfo>) {
+        selectedOptionTypeToViewId.clear()
+
+        selectedMakeup.forEach {
+            selectedOptionTypeToViewId[it.type] = it.ref.hashCode()
         }
     }
 

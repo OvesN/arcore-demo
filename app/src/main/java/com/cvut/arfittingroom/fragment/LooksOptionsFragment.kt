@@ -2,38 +2,50 @@ package com.cvut.arfittingroom.fragment
 
 import android.os.Bundle
 import android.util.Log
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.LinearLayout
+import android.widget.GridLayout
+import android.widget.ImageButton
+import android.widget.ImageView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
 import com.cvut.arfittingroom.R
 import com.cvut.arfittingroom.activity.ResourceListener
-import com.cvut.arfittingroom.model.APPLIED_MAKEUP_ATTRIBUTE
-import com.cvut.arfittingroom.model.APPLIED_MODELS_ATTRIBUTE
-import com.cvut.arfittingroom.model.HISTORY_ATTRIBUTE
+import com.cvut.arfittingroom.model.AUTHOR_ATTRIBUTE
+import com.cvut.arfittingroom.model.IS_PUBLIC_ATTRIBUTE
 import com.cvut.arfittingroom.model.LOOKS_COLLECTION
 import com.cvut.arfittingroom.model.LookInfo
-import com.cvut.arfittingroom.model.NAME_ATTRIBUTE
+import com.cvut.arfittingroom.model.MakeupInfo
+import com.cvut.arfittingroom.model.ModelInfo
+import com.cvut.arfittingroom.model.NUM_OF_ELEMENTS_IN_ROW
+import com.cvut.arfittingroom.model.NUM_OF_ELEMENTS_IN_ROW_SMALL_MENU
 import com.cvut.arfittingroom.model.PREVIEW_IMAGE_ATTRIBUTE
-import com.cvut.arfittingroom.utils.UIUtil.createDivider
+import com.cvut.arfittingroom.module.GlideApp
+import com.cvut.arfittingroom.utils.DeserializationUtil.deserializeFromMap
+import com.cvut.arfittingroom.utils.ScreenUtil
 import com.cvut.arfittingroom.utils.UIUtil.deselectButton
 import com.cvut.arfittingroom.utils.UIUtil.selectSquareButton
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.Filter
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.toObject
 import com.google.firebase.storage.FirebaseStorage
-import io.github.muddz.styleabletoast.StyleableToast
+import java.util.TreeMap
 
 class LooksOptionsFragment : Fragment() {
     private var selectedLookViewId: Int = 0
     private lateinit var firestore: FirebaseFirestore
+    private lateinit var auth: FirebaseAuth
     private lateinit var storage: FirebaseStorage
+    private val looks = mutableMapOf<String, LookInfo>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         firestore = FirebaseFirestore.getInstance()
         storage = FirebaseStorage.getInstance()
+        auth = FirebaseAuth.getInstance()
     }
 
     override fun onCreateView(
@@ -47,52 +59,101 @@ class LooksOptionsFragment : Fragment() {
         savedInstanceState: Bundle?,
     ) {
         super.onViewCreated(view, savedInstanceState)
-        getView()?.let { fetchLooks(it) }
+        view.findViewById<View>(R.id.divider).visibility = View.GONE
+        view.findViewById<View>(R.id.type_button).visibility = View.GONE
+        view.findViewById<View>(R.id.vertical_scroll_view).visibility = View.VISIBLE
+
+        view.findViewById<GridLayout>(R.id.vertical_options).columnCount = NUM_OF_ELEMENTS_IN_ROW
     }
 
-    private fun fetchLooks(view: View) {
-        firestore.collection(LOOKS_COLLECTION).get().addOnSuccessListener { result ->
+    fun fetchLooks() {
+        looks.clear()
 
-            val looksId = result.map { it.id }
-            updateLooksOptionsMenu(view, looksId)
-        }
+        firestore.collection(LOOKS_COLLECTION)
+            .where(
+                Filter.or(
+                    Filter.equalTo(IS_PUBLIC_ATTRIBUTE, true),
+                    Filter.equalTo(
+                        AUTHOR_ATTRIBUTE,
+                        auth.currentUser?.let { it.email?.substringBefore("@") })
+                )
+            )
+            .get().addOnSuccessListener { result ->
+                result.documents.forEach { look ->
+                    val data = look.data
+                    val lookInfo = data?.let { deserializeFromMap(it, LookInfo::class.java) }
+                    lookInfo?.let {  looks[it.lookId] = it }
+                }
+
+                updateLooksOptionsMenu()
+            }
     }
 
     private fun updateLooksOptionsMenu(
-        view: View,
-        lookIds: List<String>,
+
     ) {
-        val options = view.findViewById<LinearLayout>(R.id.horizontal_options)
+        val options = requireView().findViewById<GridLayout>(R.id.vertical_options)
         options.removeAllViews()
 
-        for (lookId in lookIds) {
-            val button =
-                Button(context).apply {
-                    layoutParams =
-                        ViewGroup.LayoutParams(
-                            ViewGroup.LayoutParams.WRAP_CONTENT,
-                            ViewGroup.LayoutParams.WRAP_CONTENT,
-                        )
-                    text = lookId
-                    isAllCaps = false
-                    background = null
-                    id = lookId.hashCode()
-                    setOnClickListener {
-                        selectLook(view, it, lookId)
+        options.post {
+            val imageWidth =
+                (options.width - options.paddingStart - options.paddingEnd) / NUM_OF_ELEMENTS_IN_ROW
+
+            looks.values.forEach { lookInfo ->
+                val button = if (lookInfo.imagePreviewRef.isNotEmpty()) {
+                    ImageButton(context).apply {
+                        scaleType = ImageView.ScaleType.FIT_CENTER
+                        background = null
+                        id = lookInfo.lookId.hashCode()
+                        setOnClickListener {
+                            selectLook( requireView(), it, lookInfo)
+                        }
+                    }
+                } else {
+                    Button(context).apply {
+                        text = lookInfo.name
+                        background = null
+                        id = lookInfo.lookId.hashCode()
+                        setOnClickListener {
+                            selectLook( requireView(), it, lookInfo)
+                        }
                     }
                 }
-            options.addView(button)
-            options.addView(createDivider(requireContext()))
+
+                val params = GridLayout.LayoutParams().apply {
+                    columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
+                    rowSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
+                    height = ViewGroup.LayoutParams.WRAP_CONTENT
+                    height = ScreenUtil.dpToPx(100, requireContext())
+                    width = imageWidth
+                }
+
+                params.setGravity(Gravity.START)
+
+                options.addView(button, params)
+
+                if (selectedLookViewId == button.id) {
+                    selectSquareButton(button)
+                }
+
+                if (lookInfo.imagePreviewRef.isNotEmpty()) {
+
+                    GlideApp.with(this)
+                        .load(storage.getReference(lookInfo.imagePreviewRef))
+                        .thumbnail()
+                        .into(button as ImageButton)
+                }
+            }
         }
     }
 
     private fun selectLook(
         view: View,
         buttonView: View,
-        lookId: String,
+        lookInfo: LookInfo,
     ) {
-        deselectButton(view.findViewById(selectedLookViewId))
-        selectSquareButton(buttonView)
+        view.findViewById<View>(selectedLookViewId)
+            ?.let { deselectButton(view.findViewById(selectedLookViewId)) }
 
         val listener = context as? ResourceListener
         if (listener == null) {
@@ -101,52 +162,17 @@ class LooksOptionsFragment : Fragment() {
         }
 
         if (selectedLookViewId == buttonView.id) {
-            listener.removeLook(lookId)
+            listener.removeLook(lookInfo.lookId)
         } else {
-            getLookByIdAndApply(lookId)
+            listener.applyLook(lookInfo)
+            selectSquareButton(buttonView)
         }
 
-        selectedLookViewId = view.id
-    }
-
-    private fun getLookByIdAndApply(lookId: String) {
-        firestore.collection(LOOKS_COLLECTION).document(lookId).get()
-
-            .addOnSuccessListener { document ->
-                if (document.exists()) {
-                    val lookInfo = LookInfo(
-                        lookId = lookId,
-                        appliedMakeup = document.get(APPLIED_MAKEUP_ATTRIBUTE) as? List<String>
-                            ?: emptyList(),
-                        appliedModels = document.get(APPLIED_MODELS_ATTRIBUTE) as? List<String>
-                            ?: emptyList(),
-                        history = document.getString(HISTORY_ATTRIBUTE) ?: "",
-                        name = document.get(NAME_ATTRIBUTE).toString(),
-                        previewRef = document.get(PREVIEW_IMAGE_ATTRIBUTE)?.toString() ?: ""
-                    )
-
-                    val listener = context as? ResourceListener
-                    if (listener == null) {
-                        Log.println(Log.ERROR, null, "Activity does not implement ResourceListener")
-                    } else {
-                        listener.applyLook(lookInfo)
-                    }
-
-                } else {
-                    StyleableToast.makeText(
-                        requireContext(),
-                        "Look does not exist",
-                        R.style.mytoast
-                    ).show()
-                }
-            }
-            .addOnFailureListener { ex ->
-                StyleableToast.makeText(requireContext(), ex.message, R.style.mytoast).show()
-            }
+        selectedLookViewId = buttonView.id
     }
 
     fun resetMenu() {
         selectedLookViewId = 0
-        fetchLooks(requireView())
+        fetchLooks()
     }
 }
