@@ -155,9 +155,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                     }
                 },
             )
-
     }
-
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
         val inverseMatrix = Matrix()

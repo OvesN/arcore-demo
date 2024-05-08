@@ -46,6 +46,5 @@ object DrawHistoryHolder {
         undoneActions.clear()
     }
 
-    fun isEmpty() =
-        globalHistory.isEmpty()
+    fun isEmpty() = globalHistory.isEmpty()
 }

@@ -3,9 +3,7 @@ package com.cvut.arfittingroom.utils
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.Matrix
 import com.cvut.arfittingroom.draw.service.LayerManager
-import com.cvut.arfittingroom.model.BITMAP_SIZE
 import com.cvut.arfittingroom.model.MASK_FRAMES_DIR_NAME
 import com.cvut.arfittingroom.model.MASK_FRAME_FILE_NAME
 import com.cvut.arfittingroom.model.MASK_TEXTURE_FILE_NAME
@@ -87,17 +85,15 @@ object FileUtil {
 
     fun getNextTempMaskFrameInputStream(
         context: Context,
-        counter: Int
-    ): FileInputStream? {
-        return try {
-            val directory = File(context.filesDir, MASK_FRAMES_DIR_NAME)
-            val fileName = "${MASK_FRAME_FILE_NAME}_$counter.png"
-            val file = File(directory, fileName)
+        counter: Int,
+    ): FileInputStream? = try {
+        val directory = File(context.filesDir, MASK_FRAMES_DIR_NAME)
+        val fileName = "${MASK_FRAME_FILE_NAME}_$counter.png"
+        val file = File(directory, fileName)
 
-            FileInputStream(file)
-        } catch (e: Exception) {
-            null
-        }
+        FileInputStream(file)
+    } catch (e: Exception) {
+        null
     }
 
     fun saveTempMaskFrames(
@@ -140,5 +136,4 @@ object FileUtil {
             }
         }
     }
-
 }

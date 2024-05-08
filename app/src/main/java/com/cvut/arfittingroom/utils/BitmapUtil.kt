@@ -46,17 +46,22 @@ object BitmapUtil {
         bitmap.setPixels(pixels, 0, width, 0, 0, width, height)
     }
 
-    fun combineBitmaps(bitmaps: List<Bitmap>, width: Int, height: Int): Bitmap {
+    fun combineBitmaps(
+        bitmaps: List<Bitmap>,
+        width: Int,
+        height: Int,
+    ): Bitmap {
         val combinedBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(combinedBitmap)
 
         bitmaps.forEach {
             val scale = (width.toFloat() / it.width).coerceAtMost(height.toFloat() / it.height)
 
-            val matrix = Matrix().apply {
-                postScale(scale, scale)
-                postTranslate((width.toFloat() - it.width * scale) / 2, (height.toFloat() - it.height * scale) / 2)
-            }
+            val matrix =
+                Matrix().apply {
+                    postScale(scale, scale)
+                    postTranslate((width.toFloat() - it.width * scale) / 2, (height.toFloat() - it.height * scale) / 2)
+                }
 
             canvas.drawBitmap(it, matrix, null)
         }

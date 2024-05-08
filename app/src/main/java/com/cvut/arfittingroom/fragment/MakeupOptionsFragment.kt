@@ -363,7 +363,7 @@ class MakeupOptionsFragment : Fragment() {
         }
     }
 
-    fun resetMenu(){
+    fun resetMenu() {
         selectedOptionTypeToViewId.clear()
         fetchMakeupTypes(requireView())
     }

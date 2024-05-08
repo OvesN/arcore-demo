@@ -5,5 +5,5 @@ import com.google.ar.sceneform.ux.AugmentedFaceNode
 
 data class FaceNodesInfo(
     var augmentedFace: AugmentedFace? = null,
-    val slotToFaceNodeMap: MutableMap<String, AugmentedFaceNode>
+    val slotToFaceNodeMap: MutableMap<String, AugmentedFaceNode>,
 )

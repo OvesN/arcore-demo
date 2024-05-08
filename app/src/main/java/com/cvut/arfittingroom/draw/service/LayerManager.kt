@@ -346,5 +346,4 @@ class LayerManager {
     fun resetAllGifs() {
         layers.forEach { it.resetAllGifs() }
     }
-
 }

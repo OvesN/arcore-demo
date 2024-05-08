@@ -1,8 +1,6 @@
 package com.cvut.arfittingroom.service
 
 import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.Matrix
 import android.util.Log
 import com.cvut.arfittingroom.model.BITMAP_SIZE
 import com.cvut.arfittingroom.model.FaceNodesInfo
@@ -62,7 +60,6 @@ class StateService {
             it.parent = null
             faceNodesInfo.slotToFaceNodeMap.remove(slot)
         }
-
     }
 
     fun addModel(modelInfo: ModelInfo) {
@@ -117,7 +114,7 @@ class StateService {
     fun applyTextureToFaceNode(
         texture: Texture,
         sceneView: ArSceneView,
-        slot: String
+        slot: String,
     ) {
         val faceNode =
             faceNodesInfo.slotToFaceNodeMap.getOrPut(slot) {
@@ -133,7 +130,7 @@ class StateService {
     fun createTextureAndApply(
         bitmap: Bitmap,
         sceneView: ArSceneView,
-        slot: String
+        slot: String,
     ) {
         // Convert Bitmap to ARCore Texture
         Texture.builder()
@@ -160,7 +157,10 @@ class StateService {
         }
     }
 
-    fun reapplyNodesForNewFace(face: AugmentedFace, sceneView: ArSceneView) {
+    fun reapplyNodesForNewFace(
+        face: AugmentedFace,
+        sceneView: ArSceneView,
+    ) {
         faceNodesInfo.augmentedFace = face
 
         faceNodesInfo.slotToFaceNodeMap.values.forEach {
@@ -170,6 +170,6 @@ class StateService {
     }
 
     fun getAppliedModelsList() = appliedModels.values.toList()
-    fun getAppliedMakeupList() = appliedMakeUpTypes.values.toList()
 
+    fun getAppliedMakeupList() = appliedMakeUpTypes.values.toList()
 }

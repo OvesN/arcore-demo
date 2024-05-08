@@ -48,8 +48,7 @@ object UIUtil {
     fun selectLookButton(view: View) {
         if (view is ImageView) {
             selectHeadBackgroundButton(view)
-        }
-        else {
+        } else {
             deselectHeadBackgroundButton(view)
         }
     }
@@ -57,12 +56,10 @@ object UIUtil {
     fun deselectLookButton(view: View) {
         if (view is ImageView) {
             deselectHeadBackgroundButton(view)
-        }
-        else {
+        } else {
             deselectButton(view)
         }
     }
-
 
     fun selectHeadBackgroundButton(view: View) {
         val layers =

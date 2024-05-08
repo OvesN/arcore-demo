@@ -5,9 +5,7 @@ import com.cvut.arfittingroom.model.MakeupInfo
 import com.cvut.arfittingroom.model.ModelInfo
 
 interface ResourceListener {
-    fun applyMakeup(
-        makeupInfo: MakeupInfo,
-    )
+    fun applyMakeup(makeupInfo: MakeupInfo)
 
     fun applyModel(modelInfo: ModelInfo)
 

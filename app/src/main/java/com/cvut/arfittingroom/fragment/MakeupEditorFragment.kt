@@ -23,7 +23,6 @@ import com.cvut.arfittingroom.draw.model.enums.EShape
 import com.cvut.arfittingroom.utils.UIUtil
 import com.google.android.material.slider.Slider
 
-
 private const val DEFAULT_COLOR = Color.TRANSPARENT
 private val SELECTED_COLOR = Color.parseColor("#FF5722")
 
@@ -40,7 +39,10 @@ class MakeupEditorFragment : Fragment() {
         savedInstanceState: Bundle?,
     ): View = inflater.inflate(R.layout.fragment_makeup_editor, container, false)
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
         super.onViewCreated(view, savedInstanceState)
         drawView = view.findViewById(R.id.draw_view)
         drawView.applyBitmapBackground(backgroundBitmap)
@@ -82,7 +84,6 @@ class MakeupEditorFragment : Fragment() {
         view.findViewById<ImageButton>(R.id.button_heart).setOnClickListener {
             toggleStrokeShape(EShape.HEART)
         }
-
         view.findViewById<ImageButton>(R.id.button_gif).setOnClickListener {
             addGif(R.drawable.donut)
         }
@@ -107,20 +108,20 @@ class MakeupEditorFragment : Fragment() {
             },
         )
 
-        drawView.viewTreeObserver.addOnGlobalLayoutListener(object :
-            ViewTreeObserver.OnGlobalLayoutListener {
-            override fun onGlobalLayout() {
-                drawView.viewTreeObserver.removeOnGlobalLayoutListener(this)
+        drawView.viewTreeObserver.addOnGlobalLayoutListener(
+            object :
+                ViewTreeObserver.OnGlobalLayoutListener {
+                override fun onGlobalLayout() {
+                    drawView.viewTreeObserver.removeOnGlobalLayoutListener(this)
 
-                if (drawView.layerManager.getNumOfLayers() == 0) {
-                    drawView.layerManager.addLayer(drawView.width, drawView.height)
-                    drawView.layerInitializedListener?.onLayerInitialized(drawView.layerManager.getNumOfLayers())
+                    if (drawView.layerManager.getNumOfLayers() == 0) {
+                        drawView.layerManager.addLayer(drawView.width, drawView.height)
+                        drawView.layerInitializedListener?.onLayerInitialized(drawView.layerManager.getNumOfLayers())
+                    }
                 }
-            }
-        })
-
+            },
+        )
     }
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -209,7 +210,6 @@ class MakeupEditorFragment : Fragment() {
         drawView.loadGif(gifId)
     }
 
-
     private fun showMainLayout() {
         val listener = context as? UIChangeListener
         if (listener == null) {
@@ -226,7 +226,6 @@ class MakeupEditorFragment : Fragment() {
         }
     }
 
-
     fun applyBackgroundBitmap(bitmap: Bitmap?) {
         backgroundBitmap = bitmap
         if (::drawView.isInitialized) {
@@ -235,7 +234,6 @@ class MakeupEditorFragment : Fragment() {
     }
 
     companion object {
-        const val MAKEUP_EDITOR_FRAGMENT_TAG ="MakeupEditorFragmentTag"
+        const val MAKEUP_EDITOR_FRAGMENT_TAG = "MakeupEditorFragmentTag"
     }
-
 }

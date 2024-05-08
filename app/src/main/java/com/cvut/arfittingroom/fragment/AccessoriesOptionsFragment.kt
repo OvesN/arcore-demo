@@ -156,10 +156,11 @@ class AccessoriesOptionsFragment : Fragment() {
         val options = view.findViewById<GridLayout>(R.id.vertical_options)
         options.removeAllViews()
 
-        val typeButton = view.findViewById<Button>(R.id.type_button).apply {
-            text =
-                selectedAccessoryType.makeFirstLetterCapital().chunked(10).joinToString("\n")
-        }
+        val typeButton =
+            view.findViewById<Button>(R.id.type_button).apply {
+                text =
+                    selectedAccessoryType.makeFirstLetterCapital().chunked(10).joinToString("\n")
+            }
         typeButton.setOnClickListener {
             // Return back
             fetchAccessoriesTypes(view)
@@ -180,13 +181,14 @@ class AccessoriesOptionsFragment : Fragment() {
                         }
                     }
 
-                val params = GridLayout.LayoutParams().apply {
-                    columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
-                    rowSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
-                    height = ViewGroup.LayoutParams.WRAP_CONTENT
-                    height = dpToPx(100, requireContext())
-                    width = imageWidth
-                }
+                val params =
+                    GridLayout.LayoutParams().apply {
+                        columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
+                        rowSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
+                        height = ViewGroup.LayoutParams.WRAP_CONTENT
+                        height = dpToPx(100, requireContext())
+                        width = imageWidth
+                    }
 
                 params.setGravity(Gravity.START)
 
