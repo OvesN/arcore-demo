@@ -1,6 +1,6 @@
 package com.cvut.arfittingroom.model.to.drawhistory
 
-import com.cvut.arfittingroom.model.enums.EPathActionType
+import com.cvut.arfittingroom.model.to.EPathActionType
 
 data class PathActionTO(
     var actionType: EPathActionType = EPathActionType.LINE,

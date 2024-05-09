@@ -20,7 +20,7 @@ import com.cvut.arfittingroom.draw.Layer
 import com.cvut.arfittingroom.draw.model.element.strategy.PathCreationStrategy
 import com.cvut.arfittingroom.draw.model.enums.ELayerEditAction
 import com.cvut.arfittingroom.draw.model.enums.EShape
-import com.cvut.arfittingroom.model.to.drawhistory.DrawHistoryTO
+import com.cvut.arfittingroom.model.to.drawhistory.EditorStateTO
 import com.cvut.arfittingroom.model.to.drawhistory.ElementTO
 import com.cvut.arfittingroom.model.to.drawhistory.LayerTO
 import com.cvut.arfittingroom.service.Mapper
@@ -34,7 +34,7 @@ private val SELECTED_COLOR = Color.parseColor("#FF5722")
 
 class MakeupEditorFragment : Fragment() {
     private var backgroundBitmap: Bitmap? = null
-    var drawHistoryTO: DrawHistoryTO? = null
+    var editorStateTO: EditorStateTO? = null
     private lateinit var drawView: DrawView
     private lateinit var slider: Slider
     private lateinit var layersButtonsContainer: LinearLayout
@@ -139,9 +139,9 @@ class MakeupEditorFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        drawHistoryTO?.let {
+        editorStateTO?.let {
             deserializeEditorState(it)
-            drawHistoryTO = null
+            editorStateTO = null
         }
         drawView.layerManager.resetAllGifs()
         drawView.layerManager.setAllGifsToStaticMode()
@@ -245,7 +245,7 @@ class MakeupEditorFragment : Fragment() {
         }
     }
 
-    fun serializeEditorState(): DrawHistoryTO {
+    fun serializeEditorState(): EditorStateTO {
         mapper.setDimensions(drawView.width, drawView.height)
 
         val layers = drawView.layerManager.layers
@@ -257,22 +257,22 @@ class MakeupEditorFragment : Fragment() {
             layersTO.add(mapper.layerToLayerTO(layer, index))
         }
 
-        return DrawHistoryTO(
+        return EditorStateTO(
             elements = elementsTO,
             layers = layersTO,
         )
     }
 
-    private fun deserializeEditorState(drawHistoryTO: DrawHistoryTO) {
+    private fun deserializeEditorState(editorStateTO: EditorStateTO) {
         mapper.setDimensions(drawView.width, drawView.height)
 
         val elementsMap =
-            drawHistoryTO.elements.associateBy(
+            editorStateTO.elements.associateBy(
                 keySelector = { it.id },
                 valueTransform = { mapper.elementTOtoElement(it) },
             )
 
-        val sortedLayers = drawHistoryTO.layers.sortedBy { it.index }
+        val sortedLayers = editorStateTO.layers.sortedBy { it.index }
         val layersList: LinkedList<Layer> = LinkedList()
 
         val layersMap =

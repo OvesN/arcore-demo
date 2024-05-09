@@ -1,7 +1,7 @@
 package com.cvut.arfittingroom.model.to.drawhistory
 
 import com.cvut.arfittingroom.draw.model.PaintOptions
-import com.cvut.arfittingroom.model.enums.EElementType
+import com.cvut.arfittingroom.model.to.EElementType
 
 data class ElementTO(
     var id: String = "",

@@ -14,8 +14,8 @@ import com.cvut.arfittingroom.draw.path.PathAction
 import com.cvut.arfittingroom.draw.path.impl.Line
 import com.cvut.arfittingroom.draw.path.impl.Move
 import com.cvut.arfittingroom.draw.path.impl.Quad
-import com.cvut.arfittingroom.model.enums.EElementType
-import com.cvut.arfittingroom.model.enums.EPathActionType
+import com.cvut.arfittingroom.model.to.EElementType
+import com.cvut.arfittingroom.model.to.EPathActionType
 import com.cvut.arfittingroom.model.to.drawhistory.ElementTO
 import com.cvut.arfittingroom.model.to.drawhistory.LayerTO
 import com.cvut.arfittingroom.model.to.drawhistory.PathActionTO
@@ -193,7 +193,6 @@ constructor(private val strategies: Map<String, @JvmSuppressWildcards PathCreati
                     outerRadius = elementTO.outerRadius * width,
                     rotationAngle = elementTO.rotationAngle,
                 )
-
             EElementType.IMAGE ->
                 Image(
                     id = UUID.fromString(elementTO.id),
@@ -222,4 +221,12 @@ constructor(private val strategies: Map<String, @JvmSuppressWildcards PathCreati
             width = width,
             height = height,
         )
+
+    private fun downloadImage(ref: String) {
+
+    }
+
+    private fun downloadGif(ref: String) {
+
+    }
 }

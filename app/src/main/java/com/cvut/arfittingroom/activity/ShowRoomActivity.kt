@@ -208,7 +208,7 @@ class ShowRoomActivity :
         if (DrawHistoryHolder.isNotEmpty()) {
             showWarningDialog(lookTO)
         } else {
-            makeupEditorFragment.drawHistoryTO = lookTO.history
+            makeupEditorFragment.editorStateTO = lookTO.editorState
 
             stopAnimation()
             accessoriesOptionsFragment.applyState(lookTO.appliedModels)
@@ -642,7 +642,7 @@ class ShowRoomActivity :
                 isAnimated = isAnimated,
                 appliedMakeup = stateService.getAppliedMakeupList(),
                 appliedModels = stateService.getAppliedModelsList(),
-                history = makeupEditorFragment.serializeEditorState(),
+                editorState = makeupEditorFragment.serializeEditorState(),
                 name = name,
                 imagePreviewRef = createPreview(lookId),
             )

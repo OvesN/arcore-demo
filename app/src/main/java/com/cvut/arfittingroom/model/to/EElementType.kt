@@ -1,4 +1,4 @@
-package com.cvut.arfittingroom.model.enums
+package com.cvut.arfittingroom.model.to
 
 enum class EElementType {
     CURVE,
