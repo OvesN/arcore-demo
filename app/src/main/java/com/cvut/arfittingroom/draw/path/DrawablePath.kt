@@ -4,18 +4,15 @@ import android.graphics.Path
 import com.cvut.arfittingroom.draw.path.impl.Line
 import com.cvut.arfittingroom.draw.path.impl.Move
 import com.cvut.arfittingroom.draw.path.impl.Quad
-import java.io.ObjectInputStream
 import java.io.Serializable
 import java.util.LinkedList
 
 class DrawablePath : Path(), Serializable {
-    private val actions = LinkedList<Action>()
+    val actions = LinkedList<PathAction>()
 
-    private fun readObject(inputStream: ObjectInputStream) {
-        inputStream.defaultReadObject()
-
-        val copiedActions = actions.map { it }
-        copiedActions.forEach {
+    fun addActions(actions: List<PathAction>) {
+        actions.forEach {
+            this.actions.add(it)
             it.perform(this)
         }
     }

@@ -30,9 +30,9 @@ import com.cvut.arfittingroom.draw.command.action.element.impl.ScaleElement
 import com.cvut.arfittingroom.draw.model.PaintOptions
 import com.cvut.arfittingroom.draw.model.element.Element
 import com.cvut.arfittingroom.draw.model.element.impl.Curve
-import com.cvut.arfittingroom.draw.model.element.impl.Figure
 import com.cvut.arfittingroom.draw.model.element.impl.Gif
 import com.cvut.arfittingroom.draw.model.element.impl.Image
+import com.cvut.arfittingroom.draw.model.element.impl.Stamp
 import com.cvut.arfittingroom.draw.model.element.strategy.impl.HeartPathCreationStrategy
 import com.cvut.arfittingroom.draw.model.element.strategy.impl.StarPathCreationStrategy
 import com.cvut.arfittingroom.draw.model.enums.EElementEditAction
@@ -56,12 +56,11 @@ import kotlin.math.atan2
 import kotlin.math.sqrt
 
 class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
-    private var paintOptions = PaintOptions()
+    var paintOptions = PaintOptions()
     private var curX = 0f
     private var curY = 0f
     private var startX = 0f
     private var startY = 0f
-    private var isStrokeWidthBarEnabled = false
     private var elementScaleFactor = 1.0f
     private var canvasScaleFactor = 1.0f
     private val scaleGestureDetector: ScaleGestureDetector
@@ -155,6 +154,14 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                     }
                 },
             )
+    }
+
+    fun setDimensions(
+        width: Int,
+        height: Int,
+    ) {
+        uiDrawer.setDimensions(width, height)
+        layerManager.setDimensions(width, height)
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
@@ -490,7 +497,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
             EElementEditAction.CHANGE_COLOR -> {
                 selectedElement?.let { selectedElement ->
-                    showColorPickerDialog(context) { envelopColor ->
+                    showColorPickerDialog(context, paintOptions.color) { envelopColor ->
                         repaintElement(selectedElement, envelopColor)
                     }
                 }
@@ -605,16 +612,10 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         @ColorInt
         paintOptions.color = newColor
         paintOptions.alpha = newColor.alpha
-        if (isStrokeWidthBarEnabled) {
-            invalidate()
-        }
     }
 
     fun setStrokeWidth(newStrokeWidth: Float) {
         paintOptions.strokeWidth = newStrokeWidth
-        if (isStrokeWidthBarEnabled) {
-            invalidate()
-        }
     }
 
     fun setOnLayerInitializedListener(listener: OnLayerInitializedListener) {
@@ -684,14 +685,15 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
         val curve =
             Curve(
-                layerManager.getCurPath(),
-                Paint().apply {
-                    color = paintOptions.color
-                    strokeWidth = paintOptions.strokeWidth
-                    alpha = paintOptions.alpha
-                    strokeCap = Paint.Cap.ROUND
-                    style = Paint.Style.STROKE
-                },
+                path = layerManager.getCurPath(),
+                paint =
+                    Paint().apply {
+                        color = paintOptions.color
+                        strokeWidth = paintOptions.strokeWidth
+                        alpha = paintOptions.alpha
+                        strokeCap = Paint.Cap.ROUND
+                        style = Paint.Style.STROKE
+                    },
             )
 
         layerManager.setCurPath(DrawablePath())
@@ -705,17 +707,18 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         outerRadius: Float,
     ) {
         val heart =
-            Figure(
-                centerX,
-                centerY,
-                outerRadius,
-                HeartPathCreationStrategy(),
-                Paint().apply {
-                    color = paintOptions.color
-                    strokeWidth = outerRadius
-                    alpha = paintOptions.alpha
-                    style = Paint.Style.FILL
-                },
+            Stamp(
+                centerX = centerX,
+                centerY = centerY,
+                outerRadius = outerRadius,
+                pathCreationStrategy = HeartPathCreationStrategy(),
+                paint =
+                    Paint().apply {
+                        color = paintOptions.color
+                        strokeWidth = outerRadius
+                        alpha = paintOptions.alpha
+                        style = Paint.Style.FILL
+                    },
             )
 
         addElementToLayer(layerManager.getActiveLayerIndex(), heart)
@@ -727,17 +730,18 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         outerRadius: Float,
     ) {
         val star =
-            Figure(
-                centerX,
-                centerY,
-                outerRadius,
-                StarPathCreationStrategy(),
-                Paint().apply {
-                    color = paintOptions.color
-                    style = paintOptions.style
-                    strokeWidth = 6f
-                    alpha = paintOptions.alpha
-                },
+            Stamp(
+                centerX = centerX,
+                centerY = centerY,
+                outerRadius = outerRadius,
+                pathCreationStrategy = StarPathCreationStrategy(),
+                paint =
+                    Paint().apply {
+                        color = paintOptions.color
+                        style = paintOptions.style
+                        strokeWidth = 6f
+                        alpha = paintOptions.alpha
+                    },
             )
 
         addElementToLayer(layerManager.getActiveLayerIndex(), star)
@@ -790,10 +794,10 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         addElementToLayer(
             layerManager.getActiveLayerIndex(),
             Image(
-                width.toFloat() / 2,
-                height.toFloat() / 2,
-                width.toFloat() / 4,
-                imageId,
+                resourceRef = imageId.toString(),
+                centerX = width.toFloat() / 2,
+                centerY = height.toFloat() / 2,
+                outerRadius = width.toFloat() / 4,
             ).apply { bitmap = imageBitmap },
         )
 
@@ -818,10 +822,10 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
         val gif =
             Gif(
-                gifId,
-                width.toFloat() / 2,
-                height.toFloat() / 2,
-                width.toFloat() / 4,
+                resourceRef = gifId.toString(),
+                centerX = width.toFloat() / 2,
+                centerY = height.toFloat() / 2,
+                outerRadius = width.toFloat() / 4,
             ).apply {
                 setDrawable(adjustedGif)
                 shouldDrawNextFrame = true

@@ -7,18 +7,19 @@ import com.cvut.arfittingroom.draw.command.action.element.impl.MoveElementBetwee
 import com.cvut.arfittingroom.draw.model.PaintOptions
 import com.cvut.arfittingroom.draw.model.element.Element
 import com.cvut.arfittingroom.draw.path.DrawablePath
-import com.cvut.arfittingroom.utils.ScreenUtil
 import mu.KotlinLogging
 import java.util.UUID
 
 private val logger = KotlinLogging.logger {}
 
 class LayerManager {
-    private val layers = mutableListOf<Layer>()
+    val layers = mutableListOf<Layer>()
     private val idToLayerMap = HashMap<UUID, Layer>()
     private var activeLayerIndex = 0
     private var layersBelowActiveLayerBitmap: Bitmap? = null
     private var layersAboveActiveLayerBitmap: Bitmap? = null
+    private var viewWidth: Int = 0
+    private var viewHeight: Int = 0
 
     /**
      * Draw all layers
@@ -49,6 +50,14 @@ class LayerManager {
         }
     }
 
+    fun setDimensions(
+        width: Int,
+        height: Int,
+    ) {
+        viewWidth = width
+        viewHeight = height
+    }
+
     fun updateLayersBitmaps() {
         layers.forEach {
             it.prepareBitmap()
@@ -65,7 +74,8 @@ class LayerManager {
         height: Int,
         layerId: UUID? = null,
     ): Int {
-        val layer = layerId?.let { Layer(width, height, layerId) } ?: Layer(width, height)
+        val layer =
+            layerId?.let { Layer(layerId, width, height) } ?: Layer(width = width, height = height)
 
         if (layers.isNotEmpty()) {
             layers[activeLayerIndex].deselectAllElements()
@@ -295,8 +305,8 @@ class LayerManager {
 
         val bitmap =
             Bitmap.createBitmap(
-                ScreenUtil.screenWidth,
-                ScreenUtil.screenHeight,
+                viewWidth,
+                viewHeight,
                 Bitmap.Config.ARGB_8888,
             )
         val canvas = Canvas(bitmap)
@@ -330,8 +340,8 @@ class LayerManager {
 
     fun createBitmapFromAllLayers() =
         createBitmapFromLayers(layers) ?: Bitmap.createBitmap(
-            ScreenUtil.screenWidth,
-            ScreenUtil.screenHeight,
+            viewWidth,
+            viewHeight,
             Bitmap.Config.ARGB_8888,
         )
 

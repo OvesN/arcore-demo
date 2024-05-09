@@ -16,7 +16,6 @@ class GlideModule : AppGlideModule() {
         glide: Glide,
         registry: Registry,
     ) {
-        // Register FirebaseImageLoader to handle StorageReference
         registry.append(
             StorageReference::class.java,
             InputStream::class.java,

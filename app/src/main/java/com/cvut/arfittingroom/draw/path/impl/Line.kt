@@ -1,15 +1,10 @@
 package com.cvut.arfittingroom.draw.path.impl
 
 import android.graphics.Path
-import com.cvut.arfittingroom.draw.path.Action
-import java.io.Writer
+import com.cvut.arfittingroom.draw.path.PathAction
 
-class Line(private val x: Float, private val y: Float) : Action {
+class Line(val x: Float, val y: Float) : PathAction {
     override fun perform(path: Path) {
         path.lineTo(x, y)
-    }
-
-    override fun perform(writer: Writer) {
-        writer.write("L$x,$y")
     }
 }

@@ -2,8 +2,11 @@ package com.cvut.arfittingroom.draw.model.element.strategy.impl
 
 import com.cvut.arfittingroom.draw.model.element.strategy.PathCreationStrategy
 import com.cvut.arfittingroom.draw.path.DrawablePath
+import javax.inject.Inject
 
-class RectanglePathCreationStrategy : PathCreationStrategy {
+class RectanglePathCreationStrategy
+@Inject
+constructor() : PathCreationStrategy {
     override val name: String = "rectangle"
 
     override fun createPath(

@@ -1,19 +1,19 @@
 package com.cvut.arfittingroom.activity
 
-import com.cvut.arfittingroom.model.LookInfo
-import com.cvut.arfittingroom.model.MakeupInfo
-import com.cvut.arfittingroom.model.ModelInfo
+import com.cvut.arfittingroom.model.to.LookTO
+import com.cvut.arfittingroom.model.to.MakeupTO
+import com.cvut.arfittingroom.model.to.ModelTO
 
 interface ResourceListener {
-    fun applyMakeup(makeupInfo: MakeupInfo)
+    fun applyMakeup(makeupTO: MakeupTO)
 
-    fun applyModel(modelInfo: ModelInfo)
+    fun applyModel(modelTO: ModelTO)
 
     fun removeMakeup(type: String)
 
     fun removeModel(slot: String)
 
-    fun applyLook(lookInfo: LookInfo)
+    fun applyLook(lookTO: LookTO)
 
     fun removeLook(lookId: String)
 }

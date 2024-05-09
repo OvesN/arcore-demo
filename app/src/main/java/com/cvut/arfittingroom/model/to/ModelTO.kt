@@ -1,8 +1,8 @@
-package com.cvut.arfittingroom.model
+package com.cvut.arfittingroom.model.to
 
 import com.google.firebase.firestore.PropertyName
 
-data class ModelInfo(
+data class ModelTO(
     @get:PropertyName("slot") @set:PropertyName("slot") var slot: String = "",
     @get:PropertyName("model_ref") @set:PropertyName("model_ref") var modelRef: String = "",
     @get:PropertyName("image_preview_ref") @set:PropertyName("image_preview_ref") var imagePreviewRef: String = "",

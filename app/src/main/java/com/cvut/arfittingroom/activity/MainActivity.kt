@@ -1,14 +1,12 @@
 package com.cvut.arfittingroom.activity
 
 import android.content.Intent
-import android.content.res.Resources
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import by.kirich1409.viewbindingdelegate.CreateMethod
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.cvut.arfittingroom.databinding.ActivityMainBinding
 import com.cvut.arfittingroom.utils.FileUtil.deleteTempFiles
-import com.cvut.arfittingroom.utils.ScreenUtil
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
@@ -21,8 +19,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         auth = Firebase.auth
 
-        ScreenUtil.screenHeight = Resources.getSystem().displayMetrics.heightPixels
-        ScreenUtil.screenWidth = Resources.getSystem().displayMetrics.widthPixels
         deleteTempFiles(applicationContext)
 
         if (auth.currentUser != null) {

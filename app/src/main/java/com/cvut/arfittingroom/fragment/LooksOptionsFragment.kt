@@ -19,8 +19,8 @@ import com.cvut.arfittingroom.activity.ResourceListener
 import com.cvut.arfittingroom.model.AUTHOR_ATTRIBUTE
 import com.cvut.arfittingroom.model.IS_PUBLIC_ATTRIBUTE
 import com.cvut.arfittingroom.model.LOOKS_COLLECTION
-import com.cvut.arfittingroom.model.LookInfo
 import com.cvut.arfittingroom.model.NUM_OF_ELEMENTS_IN_ROW_BIG_MENU
+import com.cvut.arfittingroom.model.to.LookTO
 import com.cvut.arfittingroom.module.GlideApp
 import com.cvut.arfittingroom.utils.UIUtil.deselectLookButton
 import com.cvut.arfittingroom.utils.UIUtil.selectLookButton
@@ -33,7 +33,7 @@ import io.github.muddz.styleabletoast.StyleableToast
 
 class LooksOptionsFragment : Fragment() {
     private var selectedLookViewId: Int = 0
-    private val looks = mutableMapOf<String, LookInfo>()
+    private val looks = mutableMapOf<String, LookTO>()
     private lateinit var firestore: FirebaseFirestore
     private lateinit var auth: FirebaseAuth
     private lateinit var storage: FirebaseStorage
@@ -99,8 +99,8 @@ class LooksOptionsFragment : Fragment() {
             .get()
             .addOnSuccessListener { result ->
                 result.documents.forEach { look ->
-                    val lookInfo = look.toObject(LookInfo::class.java)
-                    lookInfo?.let { looks[it.lookId] = it }
+                    val lookTO = look.toObject(LookTO::class.java)
+                    lookTO?.let { looks[it.lookId] = it }
                 }
 
                 updateLooksOptionsMenu()
@@ -174,7 +174,7 @@ class LooksOptionsFragment : Fragment() {
     private fun selectLook(
         view: View,
         buttonView: View,
-        lookInfo: LookInfo,
+        lookTO: LookTO,
     ) {
         view.findViewById<View>(selectedLookViewId)
             ?.let { deselectLookButton(view.findViewById(selectedLookViewId)) }
@@ -186,10 +186,10 @@ class LooksOptionsFragment : Fragment() {
         }
 
         if (selectedLookViewId == buttonView.id) {
-            listener.removeLook(lookInfo.lookId)
+            listener.removeLook(lookTO.lookId)
             selectedLookViewId = 0
         } else {
-            listener.applyLook(lookInfo)
+            listener.applyLook(lookTO)
             selectLookButton(buttonView)
             selectedLookViewId = buttonView.id
         }

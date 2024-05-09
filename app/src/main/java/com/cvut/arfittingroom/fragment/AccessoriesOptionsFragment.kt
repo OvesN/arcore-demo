@@ -18,12 +18,12 @@ import com.cvut.arfittingroom.R
 import com.cvut.arfittingroom.activity.ResourceListener
 import com.cvut.arfittingroom.model.ACCESSORY_TYPES_COLLECTION
 import com.cvut.arfittingroom.model.MODELS_COLLECTION
-import com.cvut.arfittingroom.model.ModelInfo
 import com.cvut.arfittingroom.model.NUM_OF_ELEMENTS_IN_ROW
 import com.cvut.arfittingroom.model.PREVIEW_IMAGE_ATTRIBUTE
 import com.cvut.arfittingroom.model.REF_ATTRIBUTE
 import com.cvut.arfittingroom.model.SLOT_ATTRIBUTE
 import com.cvut.arfittingroom.model.TYPE_ATTRIBUTE
+import com.cvut.arfittingroom.model.to.ModelTO
 import com.cvut.arfittingroom.module.GlideApp
 import com.cvut.arfittingroom.utils.ScreenUtil.dpToPx
 import com.cvut.arfittingroom.utils.UIUtil.deselectButton
@@ -35,7 +35,7 @@ import io.github.muddz.styleabletoast.StyleableToast
 
 class AccessoriesOptionsFragment : Fragment() {
     private val accessoriesTypes = mutableSetOf<String>()
-    private val modelsInfo = mutableListOf<ModelInfo>()
+    private val modelsInfo = mutableListOf<ModelTO>()
     private val selectedSlotToViewId = mutableMapOf<String, Int>()
     private var selectedAccessoryType: String = ""
     private lateinit var firestore: FirebaseFirestore
@@ -132,7 +132,7 @@ class AccessoriesOptionsFragment : Fragment() {
                     val slot = document[SLOT_ATTRIBUTE]?.toString() ?: ref
 
                     modelsInfo.add(
-                        ModelInfo(
+                        ModelTO(
                             slot = slot,
                             modelRef = ref,
                             imagePreviewRef = preview,
@@ -209,9 +209,9 @@ class AccessoriesOptionsFragment : Fragment() {
     private fun selectAccessoriesOption(
         view: View,
         imageView: ImageView,
-        modelInfo: ModelInfo,
+        modelTO: ModelTO,
     ) {
-        selectedSlotToViewId[modelInfo.slot]?.let { viewId ->
+        selectedSlotToViewId[modelTO.slot]?.let { viewId ->
             view.findViewById<ImageView>(viewId)?.let { deselectButton(it) }
         }
 
@@ -221,22 +221,22 @@ class AccessoriesOptionsFragment : Fragment() {
             return
         }
 
-        if (selectedSlotToViewId[modelInfo.slot] == imageView.id) {
-            selectedSlotToViewId.remove(modelInfo.slot)
-            listener.removeModel(modelInfo.slot)
+        if (selectedSlotToViewId[modelTO.slot] == imageView.id) {
+            selectedSlotToViewId.remove(modelTO.slot)
+            listener.removeModel(modelTO.slot)
 
-            selectedSlotToViewId.remove(modelInfo.slot)
+            selectedSlotToViewId.remove(modelTO.slot)
         } else {
             listener.applyModel(
-                modelInfo,
+                modelTO,
             )
 
             selectSquareButton(imageView)
-            selectedSlotToViewId[modelInfo.slot] = imageView.id
+            selectedSlotToViewId[modelTO.slot] = imageView.id
         }
     }
 
-    fun applyState(selectedModels: List<ModelInfo>) {
+    fun applyState(selectedModels: List<ModelTO>) {
         selectedSlotToViewId.clear()
         selectedModels.forEach { selectedSlotToViewId[it.slot] = it.modelRef.hashCode() }
         fetchAccessoriesTypes(requireView())

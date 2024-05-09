@@ -12,8 +12,6 @@ import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
 import com.cvut.arfittingroom.R
 import com.cvut.arfittingroom.draw.model.element.Element
 import com.cvut.arfittingroom.draw.model.enums.EElementEditAction
-import com.cvut.arfittingroom.utils.ScreenUtil.screenHeight
-import com.cvut.arfittingroom.utils.ScreenUtil.screenWidth
 
 class UIDrawer(private val context: Context) {
     private var menuWidth: Float = 0f
@@ -23,47 +21,32 @@ class UIDrawer(private val context: Context) {
     private var textPadding: Float = 0f
     private var lineSpacing: Float = 0f
     private var menuItemSpacing: Float = 0f
-    private val textPaint: Paint
-    private val linePaint: Paint
-    private val menuPaint: Paint
+    private val textPaint: Paint =
+        Paint().apply {
+            color = Color.WHITE
+            textSize = this@UIDrawer.textSize
+            textAlign = Paint.Align.LEFT
+        }
+    private val linePaint: Paint =
+        Paint().apply {
+            color = Color.LTGRAY
+            strokeWidth = 2f
+        }
+    private val menuPaint: Paint =
+        Paint().apply {
+            color = Color.DKGRAY
+            alpha = (255 * 0.9).toInt()
+        }
     private val editElementIcons: HashMap<EElementEditAction, Bitmap> = hashMapOf()
     private val editElementIconsBounds: HashMap<EElementEditAction, RectF> = hashMapOf()
-    private val menuBitmap: Bitmap
-    private val faceTextureBitmap: Bitmap?
+    private var menuBitmap: Bitmap? = null
+    private var faceTextureBitmap: Bitmap? = null
     private var backgroundBitmap: Bitmap? = null
     private var backgroundBitmapMatrix = Matrix()
-    private val faceTextureMatrix: Matrix
+    private var faceTextureMatrix: Matrix = Matrix()
     private var faceTextureVector: VectorDrawableCompat? = null
-
-    init {
-        initializeDimensions()
-
-        menuPaint =
-            Paint().apply {
-                color = Color.DKGRAY
-                alpha = (255 * 0.9).toInt()
-            }
-
-        textPaint =
-            Paint().apply {
-                color = Color.WHITE
-                textSize = this@UIDrawer.textSize
-                textAlign = Paint.Align.LEFT
-            }
-
-        linePaint =
-            Paint().apply {
-                color = Color.LTGRAY
-                strokeWidth = 2f
-            }
-
-        menuBitmap = prepareMenuBitmap()
-        faceTextureVector =
-            VectorDrawableCompat.create(context.resources, R.drawable.facemesh, null)
-        faceTextureBitmap = faceTextureVector?.toBitmap()
-        faceTextureMatrix = prepareMatrix(faceTextureBitmap)
-        loadEditElementIcons()
-    }
+    private var viewWidth: Int = 0
+    private var viewHeight: Int = 0
 
     private fun prepareMatrix(bitmap: Bitmap?): Matrix {
         val bitmapWidth =
@@ -73,10 +56,10 @@ class UIDrawer(private val context: Context) {
                 ?: 0
 
         val scale =
-            (screenWidth.toFloat() / bitmapWidth).coerceAtMost(screenHeight.toFloat() / bitmapHeight)
+            (viewWidth.toFloat() / bitmapWidth).coerceAtMost(viewHeight.toFloat() / bitmapHeight)
 
-        val x = (screenWidth - bitmapWidth * scale) / 2
-        val y = (screenHeight - bitmapHeight * scale) / 2
+        val x = (viewWidth - bitmapWidth * scale) / 2
+        val y = (viewHeight - bitmapHeight * scale) / 2
 
         val matrix = Matrix()
         matrix.setScale(scale, scale)
@@ -85,14 +68,30 @@ class UIDrawer(private val context: Context) {
         return matrix
     }
 
+    fun setDimensions(
+        width: Int,
+        height: Int,
+    ) {
+        viewWidth = width
+        viewHeight = height
+        initializeDimensions()
+
+        menuBitmap = prepareMenuBitmap()
+        faceTextureVector =
+            VectorDrawableCompat.create(context.resources, R.drawable.facemesh, null)
+        faceTextureBitmap = faceTextureVector?.toBitmap()
+        faceTextureMatrix = prepareMatrix(faceTextureBitmap)
+        loadEditElementIcons()
+    }
+
     private fun initializeDimensions() {
-        menuWidth = screenWidth * 0.3f * 1.3f
-        menuHeight = screenHeight * 0.125f * 1.3f
-        cornerRadius = screenWidth * 0.02f * 1.3f
-        textSize = screenHeight * 0.02f * 1.3f
-        textPadding = screenWidth * 0.025f * 1.3f
-        lineSpacing = screenHeight * 0.005f * 1.3f
-        menuItemSpacing = screenHeight * 0.025f * 1.3f
+        menuWidth = viewWidth * 0.3f * 1.3f
+        menuHeight = viewHeight * 0.125f * 1.3f
+        cornerRadius = viewWidth * 0.02f * 1.3f
+        textSize = viewHeight * 0.02f * 1.3f
+        textPadding = viewWidth * 0.025f * 1.3f
+        lineSpacing = viewHeight * 0.005f * 1.3f
+        menuItemSpacing = viewHeight * 0.025f * 1.3f
     }
 
     private fun prepareMenuBitmap(): Bitmap {
@@ -199,17 +198,22 @@ class UIDrawer(private val context: Context) {
             }
 
             if (isInElementMenuMode) {
-                canvas.drawBitmap(
-                    menuBitmap,
-                    boundingBox.topRightCornerCoor.x - menuBitmap.width,
-                    boundingBox.topRightCornerCoor.y,
-                    null,
-                )
+                if (menuBitmap == null) {
+                    return
+                }
+                menuBitmap?.let {
+                    canvas.drawBitmap(
+                        it,
+                        boundingBox.topRightCornerCoor.x - menuBitmap!!.width,
+                        boundingBox.topRightCornerCoor.y,
+                        null,
+                    )
+                }
 
                 // Initial menu item Y position
                 var itemY = boundingBox.topRightCornerCoor.y + textPadding
 
-                val menuX = boundingBox.topRightCornerCoor.x - menuBitmap.width
+                val menuX = boundingBox.topRightCornerCoor.x - menuBitmap!!.width
 
                 // Defining RectF for each menu item
                 editElementIconsBounds[EElementEditAction.MOVE_UP] =

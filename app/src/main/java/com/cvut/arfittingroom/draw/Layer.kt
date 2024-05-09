@@ -12,12 +12,12 @@ import java.util.UUID
 import kotlin.collections.HashMap
 
 class Layer(
+    val id: UUID = UUID.randomUUID(),
     private val width: Int,
     private val height: Int,
-    val id: UUID = UUID.randomUUID(),
 ) {
     var isVisible: Boolean = true
-    private val elements = HashMap<UUID, Element>()
+    val elements = HashMap<UUID, Element>()
     private val elementsToDraw = LinkedList<Element>()
     var curPath = DrawablePath()
     private val curPaint =

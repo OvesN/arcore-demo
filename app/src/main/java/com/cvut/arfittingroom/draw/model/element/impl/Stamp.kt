@@ -7,13 +7,16 @@ import com.cvut.arfittingroom.draw.model.element.BoundingBox
 import com.cvut.arfittingroom.draw.model.element.Element
 import com.cvut.arfittingroom.draw.model.element.strategy.PathCreationStrategy
 import com.cvut.arfittingroom.draw.path.DrawablePath
+import java.util.UUID
 
-class Figure(
+class Stamp(
+    override val id: UUID = UUID.randomUUID(),
     override var centerX: Float,
     override var centerY: Float,
     override var outerRadius: Float,
     private val pathCreationStrategy: PathCreationStrategy,
     override val paint: Paint,
+    override var rotationAngle: Float = 0f,
 ) : Element(), Repaintable {
     override val name: String = pathCreationStrategy.name
     override var originalRadius: Float = outerRadius
