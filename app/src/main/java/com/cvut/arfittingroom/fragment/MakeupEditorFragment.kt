@@ -11,7 +11,11 @@ import android.widget.Button
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.DrawableCompat
+import androidx.core.graphics.toColorInt
 import androidx.fragment.app.Fragment
+import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
 import com.cvut.arfittingroom.ARFittingRoomApplication
 import com.cvut.arfittingroom.R
 import com.cvut.arfittingroom.activity.UIChangeListener
@@ -20,6 +24,7 @@ import com.cvut.arfittingroom.draw.Layer
 import com.cvut.arfittingroom.draw.model.element.strategy.PathCreationStrategy
 import com.cvut.arfittingroom.draw.model.enums.ELayerEditAction
 import com.cvut.arfittingroom.draw.model.enums.EShape
+import com.cvut.arfittingroom.model.TRANSPARENT_CODE
 import com.cvut.arfittingroom.model.to.drawhistory.EditorStateTO
 import com.cvut.arfittingroom.model.to.drawhistory.ElementTO
 import com.cvut.arfittingroom.model.to.drawhistory.LayerTO
@@ -60,6 +65,11 @@ class MakeupEditorFragment : Fragment() {
         drawView = view.findViewById(R.id.draw_view)
         drawView.applyBitmapBackground(backgroundBitmap)
         slider = view.findViewById(R.id.stroke_size_slider)
+
+        slider.thumbPlaceholderDrawable = ContextCompat.getDrawable(view.context, R.drawable.slider)
+        slider.thumbContainerColor = Color.TRANSPARENT
+
+
             //layersButtonsContainer = view.findViewById(R.id.dynamic_layer_buttons_container)
 
         drawView.post {
