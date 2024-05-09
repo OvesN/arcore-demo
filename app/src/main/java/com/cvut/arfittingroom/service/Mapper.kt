@@ -28,11 +28,13 @@ class Mapper
 @Inject
 constructor(private val strategies: Map<String, @JvmSuppressWildcards PathCreationStrategy>) {
     private val storage = FirebaseStorage.getInstance()
-
     private var width: Int = 0
     private var height: Int = 0
 
-    fun setDimensions(width: Int, height: Int) {
+    fun setDimensions(
+        width: Int,
+        height: Int,
+    ) {
         this.width = width
         this.height = height
     }
@@ -55,9 +57,7 @@ constructor(private val strategies: Map<String, @JvmSuppressWildcards PathCreati
             strokeCap = paintOptions.strokeCap
         }
 
-    private fun pathToPathTO(drawablePath: DrawablePath) =
-        PathTO(drawablePath.actions.map { pathActionToActionTO(it) })
-
+    private fun pathToPathTO(drawablePath: DrawablePath) = PathTO(drawablePath.actions.map { pathActionToActionTO(it) })
 
     private fun pathTOPath(pathTO: PathTO): DrawablePath {
         val drawablePath = DrawablePath()
@@ -72,55 +72,56 @@ constructor(private val strategies: Map<String, @JvmSuppressWildcards PathCreati
             EPathActionType.MOVE ->
                 Move(x = pathActionTO.x1 * width, y = pathActionTO.y1 * height)
 
-            EPathActionType.QUAD
-            -> Quad(
-                x1 = pathActionTO.x1 * width,
-                y1 = pathActionTO.y1 * height,
-                x2 = pathActionTO.x2 * width,
-                y2 = pathActionTO.y2 * height
-            )
+            EPathActionType.QUAD,
+            ->
+                Quad(
+                    x1 = pathActionTO.x1 * width,
+                    y1 = pathActionTO.y1 * height,
+                    x2 = pathActionTO.x2 * width,
+                    y2 = pathActionTO.y2 * height,
+                )
         }
 
     private fun pathActionToActionTO(pathAction: PathAction) =
         when (pathAction) {
-            is Line -> PathActionTO(
-                actionType = EPathActionType.LINE,
-                x1 = pathAction.x / width,
-                y1 = pathAction.y / height
-            )
+            is Line ->
+                PathActionTO(
+                    actionType = EPathActionType.LINE,
+                    x1 = pathAction.x / width,
+                    y1 = pathAction.y / height,
+                )
 
-            is Move -> PathActionTO(
-                actionType = EPathActionType.MOVE,
-                x1 = pathAction.x / width,
-                y1 = pathAction.y / height
-            )
+            is Move ->
+                PathActionTO(
+                    actionType = EPathActionType.MOVE,
+                    x1 = pathAction.x / width,
+                    y1 = pathAction.y / height,
+                )
 
-            is Quad -> PathActionTO(
-                actionType = EPathActionType.QUAD,
-                x1 = pathAction.x1 / width,
-                y1 = pathAction.y1 / height,
-                x2 = pathAction.x2 / width,
-                y2 = pathAction.y2 / height
-            )
+            is Quad ->
+                PathActionTO(
+                    actionType = EPathActionType.QUAD,
+                    x1 = pathAction.x1 / width,
+                    y1 = pathAction.y1 / height,
+                    x2 = pathAction.x2 / width,
+                    y2 = pathAction.y2 / height,
+                )
 
-            else -> {
-                throw IllegalArgumentException("Unsupported element path action type")
-            }
+            else -> throw IllegalArgumentException("Unsupported element path action type")
         }
-
 
     // TODO handle exception
     fun elementToElementTO(element: Element): ElementTO {
         val baseTO =
             ElementTO(
                 elementType =
-                when (element) {
-                    is Curve -> EElementType.CURVE
-                    is Image -> EElementType.IMAGE
-                    is Gif -> EElementType.GIF
-                    is Stamp -> EElementType.STAMP
-                    else -> throw IllegalArgumentException("Unsupported element type")
-                },
+                    when (element) {
+                        is Curve -> EElementType.CURVE
+                        is Image -> EElementType.IMAGE
+                        is Gif -> EElementType.GIF
+                        is Stamp -> EElementType.STAMP
+                        else -> throw IllegalArgumentException("Unsupported element type")
+                    },
                 id = element.id.toString(),
                 centerX = element.centerX / width,
                 centerY = element.centerY / height,
@@ -165,12 +166,13 @@ constructor(private val strategies: Map<String, @JvmSuppressWildcards PathCreati
         elements = layer.elements.keys.map { it.toString() },
     )
 
-    //TODO handle exception, load resource
-    fun elementTOtoElement(elementTO: ElementTO): Element {
-        return when (elementTO.elementType) {
+    // TODO handle exception, load resource
+    fun elementTOtoElement(elementTO: ElementTO): Element =
+        when (elementTO.elementType) {
             EElementType.STAMP -> {
-                val strategy = strategies[elementTO.stampName]
-                    ?: throw IllegalArgumentException("Strategy ${elementTO.stampName}for stamp does not exist")
+                val strategy =
+                    strategies[elementTO.stampName]
+                        ?: throw IllegalArgumentException("Strategy ${elementTO.stampName}for stamp does not exist")
                 Stamp(
                     id = UUID.fromString(elementTO.id),
                     centerX = elementTO.centerX * width,
@@ -178,45 +180,46 @@ constructor(private val strategies: Map<String, @JvmSuppressWildcards PathCreati
                     outerRadius = elementTO.outerRadius * width,
                     pathCreationStrategy = strategy,
                     paint = paintTOtoPaint(elementTO.paint),
-                    rotationAngle = elementTO.rotationAngle
+                    rotationAngle = elementTO.rotationAngle,
                 )
             }
 
-            EElementType.GIF -> Gif(
-                id = UUID.fromString(elementTO.id),
-                resourceRef = elementTO.resourceRef,
-                centerX = elementTO.centerX * width,
-                centerY = elementTO.centerY * height,
-                outerRadius = elementTO.outerRadius * width,
-                rotationAngle = elementTO.rotationAngle,
-            )
+            EElementType.GIF ->
+                Gif(
+                    id = UUID.fromString(elementTO.id),
+                    resourceRef = elementTO.resourceRef,
+                    centerX = elementTO.centerX * width,
+                    centerY = elementTO.centerY * height,
+                    outerRadius = elementTO.outerRadius * width,
+                    rotationAngle = elementTO.rotationAngle,
+                )
 
-            EElementType.IMAGE -> Image(
-                id = UUID.fromString(elementTO.id),
-                resourceRef = elementTO.resourceRef,
-                centerX = elementTO.centerX * width,
-                centerY = elementTO.centerY * height,
-                outerRadius = elementTO.outerRadius * width,
-                rotationAngle = elementTO.rotationAngle
-            )
+            EElementType.IMAGE ->
+                Image(
+                    id = UUID.fromString(elementTO.id),
+                    resourceRef = elementTO.resourceRef,
+                    centerX = elementTO.centerX * width,
+                    centerY = elementTO.centerY * height,
+                    outerRadius = elementTO.outerRadius * width,
+                    rotationAngle = elementTO.rotationAngle,
+                )
 
-            EElementType.CURVE -> Curve(
-                id = UUID.fromString(elementTO.id),
-                centerX = elementTO.centerX * width,
-                centerY = elementTO.centerY * height,
-                outerRadius = elementTO.outerRadius * width,
-                path = pathTOPath(elementTO.drawablePath),
-                paint = paintTOtoPaint(elementTO.paint),
-                rotationAngle = elementTO.rotationAngle
-            )
+            EElementType.CURVE ->
+                Curve(
+                    id = UUID.fromString(elementTO.id),
+                    centerX = elementTO.centerX * width,
+                    centerY = elementTO.centerY * height,
+                    outerRadius = elementTO.outerRadius * width,
+                    path = pathTOPath(elementTO.drawablePath),
+                    paint = paintTOtoPaint(elementTO.paint),
+                    rotationAngle = elementTO.rotationAngle,
+                )
         }
-    }
-
 
     fun layerTOtoLayer(layerTO: LayerTO) =
         Layer(
             id = UUID.fromString(layerTO.id),
             width = width,
-            height = height
+            height = height,
         )
 }

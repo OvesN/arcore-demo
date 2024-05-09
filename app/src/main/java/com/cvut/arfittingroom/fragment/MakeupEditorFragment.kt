@@ -7,10 +7,8 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.ViewTreeObserver
 import android.widget.Button
 import android.widget.ImageButton
-import android.widget.ImageView
 import android.widget.LinearLayout
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
@@ -36,6 +34,7 @@ private val SELECTED_COLOR = Color.parseColor("#FF5722")
 
 class MakeupEditorFragment : Fragment() {
     private var backgroundBitmap: Bitmap? = null
+    var drawHistoryTO: DrawHistoryTO? = null
     private lateinit var drawView: DrawView
     private lateinit var slider: Slider
     private lateinit var layersButtonsContainer: LinearLayout
@@ -62,10 +61,15 @@ class MakeupEditorFragment : Fragment() {
         slider = view.findViewById(R.id.stroke_size_slider)
         layersButtonsContainer = view.findViewById(R.id.dynamic_layer_buttons_container)
 
-        drawView.post{
-            drawView.uiDrawer.setDimensions(drawView.width, drawView.height)
+        drawView.post {
+            drawView.setDimensions(drawView.width, drawView.height)
             drawView.invalidate()
+            if (drawView.layerManager.getNumOfLayers() == 0) {
+                drawView.layerManager.addLayer(drawView.width, drawView.height)
+                drawView.layerInitializedListener?.onLayerInitialized(drawView.layerManager.getNumOfLayers())
+            }
         }
+
         view.findViewById<ImageButton>(R.id.button_back).setOnClickListener {
             drawView.saveBitmap {
                 showMainLayout()
@@ -126,20 +130,6 @@ class MakeupEditorFragment : Fragment() {
                 }
             },
         )
-
-        drawView.viewTreeObserver.addOnGlobalLayoutListener(
-            object :
-                ViewTreeObserver.OnGlobalLayoutListener {
-                override fun onGlobalLayout() {
-                    drawView.viewTreeObserver.removeOnGlobalLayoutListener(this)
-
-                    if (drawView.layerManager.getNumOfLayers() == 0) {
-                        drawView.layerManager.addLayer(drawView.width, drawView.height)
-                        drawView.layerInitializedListener?.onLayerInitialized(drawView.layerManager.getNumOfLayers())
-                    }
-                }
-            },
-        )
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -149,7 +139,10 @@ class MakeupEditorFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-
+        drawHistoryTO?.let {
+            deserializeEditorState(it)
+            drawHistoryTO = null
+        }
         drawView.layerManager.resetAllGifs()
         drawView.layerManager.setAllGifsToStaticMode()
 
@@ -270,29 +263,31 @@ class MakeupEditorFragment : Fragment() {
         )
     }
 
-    fun deserializeEditorState(drawHistoryTO: DrawHistoryTO) {
+    private fun deserializeEditorState(drawHistoryTO: DrawHistoryTO) {
         mapper.setDimensions(drawView.width, drawView.height)
 
-        val elementsMap = drawHistoryTO.elements.associateBy(
-            keySelector = { it.id },
-            valueTransform = { mapper.elementTOtoElement(it) }
-        )
+        val elementsMap =
+            drawHistoryTO.elements.associateBy(
+                keySelector = { it.id },
+                valueTransform = { mapper.elementTOtoElement(it) },
+            )
 
         val sortedLayers = drawHistoryTO.layers.sortedBy { it.index }
         val layersList: LinkedList<Layer> = LinkedList()
 
-        val layersMap = sortedLayers.associateBy(
-            keySelector = { it.id },
-            valueTransform = { layerTO ->
-                val layer =
-                    mapper.layerTOtoLayer(layerTO)
-                layersList.add(layer)
-                layerTO.elements.forEach {
-                    elementsMap[it]?.let { it1 -> layer.addElement(it1) }
-                }
-                layer
-            }
-        )
+        val layersMap =
+            sortedLayers.associateBy(
+                keySelector = { it.id },
+                valueTransform = { layerTO ->
+                    val layer =
+                        mapper.layerTOtoLayer(layerTO)
+                    layersList.add(layer)
+                    layerTO.elements.forEach {
+                        elementsMap[it]?.let { it1 -> layer.addElement(it1) }
+                    }
+                    layer
+                },
+            )
 
         drawView.layerManager.deleteLayers()
 

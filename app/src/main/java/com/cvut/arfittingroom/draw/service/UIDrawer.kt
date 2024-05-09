@@ -21,19 +21,22 @@ class UIDrawer(private val context: Context) {
     private var textPadding: Float = 0f
     private var lineSpacing: Float = 0f
     private var menuItemSpacing: Float = 0f
-    private val textPaint: Paint = Paint().apply {
-        color = Color.WHITE
-        textSize = this@UIDrawer.textSize
-        textAlign = Paint.Align.LEFT
-    }
-    private val linePaint: Paint = Paint().apply {
-        color = Color.LTGRAY
-        strokeWidth = 2f
-    }
-    private val menuPaint: Paint = Paint().apply {
-        color = Color.DKGRAY
-        alpha = (255 * 0.9).toInt()
-    }
+    private val textPaint: Paint =
+        Paint().apply {
+            color = Color.WHITE
+            textSize = this@UIDrawer.textSize
+            textAlign = Paint.Align.LEFT
+        }
+    private val linePaint: Paint =
+        Paint().apply {
+            color = Color.LTGRAY
+            strokeWidth = 2f
+        }
+    private val menuPaint: Paint =
+        Paint().apply {
+            color = Color.DKGRAY
+            alpha = (255 * 0.9).toInt()
+        }
     private val editElementIcons: HashMap<EElementEditAction, Bitmap> = hashMapOf()
     private val editElementIconsBounds: HashMap<EElementEditAction, RectF> = hashMapOf()
     private var menuBitmap: Bitmap? = null
@@ -42,7 +45,6 @@ class UIDrawer(private val context: Context) {
     private var backgroundBitmapMatrix = Matrix()
     private var faceTextureMatrix: Matrix = Matrix()
     private var faceTextureVector: VectorDrawableCompat? = null
-
     private var viewWidth: Int = 0
     private var viewHeight: Int = 0
 
@@ -66,7 +68,10 @@ class UIDrawer(private val context: Context) {
         return matrix
     }
 
-    fun setDimensions(width: Int, height: Int) {
+    fun setDimensions(
+        width: Int,
+        height: Int,
+    ) {
         viewWidth = width
         viewHeight = height
         initializeDimensions()

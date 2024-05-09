@@ -76,7 +76,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     var selectedElement: Element? = null
     var strokeShape = EShape.CIRCLE
     private var ignoreNextOneFingerMove = false
-    val uiDrawer = UIDrawer(context)
+    private val uiDrawer = UIDrawer(context)
     private var ignoreDrawing: Boolean = false
     private var canvasTransformationMatrix: Matrix = Matrix()
     private var handler = Handler(Looper.getMainLooper())
@@ -154,6 +154,14 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                     }
                 },
             )
+    }
+
+    fun setDimensions(
+        width: Int,
+        height: Int,
+    ) {
+        uiDrawer.setDimensions(width, height)
+        layerManager.setDimensions(width, height)
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
@@ -678,13 +686,14 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         val curve =
             Curve(
                 path = layerManager.getCurPath(),
-                paint = Paint().apply {
-                    color = paintOptions.color
-                    strokeWidth = paintOptions.strokeWidth
-                    alpha = paintOptions.alpha
-                    strokeCap = Paint.Cap.ROUND
-                    style = Paint.Style.STROKE
-                },
+                paint =
+                    Paint().apply {
+                        color = paintOptions.color
+                        strokeWidth = paintOptions.strokeWidth
+                        alpha = paintOptions.alpha
+                        strokeCap = Paint.Cap.ROUND
+                        style = Paint.Style.STROKE
+                    },
             )
 
         layerManager.setCurPath(DrawablePath())
@@ -699,16 +708,17 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     ) {
         val heart =
             Stamp(
-               centerX= centerX,
+                centerX = centerX,
                 centerY = centerY,
-              outerRadius =   outerRadius,
-               pathCreationStrategy =  HeartPathCreationStrategy(),
-               paint =  Paint().apply {
-                    color = paintOptions.color
-                    strokeWidth = outerRadius
-                    alpha = paintOptions.alpha
-                    style = Paint.Style.FILL
-                },
+                outerRadius = outerRadius,
+                pathCreationStrategy = HeartPathCreationStrategy(),
+                paint =
+                    Paint().apply {
+                        color = paintOptions.color
+                        strokeWidth = outerRadius
+                        alpha = paintOptions.alpha
+                        style = Paint.Style.FILL
+                    },
             )
 
         addElementToLayer(layerManager.getActiveLayerIndex(), heart)
@@ -721,16 +731,17 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     ) {
         val star =
             Stamp(
-               centerX =  centerX,
-               centerY =  centerY,
+                centerX = centerX,
+                centerY = centerY,
                 outerRadius = outerRadius,
-              pathCreationStrategy =   StarPathCreationStrategy(),
-               paint =  Paint().apply {
-                    color = paintOptions.color
-                    style = paintOptions.style
-                    strokeWidth = 6f
-                    alpha = paintOptions.alpha
-                },
+                pathCreationStrategy = StarPathCreationStrategy(),
+                paint =
+                    Paint().apply {
+                        color = paintOptions.color
+                        style = paintOptions.style
+                        strokeWidth = 6f
+                        alpha = paintOptions.alpha
+                    },
             )
 
         addElementToLayer(layerManager.getActiveLayerIndex(), star)
@@ -783,10 +794,10 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         addElementToLayer(
             layerManager.getActiveLayerIndex(),
             Image(
-             resourceRef =    imageId.toString(),
-             centerX =    width.toFloat() / 2,
-             centerY =    height.toFloat() / 2,
-             outerRadius =    width.toFloat() / 4,
+                resourceRef = imageId.toString(),
+                centerX = width.toFloat() / 2,
+                centerY = height.toFloat() / 2,
+                outerRadius = width.toFloat() / 4,
             ).apply { bitmap = imageBitmap },
         )
 
@@ -811,10 +822,10 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
         val gif =
             Gif(
-              resourceRef =   gifId.toString(),
-               centerX = width.toFloat() / 2,
-              centerY =   height.toFloat() / 2,
-              outerRadius =   width.toFloat() / 4,
+                resourceRef = gifId.toString(),
+                centerX = width.toFloat() / 2,
+                centerY = height.toFloat() / 2,
+                outerRadius = width.toFloat() / 4,
             ).apply {
                 setDrawable(adjustedGif)
                 shouldDrawNextFrame = true

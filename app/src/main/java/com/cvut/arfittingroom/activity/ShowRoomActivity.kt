@@ -208,6 +208,8 @@ class ShowRoomActivity :
         if (DrawHistoryHolder.isNotEmpty()) {
             showWarningDialog(lookTO)
         } else {
+            makeupEditorFragment.drawHistoryTO = lookTO.history
+
             stopAnimation()
             accessoriesOptionsFragment.applyState(lookTO.appliedModels)
             makeupOptionsFragment.applyState(lookTO.appliedMakeup)
@@ -222,9 +224,6 @@ class ShowRoomActivity :
             lookTO.appliedModels.forEach {
                 applyModel(it)
             }
-
-            //TODO not here
-            makeupEditorFragment.deserializeEditorState(lookTO.history)
 
             if (lookTO.isAnimated) {
                 downloadLookFrames(lookTO.lookId)
@@ -590,6 +589,8 @@ class ShowRoomActivity :
         } else {
             showFragment(makeupEditorFragment)
         }
+
+        arSceneView.pause()
 
         makeupEditorFragment.applyBackgroundBitmap(stateService.makeupTextureBitmap)
     }

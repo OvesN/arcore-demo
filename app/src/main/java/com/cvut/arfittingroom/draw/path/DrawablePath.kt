@@ -4,7 +4,6 @@ import android.graphics.Path
 import com.cvut.arfittingroom.draw.path.impl.Line
 import com.cvut.arfittingroom.draw.path.impl.Move
 import com.cvut.arfittingroom.draw.path.impl.Quad
-import java.io.ObjectInputStream
 import java.io.Serializable
 import java.util.LinkedList
 
