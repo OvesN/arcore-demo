@@ -2,6 +2,7 @@ package com.cvut.arfittingroom.draw.model.element.strategy
 
 import com.cvut.arfittingroom.draw.path.DrawablePath
 
+@JvmSuppressWildcards
 interface PathCreationStrategy {
     val name: String
 

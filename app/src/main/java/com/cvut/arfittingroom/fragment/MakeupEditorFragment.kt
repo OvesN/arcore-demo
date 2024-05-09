@@ -18,6 +18,7 @@ import com.cvut.arfittingroom.ARFittingRoomApplication
 import com.cvut.arfittingroom.R
 import com.cvut.arfittingroom.activity.UIChangeListener
 import com.cvut.arfittingroom.draw.DrawView
+import com.cvut.arfittingroom.draw.model.element.strategy.PathCreationStrategy
 import com.cvut.arfittingroom.draw.model.enums.ELayerEditAction
 import com.cvut.arfittingroom.draw.model.enums.EShape
 import com.cvut.arfittingroom.model.to.drawhistory.DrawHistoryTO
@@ -27,6 +28,7 @@ import com.cvut.arfittingroom.service.Mapper
 import com.cvut.arfittingroom.utils.UIUtil
 import com.google.android.material.slider.Slider
 import javax.inject.Inject
+import javax.inject.Provider
 
 private const val DEFAULT_COLOR = Color.TRANSPARENT
 private val SELECTED_COLOR = Color.parseColor("#FF5722")
@@ -37,7 +39,8 @@ class MakeupEditorFragment : Fragment() {
     private lateinit var imageView: ImageView
     private lateinit var slider: Slider
     private lateinit var layersButtonsContainer: LinearLayout
-
+    @Inject
+    lateinit var strategies: Map<String, @JvmSuppressWildcards PathCreationStrategy>
     @Inject
     lateinit var mapper: Mapper
 
@@ -65,7 +68,10 @@ class MakeupEditorFragment : Fragment() {
         }
 
         view.findViewById<ImageButton>(R.id.button_color_picker).setOnClickListener {
-            UIUtil.showColorPickerDialog(requireContext(), drawView.paintOptions.color) { envelopColor ->
+            UIUtil.showColorPickerDialog(
+                requireContext(),
+                drawView.paintOptions.color
+            ) { envelopColor ->
                 drawView.setColor(
                     envelopColor,
                 )

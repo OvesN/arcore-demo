@@ -1,6 +1,7 @@
 package com.cvut.arfittingroom.service
 
 import android.graphics.Paint
+import com.cvut.arfittingroom.ARFittingRoomApplication
 import com.cvut.arfittingroom.draw.Layer
 import com.cvut.arfittingroom.draw.model.PaintOptions
 import com.cvut.arfittingroom.draw.model.element.Element
@@ -8,13 +9,18 @@ import com.cvut.arfittingroom.draw.model.element.impl.Curve
 import com.cvut.arfittingroom.draw.model.element.impl.Stamp
 import com.cvut.arfittingroom.draw.model.element.impl.Gif
 import com.cvut.arfittingroom.draw.model.element.impl.Image
+import com.cvut.arfittingroom.draw.model.element.strategy.PathCreationStrategy
 import com.cvut.arfittingroom.model.enums.EElementType
 import com.cvut.arfittingroom.model.to.drawhistory.ElementTO
 import com.cvut.arfittingroom.model.to.drawhistory.LayerTO
 import com.google.firebase.storage.FirebaseStorage
+import javax.inject.Inject
 
-class Mapper {
+
+class Mapper @Inject constructor(private val strategies: Map<String, @JvmSuppressWildcards PathCreationStrategy>) {
+
     private val storage = FirebaseStorage.getInstance()
+
 
     private fun paintToPaintTO(paint: Paint) =
         PaintOptions(
@@ -72,4 +78,8 @@ class Mapper {
             index = index,
             elements = layer.elements.keys.map { it.toString() }
         )
+
+    fun elementTOtoElement(elementTO: ElementTO) {
+
+    }
 }

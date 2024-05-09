@@ -2,10 +2,11 @@ package com.cvut.arfittingroom.draw.model.element.strategy.impl
 
 import com.cvut.arfittingroom.draw.model.element.strategy.PathCreationStrategy
 import com.cvut.arfittingroom.draw.path.DrawablePath
+import javax.inject.Inject
 import kotlin.math.cos
 import kotlin.math.sin
 
-class StarPathCreationStrategy : PathCreationStrategy {
+class StarPathCreationStrategy @Inject constructor() : PathCreationStrategy {
     override val name: String = "star"
 
     override fun createPath(
