@@ -614,8 +614,8 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         paintOptions.alpha = newColor.alpha
     }
 
-    fun setStrokeWidth(newStrokeWidth: Float) {
-        paintOptions.strokeWidth = newStrokeWidth
+    fun setStrokeWidth(newStrokeWidth: Int) {
+        paintOptions.strokeWidth = newStrokeWidth.toFloat()
     }
 
     fun setOnLayerInitializedListener(listener: OnLayerInitializedListener) {

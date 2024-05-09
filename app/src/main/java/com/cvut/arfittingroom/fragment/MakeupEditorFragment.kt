@@ -26,6 +26,7 @@ import com.cvut.arfittingroom.model.to.drawhistory.LayerTO
 import com.cvut.arfittingroom.service.Mapper
 import com.cvut.arfittingroom.utils.UIUtil
 import com.google.android.material.slider.Slider
+import com.lukelorusso.verticalseekbar.VerticalSeekBar
 import java.util.LinkedList
 import javax.inject.Inject
 
@@ -36,7 +37,7 @@ class MakeupEditorFragment : Fragment() {
     private var backgroundBitmap: Bitmap? = null
     var editorStateTO: EditorStateTO? = null
     private lateinit var drawView: DrawView
-    private lateinit var slider: Slider
+    private lateinit var slider: VerticalSeekBar
     private lateinit var layersButtonsContainer: LinearLayout
 
     @Inject
@@ -59,74 +60,55 @@ class MakeupEditorFragment : Fragment() {
         drawView = view.findViewById(R.id.draw_view)
         drawView.applyBitmapBackground(backgroundBitmap)
         slider = view.findViewById(R.id.stroke_size_slider)
-        layersButtonsContainer = view.findViewById(R.id.dynamic_layer_buttons_container)
+            //layersButtonsContainer = view.findViewById(R.id.dynamic_layer_buttons_container)
 
         drawView.post {
             drawView.setDimensions(drawView.width, drawView.height)
             drawView.invalidate()
             if (drawView.layerManager.getNumOfLayers() == 0) {
                 drawView.layerManager.addLayer(drawView.width, drawView.height)
-                drawView.layerInitializedListener?.onLayerInitialized(drawView.layerManager.getNumOfLayers())
+                    //  drawView.layerInitializedListener?.onLayerInitialized(drawView.layerManager.getNumOfLayers())
             }
         }
-
-        view.findViewById<ImageButton>(R.id.button_back).setOnClickListener {
-            drawView.saveBitmap {
-                showMainLayout()
-            }
-        }
-
-        view.findViewById<ImageButton>(R.id.button_color_picker).setOnClickListener {
-            UIUtil.showColorPickerDialog(
-                requireContext(),
-                drawView.paintOptions.color,
-            ) { envelopColor ->
-                drawView.setColor(
-                    envelopColor,
-                )
-            }
-        }
-        view.findViewById<ImageButton>(R.id.button_redo).setOnClickListener {
-            drawView.redo()
-        }
+//
+//        view.findViewById<ImageButton>(R.id.button_back).setOnClickListener {
+//            drawView.saveBitmap {
+//                showMainLayout()
+//            }
+//        }
+//
+//        view.findViewById<ImageButton>(R.id.button_color_picker).setOnClickListener {
+//            UIUtil.showColorPickerDialog(
+//                requireContext(),
+//                drawView.paintOptions.color,
+//            ) { envelopColor ->
+//                drawView.setColor(
+//                    envelopColor,
+//                )
+//            }
+//        }
+//        view.findViewById<ImageButton>(R.id.button_redo).setOnClickListener {
+//            drawView.redo()
+//        }
         view.findViewById<ImageButton>(R.id.button_undo).setOnClickListener {
             drawView.undo()
         }
-        view.findViewById<ImageButton>(R.id.button_star).setOnClickListener {
-            toggleStrokeShape(EShape.STAR)
-        }
-        view.findViewById<ImageButton>(R.id.button_heart).setOnClickListener {
-            toggleStrokeShape(EShape.HEART)
-        }
-        view.findViewById<ImageButton>(R.id.button_flowers_image).setOnClickListener {
-            addImage(R.drawable.flowers)
-        }
-        view.findViewById<ImageButton>(R.id.button_star).setOnClickListener {
-            toggleStrokeShape(EShape.STAR)
-        }
-        view.findViewById<ImageButton>(R.id.button_heart).setOnClickListener {
-            toggleStrokeShape(EShape.HEART)
-        }
-        view.findViewById<ImageButton>(R.id.button_gif).setOnClickListener {
-            addGif(R.drawable.donut)
-        }
-        view.findViewById<ImageButton>(R.id.button_gif2).setOnClickListener {
-            addGif(R.drawable.hamburger)
-        }
-        slider.addOnChangeListener { _, value, _ ->
-            drawView.setStrokeWidth(value)
-        }
-        drawView.setStrokeWidth(slider.value)
 
-        // TODO fix num or indexes or whut
-        view.findViewById<ImageButton>(R.id.button_add_layer).setOnClickListener {
-            updateLayersButtons(drawView.addLayer() + 1)
+        slider.setOnProgressChangeListener {
+            drawView.setStrokeWidth(it)
         }
+
+        drawView.setStrokeWidth(slider.progress)
+
+//        // TODO fix num or indexes or whut
+//        view.findViewById<ImageButton>(R.id.button_add_layer).setOnClickListener {
+//            updateLayersButtons(drawView.addLayer() + 1)
+//        }
 
         drawView.setOnLayerInitializedListener(
             object : DrawView.OnLayerInitializedListener {
                 override fun onLayerInitialized(numOfLayers: Int) {
-                    updateLayersButtons(numOfLayers)
+                   // updateLayersButtons(numOfLayers)
                 }
             },
         )
@@ -146,7 +128,7 @@ class MakeupEditorFragment : Fragment() {
         drawView.layerManager.resetAllGifs()
         drawView.layerManager.setAllGifsToStaticMode()
 
-        updateLayersButtons(drawView.layerManager.getNumOfLayers())
+        //updateLayersButtons(drawView.layerManager.getNumOfLayers())
     }
 
     override fun onPause() {
