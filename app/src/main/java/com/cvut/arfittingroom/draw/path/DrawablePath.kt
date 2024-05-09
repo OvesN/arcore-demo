@@ -9,13 +9,11 @@ import java.io.Serializable
 import java.util.LinkedList
 
 class DrawablePath : Path(), Serializable {
-    private val actions = LinkedList<Action>()
+    val actions = LinkedList<PathAction>()
 
-    private fun readObject(inputStream: ObjectInputStream) {
-        inputStream.defaultReadObject()
-
-        val copiedActions = actions.map { it }
-        copiedActions.forEach {
+    fun addActions(actions: List<PathAction>) {
+        actions.forEach {
+            this.actions.add(it)
             it.perform(this)
         }
     }

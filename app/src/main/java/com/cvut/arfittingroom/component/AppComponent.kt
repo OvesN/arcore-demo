@@ -7,7 +7,6 @@ import com.cvut.arfittingroom.fragment.MakeupEditorFragment
 import com.cvut.arfittingroom.module.BindingModule
 import com.cvut.arfittingroom.module.ServiceModule
 import dagger.Component
-import java.security.Provider
 import javax.inject.Singleton
 
 @Singleton

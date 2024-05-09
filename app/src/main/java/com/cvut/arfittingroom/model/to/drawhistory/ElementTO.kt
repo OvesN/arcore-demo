@@ -1,7 +1,6 @@
 package com.cvut.arfittingroom.model.to.drawhistory
 
 import com.cvut.arfittingroom.draw.model.PaintOptions
-import com.cvut.arfittingroom.draw.path.DrawablePath
 import com.cvut.arfittingroom.model.enums.EElementType
 
 data class ElementTO(
@@ -12,7 +11,7 @@ data class ElementTO(
     var centerY: Float = 0f,
     var outerRadius: Float = 0f,
     var rotationAngle: Float = 0f,
-    var drawablePath: DrawablePath = DrawablePath(),
+    var drawablePath: PathTO = PathTO(),
     var paint: PaintOptions = PaintOptions(),
-    var stampName: String = ""
+    var stampName: String = "",
 )

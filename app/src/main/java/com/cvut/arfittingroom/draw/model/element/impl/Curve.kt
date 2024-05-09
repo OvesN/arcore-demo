@@ -9,18 +9,21 @@ import com.cvut.arfittingroom.draw.command.Repaintable
 import com.cvut.arfittingroom.draw.model.element.BoundingBox
 import com.cvut.arfittingroom.draw.model.element.Element
 import com.cvut.arfittingroom.draw.path.DrawablePath
+import java.util.UUID
 import kotlin.math.max
 
 private const val PROXIMITY_THRESHOLD = 60f  // pixels
 
 class Curve(
+    override val id: UUID = UUID.randomUUID(),
+    override var centerX: Float = 0f,
+    override var centerY: Float = 0f,
+    override var outerRadius: Float = 0f,
     var path: DrawablePath,
     override val paint: Paint,
+    override var rotationAngle: Float = 0f,
 ) : Element(), Repaintable {
     override val name: String = "Line"
-    override var centerX: Float = 0f
-    override var centerY: Float = 0f
-    override var outerRadius: Float = 0f
     override var boundingBox: BoundingBox
 
     // For continuous scaling so gradually changes will be applied to the original value

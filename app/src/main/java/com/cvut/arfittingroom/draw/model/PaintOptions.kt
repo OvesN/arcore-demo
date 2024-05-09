@@ -9,5 +9,5 @@ data class PaintOptions(
     var strokeWidth: Float = 8f,
     var alpha: Int = 255,
     var style: Style = Style.STROKE,
-    var strokeCap: Paint.Cap = Paint.Cap.ROUND
+    var strokeCap: Paint.Cap = Paint.Cap.ROUND,
 )

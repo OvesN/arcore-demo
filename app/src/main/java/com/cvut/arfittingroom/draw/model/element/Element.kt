@@ -13,7 +13,7 @@ abstract class Element :
     Drawable,
     Movable,
     Rotatable {
-    val id: UUID = UUID.randomUUID()
+    abstract val id: UUID
     abstract val name: String
     abstract var centerX: Float
     abstract var centerY: Float
@@ -22,7 +22,7 @@ abstract class Element :
     abstract var originalCenterX: Float
     abstract var originalCenterY: Float
     abstract var originalRadius: Float
-    var rotationAngle = 0f
+    abstract var rotationAngle: Float
     private var originalRotationAngle = 0f
     private var isSelected: Boolean = false
 

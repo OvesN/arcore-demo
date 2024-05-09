@@ -18,6 +18,7 @@ import com.cvut.arfittingroom.ARFittingRoomApplication
 import com.cvut.arfittingroom.R
 import com.cvut.arfittingroom.activity.UIChangeListener
 import com.cvut.arfittingroom.draw.DrawView
+import com.cvut.arfittingroom.draw.Layer
 import com.cvut.arfittingroom.draw.model.element.strategy.PathCreationStrategy
 import com.cvut.arfittingroom.draw.model.enums.ELayerEditAction
 import com.cvut.arfittingroom.draw.model.enums.EShape
@@ -27,8 +28,8 @@ import com.cvut.arfittingroom.model.to.drawhistory.LayerTO
 import com.cvut.arfittingroom.service.Mapper
 import com.cvut.arfittingroom.utils.UIUtil
 import com.google.android.material.slider.Slider
+import java.util.LinkedList
 import javax.inject.Inject
-import javax.inject.Provider
 
 private const val DEFAULT_COLOR = Color.TRANSPARENT
 private val SELECTED_COLOR = Color.parseColor("#FF5722")
@@ -36,11 +37,12 @@ private val SELECTED_COLOR = Color.parseColor("#FF5722")
 class MakeupEditorFragment : Fragment() {
     private var backgroundBitmap: Bitmap? = null
     private lateinit var drawView: DrawView
-    private lateinit var imageView: ImageView
     private lateinit var slider: Slider
     private lateinit var layersButtonsContainer: LinearLayout
+
     @Inject
     lateinit var strategies: Map<String, @JvmSuppressWildcards PathCreationStrategy>
+
     @Inject
     lateinit var mapper: Mapper
 
@@ -57,10 +59,13 @@ class MakeupEditorFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         drawView = view.findViewById(R.id.draw_view)
         drawView.applyBitmapBackground(backgroundBitmap)
-        imageView = view.findViewById(R.id.face_image)
         slider = view.findViewById(R.id.stroke_size_slider)
         layersButtonsContainer = view.findViewById(R.id.dynamic_layer_buttons_container)
 
+        drawView.post{
+            drawView.uiDrawer.setDimensions(drawView.width, drawView.height)
+            drawView.invalidate()
+        }
         view.findViewById<ImageButton>(R.id.button_back).setOnClickListener {
             drawView.saveBitmap {
                 showMainLayout()
@@ -70,7 +75,7 @@ class MakeupEditorFragment : Fragment() {
         view.findViewById<ImageButton>(R.id.button_color_picker).setOnClickListener {
             UIUtil.showColorPickerDialog(
                 requireContext(),
-                drawView.paintOptions.color
+                drawView.paintOptions.color,
             ) { envelopColor ->
                 drawView.setColor(
                     envelopColor,
@@ -247,8 +252,9 @@ class MakeupEditorFragment : Fragment() {
         }
     }
 
-
     fun serializeEditorState(): DrawHistoryTO {
+        mapper.setDimensions(drawView.width, drawView.height)
+
         val layers = drawView.layerManager.layers
         val elementsTO = mutableListOf<ElementTO>()
         val layersTO = mutableListOf<LayerTO>()
@@ -260,8 +266,37 @@ class MakeupEditorFragment : Fragment() {
 
         return DrawHistoryTO(
             elements = elementsTO,
-            layers = layersTO
+            layers = layersTO,
         )
+    }
+
+    fun deserializeEditorState(drawHistoryTO: DrawHistoryTO) {
+        mapper.setDimensions(drawView.width, drawView.height)
+
+        val elementsMap = drawHistoryTO.elements.associateBy(
+            keySelector = { it.id },
+            valueTransform = { mapper.elementTOtoElement(it) }
+        )
+
+        val sortedLayers = drawHistoryTO.layers.sortedBy { it.index }
+        val layersList: LinkedList<Layer> = LinkedList()
+
+        val layersMap = sortedLayers.associateBy(
+            keySelector = { it.id },
+            valueTransform = { layerTO ->
+                val layer =
+                    mapper.layerTOtoLayer(layerTO)
+                layersList.add(layer)
+                layerTO.elements.forEach {
+                    elementsMap[it]?.let { it1 -> layer.addElement(it1) }
+                }
+                layer
+            }
+        )
+
+        drawView.layerManager.deleteLayers()
+
+        drawView.layerManager.layers.addAll(layersList)
     }
 
     companion object {

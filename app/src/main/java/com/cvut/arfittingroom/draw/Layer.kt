@@ -12,9 +12,9 @@ import java.util.UUID
 import kotlin.collections.HashMap
 
 class Layer(
+    val id: UUID = UUID.randomUUID(),
     private val width: Int,
     private val height: Int,
-    val id: UUID = UUID.randomUUID(),
 ) {
     var isVisible: Boolean = true
     val elements = HashMap<UUID, Element>()
@@ -251,5 +251,4 @@ class Layer(
             }
         }
     }
-
 }

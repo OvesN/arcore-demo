@@ -30,9 +30,9 @@ import com.cvut.arfittingroom.draw.command.action.element.impl.ScaleElement
 import com.cvut.arfittingroom.draw.model.PaintOptions
 import com.cvut.arfittingroom.draw.model.element.Element
 import com.cvut.arfittingroom.draw.model.element.impl.Curve
-import com.cvut.arfittingroom.draw.model.element.impl.Stamp
 import com.cvut.arfittingroom.draw.model.element.impl.Gif
 import com.cvut.arfittingroom.draw.model.element.impl.Image
+import com.cvut.arfittingroom.draw.model.element.impl.Stamp
 import com.cvut.arfittingroom.draw.model.element.strategy.impl.HeartPathCreationStrategy
 import com.cvut.arfittingroom.draw.model.element.strategy.impl.StarPathCreationStrategy
 import com.cvut.arfittingroom.draw.model.enums.EElementEditAction
@@ -76,7 +76,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     var selectedElement: Element? = null
     var strokeShape = EShape.CIRCLE
     private var ignoreNextOneFingerMove = false
-    private val uiDrawer = UIDrawer(context)
+    val uiDrawer = UIDrawer(context)
     private var ignoreDrawing: Boolean = false
     private var canvasTransformationMatrix: Matrix = Matrix()
     private var handler = Handler(Looper.getMainLooper())
@@ -677,8 +677,8 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
         val curve =
             Curve(
-                layerManager.getCurPath(),
-                Paint().apply {
+                path = layerManager.getCurPath(),
+                paint = Paint().apply {
                     color = paintOptions.color
                     strokeWidth = paintOptions.strokeWidth
                     alpha = paintOptions.alpha
@@ -699,11 +699,11 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     ) {
         val heart =
             Stamp(
-                centerX,
-                centerY,
-                outerRadius,
-                HeartPathCreationStrategy(),
-                Paint().apply {
+               centerX= centerX,
+                centerY = centerY,
+              outerRadius =   outerRadius,
+               pathCreationStrategy =  HeartPathCreationStrategy(),
+               paint =  Paint().apply {
                     color = paintOptions.color
                     strokeWidth = outerRadius
                     alpha = paintOptions.alpha
@@ -721,11 +721,11 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     ) {
         val star =
             Stamp(
-                centerX,
-                centerY,
-                outerRadius,
-                StarPathCreationStrategy(),
-                Paint().apply {
+               centerX =  centerX,
+               centerY =  centerY,
+                outerRadius = outerRadius,
+              pathCreationStrategy =   StarPathCreationStrategy(),
+               paint =  Paint().apply {
                     color = paintOptions.color
                     style = paintOptions.style
                     strokeWidth = 6f
@@ -783,10 +783,10 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         addElementToLayer(
             layerManager.getActiveLayerIndex(),
             Image(
-                imageId.toString(),
-                width.toFloat() / 2,
-                height.toFloat() / 2,
-                width.toFloat() / 4,
+             resourceRef =    imageId.toString(),
+             centerX =    width.toFloat() / 2,
+             centerY =    height.toFloat() / 2,
+             outerRadius =    width.toFloat() / 4,
             ).apply { bitmap = imageBitmap },
         )
 
@@ -811,10 +811,10 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
         val gif =
             Gif(
-                gifId.toString(),
-                width.toFloat() / 2,
-                height.toFloat() / 2,
-                width.toFloat() / 4,
+              resourceRef =   gifId.toString(),
+               centerX = width.toFloat() / 2,
+              centerY =   height.toFloat() / 2,
+              outerRadius =   width.toFloat() / 4,
             ).apply {
                 setDrawable(adjustedGif)
                 shouldDrawNextFrame = true

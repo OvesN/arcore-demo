@@ -32,15 +32,15 @@ import com.cvut.arfittingroom.fragment.MakeupEditorFragment
 import com.cvut.arfittingroom.fragment.MakeupOptionsFragment
 import com.cvut.arfittingroom.fragment.ProfileFragment
 import com.cvut.arfittingroom.model.LOOKS_COLLECTION
-import com.cvut.arfittingroom.model.to.LookTO
 import com.cvut.arfittingroom.model.MAKEUP_SLOT
 import com.cvut.arfittingroom.model.MASK_FRAME_FILE_NAME
 import com.cvut.arfittingroom.model.MASK_TEXTURE_SLOT
 import com.cvut.arfittingroom.model.MAX_LOOK_NAME_LENGTH
-import com.cvut.arfittingroom.model.to.MakeupTO
-import com.cvut.arfittingroom.model.to.ModelTO
 import com.cvut.arfittingroom.model.PREVIEW_BITMAP_SIZE
 import com.cvut.arfittingroom.model.PREVIEW_COLLECTION
+import com.cvut.arfittingroom.model.to.LookTO
+import com.cvut.arfittingroom.model.to.MakeupTO
+import com.cvut.arfittingroom.model.to.ModelTO
 import com.cvut.arfittingroom.service.StateService
 import com.cvut.arfittingroom.utils.BitmapUtil.combineBitmaps
 import com.cvut.arfittingroom.utils.FileUtil.deleteTempFiles
@@ -222,6 +222,9 @@ class ShowRoomActivity :
             lookTO.appliedModels.forEach {
                 applyModel(it)
             }
+
+            //TODO not here
+            makeupEditorFragment.deserializeEditorState(lookTO.history)
 
             if (lookTO.isAnimated) {
                 downloadLookFrames(lookTO.lookId)

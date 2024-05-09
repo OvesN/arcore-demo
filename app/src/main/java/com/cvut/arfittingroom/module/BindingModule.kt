@@ -9,7 +9,6 @@ import dagger.Binds
 import dagger.Module
 import dagger.multibindings.IntoMap
 import dagger.multibindings.StringKey
-import javax.inject.Singleton
 
 @Module
 abstract class BindingModule {
@@ -21,16 +20,15 @@ abstract class BindingModule {
     @Binds
     @IntoMap
     @StringKey("rectangle")
-    abstract fun bindRectanglePathCreationStrategy(impl:  RectanglePathCreationStrategy): PathCreationStrategy
+    abstract fun bindRectanglePathCreationStrategy(impl: RectanglePathCreationStrategy): PathCreationStrategy
 
     @Binds
     @IntoMap
     @StringKey("star")
-    abstract fun bindStarPathCreationStrategy(impl:  StarPathCreationStrategy): PathCreationStrategy
-
+    abstract fun bindStarPathCreationStrategy(impl: StarPathCreationStrategy): PathCreationStrategy
 
     @Binds
     @IntoMap
     @StringKey("heart")
-    abstract fun bindHeartPathCreationStrategy(impl:  HeartPathCreationStrategy): PathCreationStrategy
+    abstract fun bindHeartPathCreationStrategy(impl: HeartPathCreationStrategy): PathCreationStrategy
 }

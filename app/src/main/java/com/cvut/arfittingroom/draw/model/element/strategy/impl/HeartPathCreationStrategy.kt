@@ -4,7 +4,9 @@ import com.cvut.arfittingroom.draw.model.element.strategy.PathCreationStrategy
 import com.cvut.arfittingroom.draw.path.DrawablePath
 import javax.inject.Inject
 
-class HeartPathCreationStrategy  @Inject constructor(): PathCreationStrategy {
+class HeartPathCreationStrategy
+@Inject
+constructor() : PathCreationStrategy {
     override val name: String = "heart"
 
     override fun createPath(

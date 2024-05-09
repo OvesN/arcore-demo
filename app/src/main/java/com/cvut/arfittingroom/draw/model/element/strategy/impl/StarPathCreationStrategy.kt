@@ -6,7 +6,9 @@ import javax.inject.Inject
 import kotlin.math.cos
 import kotlin.math.sin
 
-class StarPathCreationStrategy @Inject constructor() : PathCreationStrategy {
+class StarPathCreationStrategy
+@Inject
+constructor() : PathCreationStrategy {
     override val name: String = "star"
 
     override fun createPath(

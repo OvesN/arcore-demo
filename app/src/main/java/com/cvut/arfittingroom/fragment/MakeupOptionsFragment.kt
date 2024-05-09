@@ -19,10 +19,10 @@ import com.cvut.arfittingroom.model.COLORS_COLLECTION
 import com.cvut.arfittingroom.model.DEFAULT_COLOR_ATTRIBUTE
 import com.cvut.arfittingroom.model.MAKEUP_COLLECTION
 import com.cvut.arfittingroom.model.MAKEUP_TYPES_COLLECTION
-import com.cvut.arfittingroom.model.to.MakeupTO
 import com.cvut.arfittingroom.model.MakeupType
 import com.cvut.arfittingroom.model.REF_ATTRIBUTE
 import com.cvut.arfittingroom.model.TYPE_ATTRIBUTE
+import com.cvut.arfittingroom.model.to.MakeupTO
 import com.cvut.arfittingroom.module.GlideApp
 import com.cvut.arfittingroom.utils.ScreenUtil.dpToPx
 import com.cvut.arfittingroom.utils.UIUtil.createColorOptionImage

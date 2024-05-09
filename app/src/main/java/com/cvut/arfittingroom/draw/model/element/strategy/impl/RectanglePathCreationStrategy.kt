@@ -4,7 +4,9 @@ import com.cvut.arfittingroom.draw.model.element.strategy.PathCreationStrategy
 import com.cvut.arfittingroom.draw.path.DrawablePath
 import javax.inject.Inject
 
-class RectanglePathCreationStrategy  @Inject constructor(): PathCreationStrategy {
+class RectanglePathCreationStrategy
+@Inject
+constructor() : PathCreationStrategy {
     override val name: String = "rectangle"
 
     override fun createPath(

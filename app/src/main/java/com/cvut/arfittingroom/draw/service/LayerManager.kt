@@ -65,7 +65,7 @@ class LayerManager {
         height: Int,
         layerId: UUID? = null,
     ): Int {
-        val layer = layerId?.let { Layer(width, height, layerId) } ?: Layer(width, height)
+        val layer = layerId?.let { Layer(layerId, width, height, ) } ?: Layer(width = width, height = height)
 
         if (layers.isNotEmpty()) {
             layers[activeLayerIndex].deselectAllElements()

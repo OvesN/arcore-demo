@@ -19,8 +19,8 @@ import com.cvut.arfittingroom.activity.ResourceListener
 import com.cvut.arfittingroom.model.AUTHOR_ATTRIBUTE
 import com.cvut.arfittingroom.model.IS_PUBLIC_ATTRIBUTE
 import com.cvut.arfittingroom.model.LOOKS_COLLECTION
-import com.cvut.arfittingroom.model.to.LookTO
 import com.cvut.arfittingroom.model.NUM_OF_ELEMENTS_IN_ROW_BIG_MENU
+import com.cvut.arfittingroom.model.to.LookTO
 import com.cvut.arfittingroom.module.GlideApp
 import com.cvut.arfittingroom.utils.UIUtil.deselectLookButton
 import com.cvut.arfittingroom.utils.UIUtil.selectLookButton

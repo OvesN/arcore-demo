@@ -7,13 +7,16 @@ import android.util.Log
 import com.cvut.arfittingroom.draw.model.element.BoundingBox
 import com.cvut.arfittingroom.draw.model.element.Element
 import pl.droidsonroids.gif.GifDrawable
+import java.util.UUID
 import kotlin.math.max
 
 class Gif(
+    override val id: UUID = UUID.randomUUID(),
     val resourceRef: String,
     override var centerX: Float,
     override var centerY: Float,
     override var outerRadius: Float,
+    override var rotationAngle: Float = 0f,
 ) : Element() {
     override val name: String = "gif"
     override var boundingBox: BoundingBox = createBoundingBox()
