@@ -95,15 +95,14 @@
 
         <LinearLayout
             android:id="@+id/left_column_buttons"
+
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_height="0dp"
             android:layout_margin="10dp"
-            android:gravity="center_horizontal|fill_vertical"
             android:orientation="vertical"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
-
 
             <ImageButton
                 android:id="@+id/button_color_picker"
@@ -112,18 +111,18 @@
                 android:layout_gravity="center_horizontal|top"
                 android:background="@drawable/color_picker"
                 android:scaleType="fitCenter" />
-
             <Space
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1" />
-
             <ImageButton
                 android:id="@+id/button_back"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
+                android:layout_gravity="center_horizontal|bottom"
                 android:background="@drawable/back"
-                android:scaleType="fitCenter" />
+                android:scaleType="fitCenter"
+                />
 
 
         </LinearLayout>
@@ -132,9 +131,8 @@
         <LinearLayout
             android:id="@+id/right_column_buttons"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_height="0dp"
             android:layout_margin="10dp"
-            android:gravity="center_horizontal|fill_vertical"
             android:orientation="vertical"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -152,14 +150,15 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1" />
-
             <ImageButton
                 android:id="@+id/button_ok"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
+                android:layout_gravity="center_horizontal|bottom"
                 android:background="@null"
                 android:scaleType="fitCenter"
-                app:srcCompat="@drawable/ok" />
+                app:srcCompat="@drawable/ok"
+               />
         </LinearLayout>
 
 
@@ -220,7 +219,7 @@
         <FrameLayout
             android:id="@+id/menu_fragment_container"
             android:layout_width="0dp"
-            android:layout_height="100dp"
+            android:layout_height="0dp"
             android:background="@color/colorBlack"
             android:gravity="center_horizontal"
 
