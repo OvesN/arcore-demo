@@ -72,11 +72,12 @@
         <Button
             android:id="@+id/button_clear_all"
             android:layout_width="0dp"
-            android:layout_height="15dp"
+            android:layout_height="30dp"
+
             android:layout_weight="1"
             android:background="@null"
             android:scaleType="fitCenter"
-            android:text="@string/clean_all"
+            android:text="@string/clear_all"
             android:textAllCaps="false" />
     </LinearLayout>
 
@@ -130,6 +131,47 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:srcCompat="@drawable/ok" />
 
+
+        <LinearLayout
+            android:id="@+id/second_line_buttons"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:background="@drawable/button"
+            android:backgroundTint="@color/colorDarkGrey"
+            android:orientation="horizontal"
+           android:layout_marginBottom="10dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <Button
+                android:id="@+id/draw_button"
+                android:layout_width="100dp"
+                android:layout_height="30dp"
+                android:scaleType="fitCenter"
+                android:background="@null"
+                android:backgroundTint="@color/colorMediumGrey"
+                android:text="@string/draw"
+                android:textAllCaps="false" />
+
+            <Button
+                android:id="@+id/stamp_button"
+                android:layout_width="100dp"
+                android:layout_height="30dp"
+                android:background="@null"
+                android:backgroundTint="@color/colorMediumGrey"
+                android:text="@string/stamp"
+                android:textAllCaps="false" />
+
+            <Button
+                android:id="@+id/image_button"
+                android:layout_width="100dp"
+                android:layout_height="30dp"
+                android:background="@null"
+                android:backgroundTint="@color/colorMediumGrey"
+                android:text="@string/image"
+                android:textAllCaps="false" />
+        </LinearLayout>
         <ImageButton
             android:id="@+id/button_back"
             android:layout_width="35dp"
@@ -144,33 +186,17 @@
             app:srcCompat="@drawable/back" />
 
 
-        <LinearLayout
+        <FrameLayout
+            android:id="@+id/menu_fragment_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:weightSum="4"
-            app:layout_constraintBottom_toBottomOf="parent"
+            android:gravity="center_horizontal"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent">
+            app:layout_constraintBottom_toTopOf="@id/second_line_buttons"
+            app:layout_constraintHorizontal_bias="0.5"/>
 
-            <Button
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/draw" />
 
-            <Button
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/stamp" />
-
-            <Button
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/image" />
-        </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -182,13 +208,16 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/top_ui"
-        app:layout_constraintVertical_bias="0.0">
+        app:layout_constraintVertical_bias="0.0"
+     >
 
         <com.lukelorusso.verticalseekbar.VerticalSeekBar
             android:id="@+id/stroke_size_slider"
             android:layout_gravity="start"
             android:layout_width="20dp"
             android:layout_height="match_parent"
+            android:paddingBottom="50dp"
+            android:paddingTop="50dp"
 
             android:stepSize="1"
             android:value="10"
