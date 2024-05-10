@@ -73,13 +73,13 @@
             android:id="@+id/button_clear_all"
             android:layout_width="0dp"
             android:layout_height="30dp"
-            android:textStyle="bold"
-            android:textSize="20sp"
             android:layout_weight="1"
             android:background="@null"
             android:scaleType="fitCenter"
             android:text="@string/clear_all"
-            android:textAllCaps="false" />
+            android:textAllCaps="false"
+            android:textSize="20sp"
+            android:textStyle="bold" />
     </LinearLayout>
 
 
@@ -93,89 +93,61 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
-        <ImageButton
-            android:id="@+id/button_color_picker"
-            android:layout_width="35dp"
-            android:layout_height="35dp"
-            android:background="@null"
-            android:paddingStart="10dp"
-            android:paddingTop="10dp"
-            android:paddingEnd="0dp"
-            android:scaleType="fitCenter"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/color_picker" />
-
-
-        <ImageButton
-            android:id="@+id/button_menu"
-            android:layout_width="35dp"
-            android:layout_height="35dp"
-            android:background="@null"
-            android:paddingStart="0dp"
-            android:paddingTop="10dp"
-            android:paddingEnd="10dp"
-            android:scaleType="fitCenter"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/menu" />
-
         <LinearLayout
-            android:id="@+id/second_line_buttons"
-            android:layout_width="match_parent"
-            android:layout_height="30dp"
-           android:gravity="center"
-            android:orientation="horizontal"
-            android:layout_marginBottom="10dp"
-            android:layout_marginTop="10dp"
+            android:id="@+id/left_column_buttons"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_margin="10dp"
+            android:gravity="center_horizontal|fill_vertical"
+            android:orientation="vertical"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent">
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageButton
+                android:id="@+id/button_color_picker"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_gravity="center_horizontal|top"
+
+                android:background="@drawable/color_picker"
+                android:scaleType="fitCenter" />
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
 
             <ImageButton
                 android:id="@+id/button_back"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
-                android:background="@null"
-                android:scaleType="fitCenter"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="co"
-                app:srcCompat="@drawable/back" />
-            <LinearLayout
+                android:layout_gravity="center_horizontal|bottom"
+                android:background="@drawable/back" />
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:id="@+id/right_column_buttons"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_margin="10dp"
+            android:gravity="center_horizontal|fill_vertical"
+            android:orientation="vertical"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageButton
+                android:id="@+id/button_menu"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/button"
-                android:backgroundTint="@color/colorDarkGrey">
-            <Button
-                android:id="@+id/draw_button"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:background="@null"
-                android:backgroundTint="@color/colorMediumGrey"
-                android:text="@string/draw"
-                android:textAllCaps="false" />
+                android:layout_height="25dp"
+                android:layout_gravity="center_horizontal|top"
+                android:background="@drawable/menu"
+                android:scaleType="fitCenter" />
 
-            <Button
-                android:id="@+id/stamp_button"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:background="@null"
-                android:backgroundTint="@color/colorMediumGrey"
-                android:text="@string/stamp"
-                android:textAllCaps="false" />
-
-            <Button
-                android:id="@+id/image_button"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:background="@null"
-                android:backgroundTint="@color/colorMediumGrey"
-                android:text="@string/image"
-                android:textAllCaps="false" />
-            </LinearLayout>
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
 
             <ImageButton
                 android:id="@+id/button_ok"
@@ -184,12 +156,64 @@
                 android:background="@null"
 
                 android:scaleType="fitCenter"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
+
                 app:srcCompat="@drawable/ok" />
+
         </LinearLayout>
 
 
+        <LinearLayout
+            android:id="@+id/second_line_buttons"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:gravity="center"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@id/left_column_buttons">
+
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/button"
+                android:backgroundTint="@color/colorDarkGrey">
+
+                <Button
+                    android:id="@+id/draw_button"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@null"
+                    android:backgroundTint="@color/colorMediumGrey"
+                    android:text="@string/draw"
+                    android:textAllCaps="false" />
+
+                <Button
+                    android:id="@+id/stamp_button"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@null"
+                    android:backgroundTint="@color/colorMediumGrey"
+                    android:text="@string/stamp"
+                    android:textAllCaps="false" />
+
+                <Button
+                    android:id="@+id/image_button"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@null"
+                    android:backgroundTint="@color/colorMediumGrey"
+                    android:text="@string/image"
+                    android:textAllCaps="false" />
+            </LinearLayout>
+
+
+        </LinearLayout>
 
 
         <FrameLayout
@@ -197,11 +221,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toTopOf="@id/second_line_buttons"
-            app:layout_constraintHorizontal_bias="0.5"/>
-
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>
@@ -214,16 +237,15 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/top_ui"
-        app:layout_constraintVertical_bias="0.0"
-     >
+        app:layout_constraintVertical_bias="0.0">
 
         <com.lukelorusso.verticalseekbar.VerticalSeekBar
             android:id="@+id/stroke_size_slider"
-            android:layout_gravity="start"
             android:layout_width="20dp"
             android:layout_height="match_parent"
-            android:paddingBottom="50dp"
+            android:layout_gravity="start"
             android:paddingTop="50dp"
+            android:paddingBottom="50dp"
 
             android:stepSize="1"
             android:value="10"
@@ -237,10 +259,10 @@
             app:layout_constraintVertical_bias="0.0"
 
             app:tickVisible="false"
-            app:vsb_bar_corner_radius="10dp"
-
-            app:vsb_bar_progress="@color/colorLightGrey"
             app:vsb_bar_background="@color/colorDarkGrey"
+
+            app:vsb_bar_corner_radius="10dp"
+            app:vsb_bar_progress="@color/colorLightGrey"
             app:vsb_bar_width="2dp"
             app:vsb_show_thumb="true" />
     </LinearLayout>
