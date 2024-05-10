@@ -10,7 +10,7 @@
     <color name="colorRed">#FF0707</color>
     <color name="colorMediumGrey">#4D4D4D</color>
     <color name="colorDarkGrey">#312F2F</color>
-    <color name="colorTransparent">#00FFFFFF</color>
     <color name="colorActive">#CD7B00</color>
     <color name="colorActiveLight">#FFC774</color>
+    <color name="colorTransparent">#00000000</color>
 </resources>

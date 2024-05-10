@@ -55,6 +55,14 @@ import kotlin.math.abs
 import kotlin.math.atan2
 import kotlin.math.sqrt
 
+/**
+ * Draw view for 2D editor
+ *
+ * @constructor
+ *
+ * @param context
+ * @param attrs
+ */
 class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     var paintOptions = PaintOptions()
     private var curX = 0f
@@ -82,7 +90,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private var handler = Handler(Looper.getMainLooper())
     private var gifRunnable: Runnable? = null
     private var frameDelay: Long = 100
-    var layerInitializedListener: OnLayerInitializedListener? = null
+    private var layerInitializedListener: OnLayerInitializedListener? = null
     private var lastDownX = 0f
     private var lastDownY = 0f
     private var frameCount = 0
@@ -618,9 +626,6 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         paintOptions.strokeWidth = newStrokeWidth.toFloat()
     }
 
-    fun setOnLayerInitializedListener(listener: OnLayerInitializedListener) {
-        this.layerInitializedListener = listener
-    }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
@@ -928,6 +933,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     fun applyBitmapBackground(bitmap: Bitmap?) {
         uiDrawer.setBackgroundBitmap(bitmap)
     }
+
 
     interface OnLayerInitializedListener {
         fun onLayerInitialized(numOfLayers: Int)

@@ -2,12 +2,15 @@ package com.cvut.arfittingroom.utils
 
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
+import android.app.AlertDialog
 import android.content.Context
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.LayerDrawable
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AccelerateDecelerateInterpolator
+import android.widget.Button
 import android.widget.ImageView
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
@@ -48,6 +51,26 @@ object UIUtil {
         builder.colorPickerView.setInitialColor(initialColor)
 
         builder.show()
+    }
+
+    fun showClearAllDialog(context: Context,   onClearAll: (Int) -> Unit,) {
+        val dialogView = LayoutInflater.from(context).inflate(R.layout.popup_clear_all, null)
+
+        val dialog =
+            AlertDialog.Builder(context)
+                .setView(dialogView)
+                .create()
+
+        dialogView.findViewById<Button>(R.id.cancel_popup_button).setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialogView.findViewById<Button>(R.id.discard_button).setOnClickListener {
+            onClearAll
+            dialog.dismiss()
+        }
+
+        dialog.show()
     }
 
     fun selectLookButton(view: View) {

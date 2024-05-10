@@ -12,6 +12,11 @@ import java.util.UUID
 
 private val logger = KotlinLogging.logger {}
 
+/**
+ * Layer manager
+ *
+ * @constructor Create empty Layer manager
+ */
 class LayerManager {
     val layers = mutableListOf<Layer>()
     private val idToLayerMap = HashMap<UUID, Layer>()

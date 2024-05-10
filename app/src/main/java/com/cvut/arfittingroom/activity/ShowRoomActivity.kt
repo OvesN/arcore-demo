@@ -50,6 +50,8 @@ import com.cvut.arfittingroom.utils.FileUtil.getNextTempMaskFrameInputStream
 import com.cvut.arfittingroom.utils.FileUtil.getNumberOfFrames
 import com.cvut.arfittingroom.utils.FileUtil.getTempMaskTextureBitmap
 import com.cvut.arfittingroom.utils.FileUtil.getTempMaskTextureStream
+import com.cvut.arfittingroom.utils.UIUtil
+import com.cvut.arfittingroom.utils.UIUtil.showClearAllDialog
 import com.cvut.arfittingroom.utils.currentUserUsername
 import com.google.android.filament.LightManager
 import com.google.ar.core.ArCoreApk
@@ -149,7 +151,7 @@ class ShowRoomActivity :
             showSaveLookDialog()
         }
         binding.deleteButton.setOnClickListener {
-            showClearAllDialog()
+           showClearAllDialog(this) { clearAll() }
         }
         binding.cameraModeButton.setOnClickListener {
             showCameraModeUI()
@@ -255,25 +257,6 @@ class ShowRoomActivity :
         dialog.show()
     }
 
-    private fun showClearAllDialog() {
-        val dialogView = LayoutInflater.from(this).inflate(R.layout.popup_clear_all, null)
-
-        val dialog =
-            AlertDialog.Builder(this)
-                .setView(dialogView)
-                .create()
-
-        dialogView.findViewById<Button>(R.id.cancel_popup_button).setOnClickListener {
-            dialog.dismiss()
-        }
-
-        dialogView.findViewById<Button>(R.id.discard_button).setOnClickListener {
-            clearAll()
-            dialog.dismiss()
-        }
-
-        dialog.show()
-    }
 
     private fun downloadLookTextureAndApply(lookId: String) {
         val ref =

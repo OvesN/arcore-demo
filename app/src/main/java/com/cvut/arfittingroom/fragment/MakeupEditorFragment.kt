@@ -12,10 +12,7 @@ import android.widget.ImageButton
 import android.widget.LinearLayout
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
-import androidx.core.graphics.drawable.DrawableCompat
-import androidx.core.graphics.toColorInt
 import androidx.fragment.app.Fragment
-import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
 import com.cvut.arfittingroom.ARFittingRoomApplication
 import com.cvut.arfittingroom.R
 import com.cvut.arfittingroom.activity.UIChangeListener
@@ -24,26 +21,24 @@ import com.cvut.arfittingroom.draw.Layer
 import com.cvut.arfittingroom.draw.model.element.strategy.PathCreationStrategy
 import com.cvut.arfittingroom.draw.model.enums.ELayerEditAction
 import com.cvut.arfittingroom.draw.model.enums.EShape
-import com.cvut.arfittingroom.model.TRANSPARENT_CODE
 import com.cvut.arfittingroom.model.to.drawhistory.EditorStateTO
 import com.cvut.arfittingroom.model.to.drawhistory.ElementTO
 import com.cvut.arfittingroom.model.to.drawhistory.LayerTO
 import com.cvut.arfittingroom.service.Mapper
 import com.cvut.arfittingroom.utils.UIUtil
-import com.google.android.material.slider.Slider
 import com.lukelorusso.verticalseekbar.VerticalSeekBar
 import java.util.LinkedList
 import javax.inject.Inject
 
-private const val DEFAULT_COLOR = Color.TRANSPARENT
-private val SELECTED_COLOR = Color.parseColor("#FF5722")
 
 class MakeupEditorFragment : Fragment() {
     private var backgroundBitmap: Bitmap? = null
     var editorStateTO: EditorStateTO? = null
     private lateinit var drawView: DrawView
     private lateinit var slider: VerticalSeekBar
-    private lateinit var layersButtonsContainer: LinearLayout
+    private lateinit var layersButton: ImageButton
+    private lateinit var  layersMenuFragment: LayersMenuFragment
+    private var isLayersMenuShown = false
 
     @Inject
     lateinit var strategies: Map<String, @JvmSuppressWildcards PathCreationStrategy>
@@ -64,42 +59,67 @@ class MakeupEditorFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         drawView = view.findViewById(R.id.draw_view)
         drawView.applyBitmapBackground(backgroundBitmap)
-        slider = view.findViewById(R.id.stroke_size_slider)
 
+        slider = view.findViewById(R.id.stroke_size_slider)
         slider.thumbPlaceholderDrawable = ContextCompat.getDrawable(view.context, R.drawable.slider)
         slider.thumbContainerColor = Color.TRANSPARENT
 
+        layersButton = view.findViewById(R.id.button_layers)
+        layersButton.setOnClickListener {
+            isLayersMenuShown = !isLayersMenuShown
+            if (isLayersMenuShown) {
+                showLayersMenu()
+            } else {
+                hideLayersMenu()
+            }
+        }
 
-            //layersButtonsContainer = view.findViewById(R.id.dynamic_layer_buttons_container)
+        layersMenuFragment = LayersMenuFragment(drawView)
+        activity?.supportFragmentManager
+            ?.beginTransaction()
+            ?.add(R.id.layers_menu_fragment_container, layersMenuFragment)
+            ?.hide(layersMenuFragment)
+            ?.commit()
+
 
         drawView.post {
             drawView.setDimensions(drawView.width, drawView.height)
             drawView.invalidate()
             if (drawView.layerManager.getNumOfLayers() == 0) {
                 drawView.layerManager.addLayer(drawView.width, drawView.height)
-                    //  drawView.layerInitializedListener?.onLayerInitialized(drawView.layerManager.getNumOfLayers())
             }
         }
-//
-//        view.findViewById<ImageButton>(R.id.button_back).setOnClickListener {
-//            drawView.saveBitmap {
-//                showMainLayout()
-//            }
-//        }
-//
-//        view.findViewById<ImageButton>(R.id.button_color_picker).setOnClickListener {
-//            UIUtil.showColorPickerDialog(
-//                requireContext(),
-//                drawView.paintOptions.color,
-//            ) { envelopColor ->
-//                drawView.setColor(
-//                    envelopColor,
-//                )
-//            }
-//        }
-//        view.findViewById<ImageButton>(R.id.button_redo).setOnClickListener {
-//            drawView.redo()
-//        }
+
+
+        view.findViewById<ImageButton>(R.id.button_ok).setOnClickListener {
+            drawView.saveBitmap {
+                showMainLayout()
+            }
+        }
+
+        view.findViewById<ImageButton>(R.id.button_back).setOnClickListener {
+            UIUtil.showClearAllDialog(requireContext()) { clearAll() }
+            showMainLayout()
+        }
+
+        view.findViewById<Button>(R.id.button_clear_all).setOnClickListener {
+            UIUtil.showClearAllDialog(requireContext()) { clearAll() }
+        }
+
+        view.findViewById<ImageButton>(R.id.button_color_picker).setOnClickListener {
+            UIUtil.showColorPickerDialog(
+                requireContext(),
+                drawView.paintOptions.color,
+            ) { envelopColor ->
+                drawView.setColor(
+                    envelopColor,
+                )
+            }
+        }
+
+        view.findViewById<ImageButton>(R.id.button_redo).setOnClickListener {
+            drawView.redo()
+        }
         view.findViewById<ImageButton>(R.id.button_undo).setOnClickListener {
             drawView.undo()
         }
@@ -110,18 +130,25 @@ class MakeupEditorFragment : Fragment() {
 
         drawView.setStrokeWidth(slider.progress)
 
-//        // TODO fix num or indexes or whut
-//        view.findViewById<ImageButton>(R.id.button_add_layer).setOnClickListener {
-//            updateLayersButtons(drawView.addLayer() + 1)
-//        }
+    }
 
-        drawView.setOnLayerInitializedListener(
-            object : DrawView.OnLayerInitializedListener {
-                override fun onLayerInitialized(numOfLayers: Int) {
-                   // updateLayersButtons(numOfLayers)
-                }
-            },
-        )
+    private fun showLayersMenu() {
+        slider.visibility = View.GONE
+        requireActivity()
+            .supportFragmentManager
+            .beginTransaction()
+            .show(layersMenuFragment)
+            .commit()
+        layersMenuFragment.updateLayersButtons(drawView.layerManager.getNumOfLayers())
+    }
+
+    private fun hideLayersMenu() {
+        requireActivity()
+            .supportFragmentManager
+            .beginTransaction()
+            .hide(layersMenuFragment)
+            .commit()
+        slider.visibility = View.VISIBLE
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -137,67 +164,11 @@ class MakeupEditorFragment : Fragment() {
         }
         drawView.layerManager.resetAllGifs()
         drawView.layerManager.setAllGifsToStaticMode()
-
-        //updateLayersButtons(drawView.layerManager.getNumOfLayers())
     }
 
     override fun onPause() {
         super.onPause()
         drawView.stopAnimation()
-    }
-
-    // Create buttons for layers in reverse order and select the active one
-    private fun updateLayersButtons(numOfLayers: Int) {
-        layersButtonsContainer.removeAllViews()
-
-        for (i in numOfLayers - 1 downTo 0) {
-            val button =
-                Button(requireContext()).apply {
-                    text = i.toString()
-                    setOnClickListener { showLayerEditDialog(i, this) }
-                }
-
-            if (i == drawView.layerManager.getActiveLayerIndex()) {
-                button.setBackgroundColor(SELECTED_COLOR)
-            } else {
-                button.setBackgroundColor(DEFAULT_COLOR)
-            }
-
-            layersButtonsContainer.addView(button, layersButtonsContainer.childCount)
-        }
-    }
-
-    private fun showLayerEditDialog(
-        layerIndex: Int,
-        button: Button,
-    ) {
-        val options = ELayerEditAction.entries.map { it.string }.toTypedArray()
-
-        AlertDialog.Builder(requireContext())
-            .setTitle("Edit layer $layerIndex")
-            .setItems(options) { _, which ->
-
-                when (options[which]) {
-                    ELayerEditAction.DELETE.string -> drawView.removeLayer(layerIndex)
-
-                    ELayerEditAction.MOVE_DOWN.string ->
-                        drawView.moveLayer(
-                            layerIndex,
-                            layerIndex - 1,
-                        )
-
-                    ELayerEditAction.MOVE_UP.string ->
-                        drawView.moveLayer(
-                            layerIndex,
-                            layerIndex + 1,
-                        )
-
-                    ELayerEditAction.SELECT.string -> drawView.setActiveLayer(layerIndex)
-                }
-
-                // updateLayersButtons(drawView.layerManager.getNumOfLayers())
-            }
-            .show()
     }
 
     private fun toggleStrokeShape(shape: EShape) {
@@ -285,6 +256,7 @@ class MakeupEditorFragment : Fragment() {
 
         drawView.layerManager.layers.addAll(layersList)
     }
+
 
     companion object {
         const val MAKEUP_EDITOR_FRAGMENT_TAG = "MakeupEditorFragmentTag"
