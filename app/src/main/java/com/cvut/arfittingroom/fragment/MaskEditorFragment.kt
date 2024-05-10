@@ -98,8 +98,7 @@ class MaskEditorFragment : Fragment() {
         }
 
         view.findViewById<ImageButton>(R.id.button_back).setOnClickListener {
-            UIUtil.showClearAllDialog(requireContext()) { clearAll() }
-            showMainLayout()
+            UIUtil.showClearAllDialog(requireContext()) { run { clearAll(); showMainLayout() } }
         }
 
         view.findViewById<Button>(R.id.button_clear_all).setOnClickListener {
@@ -133,6 +132,8 @@ class MaskEditorFragment : Fragment() {
     }
 
     private fun showLayersMenu() {
+        layersButton.setImageDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.selected_layers))
+
         sliderLayout.visibility = View.GONE
         requireActivity()
             .supportFragmentManager
@@ -143,6 +144,7 @@ class MaskEditorFragment : Fragment() {
     }
 
     private fun hideLayersMenu() {
+        layersButton.setImageDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.layers))
         requireActivity()
             .supportFragmentManager
             .beginTransaction()
@@ -198,6 +200,7 @@ class MaskEditorFragment : Fragment() {
     fun clearAll() {
         if (::drawView.isInitialized) {
             drawView.clearCanvas()
+            layersMenuFragment.updateLayersButtons(drawView.layerManager.getNumOfLayers())
         }
     }
 

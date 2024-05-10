@@ -46,6 +46,7 @@ constructor(private val strategies: Map<String, @JvmSuppressWildcards PathCreati
             alpha = paint.alpha,
             style = paint.style,
             strokeCap = paint.strokeCap,
+            strokeJoint = paint.strokeJoin
         )
 
     private fun paintTOtoPaint(paintOptions: PaintOptions) =
@@ -55,6 +56,7 @@ constructor(private val strategies: Map<String, @JvmSuppressWildcards PathCreati
             alpha = paintOptions.alpha
             style = paintOptions.style
             strokeCap = paintOptions.strokeCap
+            strokeJoin = paintOptions.strokeJoint
         }
 
     private fun pathToPathTO(drawablePath: DrawablePath) = PathTO(drawablePath.actions.map { pathActionToActionTO(it) })

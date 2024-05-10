@@ -51,6 +51,8 @@ class Layer(
         canvas: Canvas,
         paintOptions: PaintOptions,
     ) {
+        if (!isVisible) return
+
         changePaint(paintOptions)
 
         elementsBelowUpdatableElementBitmap?.let {
@@ -114,6 +116,8 @@ class Layer(
         x: Float,
         y: Float,
     ): Element? {
+        if (!isVisible) return null
+
         val iterator = elementsToDraw.descendingIterator()
         while (iterator.hasNext()) {
             val element = iterator.next()
@@ -141,7 +145,10 @@ class Layer(
      *
      * @return bitmap with all elements from this layer
      */
-    fun createBitmap(): Bitmap? = createBitmapFromElements(elementsToDraw)
+    fun createBitmap(): Bitmap? {
+        if (!isVisible) return null
+        return createBitmapFromElements(elementsToDraw)
+    }
 
     /**
      * Prepare bitmaps
@@ -150,6 +157,8 @@ class Layer(
      */
     fun prepareBitmaps() {
         resetBitmaps()
+
+        if (!isVisible) return
 
         elementsToDraw.forEach {
             if (it != elementToUpdate) {
@@ -177,10 +186,14 @@ class Layer(
 
     fun prepareBitmap() {
         resetBitmaps()
+        if (!isVisible) return
+
         elementsBelowUpdatableElementBitmap = createBitmapFromElements(elementsToDraw)
     }
 
     private fun createBitmapFromElements(elements: List<Element>): Bitmap? {
+        if (!isVisible) return null
+
         if (elements.isEmpty()) {
             return null
         }
@@ -196,6 +209,8 @@ class Layer(
     }
 
     private fun addToBitmap(element: Element) {
+        if (!isVisible) return
+
         val bitmap =
             elementAboveUpdatableElementBitmap ?: Bitmap.createBitmap(
                 width,
@@ -208,11 +223,6 @@ class Layer(
 
         elementAboveUpdatableElementBitmap = bitmap
     }
-
-    // private fun createBitmapsWithGif(): List<Bitmap> {
-    // 
-    // }
-
     fun setOpacity(opacity: Float) {
         this.opacity = opacity
         opacityPaint.apply {
@@ -222,7 +232,8 @@ class Layer(
 
     fun doesHaveGif(): Boolean = elementsToDraw.firstOrNull { it is Gif }?.let { true } ?: false
 
-    fun getMaxNumberOfFrames() = elementsToDraw.filterIsInstance<Gif>().maxOfOrNull { it.gifDrawable.numberOfFrames } ?: 0
+    fun getMaxNumberOfFrames() =
+        elementsToDraw.filterIsInstance<Gif>().maxOfOrNull { it.gifDrawable.numberOfFrames } ?: 0
 
     fun setAllGifsToAnimationMode() {
         elementsToDraw.forEach {

@@ -244,39 +244,30 @@
 
     <LinearLayout
         android:id="@+id/stroke_size_layout"
-        android:layout_width="30dp"
-        android:layout_height="0dp"
-        android:layout_marginTop="80dp"
-        android:layout_marginBottom="80dp"
-        android:translationX="-10dp"
+        android:layout_width="40dp"
+        android:layout_height="350dp"
         android:background="@drawable/size_bar"
-        app:layout_constraintBottom_toTopOf="@id/bottom_ui"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/top_ui"
-        app:layout_constraintVertical_bias="0.0">
+        android:translationX="-10dp"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintHorizontal_bias="0.0"
+    app:layout_constraintVertical_bias="0.5">
 
-        <com.lukelorusso.verticalseekbar.VerticalSeekBar
-            android:id="@+id/stroke_size_slider"
-            android:layout_width="30dp"
-            android:layout_height="match_parent"
-            android:layout_gravity="start"
-            android:stepSize="1"
-            android:value="10"
-            android:valueFrom="1"
-            android:valueTo="250"
-            app:layout_constraintBottom_toTopOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="parent"
-            app:layout_constraintVertical_bias="0.0"
-            app:tickVisible="false"
-            app:vsb_bar_width="0dp"
-            app:vsb_show_thumb="true" />
-    </LinearLayout>
-
+    <com.lukelorusso.verticalseekbar.VerticalSeekBar
+        android:id="@+id/stroke_size_slider"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:stepSize="1"
+        android:value="10"
+        android:valueFrom="1"
+        android:valueTo="250"
+        app:tickVisible="false"
+        app:vsb_bar_width="0dp"
+        app:vsb_show_thumb="true" />
+</LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 

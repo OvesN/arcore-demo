@@ -81,10 +81,10 @@
             android:layout_height="30dp"></View>
 
         <ImageButton
-            android:id="@+id/hide_layer_button"
+            android:id="@+id/is_visible_button"
             android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:background="@drawable/hide_layer"
+            android:layout_height="wrap_content"
+            android:background="@drawable/invisible_layer"
             android:scaleType="fitCenter" />
     </LinearLayout>
 

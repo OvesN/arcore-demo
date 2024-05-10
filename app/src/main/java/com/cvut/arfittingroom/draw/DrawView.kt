@@ -608,14 +608,6 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         return newLayerIndex
     }
 
-    fun setActiveLayer(layerIndex: Int) {
-        if (layerIndex >= layerManager.getNumOfLayers() || layerIndex < 0) {
-            return
-        }
-        layerManager.setActiveLayer(layerIndex)
-        Log.println(Log.INFO, null, "Active layer is now $layerIndex")
-    }
-
     fun setColor(newColor: Int) {
         @ColorInt
         paintOptions.color = newColor
@@ -697,6 +689,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                         strokeWidth = paintOptions.strokeWidth
                         alpha = paintOptions.alpha
                         strokeCap = Paint.Cap.ROUND
+                        strokeJoin = Paint.Join.ROUND
                         style = Paint.Style.STROKE
                     },
             )

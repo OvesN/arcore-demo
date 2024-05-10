@@ -7,17 +7,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageButton
-import android.widget.ImageView
 import android.widget.LinearLayout
-import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.cvut.arfittingroom.R
 import com.cvut.arfittingroom.draw.DrawView
-import com.cvut.arfittingroom.draw.model.enums.ELayerEditAction
-import com.cvut.arfittingroom.draw.service.LayerManager
-import com.cvut.arfittingroom.utils.ScreenUtil
 import com.cvut.arfittingroom.utils.ScreenUtil.dpToPx
+import io.github.muddz.styleabletoast.StyleableToast
 
 /**
  * Layers menu fragment, manages menu for layers
@@ -26,6 +22,10 @@ import com.cvut.arfittingroom.utils.ScreenUtil.dpToPx
  */
 class LayersMenuFragment(private val drawView: DrawView) : Fragment() {
     private lateinit var layersButtonsContainer: LinearLayout
+    private lateinit var layerUpButton: ImageButton
+    private lateinit var layerDownButton: ImageButton
+    private lateinit var isVisibleButton: ImageButton
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -35,8 +35,54 @@ class LayersMenuFragment(private val drawView: DrawView) : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         layersButtonsContainer = view.findViewById(R.id.layers_buttons_container)
+
         view.findViewById<ImageButton>(R.id.add_layer_button).setOnClickListener {
             updateLayersButtons(drawView.addLayer() + 1)
+            StyleableToast.makeText(requireContext(), "New layer added", R.style.mytoast).show()
+        }
+
+        view.findViewById<ImageButton>(R.id.delete_layer_button).setOnClickListener {
+            drawView.removeLayer(drawView.layerManager.getActiveLayerIndex())
+            updateLayersButtons(drawView.layerManager.getNumOfLayers())
+            StyleableToast.makeText(requireContext(), "Layer deleted", R.style.mytoast).show()
+        }
+
+        layerUpButton = view.findViewById(R.id.move_layer_up_button)
+        layerUpButton.setOnClickListener {
+            val layerIndex = drawView.layerManager.getActiveLayerIndex()
+            drawView.moveLayer(
+                layerIndex,
+                layerIndex + 1,
+            )
+            updateLayersButtons(drawView.layerManager.getNumOfLayers())
+            StyleableToast.makeText(requireContext(), "Layer moved up", R.style.mytoast).show()
+        }
+
+        layerDownButton = view.findViewById(R.id.move_layer_down_button)
+        layerDownButton.setOnClickListener {
+            val layerIndex = drawView.layerManager.getActiveLayerIndex()
+            drawView.moveLayer(
+                layerIndex,
+                layerIndex - 1,
+            )
+            updateLayersButtons(drawView.layerManager.getNumOfLayers())
+            StyleableToast.makeText(requireContext(), "Layer moved down", R.style.mytoast).show()
+        }
+
+        isVisibleButton = view.findViewById(R.id.is_visible_button)
+        isVisibleButton.setOnClickListener {
+            val layerIndex = drawView.layerManager.getActiveLayerIndex()
+
+            drawView.layerManager.toggleActiveLayerVisibility()
+            drawView.invalidate()
+            setIsVisibleButton(layerIndex)
+
+            if (drawView.layerManager.isVisible(layerIndex)) {
+                StyleableToast.makeText(requireContext(), "Layer is visible now", R.style.mytoast).show()
+            }
+            else {
+                StyleableToast.makeText(requireContext(), "Layer is invisible now", R.style.mytoast).show()
+            }
         }
     }
 
@@ -54,10 +100,14 @@ class LayersMenuFragment(private val drawView: DrawView) : Fragment() {
                     height = dpToPx(30, requireContext())
                     setTypeface(typeface, Typeface.BOLD)
                     text = i.toString()
-                    setOnClickListener { showLayerEditDialog(i, this) }
+                    setOnClickListener {
+                        drawView.layerManager.setActiveLayer(i)
+                        updateLayersButtons(drawView.layerManager.getNumOfLayers())
+                    }
                 }
 
             if (i == drawView.layerManager.getActiveLayerIndex()) {
+                setIsVisibleButton(i)
                 button.setBackgroundColor(
                     ContextCompat.getColor(
                         requireContext(),
@@ -77,36 +127,13 @@ class LayersMenuFragment(private val drawView: DrawView) : Fragment() {
         }
     }
 
-    private fun showLayerEditDialog(
-        layerIndex: Int,
-        button: Button,
-    ) {
-        val options = ELayerEditAction.entries.map { it.string }.toTypedArray()
 
-        AlertDialog.Builder(requireContext())
-            .setTitle("Edit layer $layerIndex")
-            .setItems(options) { _, which ->
-
-                when (options[which]) {
-                    ELayerEditAction.DELETE.string -> drawView.removeLayer(layerIndex)
-
-                    ELayerEditAction.MOVE_DOWN.string ->
-                        drawView.moveLayer(
-                            layerIndex,
-                            layerIndex - 1,
-                        )
-
-                    ELayerEditAction.MOVE_UP.string ->
-                        drawView.moveLayer(
-                            layerIndex,
-                            layerIndex + 1,
-                        )
-
-                    ELayerEditAction.SELECT.string -> drawView.setActiveLayer(layerIndex)
-                }
-
-                updateLayersButtons(drawView.layerManager.getNumOfLayers())
-            }
-            .show()
+    private fun setIsVisibleButton(layerIndex: Int) {
+        if (drawView.layerManager.isVisible(layerIndex)) {
+            isVisibleButton.background = (ContextCompat.getDrawable(requireContext(), R.drawable.visible_layer))
+        }
+        else {
+            isVisibleButton.background = (ContextCompat.getDrawable(requireContext(), R.drawable.invisible_layer))
+        }
     }
 }

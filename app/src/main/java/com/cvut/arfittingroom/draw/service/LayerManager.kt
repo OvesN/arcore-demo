@@ -73,6 +73,8 @@ class LayerManager {
 
     fun getActiveLayerIndex() = activeLayerIndex
 
+    fun isVisible(layerIndex: Int) = layers[layerIndex].isVisible
+
     // Returns index of the last layer
     fun addLayer(
         width: Int,
@@ -109,6 +111,11 @@ class LayerManager {
     }
 
     fun getLayerIdByIndex(index: Int): UUID? = layers.getOrNull(index)?.id
+
+    fun toggleActiveLayerVisibility() {
+        if (layers.isEmpty()) return
+        layers[activeLayerIndex].isVisible = !layers[activeLayerIndex].isVisible
+    }
 
     fun removeElementFromLayer(
         elementId: UUID,
