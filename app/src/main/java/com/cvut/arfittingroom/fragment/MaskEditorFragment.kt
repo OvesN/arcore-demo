@@ -28,16 +28,15 @@ import com.lukelorusso.verticalseekbar.VerticalSeekBar
 import java.util.LinkedList
 import javax.inject.Inject
 
-
 class MaskEditorFragment : Fragment() {
     private var backgroundBitmap: Bitmap? = null
     var editorStateTO: EditorStateTO? = null
+    private var isLayersMenuShown = false
     private lateinit var drawView: DrawView
     private lateinit var sliderLayout: LinearLayout
     private lateinit var slider: VerticalSeekBar
     private lateinit var layersButton: ImageButton
-    private lateinit var  layersMenuFragment: LayersMenuFragment
-    private var isLayersMenuShown = false
+    private lateinit var layersMenuFragment: LayersMenuFragment
 
     @Inject
     lateinit var strategies: Map<String, @JvmSuppressWildcards PathCreationStrategy>
@@ -81,7 +80,6 @@ class MaskEditorFragment : Fragment() {
             ?.hide(layersMenuFragment)
             ?.commit()
 
-
         drawView.post {
             drawView.setDimensions(drawView.width, drawView.height)
             drawView.invalidate()
@@ -90,7 +88,6 @@ class MaskEditorFragment : Fragment() {
             }
         }
 
-
         view.findViewById<ImageButton>(R.id.button_ok).setOnClickListener {
             drawView.saveBitmap {
                 showMainLayout()
@@ -98,7 +95,12 @@ class MaskEditorFragment : Fragment() {
         }
 
         view.findViewById<ImageButton>(R.id.button_back).setOnClickListener {
-            UIUtil.showClearAllDialog(requireContext()) { run { clearAll(); showMainLayout() } }
+            UIUtil.showClearAllDialog(requireContext()) {
+                run {
+                    clearAll()
+                    showMainLayout()
+                }
+            }
         }
 
         view.findViewById<Button>(R.id.button_clear_all).setOnClickListener {
@@ -128,7 +130,6 @@ class MaskEditorFragment : Fragment() {
         }
 
         drawView.setStrokeWidth(slider.progress)
-
     }
 
     private fun showLayersMenu() {
@@ -259,7 +260,6 @@ class MaskEditorFragment : Fragment() {
 
         drawView.layerManager.layers.addAll(layersList)
     }
-
 
     companion object {
         const val MAKEUP_EDITOR_FRAGMENT_TAG = "MakeupEditorFragmentTag"

@@ -10,5 +10,5 @@ data class PaintOptions(
     var alpha: Int = 255,
     var style: Style = Style.STROKE,
     var strokeCap: Paint.Cap = Paint.Cap.ROUND,
-    var strokeJoint: Paint.Join = Paint.Join.ROUND
+    var strokeJoint: Paint.Join = Paint.Join.ROUND,
 )

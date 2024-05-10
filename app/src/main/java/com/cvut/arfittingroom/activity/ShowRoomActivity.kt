@@ -27,9 +27,9 @@ import com.cvut.arfittingroom.databinding.ActivityShowRoomBinding
 import com.cvut.arfittingroom.draw.DrawHistoryHolder
 import com.cvut.arfittingroom.fragment.AccessoriesOptionsFragment
 import com.cvut.arfittingroom.fragment.CameraModeFragment
-import com.cvut.arfittingroom.fragment.LooksOptionsFragment
+import com.cvut.arfittingroom.fragment.LookOptionsMenuFragment
+import com.cvut.arfittingroom.fragment.MakeupOptionsMenuFragment
 import com.cvut.arfittingroom.fragment.MaskEditorFragment
-import com.cvut.arfittingroom.fragment.MakeupOptionsFragment
 import com.cvut.arfittingroom.fragment.ProfileFragment
 import com.cvut.arfittingroom.model.LOOKS_COLLECTION
 import com.cvut.arfittingroom.model.MAKEUP_SLOT
@@ -88,8 +88,8 @@ class ShowRoomActivity :
 
     private var frameDelay: Long = 100  // Default frame delay (100 ms per frame)
     private val accessoriesOptionsFragment = AccessoriesOptionsFragment()
-    private val looksOptionsFragment = LooksOptionsFragment()
-    private val makeupOptionsFragment = MakeupOptionsFragment()
+    private val looksOptionsFragment = LookOptionsMenuFragment()
+    private val makeupOptionsFragment = MakeupOptionsMenuFragment()
     private val cameraModeFragment = CameraModeFragment()
     private val profileFragment = ProfileFragment()
     private val maskEditorFragment = MaskEditorFragment()
@@ -150,7 +150,7 @@ class ShowRoomActivity :
             showSaveLookDialog()
         }
         binding.deleteButton.setOnClickListener {
-           showClearAllDialog(this) { clearAll() }
+            showClearAllDialog(this) { clearAll() }
         }
         binding.cameraModeButton.setOnClickListener {
             showCameraModeUI()
@@ -255,7 +255,6 @@ class ShowRoomActivity :
 
         dialog.show()
     }
-
 
     private fun downloadLookTextureAndApply(lookId: String) {
         val ref =

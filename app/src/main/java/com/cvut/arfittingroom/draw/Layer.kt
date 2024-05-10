@@ -51,7 +51,9 @@ class Layer(
         canvas: Canvas,
         paintOptions: PaintOptions,
     ) {
-        if (!isVisible) return
+        if (!isVisible) {
+            return
+        }
 
         changePaint(paintOptions)
 
@@ -116,7 +118,9 @@ class Layer(
         x: Float,
         y: Float,
     ): Element? {
-        if (!isVisible) return null
+        if (!isVisible) {
+            return null
+        }
 
         val iterator = elementsToDraw.descendingIterator()
         while (iterator.hasNext()) {
@@ -146,7 +150,9 @@ class Layer(
      * @return bitmap with all elements from this layer
      */
     fun createBitmap(): Bitmap? {
-        if (!isVisible) return null
+        if (!isVisible) {
+            return null
+        }
         return createBitmapFromElements(elementsToDraw)
     }
 
@@ -158,7 +164,9 @@ class Layer(
     fun prepareBitmaps() {
         resetBitmaps()
 
-        if (!isVisible) return
+        if (!isVisible) {
+            return
+        }
 
         elementsToDraw.forEach {
             if (it != elementToUpdate) {
@@ -186,13 +194,17 @@ class Layer(
 
     fun prepareBitmap() {
         resetBitmaps()
-        if (!isVisible) return
+        if (!isVisible) {
+            return
+        }
 
         elementsBelowUpdatableElementBitmap = createBitmapFromElements(elementsToDraw)
     }
 
     private fun createBitmapFromElements(elements: List<Element>): Bitmap? {
-        if (!isVisible) return null
+        if (!isVisible) {
+            return null
+        }
 
         if (elements.isEmpty()) {
             return null
@@ -209,7 +221,9 @@ class Layer(
     }
 
     private fun addToBitmap(element: Element) {
-        if (!isVisible) return
+        if (!isVisible) {
+            return
+        }
 
         val bitmap =
             elementAboveUpdatableElementBitmap ?: Bitmap.createBitmap(
@@ -223,6 +237,7 @@ class Layer(
 
         elementAboveUpdatableElementBitmap = bitmap
     }
+
     fun setOpacity(opacity: Float) {
         this.opacity = opacity
         opacityPaint.apply {
@@ -232,8 +247,7 @@ class Layer(
 
     fun doesHaveGif(): Boolean = elementsToDraw.firstOrNull { it is Gif }?.let { true } ?: false
 
-    fun getMaxNumberOfFrames() =
-        elementsToDraw.filterIsInstance<Gif>().maxOfOrNull { it.gifDrawable.numberOfFrames } ?: 0
+    fun getMaxNumberOfFrames() = elementsToDraw.filterIsInstance<Gif>().maxOfOrNull { it.gifDrawable.numberOfFrames } ?: 0
 
     fun setAllGifsToAnimationMode() {
         elementsToDraw.forEach {

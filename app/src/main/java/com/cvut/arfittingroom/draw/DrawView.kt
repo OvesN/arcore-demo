@@ -58,7 +58,6 @@ import kotlin.math.sqrt
 /**
  * Draw view for 2D editor
  *
- * @constructor
  *
  * @param context
  * @param attrs
@@ -618,7 +617,6 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         paintOptions.strokeWidth = newStrokeWidth.toFloat()
     }
 
-
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
@@ -926,7 +924,6 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     fun applyBitmapBackground(bitmap: Bitmap?) {
         uiDrawer.setBackgroundBitmap(bitmap)
     }
-
 
     interface OnLayerInitializedListener {
         fun onLayerInitialized(numOfLayers: Int)

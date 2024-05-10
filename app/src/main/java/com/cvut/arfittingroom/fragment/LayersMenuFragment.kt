@@ -32,7 +32,10 @@ class LayersMenuFragment(private val drawView: DrawView) : Fragment() {
         savedInstanceState: Bundle?,
     ): View? = inflater.inflate(R.layout.fragment_layers_menu, container, false)
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
         super.onViewCreated(view, savedInstanceState)
         layersButtonsContainer = view.findViewById(R.id.layers_buttons_container)
 
@@ -79,8 +82,7 @@ class LayersMenuFragment(private val drawView: DrawView) : Fragment() {
 
             if (drawView.layerManager.isVisible(layerIndex)) {
                 StyleableToast.makeText(requireContext(), "Layer is visible now", R.style.mytoast).show()
-            }
-            else {
+            } else {
                 StyleableToast.makeText(requireContext(), "Layer is invisible now", R.style.mytoast).show()
             }
         }
@@ -111,15 +113,15 @@ class LayersMenuFragment(private val drawView: DrawView) : Fragment() {
                 button.setBackgroundColor(
                     ContextCompat.getColor(
                         requireContext(),
-                        R.color.colorActive
-                    )
+                        R.color.colorActive,
+                    ),
                 )
             } else {
                 button.setBackgroundColor(
                     ContextCompat.getColor(
                         requireContext(),
-                        R.color.colorTransparent
-                    )
+                        R.color.colorTransparent,
+                    ),
                 )
             }
 
@@ -127,12 +129,10 @@ class LayersMenuFragment(private val drawView: DrawView) : Fragment() {
         }
     }
 
-
     private fun setIsVisibleButton(layerIndex: Int) {
         if (drawView.layerManager.isVisible(layerIndex)) {
             isVisibleButton.background = (ContextCompat.getDrawable(requireContext(), R.drawable.visible_layer))
-        }
-        else {
+        } else {
             isVisibleButton.background = (ContextCompat.getDrawable(requireContext(), R.drawable.invisible_layer))
         }
     }

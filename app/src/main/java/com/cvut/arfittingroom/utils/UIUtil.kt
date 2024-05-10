@@ -53,7 +53,10 @@ object UIUtil {
         builder.show()
     }
 
-    fun showClearAllDialog(context: Context,   onClearAll: () -> Unit) {
+    fun showClearAllDialog(
+        context: Context,
+        onClearAll: () -> Unit,
+    ) {
         val dialogView = LayoutInflater.from(context).inflate(R.layout.popup_clear_all, null)
 
         val dialog =

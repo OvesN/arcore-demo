@@ -15,7 +15,6 @@ private val logger = KotlinLogging.logger {}
 /**
  * Layer manager
  *
- * @constructor Create empty Layer manager
  */
 class LayerManager {
     val layers = mutableListOf<Layer>()
@@ -113,7 +112,9 @@ class LayerManager {
     fun getLayerIdByIndex(index: Int): UUID? = layers.getOrNull(index)?.id
 
     fun toggleActiveLayerVisibility() {
-        if (layers.isEmpty()) return
+        if (layers.isEmpty()) {
+            return
+        }
         layers[activeLayerIndex].isVisible = !layers[activeLayerIndex].isVisible
     }
 

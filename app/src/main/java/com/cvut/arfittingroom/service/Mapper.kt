@@ -46,7 +46,7 @@ constructor(private val strategies: Map<String, @JvmSuppressWildcards PathCreati
             alpha = paint.alpha,
             style = paint.style,
             strokeCap = paint.strokeCap,
-            strokeJoint = paint.strokeJoin
+            strokeJoint = paint.strokeJoin,
         )
 
     private fun paintTOtoPaint(paintOptions: PaintOptions) =
@@ -223,12 +223,4 @@ constructor(private val strategies: Map<String, @JvmSuppressWildcards PathCreati
             width = width,
             height = height,
         )
-
-    private fun downloadImage(ref: String) {
-
-    }
-
-    private fun downloadGif(ref: String) {
-
-    }
 }
