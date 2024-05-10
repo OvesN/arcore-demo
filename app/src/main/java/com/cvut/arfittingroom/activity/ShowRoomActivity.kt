@@ -28,7 +28,7 @@ import com.cvut.arfittingroom.draw.DrawHistoryHolder
 import com.cvut.arfittingroom.fragment.AccessoriesOptionsFragment
 import com.cvut.arfittingroom.fragment.CameraModeFragment
 import com.cvut.arfittingroom.fragment.LooksOptionsFragment
-import com.cvut.arfittingroom.fragment.MakeupEditorFragment
+import com.cvut.arfittingroom.fragment.MaskEditorFragment
 import com.cvut.arfittingroom.fragment.MakeupOptionsFragment
 import com.cvut.arfittingroom.fragment.ProfileFragment
 import com.cvut.arfittingroom.model.LOOKS_COLLECTION
@@ -50,7 +50,6 @@ import com.cvut.arfittingroom.utils.FileUtil.getNextTempMaskFrameInputStream
 import com.cvut.arfittingroom.utils.FileUtil.getNumberOfFrames
 import com.cvut.arfittingroom.utils.FileUtil.getTempMaskTextureBitmap
 import com.cvut.arfittingroom.utils.FileUtil.getTempMaskTextureStream
-import com.cvut.arfittingroom.utils.UIUtil
 import com.cvut.arfittingroom.utils.UIUtil.showClearAllDialog
 import com.cvut.arfittingroom.utils.currentUserUsername
 import com.google.android.filament.LightManager
@@ -93,7 +92,7 @@ class ShowRoomActivity :
     private val makeupOptionsFragment = MakeupOptionsFragment()
     private val cameraModeFragment = CameraModeFragment()
     private val profileFragment = ProfileFragment()
-    private val makeupEditorFragment = MakeupEditorFragment()
+    private val maskEditorFragment = MaskEditorFragment()
     private lateinit var arFragment: ArFrontFacingFragment
     private lateinit var arSceneView: ArSceneView
     private lateinit var auth: FirebaseAuth
@@ -210,7 +209,7 @@ class ShowRoomActivity :
         if (DrawHistoryHolder.isNotEmpty()) {
             showWarningDialog(lookTO)
         } else {
-            makeupEditorFragment.editorStateTO = lookTO.editorState
+            maskEditorFragment.editorStateTO = lookTO.editorState
 
             stopAnimation()
             accessoriesOptionsFragment.applyState(lookTO.appliedModels)
@@ -249,7 +248,7 @@ class ShowRoomActivity :
 
         dialogView.findViewById<Button>(R.id.continue_button).setOnClickListener {
             stateService.clearAll()
-            makeupEditorFragment.clearAll()
+            maskEditorFragment.clearAll()
             applyLook(lookTO)
             dialog.dismiss()
         }
@@ -293,7 +292,7 @@ class ShowRoomActivity :
         makeupOptionsFragment.resetMenu()
 
         stateService.clearAll()
-        makeupEditorFragment.clearAll()
+        maskEditorFragment.clearAll()
     }
 
     private fun onAttachFragment(
@@ -559,23 +558,23 @@ class ShowRoomActivity :
         findViewById<View>(R.id.bottom_ui).visibility = View.GONE
         val fragmentManager = supportFragmentManager
         val existingFragment =
-            fragmentManager.findFragmentByTag(MakeupEditorFragment.MAKEUP_EDITOR_FRAGMENT_TAG)
+            fragmentManager.findFragmentByTag(MaskEditorFragment.MAKEUP_EDITOR_FRAGMENT_TAG)
 
         if (existingFragment == null) {
             fragmentManager.beginTransaction()
                 .add(
                     R.id.makeup_editor_fragment_container,
-                    makeupEditorFragment,
-                    MakeupEditorFragment.MAKEUP_EDITOR_FRAGMENT_TAG,
+                    maskEditorFragment,
+                    MaskEditorFragment.MAKEUP_EDITOR_FRAGMENT_TAG,
                 )
                 .commit()
         } else {
-            showFragment(makeupEditorFragment)
+            showFragment(maskEditorFragment)
         }
 
         arSceneView.pause()
 
-        makeupEditorFragment.applyBackgroundBitmap(stateService.makeupTextureBitmap)
+        maskEditorFragment.applyBackgroundBitmap(stateService.makeupTextureBitmap)
     }
 
     private fun resetMenu() {
@@ -625,7 +624,7 @@ class ShowRoomActivity :
                 isAnimated = isAnimated,
                 appliedMakeup = stateService.getAppliedMakeupList(),
                 appliedModels = stateService.getAppliedModelsList(),
-                editorState = makeupEditorFragment.serializeEditorState(),
+                editorState = maskEditorFragment.serializeEditorState(),
                 name = name,
                 imagePreviewRef = createPreview(lookId),
             )
@@ -736,7 +735,7 @@ class ShowRoomActivity :
         looksOptionsFragment.resetMenu()
 
         stateService.clearAll()
-        makeupEditorFragment.clearAll()
+        maskEditorFragment.clearAll()
     }
 
     override fun showMainLayout() {
@@ -744,7 +743,7 @@ class ShowRoomActivity :
         findViewById<View>(R.id.bottom_ui).visibility = View.VISIBLE
 
         val makeupEditor =
-            supportFragmentManager.findFragmentByTag(MakeupEditorFragment.MAKEUP_EDITOR_FRAGMENT_TAG)
+            supportFragmentManager.findFragmentByTag(MaskEditorFragment.MAKEUP_EDITOR_FRAGMENT_TAG)
 
         val transaction =
             supportFragmentManager

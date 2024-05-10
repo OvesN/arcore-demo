@@ -10,7 +10,6 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.LinearLayout
-import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.cvut.arfittingroom.ARFittingRoomApplication
@@ -19,7 +18,6 @@ import com.cvut.arfittingroom.activity.UIChangeListener
 import com.cvut.arfittingroom.draw.DrawView
 import com.cvut.arfittingroom.draw.Layer
 import com.cvut.arfittingroom.draw.model.element.strategy.PathCreationStrategy
-import com.cvut.arfittingroom.draw.model.enums.ELayerEditAction
 import com.cvut.arfittingroom.draw.model.enums.EShape
 import com.cvut.arfittingroom.model.to.drawhistory.EditorStateTO
 import com.cvut.arfittingroom.model.to.drawhistory.ElementTO
@@ -31,10 +29,11 @@ import java.util.LinkedList
 import javax.inject.Inject
 
 
-class MakeupEditorFragment : Fragment() {
+class MaskEditorFragment : Fragment() {
     private var backgroundBitmap: Bitmap? = null
     var editorStateTO: EditorStateTO? = null
     private lateinit var drawView: DrawView
+    private lateinit var sliderLayout: LinearLayout
     private lateinit var slider: VerticalSeekBar
     private lateinit var layersButton: ImageButton
     private lateinit var  layersMenuFragment: LayersMenuFragment
@@ -60,6 +59,7 @@ class MakeupEditorFragment : Fragment() {
         drawView = view.findViewById(R.id.draw_view)
         drawView.applyBitmapBackground(backgroundBitmap)
 
+        sliderLayout = view.findViewById(R.id.stroke_size_layout)
         slider = view.findViewById(R.id.stroke_size_slider)
         slider.thumbPlaceholderDrawable = ContextCompat.getDrawable(view.context, R.drawable.slider)
         slider.thumbContainerColor = Color.TRANSPARENT
@@ -133,7 +133,7 @@ class MakeupEditorFragment : Fragment() {
     }
 
     private fun showLayersMenu() {
-        slider.visibility = View.GONE
+        sliderLayout.visibility = View.GONE
         requireActivity()
             .supportFragmentManager
             .beginTransaction()
@@ -148,7 +148,7 @@ class MakeupEditorFragment : Fragment() {
             .beginTransaction()
             .hide(layersMenuFragment)
             .commit()
-        slider.visibility = View.VISIBLE
+        sliderLayout.visibility = View.VISIBLE
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

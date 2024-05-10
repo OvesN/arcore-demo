@@ -78,7 +78,7 @@
             android:scaleType="fitCenter"
             android:text="@string/clear_all"
             android:textAllCaps="false"
-            android:textSize="20sp"
+            android:textSize="17sp"
             android:textStyle="bold" />
     </LinearLayout>
 
@@ -111,18 +111,19 @@
                 android:layout_gravity="center_horizontal|top"
                 android:background="@drawable/color_picker"
                 android:scaleType="fitCenter" />
+
             <Space
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1" />
+
             <ImageButton
                 android:id="@+id/button_back"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
                 android:layout_gravity="center_horizontal|bottom"
                 android:background="@drawable/back"
-                android:scaleType="fitCenter"
-                />
+                android:scaleType="fitCenter" />
 
 
         </LinearLayout>
@@ -150,6 +151,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1" />
+
             <ImageButton
                 android:id="@+id/button_ok"
                 android:layout_width="30dp"
@@ -157,8 +159,7 @@
                 android:layout_gravity="center_horizontal|bottom"
                 android:background="@null"
                 android:scaleType="fitCenter"
-                app:srcCompat="@drawable/ok"
-               />
+                app:srcCompat="@drawable/ok" />
         </LinearLayout>
 
 
@@ -239,14 +240,16 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/top_ui"
-        app:layout_constraintVertical_bias="0.0">
-    </FrameLayout>
+        app:layout_constraintVertical_bias="0.0"/>
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:id="@+id/stroke_size_layout"
+        android:layout_width="30dp"
         android:layout_height="0dp"
-        android:layout_marginBottom="40dp"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="80dp"
+        android:layout_marginBottom="80dp"
+        android:translationX="-10dp"
+        android:background="@drawable/size_bar"
         app:layout_constraintBottom_toTopOf="@id/bottom_ui"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
@@ -256,10 +259,9 @@
 
         <com.lukelorusso.verticalseekbar.VerticalSeekBar
             android:id="@+id/stroke_size_slider"
-            android:layout_width="20dp"
+            android:layout_width="30dp"
             android:layout_height="match_parent"
             android:layout_gravity="start"
-
             android:stepSize="1"
             android:value="10"
             android:valueFrom="1"
@@ -270,13 +272,8 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="parent"
             app:layout_constraintVertical_bias="0.0"
-
             app:tickVisible="false"
-            app:vsb_bar_background="@color/colorDarkGrey"
-
-            app:vsb_bar_corner_radius="10dp"
-            app:vsb_bar_progress="@color/colorLightGrey"
-            app:vsb_bar_width="2dp"
+            app:vsb_bar_width="0dp"
             app:vsb_show_thumb="true" />
     </LinearLayout>
 
