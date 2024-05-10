@@ -63,17 +63,18 @@
         <ImageButton
             android:id="@+id/button_layers"
             android:layout_width="0dp"
-            android:layout_height="25dp"
+            android:layout_height="30dp"
             android:layout_weight="1"
             android:background="@null"
-            android:scaleType="fitCenter"
+            android:scaleType="fitStart"
             android:src="@drawable/layers" />
 
         <Button
             android:id="@+id/button_clear_all"
             android:layout_width="0dp"
             android:layout_height="30dp"
-
+            android:textStyle="bold"
+            android:textSize="20sp"
             android:layout_weight="1"
             android:background="@null"
             android:scaleType="fitCenter"
@@ -105,6 +106,7 @@
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/color_picker" />
 
+
         <ImageButton
             android:id="@+id/button_menu"
             android:layout_width="35dp"
@@ -118,37 +120,37 @@
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/menu" />
 
-        <ImageButton
-            android:id="@+id/button_ok"
-            android:layout_width="35dp"
-            android:layout_height="35dp"
-            android:background="@null"
-            android:paddingStart="0dp"
-            android:paddingEnd="10dp"
-            android:paddingBottom="10dp"
-            android:scaleType="fitCenter"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:srcCompat="@drawable/ok" />
-
-
         <LinearLayout
             android:id="@+id/second_line_buttons"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="30dp"
-            android:background="@drawable/button"
-            android:backgroundTint="@color/colorDarkGrey"
+           android:gravity="center"
             android:orientation="horizontal"
-           android:layout_marginBottom="10dp"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="10dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toBottomOf="parent">
 
+            <ImageButton
+                android:id="@+id/button_back"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:background="@null"
+                android:scaleType="fitCenter"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="co"
+                app:srcCompat="@drawable/back" />
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/button"
+                android:backgroundTint="@color/colorDarkGrey">
             <Button
                 android:id="@+id/draw_button"
-                android:layout_width="100dp"
-                android:layout_height="30dp"
-                android:scaleType="fitCenter"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
                 android:background="@null"
                 android:backgroundTint="@color/colorMediumGrey"
                 android:text="@string/draw"
@@ -156,8 +158,9 @@
 
             <Button
                 android:id="@+id/stamp_button"
-                android:layout_width="100dp"
-                android:layout_height="30dp"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
                 android:background="@null"
                 android:backgroundTint="@color/colorMediumGrey"
                 android:text="@string/stamp"
@@ -165,25 +168,28 @@
 
             <Button
                 android:id="@+id/image_button"
-                android:layout_width="100dp"
-                android:layout_height="30dp"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
                 android:background="@null"
                 android:backgroundTint="@color/colorMediumGrey"
                 android:text="@string/image"
                 android:textAllCaps="false" />
+            </LinearLayout>
+
+            <ImageButton
+                android:id="@+id/button_ok"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:background="@null"
+
+                android:scaleType="fitCenter"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:srcCompat="@drawable/ok" />
         </LinearLayout>
-        <ImageButton
-            android:id="@+id/button_back"
-            android:layout_width="35dp"
-            android:layout_height="35dp"
-            android:background="@null"
-            android:paddingStart="10dp"
-            android:paddingEnd="0dp"
-            android:paddingBottom="10dp"
-            android:scaleType="fitCenter"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:srcCompat="@drawable/back" />
+
+
 
 
         <FrameLayout

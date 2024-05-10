@@ -96,7 +96,8 @@
 
             <Button
                 android:id="@+id/makeup_button"
-                android:layout_width="100dp"
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 android:layout_height="30dp"
                 android:scaleType="fitCenter"
                 android:background="@null"
@@ -106,8 +107,9 @@
 
             <Button
                 android:id="@+id/accessories_button"
-                android:layout_width="100dp"
+                android:layout_width="0dp"
                 android:layout_height="30dp"
+                android:layout_weight="1"
                 android:background="@null"
                 android:backgroundTint="@color/colorMediumGrey"
                 android:text="@string/accessories"
@@ -115,8 +117,9 @@
 
             <Button
                 android:id="@+id/looks_button"
-                android:layout_width="100dp"
+                android:layout_width="0dp"
                 android:layout_height="30dp"
+                android:layout_weight="1"
                 android:background="@null"
                 android:backgroundTint="@color/colorMediumGrey"
                 android:text="@string/looks"
