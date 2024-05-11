@@ -7,6 +7,7 @@ import com.cvut.arfittingroom.draw.model.PaintOptions
 import com.cvut.arfittingroom.draw.model.element.Element
 import com.cvut.arfittingroom.draw.model.element.impl.Gif
 import com.cvut.arfittingroom.draw.path.DrawablePath
+import com.cvut.arfittingroom.draw.service.TexturedCurveDrawer
 import java.util.LinkedList
 import java.util.UUID
 import kotlin.collections.HashMap
@@ -27,6 +28,7 @@ class Layer(
                 style = Paint.Style.STROKE
             }
     val opacityPaint = Paint()
+
 
     /**
      * Range from 0.0 (fully transparent) to 1.0 (fully opaque)
@@ -67,7 +69,12 @@ class Layer(
             canvas.drawBitmap(it, 0f, 0f, null)
         }
 
-        canvas.drawPath(curPath, curPaint)
+        if (paintOptions.strokeTextureRef.isNotEmpty()) {
+            TexturedCurveDrawer.draw(canvas, curPath, curPaint.strokeWidth)
+        }
+        else {
+            canvas.drawPath(curPath, curPaint)
+        }
     }
 
     fun removeElement(elementId: UUID) {

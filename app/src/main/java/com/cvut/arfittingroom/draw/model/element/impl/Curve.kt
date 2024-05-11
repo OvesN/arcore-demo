@@ -1,5 +1,6 @@
 package com.cvut.arfittingroom.draw.model.element.impl
 
+import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Matrix
 import android.graphics.Paint
@@ -9,6 +10,8 @@ import com.cvut.arfittingroom.draw.command.Repaintable
 import com.cvut.arfittingroom.draw.model.element.BoundingBox
 import com.cvut.arfittingroom.draw.model.element.Element
 import com.cvut.arfittingroom.draw.path.DrawablePath
+import com.cvut.arfittingroom.draw.service.TexturedCurveDrawer
+import com.cvut.arfittingroom.utils.BitmapUtil
 import java.util.UUID
 import kotlin.math.max
 
@@ -22,6 +25,8 @@ class Curve(
     var path: DrawablePath,
     override val paint: Paint,
     override var rotationAngle: Float = 0f,
+    private var bitmapTexture: Bitmap? = null,
+    var textureRef: String = ""
 ) : Element(), Repaintable {
     override val name: String = "Line"
     override var boundingBox: BoundingBox
@@ -36,111 +41,137 @@ class Curve(
     private var ydiff: Float = 0f  // No translation by default
 
     private var radiusDiff: Float = 1f  // No scaling by default
+    private var scaledTextureBitmap: Bitmap? = null
 
     init {
         boundingBox = updateBoundingBoxAndCenter()
+
+        bitmapTexture?.let { originalBitmap ->
+            scaledTextureBitmap = Bitmap.createScaledBitmap(
+                originalBitmap,
+                paint.strokeWidth.toInt(), paint.strokeWidth.toInt(), true
+            )
+            scaledTextureBitmap?.let {
+                BitmapUtil.replaceNonTransparentPixels(
+                    it, (paint.alpha shl 24) or (paint.color and 0xFFFFFF)
+                )
+            }
+
+        }
     }
 
-    override fun drawSpecific(canvas: Canvas) {
-        val transformedPath = DrawablePath()
-        path.transform(createTransformationMatrix(), transformedPath)
+        //TODO scale bitmap?, repaint bitmap?
+        override fun drawSpecific(canvas: Canvas) {
+            val transformedPath = DrawablePath()
+            path.transform(createTransformationMatrix(), transformedPath)
 
-        canvas.drawPath(transformedPath, paint)
-    }
+            if (scaledTextureBitmap != null) {
+                scaledTextureBitmap?.let {
+                    TexturedCurveDrawer.draw(
+                        canvas,
+                        transformedPath,
+                        it,
+                        paint.strokeWidth
+                    )
+                }
+            } else {
+                canvas.drawPath(transformedPath, paint)
+            }
+        }
 
-    // These functions are overriden because
-    // we want to know the diff between old value and new value to create transformation matrix
-    override fun move(
-        x: Float,
-        y: Float,
-    ) {
-        centerX = x
-        centerY = y
+        // These functions are overriden because
+        // we want to know the diff between old value and new value to create transformation matrix
+        override fun move(
+            x: Float,
+            y: Float,
+        ) {
+            centerX = x
+            centerY = y
 
-        xdiff = centerX - originalCenterX
-        ydiff = centerY - originalCenterY
-    }
+            xdiff = centerX - originalCenterX
+            ydiff = centerY - originalCenterY
+        }
 
-    override fun endContinuousMove() {
-        centerX = originalCenterX
-        centerY = originalCenterY
-    }
+        override fun endContinuousMove() {
+            centerX = originalCenterX
+            centerY = originalCenterY
+        }
 
-    // Scaling function
-    override fun scale(newRadius: Float) {
-        outerRadius = max(newRadius, 1f)
+        // Scaling function
+        override fun scale(newRadius: Float) {
+            outerRadius = max(newRadius, 1f)
 
-        radiusDiff = outerRadius / originalRadius
-    }
+            radiusDiff = outerRadius / originalRadius
+        }
 
-    override fun scaleContinuously(factor: Float) {
-        super.scaleContinuously(factor)
+        override fun scaleContinuously(factor: Float) {
+            super.scaleContinuously(factor)
 
-        radiusDiff = outerRadius / originalRadius
-    }
+            radiusDiff = outerRadius / originalRadius
+        }
 
-    override fun endContinuousScale() {
-        outerRadius = originalRadius
-    }
+        override fun endContinuousScale() {
+            outerRadius = originalRadius
+        }
 
-    override fun doesIntersect(
-        x: Float,
-        y: Float,
-    ): Boolean {
-        if (!boundingBox.rectF.contains(x, y)) {
+        override fun doesIntersect(
+            x: Float,
+            y: Float,
+        ): Boolean {
+            if (!boundingBox.rectF.contains(x, y)) {
+                return false
+            }
+
+            val inverseMatrix = Matrix()
+            createTransformationMatrix().invert(inverseMatrix)
+
+            val point = floatArrayOf(x, y)
+
+            inverseMatrix.mapPoints(point)
+
+            val pm = PathMeasure(path, false)
+            val pathLength = pm.length
+            val pathCoords = FloatArray(2)  // Holds coordinates as [x, y]
+
+            var distance = 0f
+            while (distance < pathLength) {
+                // Get the coordinates at the current distance
+                pm.getPosTan(distance, pathCoords, null)
+
+                // Calculate the distance from the point to the current path segment point
+                val dx = pathCoords[0] - point[0]
+                val dy = pathCoords[1] - point[1]
+                if (dx * dx + dy * dy <= PROXIMITY_THRESHOLD * PROXIMITY_THRESHOLD) {
+                    return true
+                }
+
+                distance += 1f
+            }
+
             return false
         }
 
-        val inverseMatrix = Matrix()
-        createTransformationMatrix().invert(inverseMatrix)
-
-        val point = floatArrayOf(x, y)
-
-        inverseMatrix.mapPoints(point)
-
-        val pm = PathMeasure(path, false)
-        val pathLength = pm.length
-        val pathCoords = FloatArray(2)  // Holds coordinates as [x, y]
-
-        var distance = 0f
-        while (distance < pathLength) {
-            // Get the coordinates at the current distance
-            pm.getPosTan(distance, pathCoords, null)
-
-            // Calculate the distance from the point to the current path segment point
-            val dx = pathCoords[0] - point[0]
-            val dy = pathCoords[1] - point[1]
-            if (dx * dx + dy * dy <= PROXIMITY_THRESHOLD * PROXIMITY_THRESHOLD) {
-                return true
-            }
-
-            distance += 1f
+        override fun repaint(newColor: Int) {
+            paint.color = newColor
         }
 
-        return false
+        private fun createTransformationMatrix(): Matrix {
+            val matrix = Matrix()
+
+            matrix.postRotate(rotationAngle, originalCenterX, originalCenterY)
+            matrix.postScale(radiusDiff, radiusDiff, originalCenterX, originalCenterY)
+            matrix.postTranslate(xdiff, ydiff)
+            return matrix
+        }
+
+        private fun updateBoundingBoxAndCenter(): BoundingBox {
+            val bounds = RectF()
+            path.computeBounds(bounds, true)
+
+            centerX = bounds.centerX()
+            centerY = bounds.centerY()
+            outerRadius = max(bounds.width(), bounds.height()) / 2
+
+            return createBoundingBox()
+        }
     }
-
-    override fun repaint(newColor: Int) {
-        paint.color = newColor
-    }
-
-    private fun createTransformationMatrix(): Matrix {
-        val matrix = Matrix()
-
-        matrix.postRotate(rotationAngle, originalCenterX, originalCenterY)
-        matrix.postScale(radiusDiff, radiusDiff, originalCenterX, originalCenterY)
-        matrix.postTranslate(xdiff, ydiff)
-        return matrix
-    }
-
-    private fun updateBoundingBoxAndCenter(): BoundingBox {
-        val bounds = RectF()
-        path.computeBounds(bounds, true)
-
-        centerX = bounds.centerX()
-        centerY = bounds.centerY()
-        outerRadius = max(bounds.width(), bounds.height()) / 2
-
-        return createBoundingBox()
-    }
-}

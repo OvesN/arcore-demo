@@ -262,9 +262,8 @@
         android:layout_gravity="start"
         android:stepSize="1"
         android:value="10"
-        android:valueFrom="1"
-        android:valueTo="250"
         app:tickVisible="false"
+        app:vsb_max_value="300"
         app:vsb_bar_width="0dp"
         app:vsb_show_thumb="true" />
 </LinearLayout>

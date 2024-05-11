@@ -59,6 +59,12 @@ class MaskEditorFragment : Fragment() {
         drawView.applyBitmapBackground(backgroundBitmap)
 
         sliderLayout = view.findViewById(R.id.stroke_size_layout)
+
+        // This will block the touch event so it will not propagate to draw view
+        sliderLayout.setOnTouchListener { v, event ->
+            true
+        }
+
         slider = view.findViewById(R.id.stroke_size_slider)
         slider.thumbPlaceholderDrawable = ContextCompat.getDrawable(view.context, R.drawable.slider)
         slider.thumbContainerColor = Color.TRANSPARENT
@@ -127,7 +133,7 @@ class MaskEditorFragment : Fragment() {
             drawView.undo()
         }
 
-        slider.setOnProgressChangeListener {
+        slider.setOnReleaseListener {
             drawView.setStrokeWidth(it)
         }
 

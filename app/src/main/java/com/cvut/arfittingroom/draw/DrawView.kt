@@ -14,6 +14,7 @@ import android.view.MotionEvent
 import android.view.MotionEvent.ACTION_POINTER_UP
 import android.view.View
 import androidx.annotation.ColorInt
+import androidx.core.content.ContextCompat
 import androidx.core.graphics.alpha
 import com.cvut.arfittingroom.ARFittingRoomApplication
 import com.cvut.arfittingroom.R
@@ -38,6 +39,7 @@ import com.cvut.arfittingroom.draw.model.element.strategy.impl.StarPathCreationS
 import com.cvut.arfittingroom.draw.model.enums.EElementEditAction
 import com.cvut.arfittingroom.draw.model.enums.EShape
 import com.cvut.arfittingroom.draw.path.DrawablePath
+import com.cvut.arfittingroom.draw.service.TexturedCurveDrawer
 import com.cvut.arfittingroom.draw.service.LayerManager
 import com.cvut.arfittingroom.draw.service.UIDrawer
 import com.cvut.arfittingroom.model.SPAN_SLOP
@@ -54,6 +56,7 @@ import javax.inject.Inject
 import kotlin.math.abs
 import kotlin.math.atan2
 import kotlin.math.sqrt
+
 
 /**
  * Draw view for 2D editor
@@ -93,11 +96,27 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private var lastDownY = 0f
     private var frameCount = 0
 
+
     @Inject
     lateinit var layerManager: LayerManager
 
+
     init {
         (context.applicationContext as? ARFittingRoomApplication)?.appComponent?.inject(this)
+
+        //TODO delete
+
+        val drawable = ContextCompat.getDrawable(context, R.drawable.brush_option_0)!!
+
+        val width = if (drawable.intrinsicWidth > 0) drawable.intrinsicWidth else 1
+        val height = if (drawable.intrinsicHeight > 0) drawable.intrinsicHeight else 1
+        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        drawable.setBounds(0, 0, canvas.width, canvas.height)
+        drawable.draw(canvas)
+
+
+        setStrokeTextureBitmap(bitmap, "ffoof")
 
         // Add event for element scaling
         scaleGestureDetector =
@@ -610,11 +629,41 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         @ColorInt
         paintOptions.color = newColor
         paintOptions.alpha = newColor.alpha
+
+
+        if (paintOptions.strokeTextureRef.isNotEmpty()) {
+            TexturedCurveDrawer.updateBrushTextureBitmap(paintOptions.strokeWidth.toInt(), paintOptions.color, paintOptions.alpha)
+         //   TexturedCurveDrawer.changeBrushColor(paintOptions.color, paintOptions.alpha)
+        }
     }
 
     fun setStrokeWidth(newStrokeWidth: Int) {
         paintOptions.strokeWidth = newStrokeWidth.toFloat()
+
+        if (paintOptions.strokeTextureRef.isNotEmpty()) {
+            TexturedCurveDrawer.updateBrushTextureBitmap(
+                newStrokeWidth,
+                paintOptions.color,
+                paintOptions.alpha,
+            )
+        }
     }
+
+    fun setStrokeTextureBitmap(bitmap: Bitmap, imageRef: String) {
+        paintOptions.strokeTextureRef = imageRef
+        TexturedCurveDrawer.setBrushBitmap(
+            bitmap,
+            paintOptions.strokeWidth,
+            paintOptions.color,
+            paintOptions.alpha
+        )
+    }
+
+    fun unsetStrokeTextureBitmap() {
+        paintOptions.strokeTextureRef = ""
+        TexturedCurveDrawer.resetBitmaps()
+    }
+
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
@@ -681,14 +730,16 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             Curve(
                 path = layerManager.getCurPath(),
                 paint =
-                    Paint().apply {
-                        color = paintOptions.color
-                        strokeWidth = paintOptions.strokeWidth
-                        alpha = paintOptions.alpha
-                        strokeCap = Paint.Cap.ROUND
-                        strokeJoin = Paint.Join.ROUND
-                        style = Paint.Style.STROKE
-                    },
+                Paint().apply {
+                    color = paintOptions.color
+                    strokeWidth = paintOptions.strokeWidth
+                    alpha = paintOptions.alpha
+                    strokeCap = Paint.Cap.ROUND
+                    strokeJoin = Paint.Join.ROUND
+                    style = Paint.Style.STROKE
+                },
+                bitmapTexture = TexturedCurveDrawer.originalBitmap,
+                textureRef = paintOptions.strokeTextureRef
             )
 
         layerManager.setCurPath(DrawablePath())
@@ -708,12 +759,12 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                 outerRadius = outerRadius,
                 pathCreationStrategy = HeartPathCreationStrategy(),
                 paint =
-                    Paint().apply {
-                        color = paintOptions.color
-                        strokeWidth = outerRadius
-                        alpha = paintOptions.alpha
-                        style = Paint.Style.FILL
-                    },
+                Paint().apply {
+                    color = paintOptions.color
+                    strokeWidth = outerRadius
+                    alpha = paintOptions.alpha
+                    style = Paint.Style.FILL
+                },
             )
 
         addElementToLayer(layerManager.getActiveLayerIndex(), heart)
@@ -731,12 +782,12 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                 outerRadius = outerRadius,
                 pathCreationStrategy = StarPathCreationStrategy(),
                 paint =
-                    Paint().apply {
-                        color = paintOptions.color
-                        style = paintOptions.style
-                        strokeWidth = 6f
-                        alpha = paintOptions.alpha
-                    },
+                Paint().apply {
+                    color = paintOptions.color
+                    style = paintOptions.style
+                    strokeWidth = 6f
+                    alpha = paintOptions.alpha
+                },
             )
 
         addElementToLayer(layerManager.getActiveLayerIndex(), star)
@@ -876,7 +927,10 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                 onSaved()
             }
         } else {
-            saveTempMaskTextureBitmap(adjustBitmapFromEditor(createBitmap(), height, width), context) {
+            saveTempMaskTextureBitmap(
+                adjustBitmapFromEditor(createBitmap(), height, width),
+                context
+            ) {
                 onSaved()
             }
         }
