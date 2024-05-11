@@ -89,7 +89,6 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private var handler = Handler(Looper.getMainLooper())
     private var gifRunnable: Runnable? = null
     private var frameDelay: Long = 100
-    private var layerInitializedListener: OnLayerInitializedListener? = null
     private var lastDownX = 0f
     private var lastDownY = 0f
     private var frameCount = 0

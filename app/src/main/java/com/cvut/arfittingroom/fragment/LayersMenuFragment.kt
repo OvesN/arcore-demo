@@ -41,6 +41,9 @@ class LayersMenuFragment(private val drawView: DrawView) : Fragment() {
 
         view.findViewById<ImageButton>(R.id.add_layer_button).setOnClickListener {
             updateLayersButtons(drawView.addLayer() + 1)
+            drawView.layerManager.makeLayersSemiTransparentExceptOne(drawView.layerManager.getActiveLayerIndex())
+            drawView.invalidate()
+
             StyleableToast.makeText(requireContext(), "New layer added", R.style.mytoast).show()
         }
 
@@ -48,6 +51,11 @@ class LayersMenuFragment(private val drawView: DrawView) : Fragment() {
             drawView.removeLayer(drawView.layerManager.getActiveLayerIndex())
             updateLayersButtons(drawView.layerManager.getNumOfLayers())
             StyleableToast.makeText(requireContext(), "Layer deleted", R.style.mytoast).show()
+        }
+
+        // This will block the touch event so it will not propagate to draw view
+        view.findViewById<LinearLayout>(R.id.layers_menu_layout).setOnTouchListener{ v, event ->
+            true
         }
 
         layerUpButton = view.findViewById(R.id.move_layer_up_button)
@@ -104,7 +112,10 @@ class LayersMenuFragment(private val drawView: DrawView) : Fragment() {
                     text = i.toString()
                     setOnClickListener {
                         drawView.layerManager.setActiveLayer(i)
+                        drawView.layerManager.makeLayersSemiTransparentExceptOne(i)
                         updateLayersButtons(drawView.layerManager.getNumOfLayers())
+
+                        drawView.invalidate()
                     }
                 }
 

@@ -74,6 +74,12 @@ class LayerManager {
 
     fun isVisible(layerIndex: Int) = layers[layerIndex].isVisible
 
+    fun makeLayersSemiTransparentExceptOne(layerIndex: Int) {
+        makeLayersSemiTransparent()
+        setLayerOpacity(1f, layerIndex)
+        recreateLayersBitmaps()
+    }
+
     // Returns index of the last layer
     fun addLayer(
         width: Int,
@@ -254,6 +260,25 @@ class LayerManager {
             )
         }
 
+    fun resetLayersOpacity() {
+        layers.forEach { it.setOpacity(1f) }
+    }
+
+    fun makeLayersSemiTransparent() {
+        layers.forEach { layer ->
+
+            layer.setOpacity(0.5f)
+        }
+    }
+
+    fun setLayerOpacity(opacity: Float, layerIndex: Int) {
+        if ( layerIndex >= layers.size|| layerIndex < 0) {
+            return
+        }
+        layers[layerIndex].setOpacity(opacity)
+    }
+
+
     /**
      * Initiates the process of separating the elements that
      * should be drawn below and above the [element] into two distinct bitmaps on the active layer
@@ -326,7 +351,6 @@ class LayerManager {
 
         layers.forEach { layer ->
             val layerBitmap = layer.createBitmap()
-
             layerBitmap?.let { canvas.drawBitmap(layerBitmap, 0f, 0f, layer.opacityPaint) }
         }
 
@@ -338,6 +362,10 @@ class LayerManager {
         layersAboveActiveLayerBitmap?.recycle()
         layersBelowActiveLayerBitmap = null
         layersAboveActiveLayerBitmap = null
+    }
+
+    fun recreateLayersBitmaps() {
+        setActiveLayer(activeLayerIndex)
     }
 
     fun restoreDeletedLayer(layerId: UUID) {

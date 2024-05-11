@@ -89,6 +89,8 @@ class MaskEditorFragment : Fragment() {
         }
 
         view.findViewById<ImageButton>(R.id.button_ok).setOnClickListener {
+            hideLayersMenu()
+
             drawView.saveBitmap {
                 showMainLayout()
             }
@@ -133,7 +135,15 @@ class MaskEditorFragment : Fragment() {
     }
 
     private fun showLayersMenu() {
-        layersButton.setImageDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.selected_layers))
+        drawView.layerManager.makeLayersSemiTransparentExceptOne(drawView.layerManager.getActiveLayerIndex())
+        drawView.invalidate()
+
+        layersButton.setImageDrawable(
+            ContextCompat.getDrawable(
+                requireContext(),
+                R.drawable.selected_layers
+            )
+        )
 
         sliderLayout.visibility = View.GONE
         requireActivity()
@@ -145,7 +155,16 @@ class MaskEditorFragment : Fragment() {
     }
 
     private fun hideLayersMenu() {
-        layersButton.setImageDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.layers))
+        drawView.layerManager.resetLayersOpacity()
+        drawView.layerManager.recreateLayersBitmaps()
+        drawView.invalidate()
+
+        layersButton.setImageDrawable(
+            ContextCompat.getDrawable(
+                requireContext(),
+                R.drawable.layers
+            )
+        )
         requireActivity()
             .supportFragmentManager
             .beginTransaction()
