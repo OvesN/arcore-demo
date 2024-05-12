@@ -8,10 +8,13 @@ import android.graphics.Matrix
 import android.graphics.Paint
 import android.graphics.RectF
 import androidx.core.graphics.drawable.toBitmap
+import androidx.core.graphics.get
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
 import com.cvut.arfittingroom.R
 import com.cvut.arfittingroom.draw.model.element.Element
 import com.cvut.arfittingroom.draw.model.enums.EElementEditAction
+import java.lang.IllegalArgumentException
+import kotlin.math.sqrt
 
 class UIDrawer(private val context: Context) {
     private var menuWidth: Float = 0f
@@ -53,7 +56,7 @@ class UIDrawer(private val context: Context) {
             bitmap?.width ?: faceTextureVector?.intrinsicWidth ?: 0
         val bitmapHeight =
             bitmap?.height ?: faceTextureVector?.intrinsicHeight
-                ?: 0
+            ?: 0
 
         val scale =
             (viewWidth.toFloat() / bitmapWidth).coerceAtMost(viewHeight.toFloat() / bitmapHeight)
@@ -131,7 +134,8 @@ class UIDrawer(private val context: Context) {
 
     private fun loadEditElementIcons() {
         editElementIcons[EElementEditAction.DELETE] =
-            VectorDrawableCompat.create(context.resources, R.drawable.yellow_delete, null)?.toBitmap()!!
+            VectorDrawableCompat.create(context.resources, R.drawable.yellow_delete, null)
+                ?.toBitmap()!!
 
         editElementIcons[EElementEditAction.ROTATE] =
             VectorDrawableCompat.create(context.resources, R.drawable.rotate, null)?.toBitmap()!!
@@ -140,7 +144,8 @@ class UIDrawer(private val context: Context) {
             VectorDrawableCompat.create(context.resources, R.drawable.rezise, null)?.toBitmap()!!
 
         editElementIcons[EElementEditAction.MENU] =
-            VectorDrawableCompat.create(context.resources, R.drawable.yellow_menu, null)?.toBitmap()!!
+            VectorDrawableCompat.create(context.resources, R.drawable.yellow_menu, null)
+                ?.toBitmap()!!
     }
 
     fun drawFaceTextureImage(canvas: Canvas) {
@@ -247,6 +252,83 @@ class UIDrawer(private val context: Context) {
         }
     }
 
+    fun drawPipette(
+        canvas: Canvas,
+        canvasTransformationMatrix: Matrix,
+        lastTouchX: Float, lastTouchY: Float,
+        bitmap: Bitmap?
+    ): Int {
+        val points = floatArrayOf(lastTouchX, lastTouchY)
+        canvasTransformationMatrix.mapPoints(points)
+
+        val radius = 100f
+        val transformedRadius = mapRadius(canvasTransformationMatrix, radius)
+        val strokeExtra = 10f
+        val transformedStrokeWidth = mapRadius(canvasTransformationMatrix, strokeExtra)
+        val verticalOffset =
+            mapRadius(canvasTransformationMatrix, 200f)
+        val selectedColor =
+            bitmap?.let {
+                try {
+                    it[lastTouchX.toInt(), (lastTouchY - verticalOffset).toInt()]
+                } catch (ex: IllegalArgumentException) {
+                    Color.TRANSPARENT
+                }
+            }
+                ?: Color.TRANSPARENT
+
+        val pipettePaint = Paint().apply {
+            style = Paint.Style.FILL
+            color = selectedColor
+        }
+
+        val strokePaint = Paint().apply {
+            style = Paint.Style.STROKE
+            color = Color.WHITE
+            strokeWidth = transformedStrokeWidth
+        }
+
+        val crossCenterY = lastTouchY - verticalOffset
+
+        canvas.drawCircle(lastTouchX, crossCenterY, transformedRadius + strokeExtra, strokePaint)
+        canvas.drawCircle(
+            lastTouchX, crossCenterY, transformedRadius, pipettePaint
+        )
+        val crossLength = 20f
+        val crossPaint = Paint().apply {
+            style = Paint.Style.STROKE
+            color = Color.WHITE
+            strokeWidth = 5f
+        }
+
+        canvas.drawLine(
+            lastTouchX - crossLength,
+            crossCenterY,
+            lastTouchX + crossLength,
+            crossCenterY,
+            crossPaint
+        )
+
+        // Vertical line of the cross
+        canvas.drawLine(
+            lastTouchX,
+            crossCenterY - crossLength,
+            lastTouchX,
+            crossCenterY + crossLength,
+            crossPaint
+        )
+
+        return selectedColor
+    }
+
+    private fun mapRadius(matrix: Matrix, radius: Float): Float {
+        val inverse = Matrix()
+        matrix.invert(inverse)
+        val vector = floatArrayOf(radius, 0f)
+        inverse.mapVectors(vector) // Transform for scale and rotation without translation
+        return sqrt(vector[0] * vector[0] + vector[1] * vector[1])
+    }
+
     fun setBackgroundBitmap(bitmap: Bitmap?) {
         backgroundBitmap = bitmap
         backgroundBitmapMatrix = prepareMatrix(bitmap)
@@ -255,7 +337,8 @@ class UIDrawer(private val context: Context) {
     fun checkEditButtons(
         x: Float,
         y: Float,
-    ): EElementEditAction? = editElementIconsBounds.entries.firstOrNull { it.value.contains(x, y) }?.key
+    ): EElementEditAction? =
+        editElementIconsBounds.entries.firstOrNull { it.value.contains(x, y) }?.key
 
     fun drawBackground(canvas: Canvas) {
         backgroundBitmap?.let { canvas.drawBitmap(it, backgroundBitmapMatrix, null) }

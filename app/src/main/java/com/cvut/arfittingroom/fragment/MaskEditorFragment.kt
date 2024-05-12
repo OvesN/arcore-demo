@@ -138,7 +138,7 @@ class MaskEditorFragment : Fragment() {
 
         view.findViewById<ImageButton>(R.id.button_color_picker).setOnClickListener {
             UIUtil.showColorPickerDialog(
-                requireContext(),
+                requireActivity(),
                 drawView.paintOptions.color,
                 fill = drawView.paintOptions.style == Paint.Style.FILL,
                 shouldShowFillCheckbox = true,
@@ -231,6 +231,9 @@ class MaskEditorFragment : Fragment() {
                 deserializeEditorState(it)
                 editorStateTO = null
             }
+        }
+        drawView.post {
+            drawView.applyBitmapBackground(backgroundBitmap)
         }
         drawView.layerManager.resetAllGifs()
         drawView.layerManager.setAllGifsToStaticMode()

@@ -10,6 +10,7 @@ import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewTreeObserver
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
@@ -212,6 +213,8 @@ class ShowRoomActivity :
             maskEditorFragment.editorStateTO = lookTO.editorState
 
             stopAnimation()
+            stateService.clearAll()
+
             accessoriesOptionsFragment.applyState(lookTO.appliedModels)
             makeupOptionsFragment.applyState(lookTO.appliedMakeup)
 
@@ -409,7 +412,7 @@ class ShowRoomActivity :
 
     private fun checkIsSupportedDeviceOrFinish(): Boolean {
         if (ArCoreApk.getInstance()
-            .checkAvailability(this) == ArCoreApk.Availability.UNSUPPORTED_DEVICE_NOT_CAPABLE
+                .checkAvailability(this) == ArCoreApk.Availability.UNSUPPORTED_DEVICE_NOT_CAPABLE
         ) {
             StyleableToast.makeText(this, "Augmented Faces requires ARCore", R.style.mytoast).show()
             finish()
@@ -561,16 +564,21 @@ class ShowRoomActivity :
         if (existingFragment == null) {
             container.visibility = View.INVISIBLE
             fragmentManager.beginTransaction()
-                .add(R.id.makeup_editor_fragment_container, maskEditorFragment, MaskEditorFragment.MAKEUP_EDITOR_FRAGMENT_TAG)
+                .add(
+                    R.id.makeup_editor_fragment_container,
+                    maskEditorFragment,
+                    MaskEditorFragment.MAKEUP_EDITOR_FRAGMENT_TAG
+                )
                 .commit()
-            //Prepare layout in advance and render with delay
+            // Prepare layout in advance and render with delay
+            // FIXME
             container.postDelayed({
                 container.visibility = View.VISIBLE
                 findViewById<View>(R.id.top_ui).visibility = View.GONE
                 findViewById<View>(R.id.bottom_ui).visibility = View.GONE
                 maskEditorFragment.applyBackgroundBitmap(stateService.makeupTextureBitmap)
                 arSceneView.pause()
-            }, 300)
+            }, 700)
         } else {
             findViewById<View>(R.id.top_ui).visibility = View.GONE
             findViewById<View>(R.id.bottom_ui).visibility = View.GONE
@@ -579,6 +587,7 @@ class ShowRoomActivity :
             maskEditorFragment.onResume()
         }
     }
+
 
     private fun resetMenu() {
         for (i in 0 until binding.menuButtons.childCount) {

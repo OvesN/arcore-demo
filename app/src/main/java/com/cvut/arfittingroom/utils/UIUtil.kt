@@ -4,6 +4,8 @@ import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.app.AlertDialog
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.LayerDrawable
 import android.view.LayoutInflater
@@ -16,7 +18,11 @@ import android.widget.ImageView
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
+import androidx.core.graphics.toColor
+import com.bumptech.glide.request.target.CustomTarget
 import com.cvut.arfittingroom.R
+import com.skydoves.colorpickerview.ActionMode
+import com.skydoves.colorpickerview.ColorEnvelope
 import com.skydoves.colorpickerview.ColorPickerDialog
 import com.skydoves.colorpickerview.ColorPickerView
 import com.skydoves.colorpickerview.listeners.ColorEnvelopeListener
@@ -38,7 +44,6 @@ object UIUtil {
         shouldShowPipette: Boolean = false,
         onPipetteSelected: () -> Unit = {},
         onColorSelected: (Int, Boolean) -> Unit,
-
     ) {
         val dialogView: View =
             LayoutInflater.from(context).inflate(R.layout.color_picker_dialog, null)
@@ -52,6 +57,7 @@ object UIUtil {
         colorPickerView.attachAlphaSlider(dialogView.findViewById(R.id.alphaSlideBar))
         colorPickerView.attachBrightnessSlider(dialogView.findViewById(R.id.brightnessSlideBar))
         colorPickerView.setInitialColor(initialColor)
+        colorPickerView.preferenceName = "MyColorPicker"
 
         val dialog =
             AlertDialog.Builder(context)
@@ -67,7 +73,6 @@ object UIUtil {
             dialog.dismiss()
         }
 
-
         if (shouldShowFillCheckbox) {
             checkbox?.let { it.visibility = View.VISIBLE }
         }
@@ -78,6 +83,7 @@ object UIUtil {
                 dialog.dismiss()
             }
         }
+
         dialog.show()
     }
 

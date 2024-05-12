@@ -53,6 +53,7 @@ import com.cvut.arfittingroom.utils.FileUtil.saveTempMaskTextureBitmap
 import com.cvut.arfittingroom.utils.UIUtil.showColorPickerDialog
 import io.github.muddz.styleabletoast.StyleableToast
 import pl.droidsonroids.gif.GifDrawable
+import java.lang.IllegalArgumentException
 import javax.inject.Inject
 import kotlin.math.abs
 import kotlin.math.atan2
@@ -98,7 +99,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private var lastDownX = 0f
     private var lastDownY = 0f
     private var frameCount = 0
-
+    private var pipetteSelectedColor = Color.TRANSPARENT
 
     @Inject
     lateinit var layerManager: LayerManager
@@ -601,6 +602,11 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             ACTION_POINTER_UP, ACTION_UP -> {
                 editorMode = previousEditorMode
                 layerManager.bitmapFromAllLayers = null
+
+                if (pipetteSelectedColor != Color.TRANSPARENT) {
+                    setColor(pipetteSelectedColor, paintOptions.style == Paint.Style.FILL)
+                }
+                pipetteSelectedColor = Color.TRANSPARENT
             }
 
             ACTION_MOVE -> {
@@ -636,7 +642,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         return newLayerIndex
     }
 
-    //TODO update for stamps
+
     fun setColor(newColor: Int, fill: Boolean) {
         @ColorInt
         paintOptions.color = newColor
@@ -730,50 +736,15 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         }
 
         if (editorMode == EEditorMode.PIPETTE) {
-            if (editorMode == EEditorMode.PIPETTE) {
-                val radius = 100f
-                val transformedRadius = mapRadius(canvasTransformationMatrix, radius)
-                val strokeExtra = 10f
-                val transformedStrokeWidth = mapRadius(canvasTransformationMatrix, strokeExtra)
-                val verticalOffset =
-                    mapRadius(canvasTransformationMatrix, 200f)
-
-                val pipettePaint = Paint().apply {
-                    style = Paint.Style.FILL
-                    color =
-                        layerManager.bitmapFromAllLayers?.let { it[lastTouchX.toInt(), (lastTouchY - verticalOffset).toInt()] }
-                            ?: Color.TRANSPARENT
-                }
-
-                val strokePaint = Paint().apply {
-                    style = Paint.Style.STROKE
-                    color = Color.WHITE
-                    strokeWidth = transformedStrokeWidth
-                }
-
-
-                canvas.drawCircle(
+                pipetteSelectedColor = uiDrawer.drawPipette(
+                    canvas,
+                    canvasTransformationMatrix,
                     lastTouchX,
-                    lastTouchY - verticalOffset,
-                    transformedRadius + strokeExtra,
-                    strokePaint
+                    lastTouchY,
+                    layerManager.bitmapFromAllLayers
                 )
-                canvas.drawCircle(
-                    lastTouchX,
-                    lastTouchY - verticalOffset,
-                    transformedRadius,
-                    pipettePaint
-                )
-            }
+
         }
-    }
-
-    private fun mapRadius(matrix: Matrix, radius: Float): Float {
-        val inverse = Matrix()
-        matrix.invert(inverse)
-        val vector = floatArrayOf(radius, 0f)
-        inverse.mapVectors(vector) // Transform for scale and rotation without translation
-        return sqrt(vector[0] * vector[0] + vector[1] * vector[1])
     }
 
     private fun actionDown(
@@ -988,7 +959,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
         val inverseMatrix = Matrix()
         canvasTransformationMatrix.invert(inverseMatrix)
-        val touchPoint = floatArrayOf((height / 2).toFloat(), (width / 2).toFloat())
+        val touchPoint = floatArrayOf((width / 2).toFloat(), (height / 2).toFloat())
         inverseMatrix.mapPoints(touchPoint)
 
         lastTouchX = touchPoint[0]
