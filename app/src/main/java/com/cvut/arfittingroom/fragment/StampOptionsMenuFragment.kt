@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.Paint.Style
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -12,15 +13,11 @@ import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
-import androidx.core.view.marginTop
-import androidx.core.view.setPadding
 import androidx.fragment.app.Fragment
 import com.cvut.arfittingroom.R
 import com.cvut.arfittingroom.draw.DrawView
 import com.cvut.arfittingroom.draw.model.element.strategy.PathCreationStrategy
 import com.cvut.arfittingroom.utils.ScreenUtil
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.storage.FirebaseStorage
 
 class StampOptionsMenuFragment(
     private val strategies: Map<String, @JvmSuppressWildcards PathCreationStrategy>,
@@ -29,6 +26,7 @@ class StampOptionsMenuFragment(
     private var selectedViewId = 0
     private var selectedColor: Int = Color.BLACK
     private var underscoreSelectedView: View? = null
+    private var selectedStyle:Style = Style.FILL
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -68,12 +66,12 @@ class StampOptionsMenuFragment(
                 visibility = View.INVISIBLE
             }
 
-            //TODO stoke or fill?
             val bitmap = Bitmap.createBitmap(imageSizePx, imageSizePx, Bitmap.Config.ARGB_8888)
             val canvas = Canvas(bitmap)
             val paint = Paint().apply {
                 color = Color.WHITE
-                style = Paint.Style.FILL
+                style = selectedStyle
+                strokeWidth = 3f
                 isAntiAlias = true
             }
             val path = stamp.value.createPath(imageSizePx / 2f, imageSizePx / 2f, imageSizePx / 2f)
@@ -90,6 +88,9 @@ class StampOptionsMenuFragment(
                 }
             }
 
+            if (selectedViewId == imageButton.id) {
+                underscoreLine.visibility = View.VISIBLE
+            }
             verticalContainer.addView(imageButton)
             verticalContainer.addView(underscoreLine)
             options.addView(verticalContainer)
@@ -122,11 +123,19 @@ class StampOptionsMenuFragment(
     }
 
 
-    fun changeColor(newColor: Int) {
+    fun changeColor(newColor: Int, fill: Boolean) {
         selectedColor = newColor
 
+        val newStyle = if (fill)  Style.FILL else Style.STROKE
+
+        if (newStyle != selectedStyle) {
+            selectedStyle = newStyle
+            createStampMenu(requireView())
+        }
         requireView().findViewById<ImageButton>(selectedViewId)
             ?.let { it.imageTintList = ColorStateList.valueOf(newColor) }
     }
+
+
 
 }

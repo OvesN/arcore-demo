@@ -67,8 +67,9 @@ class MaskEditorFragment : Fragment() {
 
         // This will block the touch event so it will not propagate to draw view
         sliderLayout.setOnTouchListener { v, event -> true }
-        view.findViewById<View>(R.id.top_ui_makeup_editor).setOnTouchListener { v, event ->  true}
-        view.findViewById<View>(R.id.bottom_ui_makeup_editor).setOnTouchListener { v, event ->  true}
+        view.findViewById<View>(R.id.top_ui_makeup_editor).setOnTouchListener { v, event -> true }
+        view.findViewById<View>(R.id.bottom_ui_makeup_editor)
+            .setOnTouchListener { v, event -> true }
 
         menuButtons = view.findViewById(R.id.menu_buttons)
 
@@ -104,6 +105,7 @@ class MaskEditorFragment : Fragment() {
             ?.commit()
 
         drawView.post {
+            mapper.setDimensions(drawView.width, drawView.height)
             drawView.setDimensions(drawView.width, drawView.height)
             drawView.invalidate()
             if (drawView.layerManager.getNumOfLayers() == 0) {
@@ -147,7 +149,7 @@ class MaskEditorFragment : Fragment() {
                     fill
                 )
                 brushOptionsMenuFragment.changeColor(envelopColor)
-                stampOptionsMenuFragment.changeColor(envelopColor)
+                stampOptionsMenuFragment.changeColor(envelopColor, fill)
             }
         }
 
@@ -224,8 +226,10 @@ class MaskEditorFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         editorStateTO?.let {
-            deserializeEditorState(it)
-            editorStateTO = null
+            drawView.post {
+                deserializeEditorState(it)
+                editorStateTO = null
+            }
         }
         drawView.layerManager.resetAllGifs()
         drawView.layerManager.setAllGifsToStaticMode()
@@ -326,8 +330,6 @@ class MaskEditorFragment : Fragment() {
     }
 
     private fun deserializeEditorState(editorStateTO: EditorStateTO) {
-        mapper.setDimensions(drawView.width, drawView.height)
-
         val elementsMap =
             editorStateTO.elements.associateBy(
                 keySelector = { it.id },
@@ -354,6 +356,7 @@ class MaskEditorFragment : Fragment() {
         drawView.layerManager.deleteLayers()
 
         drawView.layerManager.layers.addAll(layersList)
+
     }
 
     companion object {

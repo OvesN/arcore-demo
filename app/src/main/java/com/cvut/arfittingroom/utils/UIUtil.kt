@@ -44,7 +44,7 @@ object UIUtil {
         val colorPickerView = dialogView.findViewById<ColorPickerView>(R.id.colorPickerView)
 
         val checkbox =  dialogView.findViewById<CheckBox>(R.id.fill_checkbox)
-        checkbox.isSelected = fill
+        checkbox.isChecked = fill
 
         if (shouldShowFillCheckbox) {
            checkbox?.let { it.visibility = View.VISIBLE }
@@ -67,7 +67,7 @@ object UIUtil {
         }
 
         dialogView.findViewById<Button>(R.id.ok_button).setOnClickListener {
-            onColorSelected(colorPickerView.colorEnvelope.color, checkbox.isSelected)
+            onColorSelected(colorPickerView.colorEnvelope.color, checkbox.isChecked)
             dialog.dismiss()
         }
 

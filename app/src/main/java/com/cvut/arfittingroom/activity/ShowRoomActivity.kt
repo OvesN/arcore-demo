@@ -576,6 +576,7 @@ class ShowRoomActivity :
             findViewById<View>(R.id.bottom_ui).visibility = View.GONE
             showFragment(maskEditorFragment)
             maskEditorFragment.applyBackgroundBitmap(stateService.makeupTextureBitmap)
+            maskEditorFragment.onResume()
         }
     }
 

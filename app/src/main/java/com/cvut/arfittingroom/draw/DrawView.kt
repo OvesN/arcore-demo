@@ -759,28 +759,6 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         addElementToLayer(layerManager.getActiveLayerIndex(), curve)
     }
 
-    private fun drawHeart(
-        centerX: Float,
-        centerY: Float,
-        outerRadius: Float,
-    ) {
-        val heart =
-            Stamp(
-                centerX = centerX,
-                centerY = centerY,
-                outerRadius = outerRadius,
-                pathCreationStrategy = HeartPathCreationStrategy(),
-                paint =
-                Paint().apply {
-                    color = paintOptions.color
-                    strokeWidth = outerRadius
-                    alpha = paintOptions.alpha
-                    style = paintOptions.style
-                },
-            )
-        addElementToLayer(layerManager.getActiveLayerIndex(), heart)
-    }
-
     private fun drawStamp(
         centerX: Float,
         centerY: Float,
