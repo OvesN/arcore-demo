@@ -79,12 +79,12 @@
             android:gravity="center_horizontal"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toTopOf="@id/second_line_buttons"
+            app:layout_constraintBottom_toTopOf="@id/menu_buttons"
             app:layout_constraintHorizontal_bias="0.5"/>
 
 
         <LinearLayout
-            android:id="@+id/second_line_buttons"
+            android:id="@+id/menu_buttons"
             android:layout_width="wrap_content"
             android:layout_height="30dp"
             android:background="@drawable/button"

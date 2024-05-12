@@ -26,7 +26,7 @@
         android:id="@+id/top_ui"
         android:layout_width="match_parent"
         android:layout_height="60dp"
-        android:background="@color/colorBlack"
+        android:background="@color/colorTransparentBlack"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
@@ -88,7 +88,7 @@
         android:id="@+id/bottom_ui"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/colorBlack"
+        android:background="@color/colorTransparentBlack"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
@@ -164,7 +164,7 @@
 
 
         <LinearLayout
-            android:id="@+id/second_line_buttons"
+            android:id="@+id/menu_buttons"
             android:layout_width="match_parent"
             android:layout_height="30dp"
             android:layout_marginTop="10dp"
@@ -224,7 +224,7 @@
             android:background="@color/colorBlack"
             android:gravity="center_horizontal"
 
-            app:layout_constraintBottom_toTopOf="@id/second_line_buttons"
+            app:layout_constraintBottom_toTopOf="@id/menu_buttons"
             app:layout_constraintEnd_toStartOf="@id/right_column_buttons"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@id/left_column_buttons" />

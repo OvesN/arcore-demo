@@ -10,7 +10,7 @@ import com.cvut.arfittingroom.draw.command.Repaintable
 import com.cvut.arfittingroom.draw.model.element.BoundingBox
 import com.cvut.arfittingroom.draw.model.element.Element
 import com.cvut.arfittingroom.draw.path.DrawablePath
-import com.cvut.arfittingroom.draw.service.TexturedCurveDrawer
+import com.cvut.arfittingroom.draw.service.TexturedBrushDrawer
 import com.cvut.arfittingroom.utils.BitmapUtil
 import java.util.UUID
 import kotlin.math.max
@@ -25,8 +25,8 @@ class Curve(
     var path: DrawablePath,
     override val paint: Paint,
     override var rotationAngle: Float = 0f,
-    private var bitmapTexture: Bitmap? = null,
-    var textureRef: String = ""
+    bitmapTexture: Bitmap? = null,
+    var strokeTextureRef: String = ""
 ) : Element(), Repaintable {
     override val name: String = "Line"
     override var boundingBox: BoundingBox
@@ -67,7 +67,7 @@ class Curve(
 
             if (scaledTextureBitmap != null) {
                 scaledTextureBitmap?.let {
-                    TexturedCurveDrawer.draw(
+                    TexturedBrushDrawer.draw(
                         canvas,
                         transformedPath,
                         it,

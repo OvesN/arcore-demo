@@ -58,7 +58,7 @@ class AccessoriesOptionsFragment : Fragment() {
         savedInstanceState: Bundle?,
     ) {
         super.onViewCreated(view, savedInstanceState)
-        getView()?.let { fetchAccessoriesTypes(it) }
+        fetchAccessoriesTypes(view)
     }
 
     private fun fetchAccessoriesTypes(view: View) {

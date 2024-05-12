@@ -14,7 +14,6 @@ import android.view.MotionEvent
 import android.view.MotionEvent.ACTION_POINTER_UP
 import android.view.View
 import androidx.annotation.ColorInt
-import androidx.core.content.ContextCompat
 import androidx.core.graphics.alpha
 import com.cvut.arfittingroom.ARFittingRoomApplication
 import com.cvut.arfittingroom.R
@@ -34,16 +33,18 @@ import com.cvut.arfittingroom.draw.model.element.impl.Curve
 import com.cvut.arfittingroom.draw.model.element.impl.Gif
 import com.cvut.arfittingroom.draw.model.element.impl.Image
 import com.cvut.arfittingroom.draw.model.element.impl.Stamp
+import com.cvut.arfittingroom.draw.model.element.strategy.PathCreationStrategy
 import com.cvut.arfittingroom.draw.model.element.strategy.impl.HeartPathCreationStrategy
 import com.cvut.arfittingroom.draw.model.element.strategy.impl.StarPathCreationStrategy
 import com.cvut.arfittingroom.draw.model.enums.EElementEditAction
-import com.cvut.arfittingroom.draw.model.enums.EShape
+import com.cvut.arfittingroom.draw.model.enums.EDrawingMode
 import com.cvut.arfittingroom.draw.path.DrawablePath
-import com.cvut.arfittingroom.draw.service.TexturedCurveDrawer
+import com.cvut.arfittingroom.draw.service.TexturedBrushDrawer
 import com.cvut.arfittingroom.draw.service.LayerManager
 import com.cvut.arfittingroom.draw.service.UIDrawer
 import com.cvut.arfittingroom.model.SPAN_SLOP
 import com.cvut.arfittingroom.model.TOUCH_TO_MOVE_THRESHOLD
+import com.cvut.arfittingroom.model.to.BrushTO
 import com.cvut.arfittingroom.utils.BitmapUtil.adjustBitmapFromEditor
 import com.cvut.arfittingroom.utils.FileUtil.deleteTempFiles
 import com.cvut.arfittingroom.utils.FileUtil.saveTempMaskFrames
@@ -84,7 +85,8 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private var isInElementScalingMode: Boolean = false
     private var isInElementMenuMode: Boolean = false
     var selectedElement: Element? = null
-    var strokeShape = EShape.CIRCLE
+    private var drawingMode = EDrawingMode.BRUSH
+    private var stampType: PathCreationStrategy? = null
     private var ignoreNextOneFingerMove = false
     private val uiDrawer = UIDrawer(context)
     private var ignoreDrawing: Boolean = false
@@ -103,20 +105,6 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     init {
         (context.applicationContext as? ARFittingRoomApplication)?.appComponent?.inject(this)
-
-        //TODO delete
-
-        val drawable = ContextCompat.getDrawable(context, R.drawable.brush_option_0)!!
-
-        val width = if (drawable.intrinsicWidth > 0) drawable.intrinsicWidth else 1
-        val height = if (drawable.intrinsicHeight > 0) drawable.intrinsicHeight else 1
-        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(bitmap)
-        drawable.setBounds(0, 0, canvas.width, canvas.height)
-        drawable.draw(canvas)
-
-
-        setStrokeTextureBitmap(bitmap, "ffoof")
 
         // Add event for element scaling
         scaleGestureDetector =
@@ -232,10 +220,10 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             ignoreDrawing = false
             return true
         } else {
-            when (strokeShape) {
-                EShape.NONE -> handleElementEditing(event, x, y)
-                EShape.CIRCLE -> handleDrawing(event, x, y)
-                else -> handleStampDrawing(event, x, y)
+            when (drawingMode) {
+                EDrawingMode.NONE -> handleElementEditing(event, x, y)
+                EDrawingMode.BRUSH -> handleDrawing(event, x, y)
+                EDrawingMode.STAMP -> handleStampDrawing(event, x, y)
             }
         }
 
@@ -591,11 +579,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             return
         }
         if (event.action == MotionEvent.ACTION_DOWN) {
-            when (strokeShape) {
-                EShape.STAR -> drawStar(x, y, paintOptions.strokeWidth)
-                EShape.HEART -> drawHeart(x, y, paintOptions.strokeWidth)
-                else -> {}
-            }
+            drawStamp(x, y, paintOptions.strokeWidth)
         }
     }
 
@@ -632,8 +616,12 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
 
         if (paintOptions.strokeTextureRef.isNotEmpty()) {
-            TexturedCurveDrawer.updateBrushTextureBitmap(paintOptions.strokeWidth.toInt(), paintOptions.color, paintOptions.alpha)
-         //   TexturedCurveDrawer.changeBrushColor(paintOptions.color, paintOptions.alpha)
+            TexturedBrushDrawer.updateBrushTextureBitmap(
+                paintOptions.strokeWidth.toInt(),
+                paintOptions.color,
+                paintOptions.alpha
+            )
+            //   TexturedCurveDrawer.changeBrushColor(paintOptions.color, paintOptions.alpha)
         }
     }
 
@@ -641,7 +629,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         paintOptions.strokeWidth = newStrokeWidth.toFloat()
 
         if (paintOptions.strokeTextureRef.isNotEmpty()) {
-            TexturedCurveDrawer.updateBrushTextureBitmap(
+            TexturedBrushDrawer.updateBrushTextureBitmap(
                 newStrokeWidth,
                 paintOptions.color,
                 paintOptions.alpha,
@@ -649,21 +637,34 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         }
     }
 
-    fun setStrokeTextureBitmap(bitmap: Bitmap, imageRef: String) {
-        paintOptions.strokeTextureRef = imageRef
-        TexturedCurveDrawer.setBrushBitmap(
-            bitmap,
-            paintOptions.strokeWidth,
-            paintOptions.color,
-            paintOptions.alpha
-        )
+    fun setBrush(brush: BrushTO, brushTexture: Bitmap? = null) {
+        paintOptions.strokeTextureRef = brush.strokeTextureRef
+        paintOptions.style = brush.style
+        paintOptions.strokeCap = brush.strokeCap
+        paintOptions.strokeJoint = brush.strokeJoint
+
+        TexturedBrushDrawer.resetBitmaps()
+
+        brushTexture?.let {
+            TexturedBrushDrawer.setBrushBitmap(
+                it,
+                paintOptions.strokeWidth,
+                paintOptions.color,
+                paintOptions.alpha
+            )
+        }
     }
 
-    fun unsetStrokeTextureBitmap() {
-        paintOptions.strokeTextureRef = ""
-        TexturedCurveDrawer.resetBitmaps()
+    fun setEditingMode() {
+        drawingMode = EDrawingMode.NONE
+        stampType = null
+        TexturedBrushDrawer.resetBitmaps()
     }
 
+    fun setStamp(pathCreationStrategy: PathCreationStrategy) {
+        stampType = pathCreationStrategy
+        drawingMode = EDrawingMode.STAMP
+    }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
@@ -738,8 +739,8 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                     strokeJoin = Paint.Join.ROUND
                     style = Paint.Style.STROKE
                 },
-                bitmapTexture = TexturedCurveDrawer.originalBitmap,
-                textureRef = paintOptions.strokeTextureRef
+                bitmapTexture = TexturedBrushDrawer.originalBitmap,
+                strokeTextureRef = paintOptions.strokeTextureRef
             )
 
         layerManager.setCurPath(DrawablePath())
@@ -770,17 +771,17 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         addElementToLayer(layerManager.getActiveLayerIndex(), heart)
     }
 
-    private fun drawStar(
+    private fun drawStamp(
         centerX: Float,
         centerY: Float,
         outerRadius: Float,
     ) {
-        val star =
-            Stamp(
+        stampType?.let {
+            val stamp = Stamp(
                 centerX = centerX,
                 centerY = centerY,
                 outerRadius = outerRadius,
-                pathCreationStrategy = StarPathCreationStrategy(),
+                pathCreationStrategy = it,
                 paint =
                 Paint().apply {
                     color = paintOptions.color
@@ -790,7 +791,8 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                 },
             )
 
-        addElementToLayer(layerManager.getActiveLayerIndex(), star)
+            addElementToLayer(layerManager.getActiveLayerIndex(), stamp)
+        }
     }
 
     fun moveLayer(
@@ -821,59 +823,29 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         }
     }
 
-    fun loadImage(imageId: Int) {
-        // First decode with inJustDecodeBounds=true to check dimensions
-        val options =
-            BitmapFactory.Options().apply {
-                inJustDecodeBounds = true
-            }
-        BitmapFactory.decodeResource(resources, imageId, options)
-
-        // Calculate inSampleSize
-        options.inSampleSize =
-            calculateInSampleSize(options.outWidth, options.outHeight, width / 3, height / 3)
-
-        // Decode bitmap with inSampleSize set
-        options.inJustDecodeBounds = false
-        val imageBitmap = BitmapFactory.decodeResource(resources, imageId, options)
-
+    fun addImage(bitmap: Bitmap, imageRef: String) {
         addElementToLayer(
             layerManager.getActiveLayerIndex(),
             Image(
-                resourceRef = imageId.toString(),
+                resourceRef = imageRef,
                 centerX = width.toFloat() / 2,
                 centerY = height.toFloat() / 2,
                 outerRadius = width.toFloat() / 4,
-            ).apply { bitmap = imageBitmap },
+            ).apply { this.bitmap = bitmap },
         )
 
         invalidate()
     }
 
-    fun loadGif(gifId: Int) {
-        val gifDrawable = GifDrawable(resources, gifId)
-
-        val adjustedGif =
-            GifDrawableBuilder().with(gifDrawable)
-                .from(resources, gifId)
-                .sampleSize(
-                    calculateInSampleSize(
-                        gifDrawable.currentFrame.width,
-                        gifDrawable.currentFrame.height,
-                        width / 3,
-                        height / 3,
-                    ),
-                )
-                .build()
-
+    fun addGif(gifDrawable: GifDrawable, gifRef: String) {
         val gif =
             Gif(
-                resourceRef = gifId.toString(),
+                resourceRef = gifRef,
                 centerX = width.toFloat() / 2,
                 centerY = height.toFloat() / 2,
                 outerRadius = width.toFloat() / 4,
             ).apply {
-                setDrawable(adjustedGif)
+                setDrawable(gifDrawable)
                 shouldDrawNextFrame = true
             }
         addElementToLayer(
@@ -886,27 +858,6 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         startAnimation(gif)
     }
 
-    private fun calculateInSampleSize(
-        width: Int,
-        height: Int,
-        reqWidth: Int,
-        reqHeight: Int,
-    ): Int {
-        var inSampleSize = 1
-
-        if (height > reqHeight || width > reqWidth) {
-            val halfHeight: Int = height / 2
-            val halfWidth: Int = width / 2
-
-            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
-            // height and width larger than the requested height and width.
-            while (halfHeight / inSampleSize >= reqHeight && halfWidth / inSampleSize >= reqWidth) {
-                inSampleSize *= 2
-            }
-        }
-
-        return inSampleSize
-    }
 
     private fun resetEditState() {
         isInElementRotationMode = false
@@ -978,7 +929,4 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         uiDrawer.setBackgroundBitmap(bitmap)
     }
 
-    interface OnLayerInitializedListener {
-        fun onLayerInitialized(numOfLayers: Int)
-    }
 }

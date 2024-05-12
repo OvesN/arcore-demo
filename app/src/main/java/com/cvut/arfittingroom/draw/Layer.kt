@@ -7,7 +7,7 @@ import com.cvut.arfittingroom.draw.model.PaintOptions
 import com.cvut.arfittingroom.draw.model.element.Element
 import com.cvut.arfittingroom.draw.model.element.impl.Gif
 import com.cvut.arfittingroom.draw.path.DrawablePath
-import com.cvut.arfittingroom.draw.service.TexturedCurveDrawer
+import com.cvut.arfittingroom.draw.service.TexturedBrushDrawer
 import java.util.LinkedList
 import java.util.UUID
 import kotlin.collections.HashMap
@@ -70,7 +70,7 @@ class Layer(
         }
 
         if (paintOptions.strokeTextureRef.isNotEmpty()) {
-            TexturedCurveDrawer.draw(canvas, curPath, curPaint.strokeWidth)
+            TexturedBrushDrawer.draw(canvas, curPath, curPaint.strokeWidth)
         }
         else {
             canvas.drawPath(curPath, curPaint)

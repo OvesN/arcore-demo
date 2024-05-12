@@ -59,7 +59,8 @@ constructor(private val strategies: Map<String, @JvmSuppressWildcards PathCreati
             strokeJoin = paintOptions.strokeJoint
         }
 
-    private fun pathToPathTO(drawablePath: DrawablePath) = PathTO(drawablePath.actions.map { pathActionToActionTO(it) })
+    private fun pathToPathTO(drawablePath: DrawablePath) =
+        PathTO(drawablePath.actions.map { pathActionToActionTO(it) })
 
     private fun pathTOPath(pathTO: PathTO): DrawablePath {
         val drawablePath = DrawablePath()
@@ -117,13 +118,13 @@ constructor(private val strategies: Map<String, @JvmSuppressWildcards PathCreati
         val baseTO =
             ElementTO(
                 elementType =
-                    when (element) {
-                        is Curve -> EElementType.CURVE
-                        is Image -> EElementType.IMAGE
-                        is Gif -> EElementType.GIF
-                        is Stamp -> EElementType.STAMP
-                        else -> throw IllegalArgumentException("Unsupported element type")
-                    },
+                when (element) {
+                    is Curve -> EElementType.CURVE
+                    is Image -> EElementType.IMAGE
+                    is Gif -> EElementType.GIF
+                    is Stamp -> EElementType.STAMP
+                    else -> throw IllegalArgumentException("Unsupported element type")
+                },
                 id = element.id.toString(),
                 centerX = element.centerX / width,
                 centerY = element.centerY / height,
@@ -135,7 +136,10 @@ constructor(private val strategies: Map<String, @JvmSuppressWildcards PathCreati
             is Curve ->
                 baseTO.copy(
                     drawablePath = pathToPathTO(element.path),
-                    paint = paintToPaintTO(element.paint),
+                    paint = paintToPaintTO(element.paint)
+                        .apply {
+                        strokeTextureRef = element.strokeTextureRef
+                    },
                 )
 
             is Image ->
@@ -169,6 +173,7 @@ constructor(private val strategies: Map<String, @JvmSuppressWildcards PathCreati
     )
 
     // TODO handle exception, load resource
+    //TODO load images
     fun elementTOtoElement(elementTO: ElementTO): Element =
         when (elementTO.elementType) {
             EElementType.STAMP -> {
@@ -195,6 +200,7 @@ constructor(private val strategies: Map<String, @JvmSuppressWildcards PathCreati
                     outerRadius = elementTO.outerRadius * width,
                     rotationAngle = elementTO.rotationAngle,
                 )
+
             EElementType.IMAGE ->
                 Image(
                     id = UUID.fromString(elementTO.id),
@@ -214,6 +220,7 @@ constructor(private val strategies: Map<String, @JvmSuppressWildcards PathCreati
                     path = pathTOPath(elementTO.drawablePath),
                     paint = paintTOtoPaint(elementTO.paint),
                     rotationAngle = elementTO.rotationAngle,
+                    strokeTextureRef = elementTO.paint.strokeTextureRef
                 )
         }
 
@@ -223,4 +230,6 @@ constructor(private val strategies: Map<String, @JvmSuppressWildcards PathCreati
             width = width,
             height = height,
         )
+
+
 }

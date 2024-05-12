@@ -18,7 +18,6 @@ import com.cvut.arfittingroom.activity.UIChangeListener
 import com.cvut.arfittingroom.draw.DrawView
 import com.cvut.arfittingroom.draw.Layer
 import com.cvut.arfittingroom.draw.model.element.strategy.PathCreationStrategy
-import com.cvut.arfittingroom.draw.model.enums.EShape
 import com.cvut.arfittingroom.model.to.drawhistory.EditorStateTO
 import com.cvut.arfittingroom.model.to.drawhistory.ElementTO
 import com.cvut.arfittingroom.model.to.drawhistory.LayerTO
@@ -36,7 +35,12 @@ class MaskEditorFragment : Fragment() {
     private lateinit var sliderLayout: LinearLayout
     private lateinit var slider: VerticalSeekBar
     private lateinit var layersButton: ImageButton
+
+    private lateinit var menuButtons: LinearLayout
     private lateinit var layersMenuFragment: LayersMenuFragment
+    private lateinit var stampOptionsMenuFragment: StampOptionsMenuFragment
+    private lateinit var imageMenuFragment: ImagesMenuFragment
+    private lateinit var brushOptionsMenuFragment: BrushOptionsMenuFragment
 
     @Inject
     lateinit var strategies: Map<String, @JvmSuppressWildcards PathCreationStrategy>
@@ -65,6 +69,9 @@ class MaskEditorFragment : Fragment() {
             true
         }
 
+
+        menuButtons = view.findViewById(R.id.menu_buttons)
+
         slider = view.findViewById(R.id.stroke_size_slider)
         slider.thumbPlaceholderDrawable = ContextCompat.getDrawable(view.context, R.drawable.slider)
         slider.thumbContainerColor = Color.TRANSPARENT
@@ -80,10 +87,20 @@ class MaskEditorFragment : Fragment() {
         }
 
         layersMenuFragment = LayersMenuFragment(drawView)
+        brushOptionsMenuFragment = BrushOptionsMenuFragment(drawView)
+        stampOptionsMenuFragment = StampOptionsMenuFragment(strategies, drawView)
+        imageMenuFragment = ImagesMenuFragment(drawView)
+
         activity?.supportFragmentManager
             ?.beginTransaction()
             ?.add(R.id.layers_menu_fragment_container, layersMenuFragment)
+            ?.add(R.id.menu_fragment_container, brushOptionsMenuFragment)
+            ?.add(R.id.menu_fragment_container, stampOptionsMenuFragment)
+            ?.add(R.id.menu_fragment_container, imageMenuFragment)
             ?.hide(layersMenuFragment)
+            ?.hide(brushOptionsMenuFragment)
+            ?.hide(stampOptionsMenuFragment)
+            ?.hide(imageMenuFragment)
             ?.commit()
 
         drawView.post {
@@ -92,6 +109,8 @@ class MaskEditorFragment : Fragment() {
             if (drawView.layerManager.getNumOfLayers() == 0) {
                 drawView.layerManager.addLayer(drawView.width, drawView.height)
             }
+
+            showBrushMenu()
         }
 
         view.findViewById<ImageButton>(R.id.button_ok).setOnClickListener {
@@ -123,6 +142,8 @@ class MaskEditorFragment : Fragment() {
                 drawView.setColor(
                     envelopColor,
                 )
+                brushOptionsMenuFragment.changeColor(envelopColor)
+                stampOptionsMenuFragment.changeColor(envelopColor)
             }
         }
 
@@ -131,6 +152,21 @@ class MaskEditorFragment : Fragment() {
         }
         view.findViewById<ImageButton>(R.id.button_undo).setOnClickListener {
             drawView.undo()
+        }
+
+        view.findViewById<ImageButton>(R.id.draw_view).setOnClickListener {
+            it.setBackgroundResource(R.drawable.small_button)
+            showBrushMenu()
+        }
+
+        view.findViewById<ImageButton>(R.id.stamp_button).setOnClickListener {
+            it.setBackgroundResource(R.drawable.small_button)
+            showStampMenu()
+        }
+
+        view.findViewById<ImageButton>(R.id.image_button).setOnClickListener {
+            it.setBackgroundResource(R.drawable.small_button)
+            showImageMenu()
         }
 
         slider.setOnReleaseListener {
@@ -199,18 +235,48 @@ class MaskEditorFragment : Fragment() {
         drawView.stopAnimation()
     }
 
-    private fun toggleStrokeShape(shape: EShape) {
-        drawView.layerManager.deselectAllElements()
-        drawView.strokeShape = if (drawView.strokeShape == shape) EShape.NONE else shape
-        drawView.selectedElement = null
+    private fun showBrushMenu() {
+        resetMenu()
+
+        requireActivity().supportFragmentManager.beginTransaction()
+            .show(brushOptionsMenuFragment)
+            .commit()
     }
 
-    private fun addImage(imageId: Int) {
-        drawView.loadImage(imageId)
+    private fun showStampMenu() {
+        resetMenu()
+
+        requireActivity().supportFragmentManager.beginTransaction()
+            .show(stampOptionsMenuFragment)
+            .commit()
     }
 
-    private fun addGif(gifId: Int) {
-        drawView.loadGif(gifId)
+    private fun showImageMenu() {
+        resetMenu()
+
+        drawView.setEditingMode()
+        requireActivity().supportFragmentManager.beginTransaction()
+            .show(imageMenuFragment)
+            .commit()
+    }
+
+    private fun resetMenu() {
+        for (i in 0 until menuButtons.childCount) {
+            val child =
+                menuButtons.getChildAt(i).apply {
+                    background = null
+                }
+        }
+
+        hideMenuFragments()
+    }
+
+    private fun hideMenuFragments() {
+        requireActivity().supportFragmentManager.beginTransaction()
+            .hide(brushOptionsMenuFragment)
+            .hide(stampOptionsMenuFragment)
+            .hide(imageMenuFragment)
+            .commit()
     }
 
     private fun showMainLayout() {

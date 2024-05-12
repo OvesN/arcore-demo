@@ -577,9 +577,9 @@ class ShowRoomActivity :
     }
 
     private fun resetMenu() {
-        for (i in 0 until binding.secondLineButtons.childCount) {
+        for (i in 0 until binding.menuButtons.childCount) {
             val child =
-                binding.secondLineButtons.getChildAt(i).apply {
+                binding.menuButtons.getChildAt(i).apply {
                     background = null
                 }
         }

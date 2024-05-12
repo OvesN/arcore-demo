@@ -14,7 +14,7 @@ import kotlin.math.atan2
  * Curved bitmap drawer for textured brushes
  *
  */
-object TexturedCurveDrawer {
+object TexturedBrushDrawer {
     var originalBitmap: Bitmap? = null
     private var scaledBitmap: Bitmap? = null
 
