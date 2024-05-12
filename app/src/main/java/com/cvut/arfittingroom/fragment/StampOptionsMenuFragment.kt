@@ -90,7 +90,9 @@ class StampOptionsMenuFragment(
 
             if (selectedViewId == imageButton.id) {
                 underscoreLine.visibility = View.VISIBLE
+                imageButton.imageTintList = ColorStateList.valueOf(selectedColor)
             }
+
             verticalContainer.addView(imageButton)
             verticalContainer.addView(underscoreLine)
             options.addView(verticalContainer)
@@ -126,16 +128,9 @@ class StampOptionsMenuFragment(
     fun changeColor(newColor: Int, fill: Boolean) {
         selectedColor = newColor
 
-        val newStyle = if (fill)  Style.FILL else Style.STROKE
+        selectedStyle = if (fill)  Style.FILL else Style.STROKE
 
-        if (newStyle != selectedStyle) {
-            selectedStyle = newStyle
-            createStampMenu(requireView())
-        }
-        requireView().findViewById<ImageButton>(selectedViewId)
-            ?.let { it.imageTintList = ColorStateList.valueOf(newColor) }
+        createStampMenu(requireView())
     }
-
-
 
 }
