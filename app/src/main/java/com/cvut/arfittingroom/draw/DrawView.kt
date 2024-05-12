@@ -2,8 +2,8 @@ package com.cvut.arfittingroom.draw
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.Matrix
 import android.graphics.Paint
 import android.os.Handler
@@ -11,10 +11,13 @@ import android.os.Looper
 import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
+import android.view.MotionEvent.ACTION_MOVE
 import android.view.MotionEvent.ACTION_POINTER_UP
+import android.view.MotionEvent.ACTION_UP
 import android.view.View
 import androidx.annotation.ColorInt
 import androidx.core.graphics.alpha
+import androidx.core.graphics.get
 import com.cvut.arfittingroom.ARFittingRoomApplication
 import com.cvut.arfittingroom.R
 import com.cvut.arfittingroom.controller.ScaleGestureDetector
@@ -34,10 +37,8 @@ import com.cvut.arfittingroom.draw.model.element.impl.Gif
 import com.cvut.arfittingroom.draw.model.element.impl.Image
 import com.cvut.arfittingroom.draw.model.element.impl.Stamp
 import com.cvut.arfittingroom.draw.model.element.strategy.PathCreationStrategy
-import com.cvut.arfittingroom.draw.model.element.strategy.impl.HeartPathCreationStrategy
-import com.cvut.arfittingroom.draw.model.element.strategy.impl.StarPathCreationStrategy
 import com.cvut.arfittingroom.draw.model.enums.EElementEditAction
-import com.cvut.arfittingroom.draw.model.enums.EDrawingMode
+import com.cvut.arfittingroom.draw.model.enums.EEditorMode
 import com.cvut.arfittingroom.draw.path.DrawablePath
 import com.cvut.arfittingroom.draw.service.TexturedBrushDrawer
 import com.cvut.arfittingroom.draw.service.LayerManager
@@ -52,7 +53,6 @@ import com.cvut.arfittingroom.utils.FileUtil.saveTempMaskTextureBitmap
 import com.cvut.arfittingroom.utils.UIUtil.showColorPickerDialog
 import io.github.muddz.styleabletoast.StyleableToast
 import pl.droidsonroids.gif.GifDrawable
-import pl.droidsonroids.gif.GifDrawableBuilder
 import javax.inject.Inject
 import kotlin.math.abs
 import kotlin.math.atan2
@@ -85,7 +85,8 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private var isInElementScalingMode: Boolean = false
     private var isInElementMenuMode: Boolean = false
     var selectedElement: Element? = null
-    private var drawingMode = EDrawingMode.BRUSH
+    private var editorMode = EEditorMode.BRUSH
+    private var previousEditorMode = EEditorMode.BRUSH
     private var stampType: PathCreationStrategy? = null
     private var ignoreNextOneFingerMove = false
     private val uiDrawer = UIDrawer(context)
@@ -195,12 +196,12 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                 lastDownY = y
             }
 
-            MotionEvent.ACTION_MOVE ->
+            ACTION_MOVE ->
                 if (!isDistanceGreaterThanThreshold(x, y)) {
                     return true
                 }
 
-            MotionEvent.ACTION_UP, ACTION_POINTER_UP -> {
+            ACTION_UP, ACTION_POINTER_UP -> {
                 lastDownX = 0f
                 lastDownY = 0f
             }
@@ -208,6 +209,9 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
         // Handle multi-touch events for scaling
         if (event.pointerCount == 2) {
+            if (editorMode == EEditorMode.PIPETTE) {
+                editorMode = previousEditorMode
+            }
             ignoreDrawing = true
             layerManager.setCurPath(DrawablePath())
             scaleGestureDetector.onTouchEvent(event)
@@ -215,21 +219,23 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                 handleCanvasGesture(event)
             }
         } else if (ignoreDrawing &&
-            (event.actionMasked == ACTION_POINTER_UP || event.actionMasked == MotionEvent.ACTION_UP)
+            (event.actionMasked == ACTION_POINTER_UP || event.actionMasked == ACTION_UP)
         ) {
             ignoreDrawing = false
             return true
         } else {
-            when (drawingMode) {
-                EDrawingMode.NONE -> handleElementEditing(event, x, y)
-                EDrawingMode.BRUSH -> handleDrawing(event, x, y)
-                EDrawingMode.STAMP -> handleStampDrawing(event, x, y)
+            when (editorMode) {
+                EEditorMode.NONE -> handleElementEditing(event, x, y)
+                EEditorMode.BRUSH -> handleDrawing(event, x, y)
+                EEditorMode.STAMP -> handleStampDrawing(event, x, y)
+                EEditorMode.PIPETTE -> handlePipette(event, x, y)
             }
         }
 
         invalidate()
         return true
     }
+
 
     private fun startAnimation(gif: Gif) {
         if (gifRunnable != null) {
@@ -301,7 +307,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     ) {
         if (!scaleGestureDetector.isInProgress) {
             when (event.action) {
-                ACTION_POINTER_UP, MotionEvent.ACTION_UP -> handleActionUp(event, x, y)
+                ACTION_POINTER_UP, ACTION_UP -> handleActionUp(event, x, y)
                 MotionEvent.ACTION_DOWN -> handleActionDown(x, y)
                 MotionEvent.ACTION_MOVE -> handleActionMove(x, y)
             }
@@ -515,7 +521,8 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                         paintOptions.color,
                         fill = paintOptions.style == Paint.Style.FILL,
                         shouldShowFillCheckbox = true,
-                        shouldShowPipette = true
+                        shouldShowPipette = true,
+                        onPipetteSelected = { showPipetteView() }
                     ) { envelopColor, fill ->
                         repaintElement(selectedElement, envelopColor, fill)
                     }
@@ -586,6 +593,20 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         }
         if (event.action == MotionEvent.ACTION_DOWN) {
             drawStamp(x, y, paintOptions.strokeWidth)
+        }
+    }
+
+    private fun handlePipette(event: MotionEvent, x: Float, y: Float) {
+        when (event.actionMasked) {
+            ACTION_POINTER_UP, ACTION_UP -> {
+                editorMode = previousEditorMode
+                layerManager.bitmapFromAllLayers = null
+            }
+
+            ACTION_MOVE -> {
+                lastTouchX = x
+                lastTouchY = y
+            }
         }
     }
 
@@ -667,14 +688,14 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     }
 
     fun setEditingMode() {
-        drawingMode = EDrawingMode.NONE
+        editorMode = EEditorMode.NONE
         stampType = null
         TexturedBrushDrawer.resetBitmaps()
     }
 
     fun setStamp(pathCreationStrategy: PathCreationStrategy) {
         stampType = pathCreationStrategy
-        drawingMode = EDrawingMode.STAMP
+        editorMode = EEditorMode.STAMP
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -707,6 +728,52 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         if (shouldDrawBackground) {
             uiDrawer.drawFaceTextureImage(canvas)
         }
+
+        if (editorMode == EEditorMode.PIPETTE) {
+            if (editorMode == EEditorMode.PIPETTE) {
+                val radius = 100f
+                val transformedRadius = mapRadius(canvasTransformationMatrix, radius)
+                val strokeExtra = 10f
+                val transformedStrokeWidth = mapRadius(canvasTransformationMatrix, strokeExtra)
+                val verticalOffset =
+                    mapRadius(canvasTransformationMatrix, 200f)
+
+                val pipettePaint = Paint().apply {
+                    style = Paint.Style.FILL
+                    color =
+                        layerManager.bitmapFromAllLayers?.let { it[lastTouchX.toInt(), (lastTouchY - verticalOffset).toInt()] }
+                            ?: Color.TRANSPARENT
+                }
+
+                val strokePaint = Paint().apply {
+                    style = Paint.Style.STROKE
+                    color = Color.WHITE
+                    strokeWidth = transformedStrokeWidth
+                }
+
+
+                canvas.drawCircle(
+                    lastTouchX,
+                    lastTouchY - verticalOffset,
+                    transformedRadius + strokeExtra,
+                    strokePaint
+                )
+                canvas.drawCircle(
+                    lastTouchX,
+                    lastTouchY - verticalOffset,
+                    transformedRadius,
+                    pipettePaint
+                )
+            }
+        }
+    }
+
+    private fun mapRadius(matrix: Matrix, radius: Float): Float {
+        val inverse = Matrix()
+        matrix.invert(inverse)
+        val vector = floatArrayOf(radius, 0f)
+        inverse.mapVectors(vector) // Transform for scale and rotation without translation
+        return sqrt(vector[0] * vector[0] + vector[1] * vector[1])
     }
 
     private fun actionDown(
@@ -913,6 +980,22 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         transformationMatrix.postScale(canvasScaleFactor, canvasScaleFactor, pivotX, pivotY)
 
         return transformationMatrix
+    }
+
+    fun showPipetteView() {
+        previousEditorMode = editorMode
+        editorMode = EEditorMode.PIPETTE
+
+        val inverseMatrix = Matrix()
+        canvasTransformationMatrix.invert(inverseMatrix)
+        val touchPoint = floatArrayOf((height / 2).toFloat(), (width / 2).toFloat())
+        inverseMatrix.mapPoints(touchPoint)
+
+        lastTouchX = touchPoint[0]
+        lastTouchY = touchPoint[1]
+
+        layerManager.bitmapFromAllLayers = layerManager.createBitmapFromAllLayers()
+        invalidate()
     }
 
     fun applyBitmapBackground(bitmap: Bitmap?) {

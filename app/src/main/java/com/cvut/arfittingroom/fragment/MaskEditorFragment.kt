@@ -142,7 +142,8 @@ class MaskEditorFragment : Fragment() {
                 drawView.paintOptions.color,
                 fill = drawView.paintOptions.style == Paint.Style.FILL,
                 shouldShowFillCheckbox = true,
-                shouldShowPipette = true
+                shouldShowPipette = true,
+                onPipetteSelected = {drawView.showPipetteView()}
             ) { envelopColor, fill ->
                 drawView.setColor(
                     envelopColor,

@@ -36,22 +36,18 @@ object UIUtil {
         fill: Boolean = false,
         shouldShowFillCheckbox: Boolean = false,
         shouldShowPipette: Boolean = false,
-       onColorSelected: (Int, Boolean) -> Unit,
+        onPipetteSelected: () -> Unit = {},
+        onColorSelected: (Int, Boolean) -> Unit,
+
     ) {
         val dialogView: View =
             LayoutInflater.from(context).inflate(R.layout.color_picker_dialog, null)
 
         val colorPickerView = dialogView.findViewById<ColorPickerView>(R.id.colorPickerView)
 
-        val checkbox =  dialogView.findViewById<CheckBox>(R.id.fill_checkbox)
+        val checkbox = dialogView.findViewById<CheckBox>(R.id.fill_checkbox)
+        val pipette = dialogView.findViewById<View>(R.id.pipette_button)
         checkbox.isChecked = fill
-
-        if (shouldShowFillCheckbox) {
-           checkbox?.let { it.visibility = View.VISIBLE }
-        }
-        if (shouldShowPipette) {
-            dialogView.findViewById<View>(R.id.pipette_button)?.let { it.visibility = View.VISIBLE }
-        }
 
         colorPickerView.attachAlphaSlider(dialogView.findViewById(R.id.alphaSlideBar))
         colorPickerView.attachBrightnessSlider(dialogView.findViewById(R.id.brightnessSlideBar))
@@ -71,6 +67,17 @@ object UIUtil {
             dialog.dismiss()
         }
 
+
+        if (shouldShowFillCheckbox) {
+            checkbox?.let { it.visibility = View.VISIBLE }
+        }
+        if (shouldShowPipette) {
+            pipette?.let { it.visibility = View.VISIBLE }
+            pipette.setOnClickListener {
+                onPipetteSelected()
+                dialog.dismiss()
+            }
+        }
         dialog.show()
     }
 

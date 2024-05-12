@@ -24,6 +24,7 @@ class LayerManager {
     private var layersAboveActiveLayerBitmap: Bitmap? = null
     private var viewWidth: Int = 0
     private var viewHeight: Int = 0
+    var bitmapFromAllLayers: Bitmap? = null
 
     /**
      * Draw all layers
@@ -400,4 +401,5 @@ class LayerManager {
     fun resetAllGifs() {
         layers.forEach { it.resetAllGifs() }
     }
+
 }
