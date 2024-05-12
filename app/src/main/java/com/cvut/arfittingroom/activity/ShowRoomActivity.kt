@@ -553,27 +553,30 @@ class ShowRoomActivity :
     }
 
     private fun showMakeupEditorUI() {
-        findViewById<View>(R.id.top_ui).visibility = View.GONE
-        findViewById<View>(R.id.bottom_ui).visibility = View.GONE
         val fragmentManager = supportFragmentManager
         val existingFragment =
             fragmentManager.findFragmentByTag(MaskEditorFragment.MAKEUP_EDITOR_FRAGMENT_TAG)
+        val container = findViewById<View>(R.id.makeup_editor_fragment_container)
 
         if (existingFragment == null) {
+            container.visibility = View.INVISIBLE
             fragmentManager.beginTransaction()
-                .add(
-                    R.id.makeup_editor_fragment_container,
-                    maskEditorFragment,
-                    MaskEditorFragment.MAKEUP_EDITOR_FRAGMENT_TAG,
-                )
+                .add(R.id.makeup_editor_fragment_container, maskEditorFragment, MaskEditorFragment.MAKEUP_EDITOR_FRAGMENT_TAG)
                 .commit()
+            //Prepare layout in advance and render with delay
+            container.postDelayed({
+                container.visibility = View.VISIBLE
+                findViewById<View>(R.id.top_ui).visibility = View.GONE
+                findViewById<View>(R.id.bottom_ui).visibility = View.GONE
+                maskEditorFragment.applyBackgroundBitmap(stateService.makeupTextureBitmap)
+                arSceneView.pause()
+            }, 300)
         } else {
+            findViewById<View>(R.id.top_ui).visibility = View.GONE
+            findViewById<View>(R.id.bottom_ui).visibility = View.GONE
             showFragment(maskEditorFragment)
+            maskEditorFragment.applyBackgroundBitmap(stateService.makeupTextureBitmap)
         }
-
-        arSceneView.pause()
-
-        maskEditorFragment.applyBackgroundBitmap(stateService.makeupTextureBitmap)
     }
 
     private fun resetMenu() {

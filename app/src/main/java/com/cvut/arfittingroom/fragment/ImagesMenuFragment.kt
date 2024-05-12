@@ -60,6 +60,7 @@ class ImagesMenuFragment(private val drawView: DrawView) : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         view.findViewById<View>(R.id.horizontal_scroll_view).visibility = View.GONE
         view.findViewById<View>(R.id.vertical_scroll_view).visibility = View.VISIBLE
+        view.findViewById<View>(R.id.divider).visibility = View.GONE
         view.findViewById<GridLayout>(R.id.vertical_options).columnCount =
             NUM_OF_ELEMENTS_IN_ROW_BIG_MENU
 
@@ -92,10 +93,10 @@ class ImagesMenuFragment(private val drawView: DrawView) : Fragment() {
 
     private fun addImage(imageTO: ImageTO) {
         if (imageTO.isAnimated) {
-            downloadGif(imageTO.imageRef)
+            downloadGif(imageTO.ref)
 
         } else {
-            downloadImage(imageTO.imageRef)
+            downloadImage(imageTO.ref)
         }
     }
 
@@ -109,8 +110,8 @@ class ImagesMenuFragment(private val drawView: DrawView) : Fragment() {
                 val button =
                     ImageButton(context).apply {
                         scaleType = ImageView.ScaleType.FIT_CENTER
-                        background = ContextCompat.getDrawable(context, R.drawable.head_model)
-                        id = image.imageRef.hashCode()
+                        background = null
+                        id = image.ref.hashCode()
                         setOnClickListener {
                             addImage(image)
                         }
@@ -131,12 +132,12 @@ class ImagesMenuFragment(private val drawView: DrawView) : Fragment() {
                 if (image.isAnimated) {
                     GlideApp.with(this)
                         .asGif()
-                        .load(storage.getReference(image.imageRef))
+                        .load(storage.getReference(image.ref))
                         .into(button)
                 }
                 else {
                     GlideApp.with(this)
-                        .load(storage.getReference(image.imageRef))
+                        .load(storage.getReference(image.ref))
                         .thumbnail()
                         .into(button)
                 }

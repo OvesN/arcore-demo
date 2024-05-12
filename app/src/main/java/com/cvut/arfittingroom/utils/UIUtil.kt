@@ -11,6 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.Button
+import android.widget.CheckBox
 import android.widget.ImageView
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
@@ -19,6 +20,8 @@ import com.cvut.arfittingroom.R
 import com.skydoves.colorpickerview.ColorPickerDialog
 import com.skydoves.colorpickerview.ColorPickerView
 import com.skydoves.colorpickerview.listeners.ColorEnvelopeListener
+import com.skydoves.colorpickerview.sliders.AlphaSlideBar
+import com.skydoves.colorpickerview.sliders.BrightnessSlideBar
 
 object UIUtil {
     fun createDivider(context: Context): View =
@@ -30,28 +33,64 @@ object UIUtil {
     fun showColorPickerDialog(
         context: Context,
         initialColor: Int,
-        shouldShowFillOption: Boolean = false,
-        onColorSelected: (Int) -> Unit,
+        shouldShowFillCheckbox: Boolean = false,
+        shouldShowPipette: Boolean = false,
+       onColorSelected: (Int, Boolean) -> Unit,
     ) {
-        val builder =
-            ColorPickerDialog.Builder(context)
-                .setPreferenceName("MyColorPickerDialog")
-                .setPositiveButton(
-                    R.string.OK,
-                    ColorEnvelopeListener { envelope, _ ->
-                        onColorSelected(envelope.color)
-                    },
-                )
-                .setNegativeButton(R.string.cancel) { dialogInterface, _ ->
-                    dialogInterface.dismiss()
-                }
-                .attachAlphaSlideBar(true)
-                .attachBrightnessSlideBar(true)
-                .setBottomSpace(12)
+        val dialogView: View =
+            LayoutInflater.from(context).inflate(R.layout.color_picker_dialog, null)
 
-        builder.colorPickerView.setInitialColor(initialColor)
+        val colorPickerView = dialogView.findViewById<ColorPickerView>(R.id.colorPickerView)
 
-        builder.show()
+        val checkbox =  dialogView.findViewById<CheckBox>(R.id.fill_checkbox)
+        if (shouldShowFillCheckbox) {
+           checkbox?.let { it.visibility = View.VISIBLE }
+        }
+        if (shouldShowPipette) {
+            dialogView.findViewById<View>(R.id.pipette_button)?.let { it.visibility = View.VISIBLE }
+        }
+
+        colorPickerView.attachAlphaSlider(dialogView.findViewById(R.id.alphaSlideBar))
+        colorPickerView.attachBrightnessSlider(dialogView.findViewById(R.id.brightnessSlideBar))
+        colorPickerView.setInitialColor(initialColor)
+
+        val dialog =
+            AlertDialog.Builder(context)
+                .setView(dialogView)
+                .create()
+
+        dialogView.findViewById<Button>(R.id.cancel_popup_button).setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialogView.findViewById<Button>(R.id.ok_button).setOnClickListener {
+            onColorSelected(colorPickerView.colorEnvelope.color, checkbox.isSelected)
+            dialog.dismiss()
+        }
+
+        dialog.show()
+
+//        val builder =
+//            ColorPickerDialog.Builder(context)
+//
+//                .setPreferenceName("MyColorPickerDialog")
+//                .setPositiveButton(
+//                    R.string.OK,
+//                    ColorEnvelopeListener { envelope, _ ->
+//                        onColorSelected(envelope.color)
+//                    },
+//                )
+//                .setNegativeButton(R.string.cancel) { dialogInterface, _ ->
+//                    dialogInterface.dismiss()
+//                }
+//                .attachAlphaSlideBar(true)
+//                .attachBrightnessSlideBar(true)
+//                .setBottomSpace(12)
+////
+//
+//        builder.colorPickerView.setInitialColor(initialColor)
+//
+//        builder.show()
     }
 
     fun showClearAllDialog(

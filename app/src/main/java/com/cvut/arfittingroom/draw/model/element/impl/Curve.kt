@@ -151,7 +151,7 @@ class Curve(
             return false
         }
 
-        override fun repaint(newColor: Int) {
+        override fun repaint(newColor: Int, fill:Boolean) {
             paint.color = newColor
         }
 

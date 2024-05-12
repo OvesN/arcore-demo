@@ -211,6 +211,9 @@ class LayerManager {
     }
 
     fun deselectAllElements() {
+        if (activeLayerIndex >= layers.size) {
+            return
+        }
         layers[activeLayerIndex].deselectAllElements()
     }
 

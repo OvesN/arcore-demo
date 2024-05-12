@@ -12,6 +12,8 @@ import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
+import androidx.core.view.marginTop
+import androidx.core.view.setPadding
 import androidx.fragment.app.Fragment
 import com.cvut.arfittingroom.R
 import com.cvut.arfittingroom.draw.DrawView
@@ -20,7 +22,10 @@ import com.cvut.arfittingroom.utils.ScreenUtil
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 
-class StampOptionsMenuFragment(private val strategies: Map<String, @JvmSuppressWildcards PathCreationStrategy>, private val drawView: DrawView):Fragment() {
+class StampOptionsMenuFragment(
+    private val strategies: Map<String, @JvmSuppressWildcards PathCreationStrategy>,
+    private val drawView: DrawView
+) : Fragment() {
     private var selectedViewId = 0
     private var selectedColor: Int = Color.BLACK
     private var underscoreSelectedView: View? = null
@@ -40,24 +45,27 @@ class StampOptionsMenuFragment(private val strategies: Map<String, @JvmSuppressW
         val options = view.findViewById<LinearLayout>(R.id.horizontal_options)
         options.removeAllViews()
 
-        val imageSizePx = ScreenUtil.dpToPx(30, requireContext())
+        val imageSizePx = ScreenUtil.dpToPx(40, requireContext())
 
         for (stamp in strategies) {
             val verticalContainer = LinearLayout(requireContext()).apply {
                 layoutParams = LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.WRAP_CONTENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
+                    ScreenUtil.dpToPx(50, requireContext()),
+                    ScreenUtil.dpToPx(50, requireContext())
+
                 )
                 orientation = LinearLayout.VERTICAL
+                background = null
             }
 
+            verticalContainer.setPadding( ScreenUtil.dpToPx(5, requireContext()), 0, ScreenUtil.dpToPx(5, requireContext()), 0)
             val underscoreLine = View(requireContext()).apply {
                 layoutParams = LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT,
-                    2
+                    5
                 )
                 setBackgroundColor(Color.WHITE)
-                visibility = View.GONE
+                visibility = View.INVISIBLE
             }
 
             //TODO stoke or fill?
@@ -65,7 +73,7 @@ class StampOptionsMenuFragment(private val strategies: Map<String, @JvmSuppressW
             val canvas = Canvas(bitmap)
             val paint = Paint().apply {
                 color = Color.WHITE
-                style = Paint.Style.STROKE
+                style = Paint.Style.FILL
                 isAntiAlias = true
             }
             val path = stamp.value.createPath(imageSizePx / 2f, imageSizePx / 2f, imageSizePx / 2f)
@@ -75,40 +83,50 @@ class StampOptionsMenuFragment(private val strategies: Map<String, @JvmSuppressW
                 id = stamp.key.hashCode()
                 layoutParams = ViewGroup.LayoutParams(imageSizePx, imageSizePx)
                 setImageBitmap(bitmap)
+                ImageView.ScaleType.FIT_CENTER
                 background = null
                 setOnClickListener {
                     selectStamp(stamp.value, this, underscoreLine)
-                    underscoreLine.visibility = if (underscoreLine.visibility == View.GONE) View.VISIBLE else View.GONE
                 }
             }
 
             verticalContainer.addView(imageButton)
             verticalContainer.addView(underscoreLine)
             options.addView(verticalContainer)
-
         }
     }
 
-    private fun selectStamp(pathCreationStrategy: PathCreationStrategy, view: ImageView, underscore: View) {
-        underscoreSelectedView?.let { it.visibility = View.GONE }
-        view.imageTintList = ColorStateList.valueOf(selectedColor)
+    private fun selectStamp(
+        pathCreationStrategy: PathCreationStrategy,
+        view: ImageView,
+        underscore: View
+    ) {
+        underscoreSelectedView?.let { it.visibility = View.INVISIBLE }
+        requireView().findViewById<ImageButton>(selectedViewId)?.let {
+            it.imageTintList = ColorStateList.valueOf(Color.WHITE)
+        }
 
         if (selectedViewId == view.id) {
             selectedViewId = 0
+            underscore.visibility = View.GONE
             drawView.setEditingMode()
-            return
+        } else {
+            selectedViewId = view.id
+            underscoreSelectedView = underscore
+            underscore.visibility = View.VISIBLE
+
+            view.imageTintList = ColorStateList.valueOf(selectedColor)
+            drawView.setStamp(pathCreationStrategy)
         }
 
-        selectedViewId = view.id
-        underscoreSelectedView = underscore
-
-        drawView.setStamp(pathCreationStrategy)
     }
 
 
     fun changeColor(newColor: Int) {
         selectedColor = newColor
-        requireView().findViewById<ImageButton>(selectedViewId).imageTintList = ColorStateList.valueOf(newColor)
+
+        requireView().findViewById<ImageButton>(selectedViewId)
+            ?.let { it.imageTintList = ColorStateList.valueOf(newColor) }
     }
 
 }

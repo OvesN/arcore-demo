@@ -51,4 +51,6 @@
     <string name="my_looks">Only my looks</string>
     <string name="clean_all">Clean All</string>
     <string name="clear_all">Clear All</string>
+    <string name="fill">Fill</string>
+    <string name="ok">Ok</string>
 </resources>

@@ -510,8 +510,13 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
             EElementEditAction.CHANGE_COLOR -> {
                 selectedElement?.let { selectedElement ->
-                    showColorPickerDialog(context, paintOptions.color) { envelopColor ->
-                        repaintElement(selectedElement, envelopColor)
+                    showColorPickerDialog(
+                        context,
+                        paintOptions.color,
+                        shouldShowFillCheckbox = true,
+                        shouldShowPipette = true
+                    ) { envelopColor, fill ->
+                        repaintElement(selectedElement, envelopColor, fill)
                     }
                 }
 
@@ -609,11 +614,17 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         return newLayerIndex
     }
 
-    fun setColor(newColor: Int) {
+    //TODO update for stamps
+    fun setColor(newColor: Int, fill: Boolean) {
         @ColorInt
         paintOptions.color = newColor
         paintOptions.alpha = newColor.alpha
 
+        if (fill) {
+            paintOptions.style = Paint.Style.FILL
+        } else {
+            paintOptions.style = Paint.Style.STROKE
+        }
 
         if (paintOptions.strokeTextureRef.isNotEmpty()) {
             TexturedBrushDrawer.updateBrushTextureBitmap(
@@ -621,7 +632,6 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                 paintOptions.color,
                 paintOptions.alpha
             )
-            //   TexturedCurveDrawer.changeBrushColor(paintOptions.color, paintOptions.alpha)
         }
     }
 
@@ -764,10 +774,9 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                     color = paintOptions.color
                     strokeWidth = outerRadius
                     alpha = paintOptions.alpha
-                    style = Paint.Style.FILL
+                    style = paintOptions.style
                 },
             )
-
         addElementToLayer(layerManager.getActiveLayerIndex(), heart)
     }
 
@@ -897,10 +906,10 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         return bitmap
     }
 
-    // TODO not only color
     private fun repaintElement(
         element: Element,
         newColor: Int,
+        fill: Boolean
     ) {
         val repaintable = element as Repaintable
 
@@ -910,6 +919,8 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                 repaintable,
                 oldColor = repaintable.paint.color,
                 newColor = newColor,
+                fill = fill,
+                wasFilled = repaintable.paint.style == Paint.Style.FILL
             ),
         )
 

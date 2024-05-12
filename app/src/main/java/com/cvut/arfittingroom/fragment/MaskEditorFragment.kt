@@ -65,10 +65,9 @@ class MaskEditorFragment : Fragment() {
         sliderLayout = view.findViewById(R.id.stroke_size_layout)
 
         // This will block the touch event so it will not propagate to draw view
-        sliderLayout.setOnTouchListener { v, event ->
-            true
-        }
-
+        sliderLayout.setOnTouchListener { v, event -> true }
+        view.findViewById<View>(R.id.top_ui_makeup_editor).setOnTouchListener { v, event ->  true}
+        view.findViewById<View>(R.id.bottom_ui_makeup_editor).setOnTouchListener { v, event ->  true}
 
         menuButtons = view.findViewById(R.id.menu_buttons)
 
@@ -110,7 +109,7 @@ class MaskEditorFragment : Fragment() {
                 drawView.layerManager.addLayer(drawView.width, drawView.height)
             }
 
-            showBrushMenu()
+            showBrushMenu(view.findViewById<Button>(R.id.draw_button))
         }
 
         view.findViewById<ImageButton>(R.id.button_ok).setOnClickListener {
@@ -138,9 +137,12 @@ class MaskEditorFragment : Fragment() {
             UIUtil.showColorPickerDialog(
                 requireContext(),
                 drawView.paintOptions.color,
-            ) { envelopColor ->
+                shouldShowFillCheckbox = true,
+                shouldShowPipette = true
+            ) { envelopColor, fill ->
                 drawView.setColor(
                     envelopColor,
+                    fill
                 )
                 brushOptionsMenuFragment.changeColor(envelopColor)
                 stampOptionsMenuFragment.changeColor(envelopColor)
@@ -154,19 +156,16 @@ class MaskEditorFragment : Fragment() {
             drawView.undo()
         }
 
-        view.findViewById<ImageButton>(R.id.draw_view).setOnClickListener {
-            it.setBackgroundResource(R.drawable.small_button)
-            showBrushMenu()
+        view.findViewById<Button>(R.id.draw_button).setOnClickListener {
+            showBrushMenu(it)
         }
 
-        view.findViewById<ImageButton>(R.id.stamp_button).setOnClickListener {
-            it.setBackgroundResource(R.drawable.small_button)
-            showStampMenu()
+        view.findViewById<Button>(R.id.stamp_button).setOnClickListener {
+            showStampMenu(it)
         }
 
-        view.findViewById<ImageButton>(R.id.image_button).setOnClickListener {
-            it.setBackgroundResource(R.drawable.small_button)
-            showImageMenu()
+        view.findViewById<Button>(R.id.image_button).setOnClickListener {
+            showImageMenu(it)
         }
 
         slider.setOnReleaseListener {
@@ -235,25 +234,28 @@ class MaskEditorFragment : Fragment() {
         drawView.stopAnimation()
     }
 
-    private fun showBrushMenu() {
+    private fun showBrushMenu(button: View) {
         resetMenu()
 
+        button.setBackgroundResource(R.drawable.small_button)
         requireActivity().supportFragmentManager.beginTransaction()
             .show(brushOptionsMenuFragment)
             .commit()
     }
 
-    private fun showStampMenu() {
+    private fun showStampMenu(button: View) {
         resetMenu()
 
+        button.setBackgroundResource(R.drawable.small_button)
         requireActivity().supportFragmentManager.beginTransaction()
             .show(stampOptionsMenuFragment)
             .commit()
     }
 
-    private fun showImageMenu() {
+    private fun showImageMenu(button: View) {
         resetMenu()
 
+        button.setBackgroundResource(R.drawable.small_button)
         drawView.setEditingMode()
         requireActivity().supportFragmentManager.beginTransaction()
             .show(imageMenuFragment)

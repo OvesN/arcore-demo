@@ -1,5 +1,6 @@
 package com.cvut.arfittingroom.draw.model.element.strategy.impl
 
+import android.graphics.Matrix
 import com.cvut.arfittingroom.draw.model.element.strategy.PathCreationStrategy
 import com.cvut.arfittingroom.draw.path.DrawablePath
 import javax.inject.Inject
@@ -57,6 +58,14 @@ constructor() : PathCreationStrategy {
             outerRadius / 2 + centerX,
             outerRadius / 5 + centerY,
         )
+
+        val matrix = Matrix()
+
+        matrix.postTranslate(-centerX, -centerY)
+        matrix.postScale(2f, 2f)
+        matrix.postTranslate(centerX - outerRadius, centerY - outerRadius)
+
+        path.transform(matrix)
 
         return path
     }

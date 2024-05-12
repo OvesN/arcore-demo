@@ -55,8 +55,11 @@ class BrushOptionsMenuFragment(private val drawView: DrawView) : Fragment() {
 
     fun changeColor(newColor: Int) {
         selectedColor = newColor
-        requireView().findViewById<ImageButton>(selectedViewId).imageTintList =
-            ColorStateList.valueOf(newColor)
+
+        requireView().findViewById<ImageButton>(selectedViewId)?.let {
+            it.imageTintList =
+                ColorStateList.valueOf(newColor)
+        }
     }
 
     private fun fetchBrushes(view: View) {
