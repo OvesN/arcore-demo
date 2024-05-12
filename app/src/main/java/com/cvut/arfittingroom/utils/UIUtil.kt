@@ -33,6 +33,7 @@ object UIUtil {
     fun showColorPickerDialog(
         context: Context,
         initialColor: Int,
+        fill: Boolean = false,
         shouldShowFillCheckbox: Boolean = false,
         shouldShowPipette: Boolean = false,
        onColorSelected: (Int, Boolean) -> Unit,
@@ -43,6 +44,8 @@ object UIUtil {
         val colorPickerView = dialogView.findViewById<ColorPickerView>(R.id.colorPickerView)
 
         val checkbox =  dialogView.findViewById<CheckBox>(R.id.fill_checkbox)
+        checkbox.isSelected = fill
+
         if (shouldShowFillCheckbox) {
            checkbox?.let { it.visibility = View.VISIBLE }
         }
@@ -69,28 +72,6 @@ object UIUtil {
         }
 
         dialog.show()
-
-//        val builder =
-//            ColorPickerDialog.Builder(context)
-//
-//                .setPreferenceName("MyColorPickerDialog")
-//                .setPositiveButton(
-//                    R.string.OK,
-//                    ColorEnvelopeListener { envelope, _ ->
-//                        onColorSelected(envelope.color)
-//                    },
-//                )
-//                .setNegativeButton(R.string.cancel) { dialogInterface, _ ->
-//                    dialogInterface.dismiss()
-//                }
-//                .attachAlphaSlideBar(true)
-//                .attachBrightnessSlideBar(true)
-//                .setBottomSpace(12)
-////
-//
-//        builder.colorPickerView.setInitialColor(initialColor)
-//
-//        builder.show()
     }
 
     fun showClearAllDialog(

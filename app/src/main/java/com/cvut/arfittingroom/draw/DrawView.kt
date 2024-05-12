@@ -513,6 +513,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                     showColorPickerDialog(
                         context,
                         paintOptions.color,
+                        fill = paintOptions.style == Paint.Style.FILL,
                         shouldShowFillCheckbox = true,
                         shouldShowPipette = true
                     ) { envelopColor, fill ->

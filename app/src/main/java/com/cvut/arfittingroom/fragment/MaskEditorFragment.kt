@@ -2,6 +2,7 @@ package com.cvut.arfittingroom.fragment
 
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.graphics.Paint
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -137,6 +138,7 @@ class MaskEditorFragment : Fragment() {
             UIUtil.showColorPickerDialog(
                 requireContext(),
                 drawView.paintOptions.color,
+                fill = drawView.paintOptions.style == Paint.Style.FILL,
                 shouldShowFillCheckbox = true,
                 shouldShowPipette = true
             ) { envelopColor, fill ->
