@@ -253,7 +253,7 @@ class Layer(
 
     fun doesHaveGif(): Boolean = elementsToDraw.firstOrNull { it is Gif }?.let { true } ?: false
 
-    fun getMaxNumberOfFrames() = elementsToDraw.filterIsInstance<Gif>().maxOfOrNull { it.gifDrawable.numberOfFrames } ?: 0
+    fun getMaxNumberOfFrames() = elementsToDraw.filterIsInstance<Gif>().maxOfOrNull { it.gifDrawable?.numberOfFrames ?: 0 } ?: 0
 
     fun setAllGifsToAnimationMode() {
         elementsToDraw.forEach {

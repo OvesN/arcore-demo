@@ -95,10 +95,12 @@ class ImagesMenuFragment(private val drawView: DrawView) : Fragment() {
 
     private fun addImage(imageTO: ImageTO) {
         if (imageTO.isAnimated) {
-            downloadGif(imageTO.ref)
+            downloadGif(imageTO.ref) { gif, ref -> drawView.addGif(gif, ref) }
 
         } else {
-            downloadImage(imageTO.ref)
+            downloadImage(imageTO.ref) { bitmap, imageRef ->
+                drawView.addImage(bitmap, imageRef)
+            }
         }
     }
 
@@ -111,7 +113,7 @@ class ImagesMenuFragment(private val drawView: DrawView) : Fragment() {
             imagesTO.forEach { image ->
                 val button =
                     ImageButton(context).apply {
-                        scaleType = ImageView.ScaleType.CENTER
+                        scaleType = ImageView.ScaleType.FIT_CENTER
                         background = null
                         id = image.ref.hashCode()
                         setOnClickListener {
@@ -206,7 +208,7 @@ class ImagesMenuFragment(private val drawView: DrawView) : Fragment() {
         return inSampleSize
     }
 
-    private fun downloadImage(imageRef: String) {
+    fun downloadImage(imageRef: String, onComplete: () -> Unit = {}, onDownload: (Bitmap, String) -> Unit) {
         Glide.with(this)
             .asBitmap()
             .load(storage.getReference(imageRef))
@@ -216,10 +218,16 @@ class ImagesMenuFragment(private val drawView: DrawView) : Fragment() {
                         resource: Bitmap,
                         transition: Transition<in Bitmap>?,
                     ) {
-                        drawView.addImage(adjustImage(resource), imageRef)
+                        onDownload(adjustImage(resource), imageRef)
+                        onComplete()
                     }
 
                     override fun onLoadCleared(placeholder: Drawable?) {
+                    }
+
+                    override fun onLoadFailed(errorDrawable: Drawable?) {
+                        super.onLoadFailed(errorDrawable)
+                        onComplete()
                     }
 
                 },
@@ -227,19 +235,19 @@ class ImagesMenuFragment(private val drawView: DrawView) : Fragment() {
     }
 
 
-    private fun downloadGif(gifRef: String) {
+    fun downloadGif(gifRef: String, onComplete: () ->Unit = {}, onDownload: (GifDrawable, String) -> Unit) {
         val localFile = File.createTempFile("tempGif", ".gif")
 
         storage.getReference(gifRef).getFile(localFile).addOnSuccessListener {
             try {
                 val gif = GifDrawable(localFile)
 
-                val adjustedGif = adjustGif(gif, localFile)
-                drawView.addGif(adjustedGif, gifRef)
+                onDownload(adjustGif(gif, localFile), gifRef)
 
                 if (localFile.exists()) {
                     localFile.delete()
                 }
+                onComplete()
             } catch (ex: IOException) {
                 ex.printStackTrace()
                 StyleableToast.makeText(
@@ -247,6 +255,7 @@ class ImagesMenuFragment(private val drawView: DrawView) : Fragment() {
                     "Error processing image, ${ex.message}",
                     R.style.mytoast
                 ).show()
+                onComplete()
             }
         }.addOnFailureListener { ex ->
             StyleableToast.makeText(
@@ -258,11 +267,11 @@ class ImagesMenuFragment(private val drawView: DrawView) : Fragment() {
             if (localFile.exists()) {
                 localFile.delete()
             }
-
+            onComplete()
         }
     }
 
-    private fun adjustImage(bitmap: Bitmap): Bitmap {
+    fun adjustImage(bitmap: Bitmap): Bitmap {
         val targetWidth = drawView.width / 3
         val targetHeight = drawView.height / 3
 

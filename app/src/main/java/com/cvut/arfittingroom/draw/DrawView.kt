@@ -248,7 +248,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             Runnable {
                 Log.println(Log.INFO, null, "count $frameCount")
                 // Play gif three times and stop on the first frame
-                if (frameCount >= gif.gifDrawable.numberOfFrames * 3 && gif.currentFrameIndex == 0
+                if (frameCount >= (gif.gifDrawable?.numberOfFrames ?:0 ) * 3 && gif.currentFrameIndex == 0
                 ) {
                     frameCount = 0
                     stopAnimation(gif)

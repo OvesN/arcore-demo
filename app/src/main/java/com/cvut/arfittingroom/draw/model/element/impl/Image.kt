@@ -23,11 +23,13 @@ class Image(
     override var originalCenterX: Float = centerX
     override var originalCenterY: Float = centerY
     private var transformationMatrix: Matrix = Matrix()
-    lateinit var bitmap: Bitmap
+    var bitmap: Bitmap? = null
 
     override fun drawSpecific(canvas: Canvas) {
-        transformationMatrix = createTransformationMatrix()
-        canvas.drawBitmap(bitmap, transformationMatrix, null)
+        bitmap?.let {
+            transformationMatrix = createTransformationMatrix(it)
+            canvas.drawBitmap(it, transformationMatrix, null)
+        }
     }
 
     override fun doesIntersect(
@@ -47,16 +49,19 @@ class Image(
         inverseMatrix.mapPoints(points)
 
         // Check if the point is within bitmap bounds
-        if (points[0] < 0 || points[0] >= bitmap.width || points[1] < 0 || points[1] >= bitmap.height) {
-            return false
-        }
+        bitmap?.let {
+            if (points[0] < 0 || points[0] >= it.width || points[1] < 0 || points[1] >= it.height) {
+                return false
+            }
 
-        // Check the alpha value of the corresponding pixel in the bitmap
-        val pixel = bitmap.getPixel(points[0].toInt(), points[1].toInt())
-        return (pixel and TRANSPARENT_CODE.toInt()) != 0  // Check if alpha is not 0 (transparent)
+            // Check the alpha value of the corresponding pixel in the bitmap
+            val pixel = it.getPixel(points[0].toInt(), points[1].toInt())
+            return (pixel and TRANSPARENT_CODE.toInt()) != 0  // Check if alpha is not 0 (transparent)
+        }
+        return false
     }
 
-    private fun createTransformationMatrix(): Matrix {
+    private fun createTransformationMatrix(bitmap: Bitmap): Matrix {
         // Calculate the scale factor to fit the bitmap within the outerRadius
         val scaleFactor = (outerRadius * 2) / max(bitmap.width, bitmap.height)
 

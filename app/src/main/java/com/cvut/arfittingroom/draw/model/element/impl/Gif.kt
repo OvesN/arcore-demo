@@ -28,7 +28,7 @@ class Gif(
     var shouldDrawNextFrame = false
     var increaseFrameIndexEachDraw = false
     var currentFrameIndex = 0
-    lateinit var gifDrawable: GifDrawable
+    var gifDrawable: GifDrawable? = null
 
     fun setDrawable(gifDrawable: GifDrawable) {
         this.gifDrawable = gifDrawable
@@ -36,21 +36,24 @@ class Gif(
     }
 
     override fun drawSpecific(canvas: Canvas) {
-        if (increaseFrameIndexEachDraw) {
-            currentFrameIndex++
-        }
-        if (currentFrameIndex >= gifDrawable.numberOfFrames) {
-            currentFrameIndex = 0
+        gifDrawable?.let {
+            if (increaseFrameIndexEachDraw) {
+                currentFrameIndex++
+            }
+            if (currentFrameIndex >= it.numberOfFrames) {
+                currentFrameIndex = 0
+            }
+
+            transformationMatrix = createTransformationMatrix(it)
+            val bitmapToDraw =
+                if (shouldDrawNextFrame) it.seekToFrameAndGet(currentFrameIndex) else firstFrameBitmap
+
+            bitmapToDraw?.let { bitmap -> canvas.drawBitmap(bitmap, transformationMatrix, null) }
+            if (shouldDrawNextFrame) {
+                Log.println(Log.INFO, null, "frame $currentFrameIndex is drawn")
+            }
         }
 
-        transformationMatrix = createTransformationMatrix()
-        val bitmapToDraw =
-            if (shouldDrawNextFrame) gifDrawable.seekToFrameAndGet(currentFrameIndex) else firstFrameBitmap
-
-        bitmapToDraw?.let { canvas.drawBitmap(it, transformationMatrix, null) }
-        if (shouldDrawNextFrame) {
-            Log.println(Log.INFO, null, "frame $currentFrameIndex is drawn")
-        }
     }
 
     override fun setSelected(isSelected: Boolean) {
@@ -59,7 +62,7 @@ class Gif(
         currentFrameIndex = 0
     }
 
-    private fun createTransformationMatrix(): Matrix {
+    private fun createTransformationMatrix(gifDrawable: GifDrawable): Matrix {
         val width = gifDrawable.currentFrame.width
         val height = gifDrawable.currentFrame.height
 

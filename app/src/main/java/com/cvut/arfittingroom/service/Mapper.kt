@@ -1,6 +1,11 @@
 package com.cvut.arfittingroom.service
 
+import android.graphics.Bitmap
 import android.graphics.Paint
+import android.graphics.drawable.Drawable
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.target.CustomTarget
+import com.bumptech.glide.request.transition.Transition
 import com.cvut.arfittingroom.draw.Layer
 import com.cvut.arfittingroom.draw.model.PaintOptions
 import com.cvut.arfittingroom.draw.model.element.Element
@@ -20,6 +25,7 @@ import com.cvut.arfittingroom.model.to.drawhistory.ElementTO
 import com.cvut.arfittingroom.model.to.drawhistory.LayerTO
 import com.cvut.arfittingroom.model.to.drawhistory.PathActionTO
 import com.cvut.arfittingroom.model.to.drawhistory.PathTO
+import com.cvut.arfittingroom.module.GlideApp
 import com.google.firebase.storage.FirebaseStorage
 import java.util.UUID
 import javax.inject.Inject
@@ -172,8 +178,7 @@ constructor(private val strategies: Map<String, @JvmSuppressWildcards PathCreati
         elements = layer.elements.keys.map { it.toString() },
     )
 
-    // TODO handle exception, load resource
-    //TODO load images
+    // TODO handle exception
     fun elementTOtoElement(elementTO: ElementTO): Element =
         when (elementTO.elementType) {
             EElementType.STAMP -> {

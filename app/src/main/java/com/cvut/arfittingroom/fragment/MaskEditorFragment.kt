@@ -1,5 +1,7 @@
 package com.cvut.arfittingroom.fragment
 
+import android.app.AlertDialog
+import android.app.ProgressDialog
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Paint
@@ -11,6 +13,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.LinearLayout
+import android.widget.ProgressBar
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.cvut.arfittingroom.ARFittingRoomApplication
@@ -18,12 +21,17 @@ import com.cvut.arfittingroom.R
 import com.cvut.arfittingroom.activity.UIChangeListener
 import com.cvut.arfittingroom.draw.DrawView
 import com.cvut.arfittingroom.draw.Layer
+import com.cvut.arfittingroom.draw.model.element.impl.Gif
+import com.cvut.arfittingroom.draw.model.element.impl.Image
 import com.cvut.arfittingroom.draw.model.element.strategy.PathCreationStrategy
 import com.cvut.arfittingroom.model.to.drawhistory.EditorStateTO
 import com.cvut.arfittingroom.model.to.drawhistory.ElementTO
 import com.cvut.arfittingroom.model.to.drawhistory.LayerTO
 import com.cvut.arfittingroom.service.Mapper
+import com.cvut.arfittingroom.utils.FileUtil
+import com.cvut.arfittingroom.utils.FileUtil.deleteTempFiles
 import com.cvut.arfittingroom.utils.UIUtil
+import com.google.firebase.storage.FirebaseStorage
 import com.lukelorusso.verticalseekbar.VerticalSeekBar
 import java.util.LinkedList
 import javax.inject.Inject
@@ -42,6 +50,9 @@ class MaskEditorFragment : Fragment() {
     private lateinit var stampOptionsMenuFragment: StampOptionsMenuFragment
     private lateinit var imageMenuFragment: ImagesMenuFragment
     private lateinit var brushOptionsMenuFragment: BrushOptionsMenuFragment
+    private lateinit var storage: FirebaseStorage
+
+    private lateinit var progressBar: AlertDialog
 
     @Inject
     lateinit var strategies: Map<String, @JvmSuppressWildcards PathCreationStrategy>
@@ -60,6 +71,15 @@ class MaskEditorFragment : Fragment() {
         savedInstanceState: Bundle?,
     ) {
         super.onViewCreated(view, savedInstanceState)
+        storage = FirebaseStorage.getInstance()
+
+        val dialogView = LayoutInflater.from(context).inflate(R.layout.progress_dialog, null)
+
+        progressBar =
+            AlertDialog.Builder(context)
+                .setView(dialogView)
+                .create()
+
         drawView = view.findViewById(R.id.draw_view)
         drawView.applyBitmapBackground(backgroundBitmap)
 
@@ -116,10 +136,12 @@ class MaskEditorFragment : Fragment() {
         }
 
         view.findViewById<ImageButton>(R.id.button_ok).setOnClickListener {
+            showProgressBar()
             hideLayersMenu()
 
             drawView.saveBitmap {
                 showMainLayout()
+                hideProgressBar()
             }
         }
 
@@ -232,6 +254,7 @@ class MaskEditorFragment : Fragment() {
                 editorStateTO = null
             }
         }
+
         drawView.post {
             drawView.applyBitmapBackground(backgroundBitmap)
         }
@@ -304,6 +327,7 @@ class MaskEditorFragment : Fragment() {
     }
 
     fun clearAll() {
+        deleteTempFiles(requireContext())
         if (::drawView.isInitialized) {
             drawView.clearCanvas()
             layersMenuFragment.updateLayersButtons(drawView.layerManager.getNumOfLayers())
@@ -336,33 +360,61 @@ class MaskEditorFragment : Fragment() {
     }
 
     private fun deserializeEditorState(editorStateTO: EditorStateTO) {
-        val elementsMap =
-            editorStateTO.elements.associateBy(
-                keySelector = { it.id },
-                valueTransform = { mapper.elementTOtoElement(it) },
-            )
+        showProgressBar()
 
-        val sortedLayers = editorStateTO.layers.sortedBy { it.index }
-        val layersList: LinkedList<Layer> = LinkedList()
+        val elementsMap = editorStateTO.elements.associateBy(
+            keySelector = { it.id },
+            valueTransform = { mapper.elementTOtoElement(it) }
+        )
 
-        val layersMap =
-            sortedLayers.associateBy(
-                keySelector = { it.id },
-                valueTransform = { layerTO ->
-                    val layer =
-                        mapper.layerTOtoLayer(layerTO)
-                    layersList.add(layer)
-                    layerTO.elements.forEach {
-                        elementsMap[it]?.let { it1 -> layer.addElement(it1) }
+        var remainingDownloads = elementsMap.values.count { it is Image || it is Gif }
+
+        val onDownloadComplete = {
+            remainingDownloads--
+            if (remainingDownloads == 0) {
+                hideProgressBar()
+                // All downloads are complete, execute the following code
+                val sortedLayers = editorStateTO.layers.sortedBy { it.index }
+                val layersList: LinkedList<Layer> = LinkedList()
+
+                val layersMap = sortedLayers.associateBy(
+                    keySelector = { it.id },
+                    valueTransform = { layerTO ->
+                        val layer = mapper.layerTOtoLayer(layerTO)
+                        layersList.add(layer)
+                        layerTO.elements.forEach {
+                            elementsMap[it]?.let { it1 -> layer.addElement(it1) }
+                        }
+                        layer
                     }
-                    layer
-                },
-            )
+                )
 
-        drawView.layerManager.deleteLayers()
+                drawView.layerManager.deleteLayers()
+                drawView.layerManager.layers.addAll(layersList)
+            }
+        }
 
-        drawView.layerManager.layers.addAll(layersList)
+        elementsMap.values.forEach {
+            if (it is Image) {
+                imageMenuFragment.downloadImage(it.resourceRef,  onDownloadComplete) { bitmap, _ ->
+                    it.bitmap = bitmap
+                }
+            } else if (it is Gif) {
+                imageMenuFragment.downloadGif(it.resourceRef, onDownloadComplete) { gifDrawable, _ ->
+                    it.setDrawable(gifDrawable)
+                }
+            }
+        }
+    }
 
+
+    private fun showProgressBar() {
+       progressBar.show()
+    }
+
+    private fun hideProgressBar() {
+        progressBar.dismiss()
+        drawView.invalidate()
     }
 
     companion object {

@@ -6,6 +6,7 @@
     <color name="colorBlue">#0029FF</color>
     <color name="colorBlack">#000000</color>
     <color name="colorTransparentBlack">#BA000000</color>
+    <color name="colorLightTransparentBlack">#1D000000</color>
     <color name="colorLightGrey">#D9D9D9</color>
     <color name="colorRed">#FF0707</color>
     <color name="colorMediumGrey">#4D4D4D</color>
