@@ -38,6 +38,7 @@ object DrawHistoryHolder {
 
     fun addToHistory(command: Command) {
         globalHistory.add(command)
+        undoneActions.clear()
         command.execute()
     }
 

@@ -134,7 +134,7 @@ class SignUpActivity : AppCompatActivity() {
                             R.style.mytoast,
                         ).show()
 
-                        startActivity(Intent(this, ShowRoomActivity::class.java))
+                        startActivity(Intent(this, FittingRoomActivity::class.java))
                         finish()
                     }.addOnFailureListener { ex -> Log.println(Log.ERROR, null, "onFailure: $ex") }
                 } else {

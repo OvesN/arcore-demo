@@ -10,7 +10,6 @@ import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewTreeObserver
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
@@ -24,7 +23,7 @@ import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
 import com.cvut.arfittingroom.ARFittingRoomApplication
 import com.cvut.arfittingroom.R
-import com.cvut.arfittingroom.databinding.ActivityShowRoomBinding
+import com.cvut.arfittingroom.databinding.ActivityFittingRoomBinding
 import com.cvut.arfittingroom.draw.DrawHistoryHolder
 import com.cvut.arfittingroom.fragment.AccessoriesOptionsFragment
 import com.cvut.arfittingroom.fragment.CameraModeFragment
@@ -77,11 +76,11 @@ import java.lang.Exception
 import java.util.UUID
 import javax.inject.Inject
 
-class ShowRoomActivity :
+class FittingRoomActivity :
     AppCompatActivity(),
     ResourceListener,
     UIChangeListener {
-    private val binding: ActivityShowRoomBinding by viewBinding(createMethod = CreateMethod.INFLATE)
+    private val binding: ActivityFittingRoomBinding by viewBinding(createMethod = CreateMethod.INFLATE)
     private val gifTextures = mutableListOf<Texture>()
     private var frameCounter = 0
     private var handler = Handler(Looper.getMainLooper())

@@ -80,7 +80,7 @@ class LogInActivity : AppCompatActivity() {
                 if (task.isSuccessful) {
                     Log.println(Log.INFO, null, "User $username logged in")
                     StyleableToast.makeText(baseContext, "Logged in Successfully!", R.style.mytoast).show()
-                    startActivity(Intent(this, ShowRoomActivity::class.java))
+                    startActivity(Intent(this, FittingRoomActivity::class.java))
                     finish()
                 } else {
                     Log.println(Log.ERROR, null, "createUserWithEmail:failure ${task.exception}")

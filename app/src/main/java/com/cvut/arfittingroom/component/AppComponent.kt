@@ -1,6 +1,6 @@
 package com.cvut.arfittingroom.component
 
-import com.cvut.arfittingroom.activity.ShowRoomActivity
+import com.cvut.arfittingroom.activity.FittingRoomActivity
 import com.cvut.arfittingroom.draw.DrawView
 import com.cvut.arfittingroom.draw.model.element.strategy.PathCreationStrategy
 import com.cvut.arfittingroom.fragment.MaskEditorFragment
@@ -12,7 +12,7 @@ import javax.inject.Singleton
 @Singleton
 @Component(modules = [ServiceModule::class, BindingModule::class])
 interface AppComponent {
-    fun inject(activity: ShowRoomActivity)
+    fun inject(activity: FittingRoomActivity)
 
     fun inject(activity: MaskEditorFragment)
 

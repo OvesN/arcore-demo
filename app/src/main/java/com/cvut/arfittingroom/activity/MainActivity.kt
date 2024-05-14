@@ -22,7 +22,7 @@ class MainActivity : AppCompatActivity() {
         deleteTempFiles(applicationContext)
 
         if (auth.currentUser != null) {
-            startActivity(Intent(this, ShowRoomActivity::class.java))
+            startActivity(Intent(this, FittingRoomActivity::class.java))
             finish()
             return
         }

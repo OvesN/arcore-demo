@@ -24,9 +24,11 @@ class StampOptionsMenuFragment(
     private val drawView: DrawView
 ) : Fragment() {
     private var selectedViewId = 0
-    private var selectedColor: Int = Color.BLACK
+    private val paint = Paint().apply {
+        strokeWidth = 6f
+    }
     private var underscoreSelectedView: View? = null
-    private var selectedStyle:Style = Style.FILL
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -70,7 +72,7 @@ class StampOptionsMenuFragment(
             val canvas = Canvas(bitmap)
             val paint = Paint().apply {
                 color = Color.WHITE
-                style = selectedStyle
+                style = paint.style
                 strokeWidth = 3f
                 isAntiAlias = true
             }
@@ -90,7 +92,7 @@ class StampOptionsMenuFragment(
 
             if (selectedViewId == imageButton.id) {
                 underscoreLine.visibility = View.VISIBLE
-                imageButton.imageTintList = ColorStateList.valueOf(selectedColor)
+                imageButton.imageTintList = ColorStateList.valueOf(paint.color)
             }
 
             verticalContainer.addView(imageButton)
@@ -118,17 +120,16 @@ class StampOptionsMenuFragment(
             underscoreSelectedView = underscore
             underscore.visibility = View.VISIBLE
 
-            view.imageTintList = ColorStateList.valueOf(selectedColor)
+            view.imageTintList = ColorStateList.valueOf(paint.color)
             drawView.setStamp(pathCreationStrategy)
         }
-
     }
 
 
     fun changeColor(newColor: Int, fill: Boolean) {
-        selectedColor = newColor
+        paint.color = newColor
 
-        selectedStyle = if (fill)  Style.FILL else Style.STROKE
+        paint.style =  if (fill)  Style.FILL else Style.STROKE
 
         createStampMenu(requireView())
     }
