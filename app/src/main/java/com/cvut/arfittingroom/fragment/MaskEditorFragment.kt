@@ -33,6 +33,7 @@ import com.cvut.arfittingroom.utils.FileUtil.deleteTempFiles
 import com.cvut.arfittingroom.utils.UIUtil
 import com.google.firebase.storage.FirebaseStorage
 import com.lukelorusso.verticalseekbar.VerticalSeekBar
+import io.github.muddz.styleabletoast.StyleableToast
 import java.util.LinkedList
 import javax.inject.Inject
 
@@ -362,10 +363,24 @@ class MaskEditorFragment : Fragment() {
     private fun deserializeEditorState(editorStateTO: EditorStateTO) {
         showProgressBar()
 
-        val elementsMap = editorStateTO.elements.associateBy(
-            keySelector = { it.id },
-            valueTransform = { mapper.elementTOtoElement(it) }
-        )
+        val errorMessages = mutableListOf<String>()
+
+        val elementsMap = try {
+            editorStateTO.elements.associateBy(
+                keySelector = { it.id },
+                valueTransform = { elementTO ->
+                    try {
+                        mapper.elementTOtoElement(elementTO)
+                    } catch (e: Exception) {
+                        errorMessages.add("Error deserializing element ${elementTO.id}: ${e.message}")
+                        null
+                    }
+                }
+            ).filterValues { it != null }
+        } catch (e: Exception) {
+            errorMessages.add("Error deserializing elements: ${e.message}")
+            emptyMap()
+        }
 
         var remainingDownloads = elementsMap.values.count { it is Image || it is Gif }
 
@@ -373,30 +388,56 @@ class MaskEditorFragment : Fragment() {
             remainingDownloads--
             if (remainingDownloads == 0) {
                 hideProgressBar()
-                // All downloads are complete, execute the following code
+
+                if (errorMessages.isNotEmpty()) {
+                    StyleableToast.makeText(
+                        requireContext(),
+                        errorMessages.joinToString("\n"),
+                        R.style.mytoast
+                    ).show()
+                }
+
                 val sortedLayers = editorStateTO.layers.sortedBy { it.index }
                 val layersList: LinkedList<Layer> = LinkedList()
 
-                val layersMap = sortedLayers.associateBy(
-                    keySelector = { it.id },
-                    valueTransform = { layerTO ->
-                        val layer = mapper.layerTOtoLayer(layerTO)
-                        layersList.add(layer)
-                        layerTO.elements.forEach {
-                            elementsMap[it]?.let { it1 -> layer.addElement(it1) }
+                val layersMap = try {
+                    sortedLayers.associateBy(
+                        keySelector = { it.id },
+                        valueTransform = { layerTO ->
+                            try {
+                                val layer = mapper.layerTOtoLayer(layerTO)
+                                layersList.add(layer)
+                                layerTO.elements.forEach {
+                                    elementsMap[it]?.let { element -> layer.addElement(element) }
+                                }
+                                layer
+                            } catch (e: Exception) {
+                                errorMessages.add("Error deserializing layer ${layerTO.id}: ${e.message}")
+                                null
+                            }
                         }
-                        layer
-                    }
-                )
+                    ).filterValues { it != null }
+                } catch (e: Exception) {
+                    errorMessages.add("Error deserializing layers: ${e.message}")
+                    emptyMap()
+                }
 
                 drawView.layerManager.deleteLayers()
-                drawView.layerManager.layers.addAll(layersList)
+                drawView.layerManager.layers.addAll(layersList.filterNotNull())
+
+                if (errorMessages.isNotEmpty()) {
+                    StyleableToast.makeText(
+                        requireContext(),
+                        "Drawing was opened with errors",
+                        R.style.mytoast
+                    ).show()
+                }
             }
         }
 
         elementsMap.values.forEach {
             if (it is Image) {
-                imageMenuFragment.downloadImage(it.resourceRef,  onDownloadComplete) { bitmap, _ ->
+                imageMenuFragment.downloadImage(it.resourceRef, onDownloadComplete) { bitmap, _ ->
                     it.bitmap = bitmap
                 }
             } else if (it is Gif) {

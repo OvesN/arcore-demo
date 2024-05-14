@@ -178,7 +178,6 @@ constructor(private val strategies: Map<String, @JvmSuppressWildcards PathCreati
         elements = layer.elements.keys.map { it.toString() },
     )
 
-    // TODO handle exception
     fun elementTOtoElement(elementTO: ElementTO): Element =
         when (elementTO.elementType) {
             EElementType.STAMP -> {
