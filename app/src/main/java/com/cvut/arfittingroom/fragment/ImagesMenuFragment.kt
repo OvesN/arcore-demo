@@ -58,13 +58,11 @@ class ImagesMenuFragment(private val drawView: DrawView) : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?,
-    ): View? = inflater.inflate(R.layout.fragment_menu, container, false)
+    ): View? = inflater.inflate(R.layout.fragment_images_menu, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        view.findViewById<View>(R.id.horizontal_scroll_view).visibility = View.GONE
         view.findViewById<View>(R.id.vertical_scroll_view).visibility = View.VISIBLE
-        view.findViewById<View>(R.id.divider).visibility = View.GONE
         view.findViewById<GridLayout>(R.id.vertical_options).columnCount =
             NUM_OF_ELEMENTS_IN_ROW_BIG_MENU
 
