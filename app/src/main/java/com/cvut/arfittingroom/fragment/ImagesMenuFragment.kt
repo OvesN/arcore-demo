@@ -35,7 +35,11 @@ import com.google.firebase.storage.FirebaseStorage
 import io.github.muddz.styleabletoast.StyleableToast
 import pl.droidsonroids.gif.GifDrawable
 import pl.droidsonroids.gif.GifDrawableBuilder
+import java.io.BufferedInputStream
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.IOException
 import java.io.InputStream
 
 class ImagesMenuFragment(private val drawView: DrawView) : Fragment() {
@@ -74,7 +78,7 @@ class ImagesMenuFragment(private val drawView: DrawView) : Fragment() {
             }
         }
 
-    private fun fetchImages() {
+    fun fetchImages() {
         firestore.collection(IMAGES_COLLECTION)
             .get()
             .addOnSuccessListener { result ->
@@ -109,7 +113,7 @@ class ImagesMenuFragment(private val drawView: DrawView) : Fragment() {
             imagesTO.forEach { image ->
                 val button =
                     ImageButton(context).apply {
-                        scaleType = ImageView.ScaleType.FIT_CENTER
+                        scaleType = ImageView.ScaleType.CENTER
                         background = null
                         id = image.ref.hashCode()
                         setOnClickListener {
@@ -224,23 +228,39 @@ class ImagesMenuFragment(private val drawView: DrawView) : Fragment() {
             )
     }
 
-    private fun downloadGif(gifRef: String) {
-        storage.getReference(gifRef).stream.addOnSuccessListener {
-            it.stream.use { stream ->
-                val gif = GifDrawable(stream)
-                storage.getReference(gifRef).stream.addOnSuccessListener { task ->
-                    task.stream.use { stream ->
-                        drawView.addGif(adjustGif(gif, stream), gifRef)
-                    }
-                }
-            }
 
+    private fun downloadGif(gifRef: String) {
+        val localFile = File.createTempFile("tempGif", ".gif")
+
+        storage.getReference(gifRef).getFile(localFile).addOnSuccessListener {
+            try {
+                val gif = GifDrawable(localFile)
+
+                val adjustedGif = adjustGif(gif, localFile)
+                drawView.addGif(adjustedGif, gifRef)
+
+                if (localFile.exists()) {
+                    localFile.delete()
+                }
+            } catch (ex: IOException) {
+                ex.printStackTrace()
+                StyleableToast.makeText(
+                    requireContext(),
+                    "Error processing image, ${ex.message}",
+                    R.style.mytoast
+                ).show()
+            }
         }.addOnFailureListener { ex ->
             StyleableToast.makeText(
                 requireContext(),
                 "Error loading image, ${ex.message}",
                 R.style.mytoast
             ).show()
+            // Clean up the temporary file in case of failure
+            if (localFile.exists()) {
+                localFile.delete()
+            }
+
         }
     }
 
@@ -257,9 +277,9 @@ class ImagesMenuFragment(private val drawView: DrawView) : Fragment() {
         return Bitmap.createScaledBitmap(bitmap, width, height, true)
     }
 
-    private fun adjustGif(gifDrawable: GifDrawable, stream: InputStream): GifDrawable {
+    private fun adjustGif(gifDrawable: GifDrawable, file: File): GifDrawable {
         return GifDrawableBuilder().with(gifDrawable)
-            .from(stream)
+            .from(file)
             .sampleSize(
                 calculateInSampleSize(
                     gifDrawable.currentFrame.width,

@@ -270,6 +270,8 @@ class MaskEditorFragment : Fragment() {
         requireActivity().supportFragmentManager.beginTransaction()
             .show(imageMenuFragment)
             .commit()
+
+        imageMenuFragment.fetchImages()
     }
 
     private fun resetMenu() {
