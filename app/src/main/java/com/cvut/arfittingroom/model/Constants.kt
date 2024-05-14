@@ -27,6 +27,7 @@ const val MODELS_COLLECTION = "models"
 const val LOOKS_COLLECTION = "looks"
 const val PREVIEW_COLLECTION = "preview"
 const val IMAGES_COLLECTION = "images"
+const val GIFS_COLLECTION = "gifs"
 
 // Firebase attributes
 const val IS_PUBLIC_ATTRIBUTE = "is_public"

@@ -196,6 +196,10 @@ class MaskEditorFragment : Fragment() {
             showImageMenu(it)
         }
 
+        view.findViewById<ImageButton>(R.id.button_menu).setOnClickListener {
+            imageMenuFragment.uploadImage()
+        }
+
         slider.setOnReleaseListener {
             drawView.setStrokeWidth(it)
         }

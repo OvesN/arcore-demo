@@ -23,6 +23,7 @@ import com.bumptech.glide.request.transition.Transition
 import com.cvut.arfittingroom.R
 import com.cvut.arfittingroom.draw.DrawView
 import com.cvut.arfittingroom.draw.model.element.impl.Gif
+import com.cvut.arfittingroom.model.GIFS_COLLECTION
 import com.cvut.arfittingroom.model.IMAGES_COLLECTION
 import com.cvut.arfittingroom.model.LOOKS_COLLECTION
 import com.cvut.arfittingroom.model.NUM_OF_ELEMENTS_IN_ROW_BIG_MENU
@@ -41,6 +42,7 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.IOException
 import java.io.InputStream
+import kotlin.random.Random
 
 class ImagesMenuFragment(private val drawView: DrawView) : Fragment() {
     private lateinit var firestore: FirebaseFirestore
@@ -69,12 +71,17 @@ class ImagesMenuFragment(private val drawView: DrawView) : Fragment() {
         fetchImages()
     }
 
-    private val getImage =
-        registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-            uri?.let {
-                uploadImage(it)
-            }
+    private val getImage = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        uri?.let {
+            uploadImage(it)
+        } ?: run {
+            StyleableToast.makeText(
+                requireContext(),
+                "Failed to select image.",
+                R.style.mytoast
+            ).show()
         }
+    }
 
     fun fetchImages() {
         firestore.collection(IMAGES_COLLECTION)
@@ -138,8 +145,7 @@ class ImagesMenuFragment(private val drawView: DrawView) : Fragment() {
                         .asGif()
                         .load(storage.getReference(image.ref))
                         .into(button)
-                }
-                else {
+                } else {
                     GlideApp.with(this)
                         .load(storage.getReference(image.ref))
                         .thumbnail()
@@ -149,13 +155,32 @@ class ImagesMenuFragment(private val drawView: DrawView) : Fragment() {
         }
     }
 
-    private fun uploadImage() {
+    fun uploadImage() {
         getImage.launch("image/*")
     }
 
     private fun uploadImage(fileUri: Uri) {
-        val file = Uri.fromFile(File(fileUri.path!!))
-        val fileSize = File(fileUri.path!!).length() / (1024 * 1024)
+        StyleableToast.makeText(
+            requireContext(),
+            "Starting to upload",
+            R.style.mytoast
+        ).show()
+
+        val file = File(fileUri.path!!)
+        val fileSize = file.length() / (1024 * 1024)
+
+        val isAnimated = when (val mimeType = requireContext().contentResolver.getType(fileUri)) {
+            "image/png" -> false
+            "image/gif" -> true
+            else -> {
+                StyleableToast.makeText(
+                    requireContext(),
+                    "Unsupported file format: $mimeType",
+                    R.style.mytoast
+                ).show()
+                return
+            }
+        }
 
         if (fileSize > 30) {
             StyleableToast.makeText(
@@ -166,15 +191,20 @@ class ImagesMenuFragment(private val drawView: DrawView) : Fragment() {
             return
         }
 
-        val fileRef = storage.getReference("$IMAGES_COLLECTION/${file.lastPathSegment}")
+        val collection = if (isAnimated) GIFS_COLLECTION else IMAGES_COLLECTION
+        val ref = "$collection/${file.name}${Random.nextInt()}"
+        val fileRef = storage.getReference(ref)
+
         fileRef.putFile(fileUri)
             .addOnSuccessListener {
+                val image = ImageTO(ref = ref, isAnimated = isAnimated)
+                firestore.collection(IMAGES_COLLECTION).document().set(image)
+
                 StyleableToast.makeText(
                     requireContext(),
-                    "Image uploaded successfully",
+                    "Uploaded successfully",
                     R.style.mytoast
                 ).show()
-
             }
             .addOnFailureListener { ex ->
                 StyleableToast.makeText(
@@ -182,9 +212,9 @@ class ImagesMenuFragment(private val drawView: DrawView) : Fragment() {
                     "Failed to upload image: ${ex.message}",
                     R.style.mytoast
                 ).show()
-
             }
     }
+
 
     private fun calculateInSampleSize(
         width: Int,
@@ -208,7 +238,11 @@ class ImagesMenuFragment(private val drawView: DrawView) : Fragment() {
         return inSampleSize
     }
 
-    fun downloadImage(imageRef: String, onComplete: () -> Unit = {}, onDownload: (Bitmap, String) -> Unit) {
+    fun downloadImage(
+        imageRef: String,
+        onComplete: () -> Unit = {},
+        onDownload: (Bitmap, String) -> Unit
+    ) {
         Glide.with(this)
             .asBitmap()
             .load(storage.getReference(imageRef))
@@ -235,7 +269,11 @@ class ImagesMenuFragment(private val drawView: DrawView) : Fragment() {
     }
 
 
-    fun downloadGif(gifRef: String, onComplete: () ->Unit = {}, onDownload: (GifDrawable, String) -> Unit) {
+    fun downloadGif(
+        gifRef: String,
+        onComplete: () -> Unit = {},
+        onDownload: (GifDrawable, String) -> Unit
+    ) {
         val localFile = File.createTempFile("tempGif", ".gif")
 
         storage.getReference(gifRef).getFile(localFile).addOnSuccessListener {
