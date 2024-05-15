@@ -1,0 +1,110 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@color/colorDarkGrey"
+    android:orientation="vertical">
+
+    <FrameLayout
+        android:id="@+id/colorPickerViewFrame"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.skydoves.colorpickerview.ColorPickerView
+            android:id="@+id/colorPickerView"
+            android:layout_width="300dp"
+            android:layout_height="300dp"
+            android:layout_gravity="center"
+            android:layout_margin="20dp"
+            app:initialColor="@color/colorBlack"
+            app:selector="@drawable/colorpickerview_wheel" />
+
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/alphaSlideBarFrame"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.skydoves.colorpickerview.sliders.AlphaSlideBar
+            android:id="@+id/alphaSlideBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="15dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginRight="15dp"
+            android:layout_marginBottom="10dp"
+            app:selector_AlphaSlideBar="@drawable/colorpickerview_wheel" />
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/brightnessSlideBarFrame"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.skydoves.colorpickerview.sliders.BrightnessSlideBar
+            android:id="@+id/brightnessSlideBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="15dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginRight="15dp"
+            android:layout_marginBottom="10dp"
+            app:selector_BrightnessSlider="@drawable/colorpickerview_wheel" />
+    </FrameLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:padding="5dp"
+        android:weightSum="4">
+
+        <ImageButton
+            android:visibility="invisible"
+            android:id="@+id/pipette_button"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:src="@drawable/pipette"
+            android:background="@null"
+            android:backgroundTint="@color/colorLightGrey" />
+
+        <CheckBox
+            android:visibility="invisible"
+            android:id="@+id/fill_checkbox"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="@string/fill" />
+
+        <Button
+            android:id="@+id/cancel_popup_button"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@null"
+            android:text="@string/cancel"
+            android:textAllCaps="false"/>
+
+        <Button
+            android:id="@+id/ok_button"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@null"
+            android:text="@string/OK"
+            android:textAllCaps="false">
+
+        </Button>
+    </LinearLayout>
+
+
+    <Space
+        android:id="@+id/space_bottom"
+        android:layout_width="match_parent"
+        android:layout_height="10dp" />
+
+</LinearLayout>

@@ -37,7 +37,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import io.github.muddz.styleabletoast.StyleableToast
 
-class MakeupOptionsFragment : Fragment() {
+class MakeupMenuFragment : Fragment() {
     private val makeupTypes = mutableListOf<MakeupType>()
     private var selectedMakeupOptionRef: String = ""
     private var selectedColor: Int = Color.WHITE
@@ -226,7 +226,7 @@ class MakeupOptionsFragment : Fragment() {
                 scaleType = ImageView.ScaleType.FIT_CENTER
                 background = ContextCompat.getDrawable(requireContext(), R.drawable.color_picker)!!
                 setOnClickListener {
-                    showColorPickerDialog(requireContext(), selectedColor) { envelopColor ->
+                    showColorPickerDialog(requireContext(), selectedColor) { envelopColor, _ ->
                         selectedColor = envelopColor
                         toggleMakeup(selectedMakeupOptionRef, selectedMakeupType)
                     }

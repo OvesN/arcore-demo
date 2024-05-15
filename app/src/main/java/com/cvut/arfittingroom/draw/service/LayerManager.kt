@@ -12,6 +12,10 @@ import java.util.UUID
 
 private val logger = KotlinLogging.logger {}
 
+/**
+ * Layer manager
+ *
+ */
 class LayerManager {
     val layers = mutableListOf<Layer>()
     private val idToLayerMap = HashMap<UUID, Layer>()
@@ -20,6 +24,7 @@ class LayerManager {
     private var layersAboveActiveLayerBitmap: Bitmap? = null
     private var viewWidth: Int = 0
     private var viewHeight: Int = 0
+    var bitmapFromAllLayers: Bitmap? = null
 
     /**
      * Draw all layers
@@ -68,6 +73,14 @@ class LayerManager {
 
     fun getActiveLayerIndex() = activeLayerIndex
 
+    fun isVisible(layerIndex: Int) = layers[layerIndex].isVisible
+
+    fun makeLayersSemiTransparentExceptOne(layerIndex: Int) {
+        makeLayersSemiTransparent()
+        setLayerOpacity(1f, layerIndex)
+        recreateLayersBitmaps()
+    }
+
     // Returns index of the last layer
     fun addLayer(
         width: Int,
@@ -104,6 +117,13 @@ class LayerManager {
     }
 
     fun getLayerIdByIndex(index: Int): UUID? = layers.getOrNull(index)?.id
+
+    fun toggleActiveLayerVisibility() {
+        if (layers.isEmpty()) {
+            return
+        }
+        layers[activeLayerIndex].isVisible = !layers[activeLayerIndex].isVisible
+    }
 
     fun removeElementFromLayer(
         elementId: UUID,
@@ -192,6 +212,9 @@ class LayerManager {
     }
 
     fun deselectAllElements() {
+        if (activeLayerIndex >= layers.size) {
+            return
+        }
         layers[activeLayerIndex].deselectAllElements()
     }
 
@@ -240,6 +263,25 @@ class LayerManager {
                 this,
             )
         }
+
+    fun resetLayersOpacity() {
+        layers.forEach { it.setOpacity(1f) }
+    }
+
+    fun makeLayersSemiTransparent() {
+        layers.forEach { layer ->
+
+            layer.setOpacity(0.5f)
+        }
+    }
+
+    fun setLayerOpacity(opacity: Float, layerIndex: Int) {
+        if ( layerIndex >= layers.size|| layerIndex < 0) {
+            return
+        }
+        layers[layerIndex].setOpacity(opacity)
+    }
+
 
     /**
      * Initiates the process of separating the elements that
@@ -313,7 +355,6 @@ class LayerManager {
 
         layers.forEach { layer ->
             val layerBitmap = layer.createBitmap()
-
             layerBitmap?.let { canvas.drawBitmap(layerBitmap, 0f, 0f, layer.opacityPaint) }
         }
 
@@ -325,6 +366,10 @@ class LayerManager {
         layersAboveActiveLayerBitmap?.recycle()
         layersBelowActiveLayerBitmap = null
         layersAboveActiveLayerBitmap = null
+    }
+
+    fun recreateLayersBitmaps() {
+        setActiveLayer(activeLayerIndex)
     }
 
     fun restoreDeletedLayer(layerId: UUID) {
@@ -356,4 +401,5 @@ class LayerManager {
     fun resetAllGifs() {
         layers.forEach { it.resetAllGifs() }
     }
+
 }

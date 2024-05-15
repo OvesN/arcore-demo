@@ -1,5 +1,6 @@
 package com.cvut.arfittingroom.draw.model.element.strategy.impl
 
+import android.graphics.Path
 import com.cvut.arfittingroom.draw.model.element.strategy.PathCreationStrategy
 import com.cvut.arfittingroom.draw.path.DrawablePath
 import javax.inject.Inject
@@ -13,5 +14,11 @@ constructor() : PathCreationStrategy {
         centerX: Float,
         centerY: Float,
         outerRadius: Float,
-    ): DrawablePath = DrawablePath()
+    ): DrawablePath {
+        val path = DrawablePath()
+
+        path.addCircle(centerX, centerY, outerRadius, Path.Direction.CW)
+        return path
+    }
+
 }

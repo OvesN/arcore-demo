@@ -22,3 +22,4 @@ List of sources of other images:
 https://www.freepik.com/free-vector/set-lashes-illustration_1774223.htm#query=eyelashes&position=1&from_view=keyword&track=sph&uuid=5d1ae76c-9331-4026-9379-4b5488a56dca  by katemangostar on Freepik
 https://www.freepik.com/free-vector/eyelashes-girls-simple-illustrations-set_18733557.htm#query=eyelashes&position=0&from_view=keyword&track=sph&uuid=5d1ae76c-9331-4026-9379-4b5488a56dca  by pch.vector on Freepik
 Icons made from https://www.onlinewebfonts.com/icon svg icons is licensed by CC BY 4.0
+https://www.vecteezy.com/free-vector/dropper-icon" Dropper Icon Vectors by Vecteezy

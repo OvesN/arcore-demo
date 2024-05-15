@@ -9,14 +9,16 @@ class RepaintElement(
     private val repaintable: Repaintable,
     private val newColor: Int,
     private val oldColor: Int,
+    private val fill: Boolean,
+    private val wasFilled: Boolean
 ) : ElementCommand() {
     override val description: String = "change color of element"
 
     override fun execute() {
-        repaintable.repaint(newColor)
+        repaintable.repaint(newColor, fill)
     }
 
     override fun revert() {
-        repaintable.repaint(oldColor)
+        repaintable.repaint(oldColor, wasFilled)
     }
 }

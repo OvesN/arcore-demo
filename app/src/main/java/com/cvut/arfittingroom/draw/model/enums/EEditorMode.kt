@@ -1,9 +1,9 @@
 package com.cvut.arfittingroom.draw.model.enums
 
-enum class EShape {
-    CIRCLE,
-    HEART,
+enum class EEditorMode {
+    BRUSH,
+    STAMP,
     NONE,
-    STAR,
+    PIPETTE,
     ;
 }

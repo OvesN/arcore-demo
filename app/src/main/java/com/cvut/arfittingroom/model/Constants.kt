@@ -21,10 +21,13 @@ const val USERS_COLLECTION = "users"
 const val MAKEUP_COLLECTION = "makeup"
 const val MAKEUP_TYPES_COLLECTION = "makeup_types"
 const val ACCESSORY_TYPES_COLLECTION = "accessory_types"
+const val BRUSHES_COLLECTION = "brushes"
 const val COLORS_COLLECTION = "colors"
 const val MODELS_COLLECTION = "models"
 const val LOOKS_COLLECTION = "looks"
 const val PREVIEW_COLLECTION = "preview"
+const val IMAGES_COLLECTION = "images"
+const val GIFS_COLLECTION = "gifs"
 
 // Firebase attributes
 const val IS_PUBLIC_ATTRIBUTE = "is_public"

@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".activity.ShowRoomActivity">
+    tools:context=".activity.FittingRoomActivity">
 
     <FrameLayout
         android:id="@+id/arFragment"
@@ -79,12 +79,12 @@
             android:gravity="center_horizontal"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toTopOf="@id/second_line_buttons"
+            app:layout_constraintBottom_toTopOf="@id/menu_buttons"
             app:layout_constraintHorizontal_bias="0.5"/>
 
 
         <LinearLayout
-            android:id="@+id/second_line_buttons"
+            android:id="@+id/menu_buttons"
             android:layout_width="wrap_content"
             android:layout_height="30dp"
             android:background="@drawable/button"
@@ -96,7 +96,8 @@
 
             <Button
                 android:id="@+id/makeup_button"
-                android:layout_width="100dp"
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 android:layout_height="30dp"
                 android:scaleType="fitCenter"
                 android:background="@null"
@@ -106,8 +107,9 @@
 
             <Button
                 android:id="@+id/accessories_button"
-                android:layout_width="100dp"
+                android:layout_width="0dp"
                 android:layout_height="30dp"
+                android:layout_weight="1"
                 android:background="@null"
                 android:backgroundTint="@color/colorMediumGrey"
                 android:text="@string/accessories"
@@ -115,8 +117,9 @@
 
             <Button
                 android:id="@+id/looks_button"
-                android:layout_width="100dp"
+                android:layout_width="0dp"
                 android:layout_height="30dp"
+                android:layout_weight="1"
                 android:background="@null"
                 android:backgroundTint="@color/colorMediumGrey"
                 android:text="@string/looks"

@@ -1,6 +1,11 @@
 package com.cvut.arfittingroom.service
 
+import android.graphics.Bitmap
 import android.graphics.Paint
+import android.graphics.drawable.Drawable
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.target.CustomTarget
+import com.bumptech.glide.request.transition.Transition
 import com.cvut.arfittingroom.draw.Layer
 import com.cvut.arfittingroom.draw.model.PaintOptions
 import com.cvut.arfittingroom.draw.model.element.Element
@@ -20,6 +25,7 @@ import com.cvut.arfittingroom.model.to.drawhistory.ElementTO
 import com.cvut.arfittingroom.model.to.drawhistory.LayerTO
 import com.cvut.arfittingroom.model.to.drawhistory.PathActionTO
 import com.cvut.arfittingroom.model.to.drawhistory.PathTO
+import com.cvut.arfittingroom.module.GlideApp
 import com.google.firebase.storage.FirebaseStorage
 import java.util.UUID
 import javax.inject.Inject
@@ -46,6 +52,7 @@ constructor(private val strategies: Map<String, @JvmSuppressWildcards PathCreati
             alpha = paint.alpha,
             style = paint.style,
             strokeCap = paint.strokeCap,
+            strokeJoint = paint.strokeJoin,
         )
 
     private fun paintTOtoPaint(paintOptions: PaintOptions) =
@@ -55,9 +62,11 @@ constructor(private val strategies: Map<String, @JvmSuppressWildcards PathCreati
             alpha = paintOptions.alpha
             style = paintOptions.style
             strokeCap = paintOptions.strokeCap
+            strokeJoin = paintOptions.strokeJoint
         }
 
-    private fun pathToPathTO(drawablePath: DrawablePath) = PathTO(drawablePath.actions.map { pathActionToActionTO(it) })
+    private fun pathToPathTO(drawablePath: DrawablePath) =
+        PathTO(drawablePath.actions.map { pathActionToActionTO(it) })
 
     private fun pathTOPath(pathTO: PathTO): DrawablePath {
         val drawablePath = DrawablePath()
@@ -115,13 +124,13 @@ constructor(private val strategies: Map<String, @JvmSuppressWildcards PathCreati
         val baseTO =
             ElementTO(
                 elementType =
-                    when (element) {
-                        is Curve -> EElementType.CURVE
-                        is Image -> EElementType.IMAGE
-                        is Gif -> EElementType.GIF
-                        is Stamp -> EElementType.STAMP
-                        else -> throw IllegalArgumentException("Unsupported element type")
-                    },
+                when (element) {
+                    is Curve -> EElementType.CURVE
+                    is Image -> EElementType.IMAGE
+                    is Gif -> EElementType.GIF
+                    is Stamp -> EElementType.STAMP
+                    else -> throw IllegalArgumentException("Unsupported element type")
+                },
                 id = element.id.toString(),
                 centerX = element.centerX / width,
                 centerY = element.centerY / height,
@@ -133,7 +142,10 @@ constructor(private val strategies: Map<String, @JvmSuppressWildcards PathCreati
             is Curve ->
                 baseTO.copy(
                     drawablePath = pathToPathTO(element.path),
-                    paint = paintToPaintTO(element.paint),
+                    paint = paintToPaintTO(element.paint)
+                        .apply {
+                        strokeTextureRef = element.strokeTextureRef
+                    },
                 )
 
             is Image ->
@@ -166,7 +178,6 @@ constructor(private val strategies: Map<String, @JvmSuppressWildcards PathCreati
         elements = layer.elements.keys.map { it.toString() },
     )
 
-    // TODO handle exception, load resource
     fun elementTOtoElement(elementTO: ElementTO): Element =
         when (elementTO.elementType) {
             EElementType.STAMP -> {
@@ -193,6 +204,7 @@ constructor(private val strategies: Map<String, @JvmSuppressWildcards PathCreati
                     outerRadius = elementTO.outerRadius * width,
                     rotationAngle = elementTO.rotationAngle,
                 )
+
             EElementType.IMAGE ->
                 Image(
                     id = UUID.fromString(elementTO.id),
@@ -212,6 +224,7 @@ constructor(private val strategies: Map<String, @JvmSuppressWildcards PathCreati
                     path = pathTOPath(elementTO.drawablePath),
                     paint = paintTOtoPaint(elementTO.paint),
                     rotationAngle = elementTO.rotationAngle,
+                    strokeTextureRef = elementTO.paint.strokeTextureRef
                 )
         }
 
@@ -222,11 +235,5 @@ constructor(private val strategies: Map<String, @JvmSuppressWildcards PathCreati
             height = height,
         )
 
-    private fun downloadImage(ref: String) {
 
-    }
-
-    private fun downloadGif(ref: String) {
-
-    }
 }

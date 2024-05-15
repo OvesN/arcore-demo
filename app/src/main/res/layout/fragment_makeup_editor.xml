@@ -1,22 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".fragment.MakeupEditorFragment">
+    android:layout_height="match_parent">
 
-    <ImageView
+
+    <View
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:background="#FF444444"
-        android:scaleType="fitCenter"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <com.cvut.arfittingroom.draw.DrawView
         android:id="@+id/draw_view"
@@ -24,163 +20,250 @@
         android:layout_height="match_parent"
         android:background="@android:color/transparent" />
 
-    <!-- Placeholder for + and - buttons and dynamic layer buttons -->
+
+    <!-- Top UI Layout -->
     <LinearLayout
-        android:id="@+id/layer_controls_container"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="5dp"
+        android:id="@+id/top_ui_makeup_editor"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:background="@color/colorTransparentBlack"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <!-- + button -->
-        <ImageButton
-            android:id="@+id/button_add_layer"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginTop="5dp"
-            android:layout_marginEnd="5dp"
-            android:scaleType="fitCenter"
-            android:src="@drawable/add"
-            android:background="@null"/>
-
-        <!-- Placeholder for dynamic number buttons -->
         <LinearLayout
-            android:id="@+id/dynamic_layer_buttons_container"
-            android:paddingTop="20dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical" />
-    </LinearLayout>
-
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="top|end"
-        android:orientation="vertical"
-        tools:layout_editor_absoluteX="0dp"
-        tools:layout_editor_absoluteY="0dp">
-        <!-- Back Button in the top right corner -->
-        <ImageButton
-            android:id="@+id/button_back"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
-            android:layout_marginEnd="5dp"
-            android:background="@null"
-            android:src="@drawable/back_icon"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <ImageButton
-            android:id="@+id/button_undo"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginTop="5dp"
-            android:layout_marginEnd="5dp"
-            android:background="@null"
-            android:scaleType="fitCenter"
-            android:src="@drawable/undo_icon"
-            app:layout_constraintBottom_toTopOf="@id/stroke_size_slider"
-            app:layout_constraintEnd_toStartOf="@id/button_redo"
-            app:layout_constraintVertical_chainStyle="packed" />
-
-        <ImageButton
-            android:id="@+id/button_redo"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginTop="5dp"
-            android:layout_marginEnd="5dp"
-            android:background="@null"
-            android:scaleType="fitCenter"
-            android:src="@drawable/redo_icon"
-            app:layout_constraintBottom_toTopOf="@id/stroke_size_slider"
-            app:layout_constraintEnd_toEndOf="parent" />
-    </LinearLayout>
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="bottom"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
-
-        <com.google.android.material.slider.Slider
-            android:id="@+id/stroke_size_slider"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:stepSize="1"
-            android:theme="@style/MyMaterialTheme"
-            android:value="10"
-            android:valueFrom="1"
-            android:valueTo="150"
-            android:layout_alignParentBottom="true"/>
-
-        <ImageButton
-            android:id="@+id/button_color_picker"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_above="@id/stroke_size_slider"
-            android:layout_alignParentEnd="true"
-            android:layout_marginEnd="5dp"
-            android:background="@null"
-            android:scaleType="fitCenter"
-            android:src="@drawable/color_picker_icon" />
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_above="@id/stroke_size_slider"
-            android:layout_alignParentStart="true">
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="horizontal">
 
             <ImageButton
-                android:id="@+id/button_star"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_marginStart="5dp"
+                android:id="@+id/button_undo"
+                android:layout_width="wrap_content"
+                android:layout_height="25dp"
+                android:layout_marginEnd="10dp"
                 android:background="@null"
                 android:scaleType="fitCenter"
-                android:src="@drawable/star_icon" />
+                android:src="@drawable/undo" />
+
             <ImageButton
-                android:id="@+id/button_heart"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_marginStart="5dp"
+                android:id="@+id/button_redo"
+                android:layout_width="wrap_content"
+                android:layout_height="25dp"
+                android:layout_marginStart="10dp"
                 android:background="@null"
                 android:scaleType="fitCenter"
-                android:src="@drawable/heart_icon" />
-            <ImageButton
-                android:id="@+id/button_flowers_image"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_marginStart="5dp"
-                android:background="@null"
-                android:scaleType="fitCenter"
-                android:src="@drawable/flowers" />
-            <ImageButton
-                android:id="@+id/button_gif"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_marginStart="5dp"
-                android:background="@null"
-                android:scaleType="fitCenter"
-                android:src="@drawable/donut" />
-            <ImageButton
-                android:id="@+id/button_gif2"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_marginStart="5dp"
-                android:background="@null"
-                android:scaleType="fitCenter"
-                android:src="@drawable/hamburger" />
+                android:src="@drawable/redo" />
         </LinearLayout>
 
-    </RelativeLayout>
+
+        <ImageButton
+            android:id="@+id/button_layers"
+            android:layout_width="0dp"
+            android:layout_height="30dp"
+            android:layout_weight="1"
+            android:background="@null"
+            android:scaleType="fitStart"
+            android:src="@drawable/layers" />
+
+        <Button
+            android:id="@+id/button_clear_all"
+            android:layout_width="0dp"
+            android:layout_height="25dp"
+            android:layout_weight="1"
+            android:background="@null"
+            android:scaleType="fitCenter"
+            android:text="@string/clear_all"
+            android:textAllCaps="false"
+            android:textSize="17sp"
+            android:textStyle="bold" />
+    </LinearLayout>
 
 
+    <!-- Bottom UI Layout -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/bottom_ui_makeup_editor"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorTransparentBlack"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:paddingTop="10dp">
+
+        <LinearLayout
+            android:id="@+id/left_column_buttons"
+
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_margin="10dp"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageButton
+                android:id="@+id/button_color_picker"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_gravity="center_horizontal|top"
+                android:background="@drawable/color_picker"
+                android:scaleType="fitCenter" />
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <ImageButton
+                android:id="@+id/button_back"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_gravity="center_horizontal|bottom"
+                android:background="@drawable/back"
+                android:scaleType="fitCenter" />
+
+
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:id="@+id/right_column_buttons"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_margin="10dp"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageButton
+                android:id="@+id/button_menu"
+                android:layout_width="wrap_content"
+                android:layout_height="25dp"
+                android:layout_gravity="center_horizontal|top"
+                android:background="@drawable/menu"
+                android:scaleType="fitCenter" />
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <ImageButton
+                android:id="@+id/button_ok"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_gravity="center_horizontal|bottom"
+                android:background="@null"
+                android:scaleType="fitCenter"
+                app:srcCompat="@drawable/ok" />
+        </LinearLayout>
+
+
+            <LinearLayout
+                android:id="@+id/menu_buttons"
+                android:background="@drawable/button"
+                android:backgroundTint="@color/colorDarkGrey"
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
+                android:gravity="center"
+                android:orientation="horizontal"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="@id/left_column_buttons">
+
+                <Button
+                    android:id="@+id/draw_button"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@null"
+                    android:backgroundTint="@color/colorMediumGrey"
+                    android:text="@string/draw"
+                    android:textAllCaps="false" />
+
+                <Button
+                    android:id="@+id/stamp_button"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@null"
+                    android:backgroundTint="@color/colorMediumGrey"
+                    android:text="@string/stamp"
+                    android:textAllCaps="false" />
+
+                <Button
+                    android:id="@+id/image_button"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@null"
+                    android:backgroundTint="@color/colorMediumGrey"
+                    android:text="@string/image"
+                    android:textAllCaps="false" />
+            </LinearLayout>
+
+        <FrameLayout
+            android:id="@+id/menu_fragment_container"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:background="@null"
+            android:gravity="center_horizontal"
+
+            app:layout_constraintBottom_toTopOf="@id/menu_buttons"
+            app:layout_constraintEnd_toStartOf="@id/right_column_buttons"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@id/left_column_buttons" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <FrameLayout
+        android:id="@+id/layers_menu_fragment_container"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@id/bottom_ui_makeup_editor"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/top_ui_makeup_editor"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <LinearLayout
+        android:id="@+id/stroke_size_layout"
+        android:layout_width="40dp"
+        android:layout_height="350dp"
+        android:background="@drawable/size_bar"
+        android:translationX="-10dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.5">
+
+        <com.lukelorusso.verticalseekbar.VerticalSeekBar
+            android:id="@+id/stroke_size_slider"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="start"
+            android:stepSize="1"
+            android:value="10"
+            app:tickVisible="false"
+            app:vsb_bar_width="0dp"
+            app:vsb_max_value="300"
+            app:vsb_show_thumb="true" />
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+
+
+
+

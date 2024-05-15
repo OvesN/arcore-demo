@@ -2,19 +2,32 @@ package com.cvut.arfittingroom.utils
 
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
+import android.app.AlertDialog
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.LayerDrawable
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AccelerateDecelerateInterpolator
+import android.widget.Button
+import android.widget.CheckBox
 import android.widget.ImageView
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
+import androidx.core.graphics.toColor
+import com.bumptech.glide.request.target.CustomTarget
 import com.cvut.arfittingroom.R
+import com.skydoves.colorpickerview.ActionMode
+import com.skydoves.colorpickerview.ColorEnvelope
 import com.skydoves.colorpickerview.ColorPickerDialog
+import com.skydoves.colorpickerview.ColorPickerView
 import com.skydoves.colorpickerview.listeners.ColorEnvelopeListener
+import com.skydoves.colorpickerview.sliders.AlphaSlideBar
+import com.skydoves.colorpickerview.sliders.BrightnessSlideBar
 
 object UIUtil {
     fun createDivider(context: Context): View =
@@ -26,28 +39,75 @@ object UIUtil {
     fun showColorPickerDialog(
         context: Context,
         initialColor: Int,
-        shouldShowFillOption: Boolean = false,
-        onColorSelected: (Int) -> Unit,
+        fill: Boolean = false,
+        shouldShowFillCheckbox: Boolean = false,
+        shouldShowPipette: Boolean = false,
+        onPipetteSelected: () -> Unit = {},
+        onColorSelected: (Int, Boolean) -> Unit,
     ) {
-        val builder =
-            ColorPickerDialog.Builder(context)
-                .setPreferenceName("MyColorPickerDialog")
-                .setPositiveButton(
-                    R.string.OK,
-                    ColorEnvelopeListener { envelope, _ ->
-                        onColorSelected(envelope.color)
-                    },
-                )
-                .setNegativeButton(R.string.cancel) { dialogInterface, _ ->
-                    dialogInterface.dismiss()
-                }
-                .attachAlphaSlideBar(true)
-                .attachBrightnessSlideBar(true)
-                .setBottomSpace(12)
+        val dialogView: View =
+            LayoutInflater.from(context).inflate(R.layout.color_picker_dialog, null)
 
-        builder.colorPickerView.setInitialColor(initialColor)
+        val colorPickerView = dialogView.findViewById<ColorPickerView>(R.id.colorPickerView)
 
-        builder.show()
+        val checkbox = dialogView.findViewById<CheckBox>(R.id.fill_checkbox)
+        val pipette = dialogView.findViewById<View>(R.id.pipette_button)
+        checkbox.isChecked = fill
+
+        colorPickerView.attachAlphaSlider(dialogView.findViewById(R.id.alphaSlideBar))
+        colorPickerView.attachBrightnessSlider(dialogView.findViewById(R.id.brightnessSlideBar))
+        colorPickerView.setInitialColor(initialColor)
+        colorPickerView.preferenceName = "MyColorPicker"
+
+        val dialog =
+            AlertDialog.Builder(context)
+                .setView(dialogView)
+                .create()
+
+        dialogView.findViewById<Button>(R.id.cancel_popup_button).setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialogView.findViewById<Button>(R.id.ok_button).setOnClickListener {
+            onColorSelected(colorPickerView.colorEnvelope.color, checkbox.isChecked)
+            dialog.dismiss()
+        }
+
+        if (shouldShowFillCheckbox) {
+            checkbox?.let { it.visibility = View.VISIBLE }
+        }
+        if (shouldShowPipette) {
+            pipette?.let { it.visibility = View.VISIBLE }
+            pipette.setOnClickListener {
+                onPipetteSelected()
+                dialog.dismiss()
+            }
+        }
+
+        dialog.show()
+    }
+
+    fun showClearAllDialog(
+        context: Context,
+        onClearAll: () -> Unit,
+    ) {
+        val dialogView = LayoutInflater.from(context).inflate(R.layout.popup_clear_all, null)
+
+        val dialog =
+            AlertDialog.Builder(context)
+                .setView(dialogView)
+                .create()
+
+        dialogView.findViewById<Button>(R.id.cancel_popup_button).setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialogView.findViewById<Button>(R.id.discard_button).setOnClickListener {
+            onClearAll()
+            dialog.dismiss()
+        }
+
+        dialog.show()
     }
 
     fun selectLookButton(view: View) {
@@ -65,6 +125,7 @@ object UIUtil {
             deselectButton(view)
         }
     }
+
 
     fun selectHeadBackgroundButton(view: View) {
         val layers =

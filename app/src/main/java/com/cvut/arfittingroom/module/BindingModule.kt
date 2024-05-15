@@ -5,6 +5,7 @@ import com.cvut.arfittingroom.draw.model.element.strategy.impl.CirclePathCreatio
 import com.cvut.arfittingroom.draw.model.element.strategy.impl.HeartPathCreationStrategy
 import com.cvut.arfittingroom.draw.model.element.strategy.impl.RectanglePathCreationStrategy
 import com.cvut.arfittingroom.draw.model.element.strategy.impl.StarPathCreationStrategy
+import com.cvut.arfittingroom.draw.model.element.strategy.impl.TrianglePathCreationStrategy
 import dagger.Binds
 import dagger.Module
 import dagger.multibindings.IntoMap
@@ -31,4 +32,9 @@ abstract class BindingModule {
     @IntoMap
     @StringKey("heart")
     abstract fun bindHeartPathCreationStrategy(impl: HeartPathCreationStrategy): PathCreationStrategy
+
+    @Binds
+    @IntoMap
+    @StringKey("triangle")
+    abstract fun bindTrianglePathCreationStrategy(impl: TrianglePathCreationStrategy): PathCreationStrategy
 }

@@ -92,6 +92,7 @@ dependencies {
 	implementation 'com.github.skydoves:colorpickerview:2.3.0'
 	implementation 'io.github.microutils:kotlin-logging-jvm:2.0.11'
 	implementation 'io.github.muddz:styleabletoast:2.4.0'
+	implementation 'com.github.lukelorusso:VerticalSeekBar:1.2.7'
 
 	// Dagger Dependency Injection
 	implementation "com.google.dagger:dagger:2.48.1"

@@ -37,20 +37,20 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".activity.ShowRoomActivity"
+        <activity android:name=".activity.FittingRoomActivity"
             android:configChanges="orientation|screenSize"
             android:theme="@style/Theme.AppCompat.NoActionBar"
-            android:screenOrientation="locked"/>
+            android:screenOrientation="portrait"/>
 
         <activity android:name=".activity.LogInActivity"
             android:configChanges="orientation|screenSize"
             android:theme="@style/Theme.AppCompat.NoActionBar"
-            android:screenOrientation="locked"/>
+            android:screenOrientation="portrait"/>
 
         <activity android:name=".activity.SignUpActivity"
             android:configChanges="orientation|screenSize"
             android:theme="@style/Theme.AppCompat.NoActionBar"
-            android:screenOrientation="locked"/>
+            android:screenOrientation="portrait"/>
 
 
     </application>

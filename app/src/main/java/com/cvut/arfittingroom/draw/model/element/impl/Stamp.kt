@@ -38,7 +38,13 @@ class Stamp(
         canvas.restore()
     }
 
-    override fun repaint(newColor: Int) {
+    override fun repaint(newColor: Int, fill: Boolean) {
         paint.color = newColor
+        if (fill) {
+            paint.style = Paint.Style.FILL
+        }
+        else {
+            paint.style = Paint.Style.STROKE
+        }
     }
 }

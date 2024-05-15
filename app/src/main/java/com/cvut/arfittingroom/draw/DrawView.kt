@@ -2,8 +2,8 @@ package com.cvut.arfittingroom.draw
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.Matrix
 import android.graphics.Paint
 import android.os.Handler
@@ -11,10 +11,13 @@ import android.os.Looper
 import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
+import android.view.MotionEvent.ACTION_MOVE
 import android.view.MotionEvent.ACTION_POINTER_UP
+import android.view.MotionEvent.ACTION_UP
 import android.view.View
 import androidx.annotation.ColorInt
 import androidx.core.graphics.alpha
+import androidx.core.graphics.get
 import com.cvut.arfittingroom.ARFittingRoomApplication
 import com.cvut.arfittingroom.R
 import com.cvut.arfittingroom.controller.ScaleGestureDetector
@@ -33,15 +36,16 @@ import com.cvut.arfittingroom.draw.model.element.impl.Curve
 import com.cvut.arfittingroom.draw.model.element.impl.Gif
 import com.cvut.arfittingroom.draw.model.element.impl.Image
 import com.cvut.arfittingroom.draw.model.element.impl.Stamp
-import com.cvut.arfittingroom.draw.model.element.strategy.impl.HeartPathCreationStrategy
-import com.cvut.arfittingroom.draw.model.element.strategy.impl.StarPathCreationStrategy
+import com.cvut.arfittingroom.draw.model.element.strategy.PathCreationStrategy
 import com.cvut.arfittingroom.draw.model.enums.EElementEditAction
-import com.cvut.arfittingroom.draw.model.enums.EShape
+import com.cvut.arfittingroom.draw.model.enums.EEditorMode
 import com.cvut.arfittingroom.draw.path.DrawablePath
+import com.cvut.arfittingroom.draw.service.TexturedBrushDrawer
 import com.cvut.arfittingroom.draw.service.LayerManager
 import com.cvut.arfittingroom.draw.service.UIDrawer
 import com.cvut.arfittingroom.model.SPAN_SLOP
 import com.cvut.arfittingroom.model.TOUCH_TO_MOVE_THRESHOLD
+import com.cvut.arfittingroom.model.to.BrushTO
 import com.cvut.arfittingroom.utils.BitmapUtil.adjustBitmapFromEditor
 import com.cvut.arfittingroom.utils.FileUtil.deleteTempFiles
 import com.cvut.arfittingroom.utils.FileUtil.saveTempMaskFrames
@@ -49,12 +53,20 @@ import com.cvut.arfittingroom.utils.FileUtil.saveTempMaskTextureBitmap
 import com.cvut.arfittingroom.utils.UIUtil.showColorPickerDialog
 import io.github.muddz.styleabletoast.StyleableToast
 import pl.droidsonroids.gif.GifDrawable
-import pl.droidsonroids.gif.GifDrawableBuilder
+import java.lang.IllegalArgumentException
 import javax.inject.Inject
 import kotlin.math.abs
 import kotlin.math.atan2
 import kotlin.math.sqrt
 
+
+/**
+ * Draw view for 2D editor
+ *
+ *
+ * @param context
+ * @param attrs
+ */
 class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     var paintOptions = PaintOptions()
     private var curX = 0f
@@ -74,7 +86,9 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private var isInElementScalingMode: Boolean = false
     private var isInElementMenuMode: Boolean = false
     var selectedElement: Element? = null
-    var strokeShape = EShape.CIRCLE
+    private var editorMode = EEditorMode.BRUSH
+    private var previousEditorMode = EEditorMode.BRUSH
+    private var stampType: PathCreationStrategy? = null
     private var ignoreNextOneFingerMove = false
     private val uiDrawer = UIDrawer(context)
     private var ignoreDrawing: Boolean = false
@@ -82,13 +96,14 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private var handler = Handler(Looper.getMainLooper())
     private var gifRunnable: Runnable? = null
     private var frameDelay: Long = 100
-    var layerInitializedListener: OnLayerInitializedListener? = null
     private var lastDownX = 0f
     private var lastDownY = 0f
     private var frameCount = 0
+    private var pipetteSelectedColor = Color.TRANSPARENT
 
     @Inject
     lateinit var layerManager: LayerManager
+
 
     init {
         (context.applicationContext as? ARFittingRoomApplication)?.appComponent?.inject(this)
@@ -182,12 +197,12 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                 lastDownY = y
             }
 
-            MotionEvent.ACTION_MOVE ->
+            ACTION_MOVE ->
                 if (!isDistanceGreaterThanThreshold(x, y)) {
                     return true
                 }
 
-            MotionEvent.ACTION_UP, ACTION_POINTER_UP -> {
+            ACTION_UP, ACTION_POINTER_UP -> {
                 lastDownX = 0f
                 lastDownY = 0f
             }
@@ -195,6 +210,9 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
         // Handle multi-touch events for scaling
         if (event.pointerCount == 2) {
+            if (editorMode == EEditorMode.PIPETTE) {
+                editorMode = previousEditorMode
+            }
             ignoreDrawing = true
             layerManager.setCurPath(DrawablePath())
             scaleGestureDetector.onTouchEvent(event)
@@ -202,21 +220,23 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                 handleCanvasGesture(event)
             }
         } else if (ignoreDrawing &&
-            (event.actionMasked == ACTION_POINTER_UP || event.actionMasked == MotionEvent.ACTION_UP)
+            (event.actionMasked == ACTION_POINTER_UP || event.actionMasked == ACTION_UP)
         ) {
             ignoreDrawing = false
             return true
         } else {
-            when (strokeShape) {
-                EShape.NONE -> handleElementEditing(event, x, y)
-                EShape.CIRCLE -> handleDrawing(event, x, y)
-                else -> handleStampDrawing(event, x, y)
+            when (editorMode) {
+                EEditorMode.NONE -> handleElementEditing(event, x, y)
+                EEditorMode.BRUSH -> handleDrawing(event, x, y)
+                EEditorMode.STAMP -> handleStampDrawing(event, x, y)
+                EEditorMode.PIPETTE -> handlePipette(event, x, y)
             }
         }
 
         invalidate()
         return true
     }
+
 
     private fun startAnimation(gif: Gif) {
         if (gifRunnable != null) {
@@ -228,7 +248,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             Runnable {
                 Log.println(Log.INFO, null, "count $frameCount")
                 // Play gif three times and stop on the first frame
-                if (frameCount >= gif.gifDrawable.numberOfFrames * 3 && gif.currentFrameIndex == 0
+                if (frameCount >= (gif.gifDrawable?.numberOfFrames ?:0 ) * 3 && gif.currentFrameIndex == 0
                 ) {
                     frameCount = 0
                     stopAnimation(gif)
@@ -288,7 +308,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     ) {
         if (!scaleGestureDetector.isInProgress) {
             when (event.action) {
-                ACTION_POINTER_UP, MotionEvent.ACTION_UP -> handleActionUp(event, x, y)
+                ACTION_POINTER_UP, ACTION_UP -> handleActionUp(event, x, y)
                 MotionEvent.ACTION_DOWN -> handleActionDown(x, y)
                 MotionEvent.ACTION_MOVE -> handleActionMove(x, y)
             }
@@ -497,8 +517,15 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
             EElementEditAction.CHANGE_COLOR -> {
                 selectedElement?.let { selectedElement ->
-                    showColorPickerDialog(context, paintOptions.color) { envelopColor ->
-                        repaintElement(selectedElement, envelopColor)
+                    showColorPickerDialog(
+                        context,
+                        paintOptions.color,
+                        fill = paintOptions.style == Paint.Style.FILL,
+                        shouldShowFillCheckbox = true,
+                        shouldShowPipette = true,
+                        onPipetteSelected = { showPipetteView() }
+                    ) { envelopColor, fill ->
+                        repaintElement(selectedElement, envelopColor, fill)
                     }
                 }
 
@@ -566,10 +593,25 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             return
         }
         if (event.action == MotionEvent.ACTION_DOWN) {
-            when (strokeShape) {
-                EShape.STAR -> drawStar(x, y, paintOptions.strokeWidth)
-                EShape.HEART -> drawHeart(x, y, paintOptions.strokeWidth)
-                else -> {}
+            drawStamp(x, y, paintOptions.strokeWidth)
+        }
+    }
+
+    private fun handlePipette(event: MotionEvent, x: Float, y: Float) {
+        when (event.actionMasked) {
+            ACTION_POINTER_UP, ACTION_UP -> {
+                editorMode = previousEditorMode
+                layerManager.bitmapFromAllLayers = null
+
+                if (pipetteSelectedColor != Color.TRANSPARENT) {
+                    setColor(pipetteSelectedColor, paintOptions.style == Paint.Style.FILL)
+                }
+                pipetteSelectedColor = Color.TRANSPARENT
+            }
+
+            ACTION_MOVE -> {
+                lastTouchX = x
+                lastTouchY = y
             }
         }
     }
@@ -600,26 +642,66 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         return newLayerIndex
     }
 
-    fun setActiveLayer(layerIndex: Int) {
-        if (layerIndex >= layerManager.getNumOfLayers() || layerIndex < 0) {
-            return
-        }
-        layerManager.setActiveLayer(layerIndex)
-        Log.println(Log.INFO, null, "Active layer is now $layerIndex")
-    }
 
-    fun setColor(newColor: Int) {
+    fun setColor(newColor: Int, fill: Boolean) {
         @ColorInt
         paintOptions.color = newColor
         paintOptions.alpha = newColor.alpha
+
+        if (fill) {
+            paintOptions.style = Paint.Style.FILL
+        } else {
+            paintOptions.style = Paint.Style.STROKE
+        }
+
+        if (paintOptions.strokeTextureRef.isNotEmpty()) {
+            TexturedBrushDrawer.updateBrushTextureBitmap(
+                paintOptions.strokeWidth.toInt(),
+                paintOptions.color,
+                paintOptions.alpha
+            )
+        }
     }
 
-    fun setStrokeWidth(newStrokeWidth: Float) {
-        paintOptions.strokeWidth = newStrokeWidth
+    fun setStrokeWidth(newStrokeWidth: Int) {
+        paintOptions.strokeWidth = newStrokeWidth.toFloat()
+
+        if (paintOptions.strokeTextureRef.isNotEmpty()) {
+            TexturedBrushDrawer.updateBrushTextureBitmap(
+                newStrokeWidth,
+                paintOptions.color,
+                paintOptions.alpha,
+            )
+        }
     }
 
-    fun setOnLayerInitializedListener(listener: OnLayerInitializedListener) {
-        this.layerInitializedListener = listener
+    fun setBrush(brush: BrushTO, brushTexture: Bitmap? = null) {
+        paintOptions.strokeTextureRef = brush.strokeTextureRef
+        paintOptions.style = brush.style
+        paintOptions.strokeCap = brush.strokeCap
+        paintOptions.strokeJoint = brush.strokeJoint
+
+        TexturedBrushDrawer.resetBitmaps()
+
+        brushTexture?.let {
+            TexturedBrushDrawer.setBrushBitmap(
+                it,
+                paintOptions.strokeWidth,
+                paintOptions.color,
+                paintOptions.alpha
+            )
+        }
+    }
+
+    fun setEditingMode() {
+        editorMode = EEditorMode.NONE
+        stampType = null
+        TexturedBrushDrawer.resetBitmaps()
+    }
+
+    fun setStamp(pathCreationStrategy: PathCreationStrategy) {
+        stampType = pathCreationStrategy
+        editorMode = EEditorMode.STAMP
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -651,6 +733,17 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
         if (shouldDrawBackground) {
             uiDrawer.drawFaceTextureImage(canvas)
+        }
+
+        if (editorMode == EEditorMode.PIPETTE) {
+                pipetteSelectedColor = uiDrawer.drawPipette(
+                    canvas,
+                    canvasTransformationMatrix,
+                    lastTouchX,
+                    lastTouchY,
+                    layerManager.bitmapFromAllLayers
+                )
+
         }
     }
 
@@ -687,13 +780,16 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             Curve(
                 path = layerManager.getCurPath(),
                 paint =
-                    Paint().apply {
-                        color = paintOptions.color
-                        strokeWidth = paintOptions.strokeWidth
-                        alpha = paintOptions.alpha
-                        strokeCap = Paint.Cap.ROUND
-                        style = Paint.Style.STROKE
-                    },
+                Paint().apply {
+                    color = paintOptions.color
+                    strokeWidth = paintOptions.strokeWidth
+                    alpha = paintOptions.alpha
+                    strokeCap = Paint.Cap.ROUND
+                    strokeJoin = Paint.Join.ROUND
+                    style = Paint.Style.STROKE
+                },
+                bitmapTexture = TexturedBrushDrawer.originalBitmap,
+                strokeTextureRef = paintOptions.strokeTextureRef
             )
 
         layerManager.setCurPath(DrawablePath())
@@ -701,50 +797,28 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         addElementToLayer(layerManager.getActiveLayerIndex(), curve)
     }
 
-    private fun drawHeart(
+    private fun drawStamp(
         centerX: Float,
         centerY: Float,
         outerRadius: Float,
     ) {
-        val heart =
-            Stamp(
+        stampType?.let {
+            val stamp = Stamp(
                 centerX = centerX,
                 centerY = centerY,
                 outerRadius = outerRadius,
-                pathCreationStrategy = HeartPathCreationStrategy(),
+                pathCreationStrategy = it,
                 paint =
-                    Paint().apply {
-                        color = paintOptions.color
-                        strokeWidth = outerRadius
-                        alpha = paintOptions.alpha
-                        style = Paint.Style.FILL
-                    },
+                Paint().apply {
+                    color = paintOptions.color
+                    style = paintOptions.style
+                    strokeWidth = 6f
+                    alpha = paintOptions.alpha
+                },
             )
 
-        addElementToLayer(layerManager.getActiveLayerIndex(), heart)
-    }
-
-    private fun drawStar(
-        centerX: Float,
-        centerY: Float,
-        outerRadius: Float,
-    ) {
-        val star =
-            Stamp(
-                centerX = centerX,
-                centerY = centerY,
-                outerRadius = outerRadius,
-                pathCreationStrategy = StarPathCreationStrategy(),
-                paint =
-                    Paint().apply {
-                        color = paintOptions.color
-                        style = paintOptions.style
-                        strokeWidth = 6f
-                        alpha = paintOptions.alpha
-                    },
-            )
-
-        addElementToLayer(layerManager.getActiveLayerIndex(), star)
+            addElementToLayer(layerManager.getActiveLayerIndex(), stamp)
+        }
     }
 
     fun moveLayer(
@@ -775,59 +849,29 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         }
     }
 
-    fun loadImage(imageId: Int) {
-        // First decode with inJustDecodeBounds=true to check dimensions
-        val options =
-            BitmapFactory.Options().apply {
-                inJustDecodeBounds = true
-            }
-        BitmapFactory.decodeResource(resources, imageId, options)
-
-        // Calculate inSampleSize
-        options.inSampleSize =
-            calculateInSampleSize(options.outWidth, options.outHeight, width / 3, height / 3)
-
-        // Decode bitmap with inSampleSize set
-        options.inJustDecodeBounds = false
-        val imageBitmap = BitmapFactory.decodeResource(resources, imageId, options)
-
+    fun addImage(bitmap: Bitmap, imageRef: String) {
         addElementToLayer(
             layerManager.getActiveLayerIndex(),
             Image(
-                resourceRef = imageId.toString(),
+                resourceRef = imageRef,
                 centerX = width.toFloat() / 2,
                 centerY = height.toFloat() / 2,
                 outerRadius = width.toFloat() / 4,
-            ).apply { bitmap = imageBitmap },
+            ).apply { this.bitmap = bitmap },
         )
 
         invalidate()
     }
 
-    fun loadGif(gifId: Int) {
-        val gifDrawable = GifDrawable(resources, gifId)
-
-        val adjustedGif =
-            GifDrawableBuilder().with(gifDrawable)
-                .from(resources, gifId)
-                .sampleSize(
-                    calculateInSampleSize(
-                        gifDrawable.currentFrame.width,
-                        gifDrawable.currentFrame.height,
-                        width / 3,
-                        height / 3,
-                    ),
-                )
-                .build()
-
+    fun addGif(gifDrawable: GifDrawable, gifRef: String) {
         val gif =
             Gif(
-                resourceRef = gifId.toString(),
+                resourceRef = gifRef,
                 centerX = width.toFloat() / 2,
                 centerY = height.toFloat() / 2,
                 outerRadius = width.toFloat() / 4,
             ).apply {
-                setDrawable(adjustedGif)
+                setDrawable(gifDrawable)
                 shouldDrawNextFrame = true
             }
         addElementToLayer(
@@ -840,27 +884,6 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         startAnimation(gif)
     }
 
-    private fun calculateInSampleSize(
-        width: Int,
-        height: Int,
-        reqWidth: Int,
-        reqHeight: Int,
-    ): Int {
-        var inSampleSize = 1
-
-        if (height > reqHeight || width > reqWidth) {
-            val halfHeight: Int = height / 2
-            val halfWidth: Int = width / 2
-
-            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
-            // height and width larger than the requested height and width.
-            while (halfHeight / inSampleSize >= reqHeight && halfWidth / inSampleSize >= reqWidth) {
-                inSampleSize *= 2
-            }
-        }
-
-        return inSampleSize
-    }
 
     private fun resetEditState() {
         isInElementRotationMode = false
@@ -881,7 +904,10 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                 onSaved()
             }
         } else {
-            saveTempMaskTextureBitmap(adjustBitmapFromEditor(createBitmap(), height, width), context) {
+            saveTempMaskTextureBitmap(
+                adjustBitmapFromEditor(createBitmap(), height, width),
+                context
+            ) {
                 onSaved()
             }
         }
@@ -897,10 +923,10 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         return bitmap
     }
 
-    // TODO not only color
     private fun repaintElement(
         element: Element,
         newColor: Int,
+        fill: Boolean
     ) {
         val repaintable = element as Repaintable
 
@@ -910,6 +936,8 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                 repaintable,
                 oldColor = repaintable.paint.color,
                 newColor = newColor,
+                fill = fill,
+                wasFilled = repaintable.paint.style == Paint.Style.FILL
             ),
         )
 
@@ -925,11 +953,24 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         return transformationMatrix
     }
 
+    fun showPipetteView() {
+        previousEditorMode = editorMode
+        editorMode = EEditorMode.PIPETTE
+
+        val inverseMatrix = Matrix()
+        canvasTransformationMatrix.invert(inverseMatrix)
+        val touchPoint = floatArrayOf((width / 2).toFloat(), (height / 2).toFloat())
+        inverseMatrix.mapPoints(touchPoint)
+
+        lastTouchX = touchPoint[0]
+        lastTouchY = touchPoint[1]
+
+        layerManager.bitmapFromAllLayers = layerManager.createBitmapFromAllLayers()
+        invalidate()
+    }
+
     fun applyBitmapBackground(bitmap: Bitmap?) {
         uiDrawer.setBackgroundBitmap(bitmap)
     }
 
-    interface OnLayerInitializedListener {
-        fun onLayerInitialized(numOfLayers: Int)
-    }
 }

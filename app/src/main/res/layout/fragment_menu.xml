@@ -10,6 +10,7 @@
         android:orientation="vertical">
 
         <HorizontalScrollView
+            android:id="@+id/horizontal_scroll_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:fillViewport="true"
@@ -21,7 +22,8 @@
                 android:layout_height="wrap_content"
                 android:gravity="center_horizontal"
                 android:orientation="horizontal"
-                android:paddingBottom="10dp" />
+                android:paddingBottom="10dp"
+                android:paddingTop="10dp"/>
 
         </HorizontalScrollView>
 
