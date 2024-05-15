@@ -9,12 +9,10 @@ import by.kirich1409.viewbindingdelegate.CreateMethod
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.cvut.arfittingroom.R
 import com.cvut.arfittingroom.databinding.ActivitySignupBinding
-import com.cvut.arfittingroom.model.USERS_COLLECTION
 import com.google.firebase.FirebaseNetworkException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.ktx.auth
-import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 import io.github.muddz.styleabletoast.StyleableToast
@@ -116,18 +114,7 @@ class SignUpActivity : AppCompatActivity() {
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
-                    val currentUser = auth.currentUser
                     Log.println(Log.INFO, null, "User with $username succsesfully created")
-                    val documentReference: DocumentReference =
-                        fileStore.collection(USERS_COLLECTION).document(currentUser?.uid ?: "")
-                    val user: MutableMap<String, Any> = HashMap()
-                    user["username"] = username
-                    documentReference.set(user).addOnSuccessListener {
-                        Log.println(
-                            Log.INFO,
-                            null,
-                            "onSuccess: user Profile is created for $username",
-                        )
                         StyleableToast.makeText(
                             applicationContext,
                             "user Profile is created for $username",
@@ -136,8 +123,8 @@ class SignUpActivity : AppCompatActivity() {
 
                         startActivity(Intent(this, FittingRoomActivity::class.java))
                         finish()
-                    }.addOnFailureListener { ex -> Log.println(Log.ERROR, null, "onFailure: $ex") }
-                } else {
+                    }
+                 else {
                     Log.println(Log.ERROR, null, "createUserWithEmail:failure ${task.exception}")
                     val errorMsg =
                         when (task.exception) {
