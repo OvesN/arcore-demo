@@ -31,7 +31,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import io.github.muddz.styleabletoast.StyleableToast
 
-class LookOptionsMenuFragment : Fragment() {
+class LooksMenuFragment : Fragment() {
     private var selectedLookViewId: Int = 0
     private val looks = mutableMapOf<String, LookTO>()
     private lateinit var firestore: FirebaseFirestore

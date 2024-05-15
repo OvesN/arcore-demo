@@ -33,7 +33,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import io.github.muddz.styleabletoast.StyleableToast
 
-class AccessoriesOptionsFragment : Fragment() {
+class AccessoriesMenuFragment : Fragment() {
     private val accessoriesTypes = mutableSetOf<String>()
     private val modelsInfo = mutableListOf<ModelTO>()
     private val selectedSlotToViewId = mutableMapOf<String, Int>()

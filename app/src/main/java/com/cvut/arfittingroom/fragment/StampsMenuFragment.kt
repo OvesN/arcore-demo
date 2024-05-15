@@ -19,7 +19,7 @@ import com.cvut.arfittingroom.draw.DrawView
 import com.cvut.arfittingroom.draw.model.element.strategy.PathCreationStrategy
 import com.cvut.arfittingroom.utils.ScreenUtil
 
-class StampOptionsMenuFragment(
+class StampsMenuFragment(
     private val strategies: Map<String, @JvmSuppressWildcards PathCreationStrategy>,
     private val drawView: DrawView
 ) : Fragment() {

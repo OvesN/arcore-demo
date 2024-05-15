@@ -25,10 +25,10 @@ import com.cvut.arfittingroom.ARFittingRoomApplication
 import com.cvut.arfittingroom.R
 import com.cvut.arfittingroom.databinding.ActivityFittingRoomBinding
 import com.cvut.arfittingroom.draw.DrawHistoryHolder
-import com.cvut.arfittingroom.fragment.AccessoriesOptionsFragment
+import com.cvut.arfittingroom.fragment.AccessoriesMenuFragment
 import com.cvut.arfittingroom.fragment.CameraModeFragment
-import com.cvut.arfittingroom.fragment.LookOptionsMenuFragment
-import com.cvut.arfittingroom.fragment.MakeupOptionsMenuFragment
+import com.cvut.arfittingroom.fragment.LooksMenuFragment
+import com.cvut.arfittingroom.fragment.MakeupMenuFragment
 import com.cvut.arfittingroom.fragment.MaskEditorFragment
 import com.cvut.arfittingroom.fragment.ProfileFragment
 import com.cvut.arfittingroom.model.LOOKS_COLLECTION
@@ -87,9 +87,9 @@ class FittingRoomActivity :
     private var gifRunnable: Runnable? = null
 
     private var frameDelay: Long = 100  // Default frame delay (100 ms per frame)
-    private val accessoriesOptionsFragment = AccessoriesOptionsFragment()
-    private val looksOptionsFragment = LookOptionsMenuFragment()
-    private val makeupOptionsFragment = MakeupOptionsMenuFragment()
+    private val accessoriesMenuFragment = AccessoriesMenuFragment()
+    private val looksOptionsFragment = LooksMenuFragment()
+    private val makeupOptionsFragment = MakeupMenuFragment()
     private val cameraModeFragment = CameraModeFragment()
     private val profileFragment = ProfileFragment()
     private val maskEditorFragment = MaskEditorFragment()
@@ -214,7 +214,7 @@ class FittingRoomActivity :
             stopAnimation()
             stateService.clearAll()
 
-            accessoriesOptionsFragment.applyState(lookTO.appliedModels)
+            accessoriesMenuFragment.applyState(lookTO.appliedModels)
             makeupOptionsFragment.applyState(lookTO.appliedMakeup)
 
             lookTO.appliedMakeup.forEach {
@@ -289,7 +289,7 @@ class FittingRoomActivity :
 
     override fun removeLook(lookId: String) {
         stopAnimation()
-        accessoriesOptionsFragment.resetMenu()
+        accessoriesMenuFragment.resetMenu()
         makeupOptionsFragment.resetMenu()
 
         stateService.clearAll()
@@ -511,7 +511,7 @@ class FittingRoomActivity :
     private fun addMenuFragments() {
         supportFragmentManager.beginTransaction()
             .add(R.id.menu_fragment_container, makeupOptionsFragment)
-            .add(R.id.menu_fragment_container, accessoriesOptionsFragment)
+            .add(R.id.menu_fragment_container, accessoriesMenuFragment)
             .add(R.id.menu_fragment_container, looksOptionsFragment)
             .commit()
     }
@@ -524,7 +524,7 @@ class FittingRoomActivity :
 
     private fun showAccessoriesMenu() {
         resetMenu()
-        showFragment(accessoriesOptionsFragment)
+        showFragment(accessoriesMenuFragment)
         binding.accessoriesButton.setBackgroundResource(R.drawable.small_button)
     }
 
@@ -609,7 +609,7 @@ class FittingRoomActivity :
     private fun hideMenuFragments() {
         supportFragmentManager.beginTransaction()
             .hide(makeupOptionsFragment)
-            .hide(accessoriesOptionsFragment)
+            .hide(accessoriesMenuFragment)
             .hide(looksOptionsFragment)
             .commit()
     }
@@ -741,7 +741,7 @@ class FittingRoomActivity :
         stopAnimation()
         deleteTempFiles(applicationContext)
 
-        accessoriesOptionsFragment.resetMenu()
+        accessoriesMenuFragment.resetMenu()
         makeupOptionsFragment.resetMenu()
         looksOptionsFragment.resetMenu()
 

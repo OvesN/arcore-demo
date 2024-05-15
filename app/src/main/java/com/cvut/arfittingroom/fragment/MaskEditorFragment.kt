@@ -1,7 +1,6 @@
 package com.cvut.arfittingroom.fragment
 
 import android.app.AlertDialog
-import android.app.ProgressDialog
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Paint
@@ -13,7 +12,6 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.LinearLayout
-import android.widget.ProgressBar
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.cvut.arfittingroom.ARFittingRoomApplication
@@ -28,7 +26,6 @@ import com.cvut.arfittingroom.model.to.drawhistory.EditorStateTO
 import com.cvut.arfittingroom.model.to.drawhistory.ElementTO
 import com.cvut.arfittingroom.model.to.drawhistory.LayerTO
 import com.cvut.arfittingroom.service.Mapper
-import com.cvut.arfittingroom.utils.FileUtil
 import com.cvut.arfittingroom.utils.FileUtil.deleteTempFiles
 import com.cvut.arfittingroom.utils.UIUtil
 import com.google.firebase.storage.FirebaseStorage
@@ -48,9 +45,9 @@ class MaskEditorFragment : Fragment() {
 
     private lateinit var menuButtons: LinearLayout
     private lateinit var layersMenuFragment: LayersMenuFragment
-    private lateinit var stampOptionsMenuFragment: StampOptionsMenuFragment
+    private lateinit var stampsMenuFragment: StampsMenuFragment
     private lateinit var imageMenuFragment: ImagesMenuFragment
-    private lateinit var brushOptionsMenuFragment: BrushOptionsMenuFragment
+    private lateinit var brushesMenuFragment: BrushesMenuFragment
     private lateinit var storage: FirebaseStorage
 
     private lateinit var progressBar: AlertDialog
@@ -109,19 +106,19 @@ class MaskEditorFragment : Fragment() {
         }
 
         layersMenuFragment = LayersMenuFragment(drawView)
-        brushOptionsMenuFragment = BrushOptionsMenuFragment(drawView)
-        stampOptionsMenuFragment = StampOptionsMenuFragment(strategies, drawView)
+        brushesMenuFragment = BrushesMenuFragment(drawView)
+        stampsMenuFragment = StampsMenuFragment(strategies, drawView)
         imageMenuFragment = ImagesMenuFragment(drawView)
 
         activity?.supportFragmentManager
             ?.beginTransaction()
             ?.add(R.id.layers_menu_fragment_container, layersMenuFragment)
-            ?.add(R.id.menu_fragment_container, brushOptionsMenuFragment)
-            ?.add(R.id.menu_fragment_container, stampOptionsMenuFragment)
+            ?.add(R.id.menu_fragment_container, brushesMenuFragment)
+            ?.add(R.id.menu_fragment_container, stampsMenuFragment)
             ?.add(R.id.menu_fragment_container, imageMenuFragment)
             ?.hide(layersMenuFragment)
-            ?.hide(brushOptionsMenuFragment)
-            ?.hide(stampOptionsMenuFragment)
+            ?.hide(brushesMenuFragment)
+            ?.hide(stampsMenuFragment)
             ?.hide(imageMenuFragment)
             ?.commit()
 
@@ -172,8 +169,8 @@ class MaskEditorFragment : Fragment() {
                     envelopColor,
                     fill
                 )
-                brushOptionsMenuFragment.changeColor(envelopColor)
-                stampOptionsMenuFragment.changeColor(envelopColor, fill)
+                brushesMenuFragment.changeColor(envelopColor)
+                stampsMenuFragment.changeColor(envelopColor, fill)
             }
         }
 
@@ -277,7 +274,7 @@ class MaskEditorFragment : Fragment() {
 
         button.setBackgroundResource(R.drawable.small_button)
         requireActivity().supportFragmentManager.beginTransaction()
-            .show(brushOptionsMenuFragment)
+            .show(brushesMenuFragment)
             .commit()
     }
 
@@ -286,7 +283,7 @@ class MaskEditorFragment : Fragment() {
 
         button.setBackgroundResource(R.drawable.small_button)
         requireActivity().supportFragmentManager.beginTransaction()
-            .show(stampOptionsMenuFragment)
+            .show(stampsMenuFragment)
             .commit()
     }
 
@@ -315,8 +312,8 @@ class MaskEditorFragment : Fragment() {
 
     private fun hideMenuFragments() {
         requireActivity().supportFragmentManager.beginTransaction()
-            .hide(brushOptionsMenuFragment)
-            .hide(stampOptionsMenuFragment)
+            .hide(brushesMenuFragment)
+            .hide(stampsMenuFragment)
             .hide(imageMenuFragment)
             .commit()
     }

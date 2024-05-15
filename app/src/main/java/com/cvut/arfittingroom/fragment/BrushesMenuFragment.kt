@@ -25,7 +25,7 @@ import com.google.firebase.firestore.toObject
 import com.google.firebase.storage.FirebaseStorage
 import io.github.muddz.styleabletoast.StyleableToast
 
-class BrushOptionsMenuFragment(private val drawView: DrawView) : Fragment() {
+class BrushesMenuFragment(private val drawView: DrawView) : Fragment() {
     private lateinit var firestore: FirebaseFirestore
     private lateinit var storage: FirebaseStorage
     private val brushesOptions = mutableListOf<BrushTO>()
