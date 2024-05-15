@@ -199,7 +199,7 @@ class ImagesMenuFragment(private val drawView: DrawView) : Fragment() {
             .addOnSuccessListener {
                 val image = ImageTO(ref = ref, isAnimated = isAnimated)
                 firestore.collection(IMAGES_COLLECTION).document().set(image)
-
+                fetchImages()
                 StyleableToast.makeText(
                     requireContext(),
                     "Uploaded successfully",
