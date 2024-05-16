@@ -109,7 +109,7 @@ class Layer(
 
     private fun changePaint(paintOptions: PaintOptions) {
         curPaint.color = paintOptions.color
-        curPaint.alpha = (paintOptions.alpha + opacity * 255).toInt().coerceAtMost(255)
+        curPaint.alpha = paintOptions.alpha
         curPaint.strokeWidth = paintOptions.strokeWidth
 
         if (paintOptions.blurRadius != 0f) {
