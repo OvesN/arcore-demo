@@ -256,7 +256,7 @@
             android:value="10"
             app:tickVisible="false"
             app:vsb_bar_width="0dp"
-            app:vsb_max_value="300"
+            app:vsb_max_value="200"
             app:vsb_show_thumb="true" />
     </LinearLayout>
 

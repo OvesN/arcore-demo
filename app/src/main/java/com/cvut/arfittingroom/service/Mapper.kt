@@ -1,11 +1,7 @@
 package com.cvut.arfittingroom.service
 
-import android.graphics.Bitmap
+import android.graphics.BlurMaskFilter
 import android.graphics.Paint
-import android.graphics.drawable.Drawable
-import com.bumptech.glide.Glide
-import com.bumptech.glide.request.target.CustomTarget
-import com.bumptech.glide.request.transition.Transition
 import com.cvut.arfittingroom.draw.Layer
 import com.cvut.arfittingroom.draw.model.PaintOptions
 import com.cvut.arfittingroom.draw.model.element.Element
@@ -25,7 +21,6 @@ import com.cvut.arfittingroom.model.to.drawhistory.ElementTO
 import com.cvut.arfittingroom.model.to.drawhistory.LayerTO
 import com.cvut.arfittingroom.model.to.drawhistory.PathActionTO
 import com.cvut.arfittingroom.model.to.drawhistory.PathTO
-import com.cvut.arfittingroom.module.GlideApp
 import com.google.firebase.storage.FirebaseStorage
 import java.util.UUID
 import javax.inject.Inject
@@ -119,7 +114,6 @@ constructor(private val strategies: Map<String, @JvmSuppressWildcards PathCreati
             else -> throw IllegalArgumentException("Unsupported element path action type")
         }
 
-    // TODO handle exception
     fun elementToElementTO(element: Element): ElementTO {
         val baseTO =
             ElementTO(
@@ -139,14 +133,18 @@ constructor(private val strategies: Map<String, @JvmSuppressWildcards PathCreati
             )
 
         return when (element) {
-            is Curve ->
+            is Curve -> {
                 baseTO.copy(
                     drawablePath = pathToPathTO(element.path),
                     paint = paintToPaintTO(element.paint)
                         .apply {
-                        strokeTextureRef = element.strokeTextureRef
-                    },
-                )
+                            strokeTextureRef = element.strokeTextureRef
+                            blurRadius = element.blurRadius
+                            blurType = element.blurType
+                        },
+                    )
+
+            }
 
             is Image ->
                 baseTO.copy(
@@ -224,8 +222,11 @@ constructor(private val strategies: Map<String, @JvmSuppressWildcards PathCreati
                     path = pathTOPath(elementTO.drawablePath),
                     paint = paintTOtoPaint(elementTO.paint),
                     rotationAngle = elementTO.rotationAngle,
-                    strokeTextureRef = elementTO.paint.strokeTextureRef
+                    strokeTextureRef = elementTO.paint.strokeTextureRef,
+                    blurType = elementTO.paint.blurType,
+                    blurRadius = elementTO.paint.blurRadius
                 )
+
         }
 
     fun layerTOtoLayer(layerTO: LayerTO) =

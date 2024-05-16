@@ -1,6 +1,7 @@
 package com.cvut.arfittingroom.draw
 
 import android.graphics.Bitmap
+import android.graphics.BlurMaskFilter
 import android.graphics.Canvas
 import android.graphics.Paint
 import com.cvut.arfittingroom.draw.model.PaintOptions
@@ -110,6 +111,13 @@ class Layer(
         curPaint.color = paintOptions.color
         curPaint.alpha = (paintOptions.alpha + opacity * 255).toInt().coerceAtMost(255)
         curPaint.strokeWidth = paintOptions.strokeWidth
+
+        if (paintOptions.blurRadius != 0f) {
+            curPaint.maskFilter = BlurMaskFilter(paintOptions.blurRadius, paintOptions.blurType)
+        }
+        else {
+            curPaint.maskFilter = null
+        }
     }
 
     /**

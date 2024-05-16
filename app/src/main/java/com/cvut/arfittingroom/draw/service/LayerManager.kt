@@ -268,14 +268,14 @@ class LayerManager {
         layers.forEach { it.setOpacity(1f) }
     }
 
-    fun makeLayersSemiTransparent() {
+    private fun makeLayersSemiTransparent() {
         layers.forEach { layer ->
 
             layer.setOpacity(0.5f)
         }
     }
 
-    fun setLayerOpacity(opacity: Float, layerIndex: Int) {
+    private fun setLayerOpacity(opacity: Float, layerIndex: Int) {
         if ( layerIndex >= layers.size|| layerIndex < 0) {
             return
         }

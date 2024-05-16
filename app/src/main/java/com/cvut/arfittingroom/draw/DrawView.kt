@@ -2,6 +2,7 @@ package com.cvut.arfittingroom.draw
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BlurMaskFilter
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Matrix
@@ -17,7 +18,6 @@ import android.view.MotionEvent.ACTION_UP
 import android.view.View
 import androidx.annotation.ColorInt
 import androidx.core.graphics.alpha
-import androidx.core.graphics.get
 import com.cvut.arfittingroom.ARFittingRoomApplication
 import com.cvut.arfittingroom.R
 import com.cvut.arfittingroom.controller.ScaleGestureDetector
@@ -37,11 +37,11 @@ import com.cvut.arfittingroom.draw.model.element.impl.Gif
 import com.cvut.arfittingroom.draw.model.element.impl.Image
 import com.cvut.arfittingroom.draw.model.element.impl.Stamp
 import com.cvut.arfittingroom.draw.model.element.strategy.PathCreationStrategy
-import com.cvut.arfittingroom.draw.model.enums.EElementEditAction
 import com.cvut.arfittingroom.draw.model.enums.EEditorMode
+import com.cvut.arfittingroom.draw.model.enums.EElementEditAction
 import com.cvut.arfittingroom.draw.path.DrawablePath
-import com.cvut.arfittingroom.draw.service.TexturedBrushDrawer
 import com.cvut.arfittingroom.draw.service.LayerManager
+import com.cvut.arfittingroom.draw.service.TexturedBrushDrawer
 import com.cvut.arfittingroom.draw.service.UIDrawer
 import com.cvut.arfittingroom.model.SPAN_SLOP
 import com.cvut.arfittingroom.model.TOUCH_TO_MOVE_THRESHOLD
@@ -53,7 +53,6 @@ import com.cvut.arfittingroom.utils.FileUtil.saveTempMaskTextureBitmap
 import com.cvut.arfittingroom.utils.UIUtil.showColorPickerDialog
 import io.github.muddz.styleabletoast.StyleableToast
 import pl.droidsonroids.gif.GifDrawable
-import java.lang.IllegalArgumentException
 import javax.inject.Inject
 import kotlin.math.abs
 import kotlin.math.atan2
@@ -676,10 +675,14 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     }
 
     fun setBrush(brush: BrushTO, brushTexture: Bitmap? = null) {
+        editorMode = EEditorMode.BRUSH
+
         paintOptions.strokeTextureRef = brush.strokeTextureRef
         paintOptions.style = brush.style
         paintOptions.strokeCap = brush.strokeCap
         paintOptions.strokeJoint = brush.strokeJoint
+        paintOptions.blurRadius = brush.blurRadius
+        paintOptions.blurType = brush.blurType
 
         TexturedBrushDrawer.resetBitmaps()
 
@@ -698,6 +701,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         stampType = null
         TexturedBrushDrawer.resetBitmaps()
     }
+
 
     fun setStamp(pathCreationStrategy: PathCreationStrategy) {
         stampType = pathCreationStrategy
@@ -776,7 +780,6 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             layerManager.getCurPath().lineTo(curX + 1, curY)
         }
 
-        val foo = layerManager.getCurPath()
         val curve =
             Curve(
                 path = layerManager.getCurPath(),
@@ -790,7 +793,9 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                     style = Paint.Style.STROKE
                 },
                 bitmapTexture = TexturedBrushDrawer.originalBitmap,
-                strokeTextureRef = paintOptions.strokeTextureRef
+                strokeTextureRef = paintOptions.strokeTextureRef,
+                blurRadius = paintOptions.blurRadius,
+                blurType = paintOptions.blurType
             )
 
         layerManager.setCurPath(DrawablePath())

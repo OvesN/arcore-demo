@@ -2,6 +2,7 @@ package com.cvut.arfittingroom.fragment
 
 import android.content.res.ColorStateList
 import android.graphics.Bitmap
+import android.graphics.BlurMaskFilter
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
@@ -23,7 +24,6 @@ import com.cvut.arfittingroom.draw.DrawView
 import com.cvut.arfittingroom.draw.service.TexturedBrushDrawer
 import com.cvut.arfittingroom.model.BRUSHES_COLLECTION
 import com.cvut.arfittingroom.model.to.BrushTO
-import com.cvut.arfittingroom.module.GlideApp
 import com.cvut.arfittingroom.utils.ScreenUtil
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.toObject
@@ -36,13 +36,13 @@ class BrushesMenuFragment(private val drawView: DrawView) : Fragment() {
     private val brushesOptions = mutableListOf<BrushTO>()
     private var selectedViewId = 0
     private var underscoreSelectedView: View? = null
-    private var selectedColor: Int = Color.BLACK
+
+    private var isInitialized = false
 
     private val paint = Paint().apply {
         strokeWidth = 10f
         color = Color.WHITE
     }
-
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -63,7 +63,7 @@ class BrushesMenuFragment(private val drawView: DrawView) : Fragment() {
     }
 
     fun changeColor(newColor: Int) {
-        selectedColor = newColor
+        paint.color = newColor
 
         requireView().findViewById<ImageButton>(selectedViewId)?.let {
             it.imageTintList =
@@ -129,6 +129,9 @@ class BrushesMenuFragment(private val drawView: DrawView) : Fragment() {
                 strokeWidth = 70f
                 isAntiAlias = true
             }
+            if (brush.blurRadius != 0f) {
+                paint.maskFilter = BlurMaskFilter(brush.blurRadius, brush.blurType)
+            }
 
             val imageButton = ImageButton(context).apply {
                 id = brush.id.hashCode()
@@ -174,7 +177,14 @@ class BrushesMenuFragment(private val drawView: DrawView) : Fragment() {
             }
 
 
+            if (!isInitialized) {
+                underscoreSelectedView = underscoreLine
+                selectedViewId = imageButton.id
+                isInitialized = true
+            }
+
             if (selectedViewId == imageButton.id) {
+                underscoreSelectedView = underscoreLine
                 underscoreLine.visibility = View.VISIBLE
                 imageButton.imageTintList = ColorStateList.valueOf(paint.color)
             }
@@ -195,6 +205,7 @@ class BrushesMenuFragment(private val drawView: DrawView) : Fragment() {
             selectedViewId = 0
             underscore.visibility = View.GONE
             drawView.setEditingMode()
+
         } else {
             selectedViewId = view.id
             underscoreSelectedView = underscore
@@ -227,7 +238,6 @@ class BrushesMenuFragment(private val drawView: DrawView) : Fragment() {
             else {
                 drawView.setBrush(brush)
             }
-
         }
     }
 

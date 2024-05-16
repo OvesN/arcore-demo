@@ -1,6 +1,8 @@
 package com.cvut.arfittingroom.draw.model.element.impl
 
 import android.graphics.Bitmap
+import android.graphics.BlurMaskFilter
+import android.graphics.BlurMaskFilter.Blur
 import android.graphics.Canvas
 import android.graphics.Matrix
 import android.graphics.Paint
@@ -26,7 +28,9 @@ class Curve(
     override val paint: Paint,
     override var rotationAngle: Float = 0f,
     bitmapTexture: Bitmap? = null,
-    var strokeTextureRef: String = ""
+    var strokeTextureRef: String = "",
+    var blurRadius: Float = 0f,
+    var blurType: Blur = Blur.NORMAL
 ) : Element(), Repaintable {
     override val name: String = "Line"
     override var boundingBox: BoundingBox
@@ -44,6 +48,10 @@ class Curve(
     private var scaledTextureBitmap: Bitmap? = null
 
     init {
+        if (blurRadius != 0f) {
+            paint.apply { maskFilter = BlurMaskFilter(blurRadius, blurType) }
+        }
+
         boundingBox = updateBoundingBoxAndCenter()
 
         bitmapTexture?.let { originalBitmap ->
