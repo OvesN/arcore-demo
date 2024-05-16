@@ -579,8 +579,8 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                 actionDown(x, y)
             }
 
-            MotionEvent.ACTION_MOVE -> actionMove(x, y)
-            MotionEvent.ACTION_UP -> actionUp()
+           ACTION_MOVE -> actionMove(x, y)
+           ACTION_UP -> actionUp()
         }
     }
 
@@ -776,6 +776,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             layerManager.getCurPath().lineTo(curX + 1, curY)
         }
 
+        val foo = layerManager.getCurPath()
         val curve =
             Curve(
                 path = layerManager.getCurPath(),
