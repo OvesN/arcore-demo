@@ -152,7 +152,6 @@ class BrushesMenuFragment(private val drawView: DrawView) : Fragment() {
             path.lineTo(coord + 1, coord + 2)
             path.lineTo(coord + 1, coord)
 
-
             if (brush.strokeTextureRef.isEmpty()) {
                 canvas.drawPath(path, paint)
                 imageButton.apply { setImageBitmap(bitmap) }
@@ -167,8 +166,18 @@ class BrushesMenuFragment(private val drawView: DrawView) : Fragment() {
                                 resource: Bitmap,
                                 transition: Transition<in Bitmap>?,
                             ) {
-                                TexturedBrushDrawer.draw(canvas, path,resource, paint.strokeWidth)
-                                imageButton.apply { setImageBitmap(bitmap) }
+                                val scale = minOf(
+                                    imageSizePx.toFloat() / resource.width,
+                                    imageSizePx.toFloat() / resource.height
+                                )
+
+                                val scaledBitmap = Bitmap.createScaledBitmap(
+                                    resource,
+                                    (resource.width * scale).toInt(),
+                                    (resource.height * scale).toInt(),
+                                    true
+                                )
+                                imageButton.apply { setImageBitmap(scaledBitmap) }
                             }
 
                             override fun onLoadCleared(placeholder: Drawable?) {}
