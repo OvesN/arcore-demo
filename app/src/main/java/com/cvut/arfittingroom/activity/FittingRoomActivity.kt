@@ -509,7 +509,7 @@ class FittingRoomActivity :
                         stateService.loadImage(resource, color, arSceneView)
                     }
 
-                    override fun onLoadCleared(placeholder: android.graphics.drawable.Drawable?) {}
+                    override fun onLoadCleared(placeholder: Drawable?) {}
                 },
             )
     }
