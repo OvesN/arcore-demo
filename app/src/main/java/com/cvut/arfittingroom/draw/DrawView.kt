@@ -347,6 +347,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
         selectedElement = layerManager.selectElement(x, y)
         selectedElement?.let {
+            isInElementMenuMode = false
             if (it is Gif) {
                 startAnimation(it)
             }
