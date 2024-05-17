@@ -31,6 +31,9 @@ class Curve(
     override var centerX: Float = 0f,
     override var centerY: Float = 0f,
     override var outerRadius: Float = 0f,
+    var xdiff: Float = 0f,  // No translation by default
+    var ydiff: Float = 0f,  // No translation by default
+    var radiusDiff: Float = 1f,
 ) : Element(), Repaintable {
     override val name: String = "Line"
     override var boundingBox: BoundingBox
@@ -40,11 +43,6 @@ class Curve(
     override var originalCenterY: Float = 0f
     override var originalRadius: Float = 0f
 
-    private var xdiff: Float = 0f  // No translation by default
-
-    private var ydiff: Float = 0f  // No translation by default
-
-    private var radiusDiff: Float = 1f  // No scaling by default
     private var scaledTextureBitmap: Bitmap? = null
 
     init {

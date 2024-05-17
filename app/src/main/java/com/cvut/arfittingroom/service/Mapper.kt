@@ -1,6 +1,5 @@
 package com.cvut.arfittingroom.service
 
-import android.graphics.BlurMaskFilter
 import android.graphics.Paint
 import com.cvut.arfittingroom.draw.Layer
 import com.cvut.arfittingroom.draw.model.PaintOptions
@@ -142,6 +141,9 @@ constructor(private val strategies: Map<String, @JvmSuppressWildcards PathCreati
                             blurRadius = element.blurRadius
                             blurType = element.blurType
                         },
+                    xdiff = element.xdiff,
+                    ydiff = element.ydiff,
+                    radiusDiff = element.radiusDiff
                     )
 
             }
@@ -224,7 +226,10 @@ constructor(private val strategies: Map<String, @JvmSuppressWildcards PathCreati
                     rotationAngle = elementTO.rotationAngle,
                     strokeTextureRef = elementTO.paint.strokeTextureRef,
                     blurType = elementTO.paint.blurType,
-                    blurRadius = elementTO.paint.blurRadius
+                    blurRadius = elementTO.paint.blurRadius,
+                    xdiff = elementTO.xdiff,
+                    ydiff = elementTO.ydiff,
+                    radiusDiff = elementTO.radiusDiff
                 )
 
         }
