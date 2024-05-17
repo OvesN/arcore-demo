@@ -24,7 +24,7 @@ class Curve(
     var path: DrawablePath,
     override val paint: Paint,
     override var rotationAngle: Float = 0f,
-    val bitmapTexture: Bitmap? = null,
+    var bitmapTexture: Bitmap? = null,
     var strokeTextureRef: String = "",
     var blurRadius: Float = 0f,
     var blurType: Blur = Blur.NORMAL,
@@ -59,15 +59,8 @@ class Curve(
     }
 
     fun setTextureBitmap(bitmap: Bitmap) {
-        scaledTextureBitmap = Bitmap.createScaledBitmap(
-            bitmap,
-            paint.strokeWidth.toInt(), paint.strokeWidth.toInt(), true
-        )
-        scaledTextureBitmap?.let {
-            BitmapUtil.replaceNonTransparentPixels(
-                it, (paint.alpha shl 24) or (paint.color and 0xFFFFFF)
-            )
-        }
+        bitmapTexture = bitmap
+        updateTextureBitmap()
     }
 
 
@@ -164,12 +157,7 @@ class Curve(
 
     override fun repaint(newColor: Int, fill: Boolean) {
         paint.color = newColor
-
-        scaledTextureBitmap?.let {
-            BitmapUtil.replaceNonTransparentPixels(
-                it, (paint.alpha shl 24) or (paint.color and 0xFFFFFF)
-            )
-        }
+        updateTextureBitmap()
     }
 
     private fun createTransformationMatrix(): Matrix {
@@ -204,10 +192,19 @@ class Curve(
     private fun updateStrokeWidth() {
         paint.strokeWidth = originalStrokeWidth * radiusDiff
 
-        bitmapTexture?.let {
-            scaledTextureBitmap = Bitmap.createScaledBitmap(
+        updateTextureBitmap()
+    }
+
+    private fun updateTextureBitmap() {
+        scaledTextureBitmap = bitmapTexture?.let {
+            Bitmap.createScaledBitmap(
                 it,
                 paint.strokeWidth.toInt(), paint.strokeWidth.toInt(), true
+            )
+        }
+        scaledTextureBitmap?.let {
+            BitmapUtil.replaceNonTransparentPixels(
+                it, (paint.alpha shl 24) or (paint.color and 0xFFFFFF)
             )
         }
     }
