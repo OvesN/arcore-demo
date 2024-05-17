@@ -109,15 +109,14 @@ class Curve(
 
     // Scaling function
     override fun scale(newRadius: Float) {
-        outerRadius = max(newRadius, 1f)
-        radiusDiff = outerRadius / originalRadius
+        outerRadius = max(newRadius, 10f)
+        radiusDiff = max(outerRadius / originalRadius, 0.1f)
         updateStrokeWidth()
     }
 
     override fun scaleContinuously(factor: Float) {
         super.scaleContinuously(factor)
-
-        radiusDiff = outerRadius / originalRadius
+        radiusDiff = max(outerRadius / originalRadius, 0.1f)
         updateStrokeWidth()
     }
 
@@ -165,6 +164,12 @@ class Curve(
 
     override fun repaint(newColor: Int, fill: Boolean) {
         paint.color = newColor
+
+        scaledTextureBitmap?.let {
+            BitmapUtil.replaceNonTransparentPixels(
+                it, (paint.alpha shl 24) or (paint.color and 0xFFFFFF)
+            )
+        }
     }
 
     private fun createTransformationMatrix(): Matrix {
@@ -198,5 +203,12 @@ class Curve(
 
     private fun updateStrokeWidth() {
         paint.strokeWidth = originalStrokeWidth * radiusDiff
+
+        bitmapTexture?.let {
+            scaledTextureBitmap = Bitmap.createScaledBitmap(
+                it,
+                paint.strokeWidth.toInt(), paint.strokeWidth.toInt(), true
+            )
+        }
     }
 }
