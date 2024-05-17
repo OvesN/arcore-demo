@@ -62,7 +62,6 @@ import kotlin.math.abs
 import kotlin.math.atan2
 import kotlin.math.sqrt
 
-
 /**
  * Draw view for 2D editor
  *
@@ -103,12 +102,10 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private var lastDownY = 0f
     private var frameCount = 0
     private var pipetteSelectedColor = Color.TRANSPARENT
+    private var colorChangeListener: ColorChangeListener? = null
 
     @Inject
     lateinit var layerManager: LayerManager
-
-    private var colorChangeListener: ColorChangeListener? = null
-
 
     init {
         (context.applicationContext as? ARFittingRoomApplication)?.appComponent?.inject(this)
@@ -241,16 +238,16 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         return true
     }
 
-
     private fun startAnimation(gif: Gif) {
-
         Log.println(Log.INFO, null, "Start animation")
         gifRunnable =
             Runnable {
                 Log.println(Log.INFO, null, "count $frameCount")
                 // Play gif three times and stop on the first frame
-                if (frameCount >= (gif.gifDrawable?.numberOfFrames
-                        ?: 0) * 3 && gif.currentFrameIndex == 0
+                if (frameCount >= (
+                    gif.gifDrawable?.numberOfFrames
+                        ?: 0
+                ) * 3 && gif.currentFrameIndex == 0
                 ) {
                     frameCount = 0
                     stopAnimation(gif)
@@ -258,8 +255,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                     gif.currentFrameIndex++
                     frameCount++
                     invalidate()
-                    gifRunnable?.let {   handler.postDelayed(it, frameDelay) }
-
+                    gifRunnable?.let { handler.postDelayed(it, frameDelay) }
                 }
             }
         gifRunnable?.let { handler.post(it) }
@@ -502,91 +498,87 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     ) {
         when (action) {
             EElementEditAction.MENU -> isInElementMenuMode = !isInElementMenuMode
-
             EElementEditAction.SCALE -> isInElementScalingMode = true
-
             EElementEditAction.ROTATE -> isInElementRotationMode = true
+            EElementEditAction.DELETE -> deleteElement(element)
+            EElementEditAction.CHANGE_COLOR -> changeElementColor(element)
+            EElementEditAction.LAYER_UP -> moveElementLayerUp(element)
+            EElementEditAction.LAYER_DOWN -> moveElementLayerDown(element)
+            EElementEditAction.TO_LAYER -> moveElementToLayer(element)
+        }
+    }
 
-            EElementEditAction.DELETE -> {
-                addToHistory(
-                    RemoveElementFromLayer(
-                        element.id,
-                        element,
-                        layerManager,
-                        layerManager.getActiveLayerId(),
-                    ),
-                )
-                selectedElement = null
+    private fun deleteElement(element: Element) {
+        addToHistory(
+            RemoveElementFromLayer(
+                element.id,
+                element,
+                layerManager,
+                layerManager.getActiveLayerId(),
+            ),
+        )
+        selectedElement = null
+    }
+
+    private fun changeElementColor(element: Element) {
+        val initialColor =
+            when (element) {
+                is Repaintable -> element.paint.color
+                else -> paintOptions.color
             }
-
-            EElementEditAction.CHANGE_COLOR -> {
-                selectedElement?.let { selectedElement ->
-                    val initialColor = when (selectedElement) {
-                        is Repaintable -> selectedElement.paint.color
-                        else -> paintOptions.color
-                    }
-                    val style = when (selectedElement) {
-                        is Repaintable -> selectedElement.paint.style
-                        else -> paintOptions.style
-                    }
-                    showColorPickerDialog(
-                        context,
-                        initialColor,
-                        fill = style == Paint.Style.FILL,
-                        shouldShowFillCheckbox = true,
-                        shouldShowPipette = true,
-                        onPipetteSelected = { showPipetteView() }
-                    ) { envelopColor, fill ->
-                        repaintElement(selectedElement, envelopColor, fill)
-                    }
-                }
-
-                element.setSelected(false)
-                selectedElement = null
+        val style =
+            when (element) {
+                is Repaintable -> element.paint.style
+                else -> paintOptions.style
             }
+        showColorPickerDialog(
+            context,
+            initialColor,
+            fill = style == Paint.Style.FILL,
+            shouldShowFillCheckbox = true,
+            shouldShowPipette = true,
+            onPipetteSelected = { showPipetteView() },
+        ) { envelopColor, fill ->
+            repaintElement(element, envelopColor, fill)
+        }
 
-            EElementEditAction.LAYER_UP -> {
-                val command =
-                    layerManager.moveElementUp(
-                        element,
-                    )
-                command?.let {
-                    addToHistory(command)
-                    StyleableToast.makeText(context, command.description, R.style.mytoast).show()
-                }
-                element.setSelected(false)
-                selectedElement = null
-            }
+        element.setSelected(false)
+        selectedElement = null
+    }
 
-            EElementEditAction.LAYER_DOWN -> {
-                val command =
-                    layerManager.moveElementDown(
-                        element,
-                    )
-                command?.let {
-                    addToHistory(command)
-                    StyleableToast.makeText(context, command.description, R.style.mytoast).show()
-                }
-                element.setSelected(false)
-                selectedElement = null
-            }
+    private fun moveElementLayerUp(element: Element) {
+        val command = layerManager.moveElementUp(element)
+        command?.let {
+            addToHistory(command)
+            StyleableToast.makeText(context, command.description, R.style.mytoast).show()
+        }
+        element.setSelected(false)
+        selectedElement = null
+    }
 
-            EElementEditAction.TO_LAYER -> {
-                showMoveToLayerDialog(
-                    context,
-                    currentLayerIndex = layerManager.getActiveLayerIndex(),
-                    maxLayerIndex = layerManager.getNumOfLayers() - 1
-                ) { newLayerIndex ->
-                    val command = layerManager.moveElementTo(element, newLayerIndex)
-                    command?.let {
-                        StyleableToast.makeText(context, command.description, R.style.mytoast)
-                            .show()
-                        addToHistory(command)
-                    }
-                    element.setSelected(false)
-                    selectedElement = null
-                }
+    private fun moveElementLayerDown(element: Element) {
+        val command = layerManager.moveElementDown(element)
+        command?.let {
+            addToHistory(command)
+            StyleableToast.makeText(context, command.description, R.style.mytoast).show()
+        }
+        element.setSelected(false)
+        selectedElement = null
+    }
+
+    private fun moveElementToLayer(element: Element) {
+        showMoveToLayerDialog(
+            context,
+            currentLayerIndex = layerManager.getActiveLayerIndex(),
+            maxLayerIndex = layerManager.getNumOfLayers() - 1,
+        ) { newLayerIndex ->
+            val command = layerManager.moveElementTo(element, newLayerIndex)
+            command?.let {
+                StyleableToast.makeText(context, command.description, R.style.mytoast).show()
+                addToHistory(command)
             }
+            element.setSelected(false)
+            selectedElement = null
         }
     }
 
@@ -623,7 +615,11 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         }
     }
 
-    private fun handlePipette(event: MotionEvent, x: Float, y: Float) {
+    private fun handlePipette(
+        event: MotionEvent,
+        x: Float,
+        y: Float,
+    ) {
         when (event.actionMasked) {
             ACTION_POINTER_UP, ACTION_UP -> {
                 editorMode = previousEditorMode
@@ -671,15 +667,17 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             StyleableToast.makeText(
                 context,
                 "Cannot create more than ${LayerManager.MAX_NUMBER_OF_LAYERS} layers",
-                R.style.mytoast
+                R.style.mytoast,
             ).show()
         }
 
         return layerManager.getActiveLayerIndex()
     }
 
-
-    fun setColor(newColor: Int, fill: Boolean) {
+    fun setColor(
+        newColor: Int,
+        fill: Boolean,
+    ) {
         @ColorInt
         paintOptions.color = newColor
         paintOptions.alpha = newColor.alpha
@@ -694,7 +692,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             TexturedBrushDrawer.updateBrushTextureBitmap(
                 paintOptions.strokeWidth.toInt(),
                 paintOptions.color,
-                paintOptions.alpha
+                paintOptions.alpha,
             )
         }
     }
@@ -711,7 +709,10 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         }
     }
 
-    fun setBrush(brush: BrushTO, brushTexture: Bitmap? = null) {
+    fun setBrush(
+        brush: BrushTO,
+        brushTexture: Bitmap? = null,
+    ) {
         editorMode = EEditorMode.BRUSH
 
         paintOptions.strokeTextureRef = brush.strokeTextureRef
@@ -727,7 +728,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                 it,
                 paintOptions.strokeWidth,
                 paintOptions.color,
-                paintOptions.alpha
+                paintOptions.alpha,
             )
         }
     }
@@ -779,22 +780,22 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             canvas,
             selectedElement,
             isInElementMenuMode,
-            canvasScaleFactor
+            canvasScaleFactor,
         )
 
-       if (shouldDrawBackground) {
-           uiDrawer.drawFaceTextureImage(canvas)
-       }
+        if (shouldDrawBackground) {
+            uiDrawer.drawFaceTextureImage(canvas)
+        }
 
         if (editorMode == EEditorMode.PIPETTE) {
-            pipetteSelectedColor = uiDrawer.drawPipette(
-                canvas,
-                canvasTransformationMatrix,
-                lastTouchX,
-                lastTouchY,
-                layerManager.bitmapFromAllLayers
-            )
-
+            pipetteSelectedColor =
+                uiDrawer.drawPipette(
+                    canvas,
+                    canvasTransformationMatrix,
+                    lastTouchX,
+                    lastTouchY,
+                    layerManager.bitmapFromAllLayers,
+                )
         }
     }
 
@@ -831,19 +832,19 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             Curve(
                 path = layerManager.getCurPath(),
                 paint =
-                Paint().apply {
-                    color = paintOptions.color
-                    strokeWidth = paintOptions.strokeWidth
-                    alpha = paintOptions.alpha
-                    strokeCap = Paint.Cap.ROUND
-                    strokeJoin = Paint.Join.ROUND
-                    style = Paint.Style.STROKE
-                },
+                    Paint().apply {
+                        color = paintOptions.color
+                        strokeWidth = paintOptions.strokeWidth
+                        alpha = paintOptions.alpha
+                        strokeCap = Paint.Cap.ROUND
+                        strokeJoin = Paint.Join.ROUND
+                        style = Paint.Style.STROKE
+                    },
                 outerRadius = paintOptions.strokeWidth,
                 bitmapTexture = TexturedBrushDrawer.originalBitmap,
                 strokeTextureRef = paintOptions.strokeTextureRef,
                 blurRadius = paintOptions.blurRadius,
-                blurType = paintOptions.blurType
+                blurType = paintOptions.blurType,
             )
 
         layerManager.setCurPath(DrawablePath())
@@ -856,20 +857,21 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         centerY: Float,
         outerRadius: Float,
     ) {
-        stampType?.let {
-            val stamp = Stamp(
-                centerX = centerX,
-                centerY = centerY,
-                outerRadius = outerRadius,
-                pathCreationStrategy = it,
-                paint =
-                Paint().apply {
-                    color = paintOptions.color
-                    style = paintOptions.style
-                    strokeWidth = 6f
-                    alpha = paintOptions.alpha
-                },
-            )
+        stampType?.let { stampType ->
+            val stamp =
+                Stamp(
+                    centerX = centerX,
+                    centerY = centerY,
+                    outerRadius = outerRadius,
+                    pathCreationStrategy = stampType,
+                    paint =
+                        Paint().apply {
+                            color = paintOptions.color
+                            style = paintOptions.style
+                            strokeWidth = 6f
+                            alpha = paintOptions.alpha
+                        },
+                )
 
             addElementToLayer(layerManager.getActiveLayerIndex(), stamp)
         }
@@ -887,9 +889,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         }
     }
 
-    fun toggleLayerVisibility(
-        layerIndex: Int
-    ) {
+    fun toggleLayerVisibility(layerIndex: Int) {
         val layerId = layerManager.getLayerIdByIndex(layerIndex)
         layerId?.let { addToHistory(ToggleLayerVisibility(layerIndex, layerId, layerManager)) }
         layerManager.recreateLayersBitmaps()
@@ -913,7 +913,10 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         }
     }
 
-    fun addImage(bitmap: Bitmap, imageRef: String) {
+    fun addImage(
+        bitmap: Bitmap,
+        imageRef: String,
+    ) {
         addElementToLayer(
             layerManager.getActiveLayerIndex(),
             Image(
@@ -927,7 +930,10 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         invalidate()
     }
 
-    fun addGif(gifDrawable: GifDrawable, gifRef: String) {
+    fun addGif(
+        gifDrawable: GifDrawable,
+        gifRef: String,
+    ) {
         val gif =
             Gif(
                 resourceRef = gifRef,
@@ -948,7 +954,6 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         stopAnimation()
         startAnimation(gif)
     }
-
 
     private fun resetEditState() {
         isInElementRotationMode = false
@@ -973,7 +978,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         } else {
             saveTempMaskTextureBitmap(
                 adjustBitmapFromEditor(createBitmap(), height, width),
-                context
+                context,
             ) {
                 onSaved()
             }
@@ -993,7 +998,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private fun repaintElement(
         element: Element,
         newColor: Int,
-        fill: Boolean
+        fill: Boolean,
     ) {
         val repaintable = element as Repaintable
 
@@ -1003,7 +1008,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                 oldColor = repaintable.paint.color,
                 newColor = newColor,
                 fill = fill,
-                wasFilled = repaintable.paint.style == Paint.Style.FILL
+                wasFilled = repaintable.paint.style == Paint.Style.FILL,
             ),
         )
 
