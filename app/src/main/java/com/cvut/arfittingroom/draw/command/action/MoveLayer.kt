@@ -1,16 +1,15 @@
-package com.cvut.arfittingroom.draw.command.action.layer.impl
+package com.cvut.arfittingroom.draw.command.action
 
-import com.cvut.arfittingroom.draw.command.action.layer.LayerCommand
+import com.cvut.arfittingroom.draw.command.Command
 import com.cvut.arfittingroom.draw.service.LayerManager
 import java.util.UUID
 
 class MoveLayer(
-    override val layerManager: LayerManager,
+    private val layerManager: LayerManager,
     private val fromIndex: Int,
     private val toIndex: Int,
-    override val layerId: UUID,
-) :
-    LayerCommand() {
+    private val layerId: UUID,
+):Command {
     override val description: String = "move layer from $fromIndex to $toIndex"
 
     override fun execute() {

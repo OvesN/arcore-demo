@@ -1,17 +1,16 @@
-package com.cvut.arfittingroom.draw.command.action.element.impl
+package com.cvut.arfittingroom.draw.command.action
 
+import com.cvut.arfittingroom.draw.command.Command
 import com.cvut.arfittingroom.draw.command.Movable
-import com.cvut.arfittingroom.draw.command.action.element.ElementCommand
 import java.util.UUID
 
 class MoveElement(
-    override val elementId: UUID,
     private val movable: Movable,
     private val oldX: Float,
     private val oldY: Float,
     private val newX: Float,
     private val newY: Float,
-) : ElementCommand() {
+) : Command {
     override val description: String = "move element"
 
     override fun execute() {

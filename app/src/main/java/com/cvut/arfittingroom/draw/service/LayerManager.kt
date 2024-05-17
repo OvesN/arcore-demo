@@ -3,7 +3,7 @@ package com.cvut.arfittingroom.draw.service
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import com.cvut.arfittingroom.draw.Layer
-import com.cvut.arfittingroom.draw.command.action.element.impl.MoveElementBetweenLayers
+import com.cvut.arfittingroom.draw.command.action.MoveElementBetweenLayers
 import com.cvut.arfittingroom.draw.model.PaintOptions
 import com.cvut.arfittingroom.draw.model.element.Element
 import com.cvut.arfittingroom.draw.path.DrawablePath
@@ -228,7 +228,9 @@ class LayerManager {
                 element,
                 oldLayerId = getActiveLayerId(),
                 newLayerId = layers[activeLayerIndex + 1].id,
-                this,
+                oldLayerIndex = activeLayerIndex,
+                newLayerIndex = activeLayerIndex + 1,
+                layerManager = this,
             )
         }
     }
@@ -243,7 +245,9 @@ class LayerManager {
                 element,
                 oldLayerId = getActiveLayerId(),
                 newLayerId = layers[activeLayerIndex - 1].id,
-                this,
+                oldLayerIndex = activeLayerIndex,
+                newLayerIndex = activeLayerIndex - 1,
+                layerManager = this,
             )
         }
     }
@@ -260,7 +264,9 @@ class LayerManager {
                 element,
                 oldLayerId = getActiveLayerId(),
                 newLayerId = layers[layerIndex].id,
-                this,
+                oldLayerIndex = activeLayerIndex,
+                newLayerIndex = layerIndex,
+                layerManager = this,
             )
         }
 
@@ -276,7 +282,7 @@ class LayerManager {
     }
 
     private fun setLayerOpacity(opacity: Float, layerIndex: Int) {
-        if ( layerIndex >= layers.size|| layerIndex < 0) {
+        if (layerIndex >= layers.size || layerIndex < 0) {
             return
         }
         layers[layerIndex].setOpacity(opacity)
@@ -372,9 +378,6 @@ class LayerManager {
         setActiveLayer(activeLayerIndex)
     }
 
-    fun restoreDeletedLayer(layerId: UUID) {
-        // TODO
-    }
 
     fun doesContainAnyGif() = layers.any { it.doesHaveGif() }
 

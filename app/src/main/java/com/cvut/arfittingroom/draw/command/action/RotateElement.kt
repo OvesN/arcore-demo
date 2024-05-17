@@ -1,15 +1,14 @@
-package com.cvut.arfittingroom.draw.command.action.element.impl
+package com.cvut.arfittingroom.draw.command.action
 
+import com.cvut.arfittingroom.draw.command.Command
 import com.cvut.arfittingroom.draw.command.Rotatable
-import com.cvut.arfittingroom.draw.command.action.element.ElementCommand
 import java.util.UUID
 
 class RotateElement(
-    override val elementId: UUID,
     private val rotatable: Rotatable,
     private val newRotationAngle: Float,
     private val oldRotationAngle: Float,
-) : ElementCommand() {
+) : Command {
     override val description: String = "rotate element"
 
     override fun execute() {

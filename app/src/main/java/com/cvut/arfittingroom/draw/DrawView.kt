@@ -23,12 +23,12 @@ import com.cvut.arfittingroom.controller.ScaleGestureDetector
 import com.cvut.arfittingroom.draw.DrawHistoryHolder.addToHistory
 import com.cvut.arfittingroom.draw.DrawHistoryHolder.clearHistory
 import com.cvut.arfittingroom.draw.command.Repaintable
-import com.cvut.arfittingroom.draw.command.action.element.impl.AddElementToLayer
-import com.cvut.arfittingroom.draw.command.action.element.impl.MoveElement
-import com.cvut.arfittingroom.draw.command.action.element.impl.RemoveElementFromLayer
-import com.cvut.arfittingroom.draw.command.action.element.impl.RepaintElement
-import com.cvut.arfittingroom.draw.command.action.element.impl.RotateElement
-import com.cvut.arfittingroom.draw.command.action.element.impl.ScaleElement
+import com.cvut.arfittingroom.draw.command.action.AddElementToLayer
+import com.cvut.arfittingroom.draw.command.action.MoveElement
+import com.cvut.arfittingroom.draw.command.action.RemoveElementFromLayer
+import com.cvut.arfittingroom.draw.command.action.RepaintElement
+import com.cvut.arfittingroom.draw.command.action.RotateElement
+import com.cvut.arfittingroom.draw.command.action.ScaleElement
 import com.cvut.arfittingroom.draw.model.PaintOptions
 import com.cvut.arfittingroom.draw.model.element.Element
 import com.cvut.arfittingroom.draw.model.element.impl.Curve
@@ -50,6 +50,7 @@ import com.cvut.arfittingroom.utils.FileUtil.deleteTempFiles
 import com.cvut.arfittingroom.utils.FileUtil.saveTempMaskFrames
 import com.cvut.arfittingroom.utils.FileUtil.saveTempMaskTextureBitmap
 import com.cvut.arfittingroom.utils.UIUtil.showColorPickerDialog
+import com.cvut.arfittingroom.utils.UIUtil.showMoveToLayerDialog
 import io.github.muddz.styleabletoast.StyleableToast
 import pl.droidsonroids.gif.GifDrawable
 import javax.inject.Inject
@@ -136,7 +137,6 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                             element.endContinuousScale()
                             addToHistory(
                                 ScaleElement(
-                                    element.id,
                                     element,
                                     newRadius = element.outerRadius * elementScaleFactor,
                                     oldRadius = element.outerRadius,
@@ -246,7 +246,8 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             Runnable {
                 Log.println(Log.INFO, null, "count $frameCount")
                 // Play gif three times and stop on the first frame
-                if (frameCount >= (gif.gifDrawable?.numberOfFrames ?:0 ) * 3 && gif.currentFrameIndex == 0
+                if (frameCount >= (gif.gifDrawable?.numberOfFrames
+                        ?: 0) * 3 && gif.currentFrameIndex == 0
                 ) {
                     frameCount = 0
                     stopAnimation(gif)
@@ -337,6 +338,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         selectedElement?.let { element ->
             val pressedIconAction = uiDrawer.checkEditButtons(x, y)
             if (pressedIconAction != null) {
+                invalidate()
                 lastTouchY = y
                 lastTouchX = x
                 handleIconAction(pressedIconAction, element)
@@ -385,7 +387,6 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             element.endContinuousMove()
             addToHistory(
                 MoveElement(
-                    element.id,
                     movable = element,
                     oldX = element.centerX,
                     oldY = element.centerY,
@@ -403,7 +404,6 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             element.endContinuousScale()
             addToHistory(
                 ScaleElement(
-                    element.id,
                     element,
                     newRadius = newRadius,
                     oldRadius = element.outerRadius,
@@ -419,7 +419,6 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             element.endContinuousRotation()
             addToHistory(
                 RotateElement(
-                    element.id,
                     element,
                     newRotationAngle = newRotationAngle,
                     oldRotationAngle = element.rotationAngle,
@@ -520,10 +519,10 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                         is Repaintable -> selectedElement.paint.color
                         else -> paintOptions.color
                     }
-                    val style  = when (selectedElement) {
-                    is Repaintable -> selectedElement.paint.style
-                    else -> paintOptions.style
-                }
+                    val style = when (selectedElement) {
+                        is Repaintable -> selectedElement.paint.style
+                        else -> paintOptions.style
+                    }
                     showColorPickerDialog(
                         context,
                         initialColor,
@@ -545,7 +544,10 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                     layerManager.moveElementUp(
                         element,
                     )
-                command?.let { addToHistory(command) }
+                command?.let {
+                    addToHistory(command)
+                    StyleableToast.makeText(context, command.description, R.style.mytoast).show()
+                }
                 element.setSelected(false)
                 selectedElement = null
             }
@@ -555,18 +557,28 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                     layerManager.moveElementDown(
                         element,
                     )
-                command?.let { addToHistory(command) }
+                command?.let {
+                    addToHistory(command)
+                    StyleableToast.makeText(context, command.description, R.style.mytoast).show()
+                }
                 element.setSelected(false)
                 selectedElement = null
             }
-            // FIXME do not work, history do not work
+
             EElementEditAction.TO_LAYER -> {
-                element.setSelected(false)
-                selectedElement = null
-                // TODO open menu with layers
-                return
-                val command = layerManager.moveElementTo(element, 1)
-                command?.let { addToHistory(command) }
+                showMoveToLayerDialog(context,
+                    currentLayerIndex = layerManager.getActiveLayerIndex(),
+                    maxLayerIndex = layerManager.getNumOfLayers() - 1
+                ) { newLayerIndex ->
+                    val command = layerManager.moveElementTo(element, newLayerIndex)
+                    command?.let {
+                        StyleableToast.makeText(context, command.description, R.style.mytoast)
+                            .show()
+                        addToHistory(command)
+                    }
+                    element.setSelected(false)
+                    selectedElement = null
+                }
             }
         }
     }
@@ -586,8 +598,8 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                 actionDown(x, y)
             }
 
-           ACTION_MOVE -> actionMove(x, y)
-           ACTION_UP -> actionUp()
+            ACTION_MOVE -> actionMove(x, y)
+            ACTION_UP -> actionUp()
         }
     }
 
@@ -740,20 +752,25 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         }
 
         layerManager.drawLayers(canvas, paintOptions)
-        uiDrawer.drawSelectedElementEditIcons(canvas, selectedElement, isInElementMenuMode, canvasScaleFactor)
+        uiDrawer.drawSelectedElementEditIcons(
+            canvas,
+            selectedElement,
+            isInElementMenuMode,
+            canvasScaleFactor
+        )
 
         if (shouldDrawBackground) {
             uiDrawer.drawFaceTextureImage(canvas)
         }
 
         if (editorMode == EEditorMode.PIPETTE) {
-                pipetteSelectedColor = uiDrawer.drawPipette(
-                    canvas,
-                    canvasTransformationMatrix,
-                    lastTouchX,
-                    lastTouchY,
-                    layerManager.bitmapFromAllLayers
-                )
+            pipetteSelectedColor = uiDrawer.drawPipette(
+                canvas,
+                canvasTransformationMatrix,
+                lastTouchX,
+                lastTouchY,
+                layerManager.bitmapFromAllLayers
+            )
 
         }
     }
@@ -857,7 +874,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     ) {
         val layerId = layerManager.getLayerIdByIndex(layerIndex)
         if (layerId != null) {
-            addToHistory(AddElementToLayer(element.id, element, layerManager, layerId))
+            addToHistory(AddElementToLayer(element, layerManager, layerId))
         } else {
             Log.println(Log.ERROR, null, "Adding element to the layer was unsuccessfull")
         }
@@ -946,7 +963,6 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
         addToHistory(
             RepaintElement(
-                element.id,
                 repaintable,
                 oldColor = repaintable.paint.color,
                 newColor = newColor,

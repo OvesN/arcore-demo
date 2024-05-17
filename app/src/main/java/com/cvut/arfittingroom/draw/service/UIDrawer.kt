@@ -45,6 +45,13 @@ class UIDrawer(private val context: Context) {
             color = Color.GRAY
             alpha = (255 * 0.9).toInt()
         }
+    private val highlightPaint:
+        Paint =
+            Paint().apply {
+                color = Color.YELLOW
+                alpha = (255 * 0.7).toInt()
+            }
+
     private val editElementIcons: HashMap<EElementEditAction, Bitmap> = hashMapOf()
     private val editElementIconsBounds: HashMap<EElementEditAction, RectF> = hashMapOf()
     private var faceTextureBitmap: Bitmap? = null
@@ -54,6 +61,8 @@ class UIDrawer(private val context: Context) {
     private var faceTextureVector: VectorDrawableCompat? = null
     private var viewWidth: Int = 0
     private var viewHeight: Int = 0
+
+    private var selectedEditAction: EElementEditAction? = null
 
     private fun prepareMatrix(bitmap: Bitmap?): Matrix {
         val bitmapWidth =
@@ -183,6 +192,7 @@ class UIDrawer(private val context: Context) {
         }
     }
 
+
     private fun drawEditIcon(
         canvas: Canvas,
         action: EElementEditAction,
@@ -234,6 +244,11 @@ class UIDrawer(private val context: Context) {
                 itemY,
                 canvasScaleFactor
             )
+        }
+
+        selectedEditAction?.let {action ->
+            highlightButton(action, canvas)
+            selectedEditAction = null
         }
 
     }
@@ -408,5 +423,11 @@ class UIDrawer(private val context: Context) {
 
     fun drawBackground(canvas: Canvas) {
         backgroundBitmap?.let { canvas.drawBitmap(it, backgroundBitmapMatrix, null) }
+    }
+
+    private fun highlightButton(action: EElementEditAction, canvas: Canvas) {
+        editElementIconsBounds[action]?.let { bounds ->
+            canvas.drawRect(bounds, highlightPaint)
+        }
     }
 }

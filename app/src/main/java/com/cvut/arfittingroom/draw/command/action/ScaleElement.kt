@@ -1,15 +1,14 @@
-package com.cvut.arfittingroom.draw.command.action.element.impl
+package com.cvut.arfittingroom.draw.command.action
 
+import com.cvut.arfittingroom.draw.command.Command
 import com.cvut.arfittingroom.draw.command.Scalable
-import com.cvut.arfittingroom.draw.command.action.element.ElementCommand
 import java.util.UUID
 
 class ScaleElement(
-    override val elementId: UUID,
     private val scalable: Scalable,
     private val newRadius: Float,
     private val oldRadius: Float,
-) : ElementCommand() {
+) : Command {
     override val description: String = "scale element"
 
     override fun execute() {

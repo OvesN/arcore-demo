@@ -4,30 +4,22 @@ import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.app.AlertDialog
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.LayerDrawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AccelerateDecelerateInterpolator
+import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.ImageView
+import android.widget.Spinner
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
-import androidx.core.graphics.toColor
-import com.bumptech.glide.request.target.CustomTarget
 import com.cvut.arfittingroom.R
-import com.skydoves.colorpickerview.ActionMode
-import com.skydoves.colorpickerview.ColorEnvelope
-import com.skydoves.colorpickerview.ColorPickerDialog
 import com.skydoves.colorpickerview.ColorPickerView
-import com.skydoves.colorpickerview.listeners.ColorEnvelopeListener
-import com.skydoves.colorpickerview.sliders.AlphaSlideBar
-import com.skydoves.colorpickerview.sliders.BrightnessSlideBar
 
 object UIUtil {
     fun createDivider(context: Context): View =
@@ -35,6 +27,34 @@ object UIUtil {
             layoutParams = ViewGroup.LayoutParams(2, ViewGroup.LayoutParams.MATCH_PARENT)
             background = AppCompatResources.getDrawable(context, R.color.colorLightGrey)
         }
+
+    fun showMoveToLayerDialog(context: Context, currentLayerIndex:Int, maxLayerIndex: Int, onLayerSelected: (Int) -> Unit) {
+        val dialogView: View = LayoutInflater.from(context).inflate(R.layout.popup_move_to_layer, null)
+        val dialog = AlertDialog.Builder(context)
+            .setView(dialogView)
+            .create()
+
+        val layerSpinner: Spinner = dialogView.findViewById(R.id.layer_spinner)
+        val layers = (0..maxLayerIndex).toList()
+        val adapter = ArrayAdapter(context, android.R.layout.simple_spinner_item, layers)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        layerSpinner.adapter = adapter
+
+        layerSpinner.setSelection(currentLayerIndex)
+
+        dialogView.findViewById<Button>(R.id.cancel_popup_button).setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialogView.findViewById<Button>(R.id.move_to_layer_button).setOnClickListener {
+            val selectedLayer = layerSpinner.selectedItem as Int
+            onLayerSelected(selectedLayer)
+            dialog.dismiss()
+        }
+
+        dialog.show()
+
+    }
 
     fun showColorPickerDialog(
         context: Context,
