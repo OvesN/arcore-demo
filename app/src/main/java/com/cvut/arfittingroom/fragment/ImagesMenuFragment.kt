@@ -67,8 +67,6 @@ class ImagesMenuFragment(private val drawView: DrawView) : Fragment() {
         view.findViewById<View>(R.id.vertical_scroll_view).visibility = View.VISIBLE
         view.findViewById<GridLayout>(R.id.vertical_options).columnCount =
             NUM_OF_ELEMENTS_IN_ROW_BIG_MENU
-
-        fetchImages()
     }
 
     private val getImage = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
@@ -84,6 +82,8 @@ class ImagesMenuFragment(private val drawView: DrawView) : Fragment() {
     }
 
     fun fetchImages() {
+        val options = requireView().findViewById<GridLayout>(R.id.vertical_options)
+        options.removeAllViews()
         firestore.collection(IMAGES_COLLECTION)
             .get()
             .addOnSuccessListener { result ->
@@ -113,7 +113,6 @@ class ImagesMenuFragment(private val drawView: DrawView) : Fragment() {
 
     private fun updateImagesMenu(imagesTO: List<ImageTO>) {
         val options = requireView().findViewById<GridLayout>(R.id.vertical_options)
-        options.removeAllViews()
         options.post {
             val imageWidth =
                 (options.width - options.paddingStart - options.paddingEnd) / NUM_OF_ELEMENTS_IN_ROW_BIG_MENU

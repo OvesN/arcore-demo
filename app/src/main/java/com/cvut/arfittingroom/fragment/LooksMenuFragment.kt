@@ -85,8 +85,6 @@ class LooksMenuFragment : Fragment() {
                             ),
                         )
                     }
-
-                fetchLooks()
             }
     }
 
