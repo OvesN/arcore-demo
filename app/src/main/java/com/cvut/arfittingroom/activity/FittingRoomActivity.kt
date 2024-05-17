@@ -515,8 +515,8 @@ class FittingRoomActivity :
     }
 
     private fun startAnimation() {
-        if (gifRunnable != null) {
-            stopAnimation()
+        if (gifTextures.size == 0) {
+            return
         }
             gifRunnable =
                 Runnable {

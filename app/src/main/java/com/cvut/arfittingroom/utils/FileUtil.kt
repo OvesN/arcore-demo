@@ -3,6 +3,7 @@ package com.cvut.arfittingroom.utils
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.widget.Toast
 import com.cvut.arfittingroom.draw.service.LayerManager
 import com.cvut.arfittingroom.model.MASK_FRAMES_DIR_NAME
 import com.cvut.arfittingroom.model.MASK_FRAME_FILE_NAME
@@ -20,10 +21,13 @@ object FileUtil {
         onSaved: () -> Unit,
     ) {
         try {
-            context.openFileOutput(MASK_TEXTURE_FILE_NAME, Context.MODE_PRIVATE).use { fos ->
+            val internalStorageDir = context.filesDir
+            val file = File(internalStorageDir, MASK_TEXTURE_FILE_NAME)
+
+            FileOutputStream(file).use { fos ->
                 bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos)
-                onSaved()
             }
+            onSaved()
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -121,6 +125,7 @@ object FileUtil {
             }
             onSaved()
         } catch (e: Exception) {
+            Toast.makeText(context, e.message, Toast.LENGTH_LONG).show()
             e.printStackTrace()
         }
     }
