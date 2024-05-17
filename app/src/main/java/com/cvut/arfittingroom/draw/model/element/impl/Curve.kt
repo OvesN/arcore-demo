@@ -27,7 +27,7 @@ class Curve(
     var path: DrawablePath,
     override val paint: Paint,
     override var rotationAngle: Float = 0f,
-    bitmapTexture: Bitmap? = null,
+    private var bitmapTexture: Bitmap? = null,
     var strokeTextureRef: String = "",
     var blurRadius: Float = 0f,
     var blurType: Blur = Blur.NORMAL
@@ -54,17 +54,21 @@ class Curve(
 
         boundingBox = updateBoundingBoxAndCenter()
 
-        bitmapTexture?.let { originalBitmap ->
-            scaledTextureBitmap = Bitmap.createScaledBitmap(
-                originalBitmap,
-                paint.strokeWidth.toInt(), paint.strokeWidth.toInt(), true
-            )
-            scaledTextureBitmap?.let {
-                BitmapUtil.replaceNonTransparentPixels(
-                    it, (paint.alpha shl 24) or (paint.color and 0xFFFFFF)
-                )
-            }
+        bitmapTexture?.let {
+            setTextureBitmap(it)
+        }
 
+    }
+
+    fun setTextureBitmap(bitmap: Bitmap) {
+        scaledTextureBitmap = Bitmap.createScaledBitmap(
+            bitmap,
+            paint.strokeWidth.toInt(), paint.strokeWidth.toInt(), true
+        )
+        scaledTextureBitmap?.let {
+            BitmapUtil.replaceNonTransparentPixels(
+                it, (paint.alpha shl 24) or (paint.color and 0xFFFFFF)
+            )
         }
     }
 

@@ -19,6 +19,7 @@ import com.cvut.arfittingroom.R
 import com.cvut.arfittingroom.activity.UIChangeListener
 import com.cvut.arfittingroom.draw.DrawView
 import com.cvut.arfittingroom.draw.Layer
+import com.cvut.arfittingroom.draw.model.element.impl.Curve
 import com.cvut.arfittingroom.draw.model.element.impl.Gif
 import com.cvut.arfittingroom.draw.model.element.impl.Image
 import com.cvut.arfittingroom.draw.model.element.strategy.PathCreationStrategy
@@ -324,15 +325,19 @@ class MaskEditorFragment : Fragment() {
             Log.println(Log.ERROR, null, "Activity does not implement ResourceListener")
             return
         }
+        drawView.stopAnimation()
         drawView.layerManager.setAllGifsToStaticMode()
         listener.showMainLayout()
     }
 
     fun clearAll() {
-        deleteTempFiles(requireContext())
-        if (::drawView.isInitialized) {
-            drawView.clearCanvas()
-            layersMenuFragment.updateLayersButtons(drawView.layerManager.getNumOfLayers())
+        editorStateTO = null
+        if (isAdded) {
+            deleteTempFiles(requireContext())
+            if (::drawView.isInitialized) {
+                drawView.clearCanvas()
+                layersMenuFragment.updateLayersButtons(drawView.layerManager.getNumOfLayers())
+            }
         }
     }
 
@@ -383,7 +388,7 @@ class MaskEditorFragment : Fragment() {
             emptyMap()
         }
 
-        var remainingDownloads = elementsMap.values.count { it is Image || it is Gif }
+        var remainingDownloads = elementsMap.values.count { it is Image || it is Gif || it is Curve && it.strokeTextureRef.isNotEmpty()}
 
         val onDownloadComplete = {
             remainingDownloads--
@@ -424,7 +429,7 @@ class MaskEditorFragment : Fragment() {
                 }
 
                 drawView.layerManager.deleteLayers()
-                drawView.layerManager.layers.addAll(layersList.filterNotNull())
+                drawView.layerManager.layers.addAll(layersList)
 
                 if (errorMessages.isNotEmpty()) {
                     StyleableToast.makeText(
@@ -444,6 +449,11 @@ class MaskEditorFragment : Fragment() {
             } else if (it is Gif) {
                 imageMenuFragment.downloadGif(it.resourceRef, onDownloadComplete) { gifDrawable, _ ->
                     it.setDrawable(gifDrawable)
+                }
+            }
+            else if (it is Curve && it.strokeTextureRef.isNotEmpty()) {
+                imageMenuFragment.downloadImage(it.strokeTextureRef, onDownloadComplete) { bitmap, _ ->
+                    it.setTextureBitmap(bitmap)
                 }
             }
         }

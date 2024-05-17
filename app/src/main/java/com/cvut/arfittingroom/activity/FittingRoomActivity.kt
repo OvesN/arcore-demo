@@ -4,6 +4,7 @@ import android.app.ActivityManager
 import android.app.AlertDialog
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -41,6 +42,7 @@ import com.cvut.arfittingroom.model.PREVIEW_COLLECTION
 import com.cvut.arfittingroom.model.to.LookTO
 import com.cvut.arfittingroom.model.to.MakeupTO
 import com.cvut.arfittingroom.model.to.ModelTO
+import com.cvut.arfittingroom.module.GlideApp
 import com.cvut.arfittingroom.service.StateService
 import com.cvut.arfittingroom.utils.BitmapUtil.combineBitmaps
 import com.cvut.arfittingroom.utils.FileUtil.deleteTempFiles
@@ -74,6 +76,7 @@ import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.lang.Exception
 import java.util.UUID
+import java.util.concurrent.CountDownLatch
 import javax.inject.Inject
 
 class FittingRoomActivity :
@@ -229,7 +232,10 @@ class FittingRoomActivity :
             }
 
             if (lookTO.isAnimated) {
-                downloadLookFrames(lookTO.lookId)
+                downloadLookFrames(lookTO.lookId) { textures ->
+                    gifTextures.addAll(textures)
+                    startAnimation()
+                }
             } else {
                 downloadLookTextureAndApply(lookTO.lookId)
             }
@@ -345,7 +351,7 @@ class FittingRoomActivity :
         }
     }
 
-    private fun downloadLookFrames(lookId: String) {
+    private fun downloadLookFrames(lookId: String, onComplete: ( List<Texture> ) -> Unit){
         val ref =
             try {
                 storage.getReference("$LOOKS_COLLECTION/$lookId/")
@@ -353,8 +359,12 @@ class FittingRoomActivity :
                 StyleableToast.makeText(this, e.message, R.style.mytoast).show()
                 return
             }
+
         ref.listAll().addOnSuccessListener { listResult ->
             val amount = listResult.items.size
+            val latch = CountDownLatch(amount)
+            val downloadedTextures: MutableList<Texture?> = MutableList(amount) { null }
+
             repeat(amount) { index ->
                 val fileRef =
                     storage.getReference("$LOOKS_COLLECTION/$lookId/${MASK_FRAME_FILE_NAME}_$index")
@@ -363,22 +373,32 @@ class FittingRoomActivity :
                         .setSource(applicationContext, uri)
                         .build()
                         .thenAccept { texture ->
-                            gifTextures.add(texture)
-
-                            if (index == amount - 1) {
-                                startAnimation()
-                            }
+                            downloadedTextures[index] =  texture
+                            latch.countDown()
                         }
                         .exceptionally { throwable ->
                             Log.println(
                                 Log.ERROR,
                                 null,
-                                "Error creating texture for frame $index: $throwable",
+                                "Error creating texture for frame $index: $throwable"
                             )
+                            latch.countDown()
                             null
                         }
+                }.addOnFailureListener {
+                    Log.println(
+                        Log.ERROR,
+                        null,
+                        "Error downloading URL for frame $index"
+                    )
+                    latch.countDown() // Ensure latch is decremented on URL download failure
                 }
             }
+
+            Thread {
+                latch.await()
+                onComplete(downloadedTextures.filterNotNull())
+            }.start()
         }
     }
 
@@ -489,6 +509,7 @@ class FittingRoomActivity :
                             arSceneView,
                             MASK_TEXTURE_SLOT,
                         )
+                        Log.println(Log.INFO, "animaton", "frame $frameCounter drawn")
                         frameCounter = (frameCounter + 1) % gifTextures.size
                     }
 
