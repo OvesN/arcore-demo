@@ -520,10 +520,14 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                         is Repaintable -> selectedElement.paint.color
                         else -> paintOptions.color
                     }
+                    val style  = when (selectedElement) {
+                    is Repaintable -> selectedElement.paint.style
+                    else -> paintOptions.style
+                }
                     showColorPickerDialog(
                         context,
                         initialColor,
-                        fill = paintOptions.style == Paint.Style.FILL,
+                        fill = style == Paint.Style.FILL,
                         shouldShowFillCheckbox = true,
                         shouldShowPipette = true,
                         onPipetteSelected = { showPipetteView() }
