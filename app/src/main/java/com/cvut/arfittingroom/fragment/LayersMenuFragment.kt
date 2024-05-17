@@ -2,6 +2,7 @@ package com.cvut.arfittingroom.fragment
 
 import android.graphics.Typeface
 import android.os.Bundle
+import android.provider.ContactsContract.CommonDataKinds.Im
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -58,7 +59,7 @@ class LayersMenuFragment(private val drawView: DrawView) : Fragment() {
         }
 
         // This will block the touch event so it will not propagate to draw view
-        view.findViewById<LinearLayout>(R.id.layers_menu_layout).setOnTouchListener{ v, event ->
+        view.findViewById<LinearLayout>(R.id.layers_menu_layout).setOnTouchListener { v, event ->
             true
         }
 
@@ -92,9 +93,11 @@ class LayersMenuFragment(private val drawView: DrawView) : Fragment() {
             setIsVisibleButton(layerIndex)
 
             if (drawView.layerManager.isVisible(layerIndex)) {
-                StyleableToast.makeText(requireContext(), "Layer is visible now", R.style.mytoast).show()
+                StyleableToast.makeText(requireContext(), "Layer is visible now", R.style.mytoast)
+                    .show()
             } else {
-                StyleableToast.makeText(requireContext(), "Layer is invisible now", R.style.mytoast).show()
+                StyleableToast.makeText(requireContext(), "Layer is invisible now", R.style.mytoast)
+                    .show()
             }
         }
     }
@@ -145,9 +148,11 @@ class LayersMenuFragment(private val drawView: DrawView) : Fragment() {
 
     private fun setIsVisibleButton(layerIndex: Int) {
         if (drawView.layerManager.isVisible(layerIndex)) {
-            isVisibleButton.background = (ContextCompat.getDrawable(requireContext(), R.drawable.visible_layer))
+            isVisibleButton.background =
+                (ContextCompat.getDrawable(requireContext(), R.drawable.visible_layer))
         } else {
-            isVisibleButton.background = (ContextCompat.getDrawable(requireContext(), R.drawable.invisible_layer))
+            isVisibleButton.background =
+                (ContextCompat.getDrawable(requireContext(), R.drawable.invisible_layer))
         }
     }
 }

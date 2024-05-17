@@ -1,6 +1,7 @@
 package com.cvut.arfittingroom.fragment
 
 import android.app.AlertDialog
+import android.content.res.ColorStateList
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Paint
@@ -17,6 +18,7 @@ import androidx.fragment.app.Fragment
 import com.cvut.arfittingroom.ARFittingRoomApplication
 import com.cvut.arfittingroom.R
 import com.cvut.arfittingroom.activity.UIChangeListener
+import com.cvut.arfittingroom.draw.DrawHistoryHolder
 import com.cvut.arfittingroom.draw.DrawView
 import com.cvut.arfittingroom.draw.Layer
 import com.cvut.arfittingroom.draw.model.element.impl.Curve
@@ -36,7 +38,7 @@ import io.github.muddz.styleabletoast.StyleableToast
 import java.util.LinkedList
 import javax.inject.Inject
 
-class MaskEditorFragment : Fragment() {
+class MaskEditorFragment : Fragment(), DrawHistoryHolder.HistoryChangeListener {
     private var backgroundBitmap: Bitmap? = null
     var editorStateTO: EditorStateTO? = null
     private var isLayersMenuShown = false
@@ -176,11 +178,16 @@ class MaskEditorFragment : Fragment() {
             }
         }
 
+        DrawHistoryHolder.setHistoryChangeListener(this)
+        updateUndoRedoButtons()
+
         view.findViewById<ImageButton>(R.id.button_redo).setOnClickListener {
             drawView.redo()
+            updateUndoRedoButtons()
         }
         view.findViewById<ImageButton>(R.id.button_undo).setOnClickListener {
             drawView.undo()
+            updateUndoRedoButtons()
         }
 
         view.findViewById<Button>(R.id.draw_button).setOnClickListener {
@@ -489,7 +496,34 @@ class MaskEditorFragment : Fragment() {
         drawView.invalidate()
     }
 
+    private fun updateUndoRedoButtons() {
+        val isRedoActive = DrawHistoryHolder.getUndoneActionsSize() != 0
+        val isUndoActive = DrawHistoryHolder.getHistorySize() != 0
+
+        val redo = requireView().findViewById<ImageButton>(R.id.button_redo)
+
+        if (isRedoActive) {
+           redo.imageTintList = ColorStateList.valueOf(Color.WHITE)
+        }
+        else {
+            redo.imageTintList = ColorStateList.valueOf(Color.GRAY)
+        }
+
+        val undo = requireView().findViewById<ImageButton>(R.id.button_undo)
+
+        if (isUndoActive){
+            undo.imageTintList = ColorStateList.valueOf(Color.WHITE)
+        }
+        else {
+            undo.imageTintList = ColorStateList.valueOf(Color.GRAY)
+        }
+    }
+
     companion object {
         const val MAKEUP_EDITOR_FRAGMENT_TAG = "MakeupEditorFragmentTag"
+    }
+
+    override fun onHistoryChanged() {
+        updateUndoRedoButtons()
     }
 }

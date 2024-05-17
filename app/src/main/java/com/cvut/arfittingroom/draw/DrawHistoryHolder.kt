@@ -3,10 +3,20 @@ package com.cvut.arfittingroom.draw
 import com.cvut.arfittingroom.draw.command.Command
 import java.util.LinkedList
 
-const val MAX_NUMBER_OF_ACTIONS_HOLD_IN_HISTORY = 50
+private const val MAX_NUMBER_OF_ACTIONS_HOLD_IN_HISTORY = 50
 object DrawHistoryHolder {
     private val globalHistory = LinkedList<Command>()
     private val undoneActions = LinkedList<Command>()
+
+    private var historyChangeListener: HistoryChangeListener? = null
+
+    interface HistoryChangeListener {
+        fun onHistoryChanged()
+    }
+
+    fun setHistoryChangeListener(listener: HistoryChangeListener) {
+        historyChangeListener = listener
+    }
 
     fun undo(): Command? {
         if (globalHistory.isEmpty()) {
@@ -19,6 +29,9 @@ object DrawHistoryHolder {
         undoneActions.add(lastAction)
 
         lastAction.revert()
+
+        notifyHistoryChanged()
+
         return lastAction
     }
 
@@ -34,6 +47,8 @@ object DrawHistoryHolder {
 
         lastUndoneAction.execute()
 
+        notifyHistoryChanged()
+
         return lastUndoneAction
     }
 
@@ -44,12 +59,23 @@ object DrawHistoryHolder {
         globalHistory.add(command)
         undoneActions.clear()
         command.execute()
+
+        notifyHistoryChanged()
     }
 
     fun clearHistory() {
         globalHistory.clear()
         undoneActions.clear()
+
+        notifyHistoryChanged()
     }
 
     fun isNotEmpty() = globalHistory.isNotEmpty()
+
+    fun getHistorySize() = globalHistory.size
+    fun getUndoneActionsSize() = undoneActions.size
+
+    private fun notifyHistoryChanged() {
+        historyChangeListener?.onHistoryChanged()
+    }
 }
