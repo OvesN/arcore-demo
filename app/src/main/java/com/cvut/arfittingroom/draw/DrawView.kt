@@ -2,7 +2,6 @@ package com.cvut.arfittingroom.draw
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.BlurMaskFilter
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Matrix
@@ -533,7 +532,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                 selectedElement = null
             }
 
-            EElementEditAction.MOVE_UP -> {
+            EElementEditAction.LAYER_UP -> {
                 val command =
                     layerManager.moveElementUp(
                         element,
@@ -543,7 +542,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                 selectedElement = null
             }
 
-            EElementEditAction.MOVE_DOWN -> {
+            EElementEditAction.LAYER_DOWN -> {
                 val command =
                     layerManager.moveElementDown(
                         element,
@@ -553,7 +552,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                 selectedElement = null
             }
             // FIXME do not work, history do not work
-            EElementEditAction.MOVE_TO -> {
+            EElementEditAction.TO_LAYER -> {
                 element.setSelected(false)
                 selectedElement = null
                 // TODO open menu with layers
@@ -734,7 +733,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         }
 
         layerManager.drawLayers(canvas, paintOptions)
-        uiDrawer.drawSelectedElementEditIcons(canvas, selectedElement, isInElementMenuMode)
+        uiDrawer.drawSelectedElementEditIcons(canvas, selectedElement, isInElementMenuMode, canvasScaleFactor)
 
         if (shouldDrawBackground) {
             uiDrawer.drawFaceTextureImage(canvas)

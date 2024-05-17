@@ -42,7 +42,6 @@ class UIDrawer(private val context: Context) {
         }
     private val editElementIcons: HashMap<EElementEditAction, Bitmap> = hashMapOf()
     private val editElementIconsBounds: HashMap<EElementEditAction, RectF> = hashMapOf()
-    private var menuBitmap: Bitmap? = null
     private var faceTextureBitmap: Bitmap? = null
     private var backgroundBitmap: Bitmap? = null
     private var backgroundBitmapMatrix = Matrix()
@@ -78,8 +77,6 @@ class UIDrawer(private val context: Context) {
         viewWidth = width
         viewHeight = height
         initializeDimensions()
-
-        menuBitmap = prepareMenuBitmap()
         faceTextureVector =
             VectorDrawableCompat.create(context.resources, R.drawable.facemesh, null)
         faceTextureBitmap = faceTextureVector?.toBitmap()
@@ -97,36 +94,53 @@ class UIDrawer(private val context: Context) {
         menuItemSpacing = viewHeight * 0.025f * 1.3f
     }
 
-    private fun prepareMenuBitmap(): Bitmap {
+    private fun createMenuBitmap(canvasScaleFactor: Float): Bitmap {
         val menuX = 0f
         val menuY = 0f
+        val scaledMenuWidth = menuWidth / canvasScaleFactor
+        val scaledMenuHeight = menuHeight / canvasScaleFactor
 
-        // Draw the background of the menu
-        val rect = RectF(menuX, menuY, menuX + menuWidth, menuY + menuHeight)
-        val bitmap =
-            Bitmap.createBitmap(menuWidth.toInt(), menuHeight.toInt(), Bitmap.Config.ARGB_8888)
-
+        val rect = RectF(menuX, menuY, menuX + scaledMenuWidth, menuY + scaledMenuHeight)
+        val bitmap = Bitmap.createBitmap(
+            scaledMenuWidth.toInt(),
+            scaledMenuHeight.toInt(),
+            Bitmap.Config.ARGB_8888
+        )
         val canvas = Canvas(bitmap)
-        canvas.drawRoundRect(rect, cornerRadius, cornerRadius, menuPaint)
+
+        // Scale menu paint properties
+        val scaledCornerRadius = cornerRadius / canvasScaleFactor
+        val scaledTextSize = textSize / canvasScaleFactor
+        val scaledTextPadding = textPadding / canvasScaleFactor
+        val scaledLineSpacing = lineSpacing / canvasScaleFactor
+        val scaledMenuItemSpacing = menuItemSpacing / canvasScaleFactor
+
+        textPaint.textSize = scaledTextSize
+
+        canvas.drawRoundRect(rect, scaledCornerRadius, scaledCornerRadius, menuPaint)
 
         // Draw menu items
-        val menuItems = listOf("Move up", "Move down", "Move to", "Change color")
-        var textY = menuY + textPadding + textSize
-        for ((index, item) in menuItems.withIndex()) {
-            // Draw text
-            canvas.drawText(item, menuX + textPadding, textY, textPaint)
+        val menuItems = listOf(
+            EElementEditAction.LAYER_UP.actionName,
+            EElementEditAction.LAYER_DOWN.actionName,
+            EElementEditAction.TO_LAYER.actionName,
+            EElementEditAction.CHANGE_COLOR.actionName
+        )
 
-            // Draw line if not the last item
+        var textY = menuY + scaledTextPadding + scaledTextSize
+        for ((index, item) in menuItems.withIndex()) {
+            canvas.drawText(item, menuX + scaledTextPadding, textY, textPaint)
+
             if (index < menuItems.size - 1) {
                 canvas.drawLine(
-                    menuX + textPadding,
-                    textY + lineSpacing,
-                    menuX + menuWidth - textPadding,
-                    textY + lineSpacing,
+                    menuX + scaledTextPadding,
+                    textY + scaledLineSpacing,
+                    menuX + scaledMenuWidth - scaledTextPadding,
+                    textY + scaledLineSpacing,
                     linePaint,
                 )
             }
-            textY += menuItemSpacing
+            textY += scaledMenuItemSpacing
         }
 
         return bitmap
@@ -156,6 +170,7 @@ class UIDrawer(private val context: Context) {
         canvas: Canvas,
         selectedElement: Element?,
         isInElementMenuMode: Boolean,
+        canvasScaleFactor: Float
     ) {
         selectedElement?.let { element ->
             // Do not draw anything if element was deselected
@@ -165,75 +180,97 @@ class UIDrawer(private val context: Context) {
             }
 
             val boundingBox = element.boundingBox
+            val iconSize = 48f
+            val scaledIconSize = iconSize / canvasScaleFactor
 
             // Menu Icon (Top Right Corner)
             editElementIcons[EElementEditAction.MENU]?.let { icon ->
                 val x = boundingBox.topRightCornerCoor.x
-                val y = boundingBox.topRightCornerCoor.y - icon.height
-                canvas.drawBitmap(icon, x, y, null)
+                val y = boundingBox.topRightCornerCoor.y - scaledIconSize
+                val scaledIcon = Bitmap.createScaledBitmap(
+                    icon,
+                    scaledIconSize.toInt(),
+                    scaledIconSize.toInt(),
+                    true
+                )
+                canvas.drawBitmap(scaledIcon, x, y, null)
                 editElementIconsBounds[EElementEditAction.MENU] =
-                    RectF(x, y, x + icon.width, y + icon.height)
+                    RectF(x, y, x + scaledIconSize, y + scaledIconSize)
             }
 
             // Scale Icon (Bottom Right Corner)
             editElementIcons[EElementEditAction.SCALE]?.let { icon ->
                 val x = boundingBox.bottomRightCornerCoor.x
                 val y = boundingBox.bottomRightCornerCoor.y
-                canvas.drawBitmap(icon, x, y, null)
-                editElementIconsBounds[EElementEditAction.SCALE] =
-                    RectF(x, y, x + icon.width, y + icon.height)
+                val scaledIcon = Bitmap.createScaledBitmap(
+                    icon,
+                    scaledIconSize.toInt(),
+                    scaledIconSize.toInt(),
+                    true
+                )
+                canvas.drawBitmap(scaledIcon, x, y, null)
+                editElementIconsBounds[EElementEditAction.MENU] =
+                    RectF(x, y, x + scaledIconSize, y + scaledIconSize)
             }
 
             // Rotate Icon (Bottom Left Corner)
             editElementIcons[EElementEditAction.ROTATE]?.let { icon ->
                 val x = boundingBox.bottomLeftCornerCoor.x - icon.width
                 val y = boundingBox.bottomLeftCornerCoor.y
-                canvas.drawBitmap(icon, x, y, null)
-                editElementIconsBounds[EElementEditAction.ROTATE] =
-                    RectF(x, y, x + icon.width, y + icon.height)
+                val scaledIcon = Bitmap.createScaledBitmap(
+                    icon,
+                    scaledIconSize.toInt(),
+                    scaledIconSize.toInt(),
+                    true
+                )
+                canvas.drawBitmap(scaledIcon, x, y, null)
+                editElementIconsBounds[EElementEditAction.MENU] =
+                    RectF(x, y, x + scaledIconSize, y + scaledIconSize)
             }
 
             // Delete Icon (Top Left Corner)
             editElementIcons[EElementEditAction.DELETE]?.let { icon ->
                 val x = boundingBox.topLeftCornerCoor.x - icon.width
                 val y = boundingBox.topLeftCornerCoor.y - icon.height
-                canvas.drawBitmap(icon, x, y, null)
-                editElementIconsBounds[EElementEditAction.DELETE] =
-                    RectF(x, y, x + icon.width, y + icon.height)
+                val scaledIcon = Bitmap.createScaledBitmap(
+                    icon,
+                    scaledIconSize.toInt(),
+                    scaledIconSize.toInt(),
+                    true
+                )
+                canvas.drawBitmap(scaledIcon, x, y, null)
+                editElementIconsBounds[EElementEditAction.MENU] =
+                    RectF(x, y, x + scaledIconSize, y + scaledIconSize)
             }
 
             if (isInElementMenuMode) {
-                if (menuBitmap == null) {
-                    return
-                }
-                menuBitmap?.let {
-                    canvas.drawBitmap(
-                        it,
-                        boundingBox.topRightCornerCoor.x - menuBitmap!!.width,
-                        boundingBox.topRightCornerCoor.y,
-                        null,
-                    )
-                }
+                val menuBitmap = createMenuBitmap(canvasScaleFactor)
+                canvas.drawBitmap(
+                    menuBitmap,
+                    boundingBox.topRightCornerCoor.x - menuBitmap.width,
+                    boundingBox.topRightCornerCoor.y,
+                    null,
+                )
+
 
                 // Initial menu item Y position
                 var itemY = boundingBox.topRightCornerCoor.y + textPadding
-
-                val menuX = boundingBox.topRightCornerCoor.x - menuBitmap!!.width
+                val menuX = boundingBox.topRightCornerCoor.x - menuBitmap.width
 
                 // Defining RectF for each menu item
-                editElementIconsBounds[EElementEditAction.MOVE_UP] =
+                editElementIconsBounds[EElementEditAction.LAYER_UP] =
                     RectF(menuX, itemY, menuX + menuWidth, itemY + textSize)
 
                 // canvas.drawRect(RectF(menuX, itemY, menuX + menuWidth, itemY + textSize), Paint().apply { color = Color.BLUE })
                 itemY += textSize + lineSpacing  // Increment Y position for the next item
 
-                editElementIconsBounds[EElementEditAction.MOVE_DOWN] =
+                editElementIconsBounds[EElementEditAction.LAYER_DOWN] =
                     RectF(menuX, itemY, menuX + menuWidth, itemY + textSize)
                 // canvas.drawRect(RectF(menuX, itemY, menuX + menuWidth, itemY + textSize), Paint().apply { color = Color.BLACK })
 
                 itemY += textSize + lineSpacing
 
-                editElementIconsBounds[EElementEditAction.MOVE_TO] =
+                editElementIconsBounds[EElementEditAction.TO_LAYER] =
                     RectF(menuX, itemY, menuX + menuWidth, itemY + textSize)
 
                 // canvas.drawRect(RectF(menuX, itemY, menuX + menuWidth, itemY + textSize), Paint().apply { color = Color.YELLOW })
@@ -244,9 +281,9 @@ class UIDrawer(private val context: Context) {
 
                 // canvas.drawRect(RectF(menuX, itemY, menuX + menuWidth, itemY + textSize), Paint().apply { color = Color.RED })
             } else {
-                editElementIconsBounds.remove(EElementEditAction.MOVE_UP)
-                editElementIconsBounds.remove(EElementEditAction.MOVE_DOWN)
-                editElementIconsBounds.remove(EElementEditAction.MOVE_TO)
+                editElementIconsBounds.remove(EElementEditAction.LAYER_UP)
+                editElementIconsBounds.remove(EElementEditAction.LAYER_DOWN)
+                editElementIconsBounds.remove(EElementEditAction.TO_LAYER)
                 editElementIconsBounds.remove(EElementEditAction.CHANGE_COLOR)
             }
         }
@@ -290,7 +327,12 @@ class UIDrawer(private val context: Context) {
 
         val crossCenterY = lastTouchY - verticalOffset
 
-        canvas.drawCircle(lastTouchX, crossCenterY, transformedRadius + strokeExtra, strokePaint)
+        canvas.drawCircle(
+            lastTouchX,
+            crossCenterY,
+            transformedRadius + strokeExtra,
+            strokePaint
+        )
         canvas.drawCircle(
             lastTouchX, crossCenterY, transformedRadius, pipettePaint
         )
