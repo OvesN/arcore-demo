@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="300dp"
+    android:layout_height="wrap_content"
+    android:background="#000000"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+  android:padding="10dp"
+    >
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:text="@string/this_look_is_created_by"
+        android:textAllCaps="false"
+        android:textColor="#FFFFFF"
+        android:textSize="20sp"
+        android:paddingBottom="10dp"/>
+
+    <TextView
+        android:id="@+id/look_author_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:textAllCaps="false"
+        android:textColor="#FFFFFF"
+        android:textSize="20sp"
+        android:paddingBottom="10dp"/>
+
+    <CheckBox
+        android:id="@+id/is_public_checkbox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start"
+        android:text="@string/make_it_public"
+        android:paddingBottom="10dp"
+        android:paddingTop="10dp"
+        android:textAllCaps="false"
+        android:visibility="gone"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:background="@null"
+        android:gravity="center_vertical">
+
+        <Space
+            android:layout_width="40dp"
+            android:layout_height="10dp"
+            android:layout_weight="0.7" />
+        <Button
+            android:id="@+id/cancel_popup_button"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:layout_weight="0.8"
+            android:background="@drawable/small_button"
+            android:text="@string/cancel"
+            android:textAllCaps="false" />
+
+        <Space
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:layout_weight="0.5" />
+
+        <Button
+            android:id="@+id/delete_look_button"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:layout_weight="0.8"
+            android:background="@drawable/small_button"
+            android:backgroundTint="@color/colorActive"
+            android:text="@string/delete"
+            android:textAllCaps="false" />
+
+        <Space
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:layout_weight="0.5" />
+
+        <ImageButton
+            android:src="@drawable/share"
+            android:id="@+id/share_button"
+            android:scaleType="fitCenter"
+            android:background="@null"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_weight="0.2"
+
+            android:textAllCaps="false" />
+    </LinearLayout>
+
+</LinearLayout>
