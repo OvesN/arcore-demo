@@ -212,9 +212,8 @@ class FittingRoomActivity :
         if (DrawHistoryHolder.isNotEmpty()) {
             showWarningDialog(lookTO)
         } else {
-            maskEditorFragment.editorStateTO = lookTO.editorState
-
             stopAnimation()
+            maskEditorFragment.editorStateTO = lookTO.editorState
             stateService.clearAll()
 
             accessoriesMenuFragment.applyState(lookTO.appliedModels)
@@ -500,7 +499,9 @@ class FittingRoomActivity :
     }
 
     private fun startAnimation() {
-        if (gifRunnable == null) {
+        if (gifRunnable != null) {
+            stopAnimation()
+        }
             gifRunnable =
                 Runnable {
                     if (gifTextures.size > frameCounter) {
@@ -509,17 +510,18 @@ class FittingRoomActivity :
                             arSceneView,
                             MASK_TEXTURE_SLOT,
                         )
-                        Log.println(Log.INFO, "animaton", "frame $frameCounter drawn")
+                        Log.println(Log.INFO, "animaton", "Frame $frameCounter drawn")
                         frameCounter = (frameCounter + 1) % gifTextures.size
                     }
-
                     gifRunnable?.let { handler.postDelayed(it, frameDelay) }
                 }
-        }
+
         gifRunnable?.let { handler.post(it) }
     }
 
     private fun stopAnimation() {
+        frameCounter = 0
+        Log.println(Log.INFO, "animaton", "Stop animation")
         gifTextures.clear()
         gifRunnable?.let { handler.removeCallbacks(it) }
         gifRunnable = null
@@ -590,8 +592,6 @@ class FittingRoomActivity :
                     MaskEditorFragment.MAKEUP_EDITOR_FRAGMENT_TAG
                 )
                 .commit()
-            // Prepare layout in advance and render with delay
-            // FIXME
             container.postDelayed({
                 container.visibility = View.VISIBLE
                 findViewById<View>(R.id.top_ui).visibility = View.GONE
@@ -675,8 +675,6 @@ class FittingRoomActivity :
                     "Look saved successfully",
                     R.style.mytoast,
                 ).show()
-
-                looksOptionsFragment.fetchLooks()
             }
             .addOnFailureListener { ex -> Log.println(Log.ERROR, null, "onFailure: $ex") }
     }
@@ -716,6 +714,9 @@ class FittingRoomActivity :
         val uploadTask =
             ref.putStream(ByteArrayInputStream(stream.toByteArray()))
 
+        uploadTask.addOnCompleteListener{
+            looksOptionsFragment.fetchLooks()
+        }
         uploadTask.addOnFailureListener {
             StyleableToast.makeText(applicationContext, it.message, R.style.mytoast).show()
         }

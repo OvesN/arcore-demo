@@ -349,6 +349,7 @@ class MaskEditorFragment : Fragment() {
     }
 
     fun serializeEditorState(): EditorStateTO {
+        if (!::mapper.isInitialized) return EditorStateTO()
         mapper.setDimensions(drawView.width, drawView.height)
 
         val layers = drawView.layerManager.layers
