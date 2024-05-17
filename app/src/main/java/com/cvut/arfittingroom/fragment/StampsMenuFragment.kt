@@ -136,4 +136,13 @@ class StampsMenuFragment(
         createStampMenu(requireView())
     }
 
+
+    fun checkIfStampSelected() {
+        if (selectedViewId != 0) {
+            drawView.setStampMode()
+        }
+        else {
+            drawView.setEditingMode()
+        }
+    }
 }

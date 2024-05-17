@@ -250,6 +250,14 @@ class BrushesMenuFragment(private val drawView: DrawView) : Fragment() {
         }
     }
 
+    fun checkIfBrushSelected() {
+        if (selectedViewId == 0 && isInitialized) {
+            drawView.setEditingMode()
+        }
+        else {
+            drawView.setBrushMode()
+        }
+    }
 
 }
 

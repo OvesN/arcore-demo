@@ -734,14 +734,20 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     fun setEditingMode() {
         editorMode = EEditorMode.NONE
-        stampType = null
         TexturedBrushDrawer.resetBitmaps()
     }
 
+    fun setBrushMode() {
+        editorMode = EEditorMode.BRUSH
+    }
+
+    fun setStampMode() {
+        editorMode = EEditorMode.STAMP
+    }
 
     fun setStamp(pathCreationStrategy: PathCreationStrategy) {
-        stampType = pathCreationStrategy
         editorMode = EEditorMode.STAMP
+        stampType = pathCreationStrategy
     }
 
     override fun onDraw(canvas: Canvas) {

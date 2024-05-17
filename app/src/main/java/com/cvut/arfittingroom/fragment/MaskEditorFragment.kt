@@ -297,6 +297,8 @@ class MaskEditorFragment : Fragment(), HistoryChangeListener, ColorChangeListene
         requireActivity().supportFragmentManager.beginTransaction()
             .show(brushesMenuFragment)
             .commit()
+
+        brushesMenuFragment.checkIfBrushSelected()
     }
 
     private fun showStampMenu(button: View) {
@@ -306,6 +308,8 @@ class MaskEditorFragment : Fragment(), HistoryChangeListener, ColorChangeListene
         requireActivity().supportFragmentManager.beginTransaction()
             .show(stampsMenuFragment)
             .commit()
+
+        stampsMenuFragment.checkIfStampSelected()
     }
 
     private fun showImageMenu(button: View) {
