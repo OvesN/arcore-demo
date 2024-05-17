@@ -793,6 +793,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                     strokeJoin = Paint.Join.ROUND
                     style = Paint.Style.STROKE
                 },
+                outerRadius = paintOptions.strokeWidth,
                 bitmapTexture = TexturedBrushDrawer.originalBitmap,
                 strokeTextureRef = paintOptions.strokeTextureRef,
                 blurRadius = paintOptions.blurRadius,

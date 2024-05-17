@@ -52,7 +52,7 @@ class Curve(
             paint.apply { maskFilter = BlurMaskFilter(blurRadius, blurType) }
         }
 
-        boundingBox = updateBoundingBoxAndCenterDemensions()
+        boundingBox = updateBoundingBoxAndCenterDimensions()
 
         bitmapTexture?.let {
             setTextureBitmap(it)
@@ -175,13 +175,20 @@ class Curve(
         return matrix
     }
 
-    private fun updateBoundingBoxAndCenterDemensions(): BoundingBox {
+    private fun updateBoundingBoxAndCenterDimensions(): BoundingBox {
         val bounds = RectF()
         path.computeBounds(bounds, true)
 
         centerX = bounds.centerX()
         centerY = bounds.centerY()
-        outerRadius = max(bounds.width(), bounds.height()) / 2
+
+        val boundsCenter = max(bounds.width(), bounds.height()) / 2
+
+        // If outer radius is 1 it means that dot was drawn, so
+        // outer radius should be adjusted to the stroke size
+        if (boundsCenter > 1) {
+            outerRadius = boundsCenter
+        }
 
         originalCenterX = centerX
         originalCenterY = centerY
