@@ -29,6 +29,7 @@ import com.cvut.arfittingroom.model.to.drawhistory.LayerTO
 import com.cvut.arfittingroom.service.Mapper
 import com.cvut.arfittingroom.utils.FileUtil.deleteTempFiles
 import com.cvut.arfittingroom.utils.UIUtil
+import com.cvut.arfittingroom.utils.UIUtil.showEditorSubmenuDialog
 import com.google.firebase.storage.FirebaseStorage
 import com.lukelorusso.verticalseekbar.VerticalSeekBar
 import io.github.muddz.styleabletoast.StyleableToast
@@ -164,7 +165,7 @@ class MaskEditorFragment : Fragment() {
                 fill = drawView.paintOptions.style == Paint.Style.FILL,
                 shouldShowFillCheckbox = true,
                 shouldShowPipette = true,
-                onPipetteSelected = {drawView.showPipetteView()}
+                onPipetteSelected = { drawView.showPipetteView() }
             ) { envelopColor, fill ->
                 drawView.setColor(
                     envelopColor,
@@ -195,7 +196,16 @@ class MaskEditorFragment : Fragment() {
         }
 
         view.findViewById<ImageButton>(R.id.button_menu).setOnClickListener {
-            imageMenuFragment.uploadImage()
+            showEditorSubmenuDialog(
+                requireContext(), onAddImage = { imageMenuFragment.uploadImage() },
+                onChangeBackground = { shouldShowBackground ->
+                    drawView.setFaceGridVisibility(
+                        shouldShowBackground
+                    )
+                    drawView.invalidate()
+                },
+                isBackgroundShown = drawView.getFaceGridVisibility()
+            )
         }
 
         slider.setOnReleaseListener {
@@ -389,7 +399,8 @@ class MaskEditorFragment : Fragment() {
             emptyMap()
         }
 
-        var remainingDownloads = elementsMap.values.count { it is Image || it is Gif || it is Curve && it.strokeTextureRef.isNotEmpty()}
+        var remainingDownloads =
+            elementsMap.values.count { it is Image || it is Gif || it is Curve && it.strokeTextureRef.isNotEmpty() }
 
         val onDownloadComplete = {
             remainingDownloads--
@@ -451,12 +462,17 @@ class MaskEditorFragment : Fragment() {
                     it.bitmap = bitmap
                 }
             } else if (it is Gif) {
-                imageMenuFragment.downloadGif(it.resourceRef, onDownloadComplete) { gifDrawable, _ ->
+                imageMenuFragment.downloadGif(
+                    it.resourceRef,
+                    onDownloadComplete
+                ) { gifDrawable, _ ->
                     it.setDrawable(gifDrawable)
                 }
-            }
-            else if (it is Curve && it.strokeTextureRef.isNotEmpty()) {
-                imageMenuFragment.downloadImage(it.strokeTextureRef, onDownloadComplete) { bitmap, _ ->
+            } else if (it is Curve && it.strokeTextureRef.isNotEmpty()) {
+                imageMenuFragment.downloadImage(
+                    it.strokeTextureRef,
+                    onDownloadComplete
+                ) { bitmap, _ ->
                     it.setTextureBitmap(bitmap)
                 }
             }
@@ -465,7 +481,7 @@ class MaskEditorFragment : Fragment() {
 
 
     private fun showProgressBar() {
-       progressBar.show()
+        progressBar.show()
     }
 
     private fun hideProgressBar() {

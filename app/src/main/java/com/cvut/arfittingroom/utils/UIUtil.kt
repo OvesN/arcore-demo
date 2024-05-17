@@ -28,6 +28,38 @@ object UIUtil {
             background = AppCompatResources.getDrawable(context, R.color.colorLightGrey)
         }
 
+    fun showEditorSubmenuDialog(
+        context: Context,
+        onAddImage: () -> Unit,
+        isBackgroundShown: Boolean,
+        onChangeBackground: (Boolean) -> Unit
+    ) {
+        val dialogView: View =
+            LayoutInflater.from(context).inflate(R.layout.popup_editor_submenu, null)
+
+        val checkBox = dialogView.findViewById<CheckBox>(R.id.show_face_grid_checkbox)
+        checkBox.isChecked = isBackgroundShown
+
+        val dialog = AlertDialog.Builder(context)
+            .setView(dialogView)
+            .create()
+
+        dialogView.findViewById<Button>(R.id.cancel_popup_button).setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialogView.findViewById<Button>(R.id.upload_image_button).setOnClickListener {
+            onAddImage()
+            dialog.dismiss()
+        }
+
+        dialog.setOnDismissListener {
+            onChangeBackground(checkBox.isChecked)
+        }
+        dialog.show()
+    }
+
+
     fun showDeleteLayerDialog(context: Context, onDelete: () -> Unit) {
         val dialogView: View =
             LayoutInflater.from(context).inflate(R.layout.popup_delete_layer, null)
@@ -47,7 +79,6 @@ object UIUtil {
 
         dialog.show()
     }
-
 
     fun showMoveToLayerDialog(
         context: Context,

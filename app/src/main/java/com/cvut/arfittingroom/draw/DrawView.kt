@@ -772,9 +772,9 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             canvasScaleFactor
         )
 
-        if (shouldDrawBackground) {
-            uiDrawer.drawFaceTextureImage(canvas)
-        }
+       if (shouldDrawBackground) {
+           uiDrawer.drawFaceTextureImage(canvas)
+       }
 
         if (editorMode == EEditorMode.PIPETTE) {
             pipetteSelectedColor = uiDrawer.drawPipette(
@@ -1024,6 +1024,12 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     fun applyBitmapBackground(bitmap: Bitmap?) {
         uiDrawer.setBackgroundBitmap(bitmap)
+    }
+
+    fun getFaceGridVisibility() = uiDrawer.shouldDrawGrid
+
+    fun setFaceGridVisibility(isVisible: Boolean) {
+        uiDrawer.shouldDrawGrid = isVisible
     }
 
 }

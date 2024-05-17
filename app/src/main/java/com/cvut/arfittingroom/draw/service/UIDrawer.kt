@@ -17,9 +17,9 @@ import com.cvut.arfittingroom.draw.model.enums.EElementEditAction
 import java.lang.IllegalArgumentException
 import kotlin.math.sqrt
 
-const val ELEMENT_MENU_ICON_SIZE = 70f
-const val MENU_SCALE_FACTOR = 1.5f
-const val ELEMENT_MENU_ICON_BOUNDS_SCALE_FACTOR = 2f
+private const val ELEMENT_MENU_ICON_SIZE = 70f
+private const val MENU_SCALE_FACTOR = 1.5f
+private const val ELEMENT_MENU_ICON_BOUNDS_SCALE_FACTOR = 2f
 
 class UIDrawer(private val context: Context) {
     private var menuWidth: Float = 0f
@@ -63,6 +63,7 @@ class UIDrawer(private val context: Context) {
     private var viewHeight: Int = 0
 
     private var selectedEditAction: EElementEditAction? = null
+    var shouldDrawGrid = true
 
     private fun prepareMatrix(bitmap: Bitmap?): Matrix {
         val bitmapWidth =
@@ -125,7 +126,9 @@ class UIDrawer(private val context: Context) {
     }
 
     fun drawFaceTextureImage(canvas: Canvas) {
-        faceTextureBitmap?.let { canvas.drawBitmap(it, faceTextureMatrix, null) }
+        if (shouldDrawGrid) {
+            faceTextureBitmap?.let { canvas.drawBitmap(it, faceTextureMatrix, null) }
+        }
     }
 
     fun drawSelectedElementEditIcons(

@@ -57,4 +57,6 @@
     <string name="move_element_to_layer">Move element to layer:</string>
     <string name="delete">Delete</string>
     <string name="delete_layer_this_action_cannot_be_undone">Delete layer? This action cannot be undone</string>
+    <string name="show_face_grid">Show face grid?</string>
+    <string name="upload_image_or_gif">Upload image (.png) or GIF</string>
 </resources>
