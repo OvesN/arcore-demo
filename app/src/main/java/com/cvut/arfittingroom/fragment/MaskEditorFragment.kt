@@ -393,7 +393,7 @@ class MaskEditorFragment : Fragment() {
 
         val onDownloadComplete = {
             remainingDownloads--
-            if (remainingDownloads == 0) {
+            if (remainingDownloads <= 0) {
                 hideProgressBar()
 
                 if (errorMessages.isNotEmpty()) {
@@ -443,6 +443,9 @@ class MaskEditorFragment : Fragment() {
         }
 
         elementsMap.values.forEach {
+            if (remainingDownloads == 0) {
+                onDownloadComplete()
+            }
             if (it is Image) {
                 imageMenuFragment.downloadImage(it.resourceRef, onDownloadComplete) { bitmap, _ ->
                     it.bitmap = bitmap
