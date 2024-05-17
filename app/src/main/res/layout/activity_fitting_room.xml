@@ -83,7 +83,6 @@
             app:layout_constraintBottom_toTopOf="@id/menu_buttons"
             app:layout_constraintHorizontal_bias="0.5"/>
 
-
         <LinearLayout
             android:id="@+id/menu_buttons"
             android:layout_width="wrap_content"
@@ -150,7 +149,15 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:srcCompat="@drawable/delete" />
-
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="invisible"
+        android:indeterminate="true"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="100dp" />
 
 </FrameLayout>

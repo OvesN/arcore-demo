@@ -13,6 +13,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.LinearLayout
+import android.widget.ProgressBar
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.cvut.arfittingroom.ARFittingRoomApplication
@@ -54,7 +55,8 @@ class MaskEditorFragment : Fragment(), DrawHistoryHolder.HistoryChangeListener {
     private lateinit var brushesMenuFragment: BrushesMenuFragment
     private lateinit var storage: FirebaseStorage
 
-    private lateinit var progressBar: AlertDialog
+    private lateinit var progressBarDialog: AlertDialog
+    private lateinit var progressBar: ProgressBar
 
     @Inject
     lateinit var strategies: Map<String, @JvmSuppressWildcards PathCreationStrategy>
@@ -77,7 +79,7 @@ class MaskEditorFragment : Fragment(), DrawHistoryHolder.HistoryChangeListener {
 
         val dialogView = LayoutInflater.from(context).inflate(R.layout.progress_dialog, null)
 
-        progressBar =
+        progressBarDialog =
             AlertDialog.Builder(context)
                 .setView(dialogView)
                 .create()
@@ -86,6 +88,7 @@ class MaskEditorFragment : Fragment(), DrawHistoryHolder.HistoryChangeListener {
         drawView.applyBitmapBackground(backgroundBitmap)
 
         sliderLayout = view.findViewById(R.id.stroke_size_layout)
+        progressBar = view.findViewById(R.id.progress_bar)
 
         // This will block the touch event so it will not propagate to draw view
         sliderLayout.setOnTouchListener { v, event -> true }
@@ -138,12 +141,12 @@ class MaskEditorFragment : Fragment(), DrawHistoryHolder.HistoryChangeListener {
         }
 
         view.findViewById<ImageButton>(R.id.button_ok).setOnClickListener {
-            showProgressBar()
+            progressBar.visibility = View.VISIBLE
             hideLayersMenu()
 
             drawView.saveBitmap {
                 showMainLayout()
-                hideProgressBar()
+                progressBar.visibility = View.INVISIBLE
             }
         }
 
@@ -488,11 +491,11 @@ class MaskEditorFragment : Fragment(), DrawHistoryHolder.HistoryChangeListener {
 
 
     private fun showProgressBar() {
-        progressBar.show()
+        progressBarDialog.show()
     }
 
     private fun hideProgressBar() {
-        progressBar.dismiss()
+        progressBarDialog.dismiss()
         drawView.invalidate()
     }
 

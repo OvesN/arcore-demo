@@ -15,6 +15,7 @@ import android.view.View
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
+import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
@@ -103,6 +104,8 @@ class FittingRoomActivity :
     private lateinit var fireStore: FirebaseFirestore
     private lateinit var storage: FirebaseStorage
 
+    private lateinit var progressBar: ProgressBar
+
     @Inject
     lateinit var stateService: StateService
 
@@ -167,6 +170,8 @@ class FittingRoomActivity :
             arSceneView.pause()
         }
 
+        progressBar = binding.progressBar
+
         val lookId = intent.getStringExtra("LOOK_ID")
         if (lookId != null) {
            looksOptionsFragment.getLook(lookId) { lookTO -> applyLook(lookTO) }
@@ -215,6 +220,7 @@ class FittingRoomActivity :
     }
 
     override fun applyModel(modelTO: ModelTO) {
+        binding.progressBar.visibility = View.VISIBLE
         stateService.addModel(modelTO)
         loadModel(modelTO)
     }
@@ -227,6 +233,8 @@ class FittingRoomActivity :
         if (DrawHistoryHolder.isNotEmpty()) {
             showWarningDialog(lookTO)
         } else {
+            progressBar.visibility = View.VISIBLE
+
             maskEditorFragment.editorStateTO = lookTO.editorState
             stateService.clearAll()
 
@@ -249,6 +257,7 @@ class FittingRoomActivity :
                     stopAnimation()
                     gifTextures.addAll(textures)
                     startAnimation()
+                    progressBar.visibility = View.INVISIBLE
                 }
             } else {
                 stopAnimation()
@@ -294,6 +303,7 @@ class FittingRoomActivity :
                 .build()
                 .thenAccept { texture ->
                     stateService.applyTextureToFaceNode(texture, arSceneView, MASK_TEXTURE_SLOT)
+                    progressBar.visibility = View.INVISIBLE
                 }
                 .exceptionally { throwable ->
                     Log.println(
@@ -480,6 +490,7 @@ class FittingRoomActivity :
                     .setIsFilamentGltf(true)
                     .build()
                     .thenAccept { renderable ->
+                        progressBar.visibility = View.INVISIBLE
                         stateService.applyModelOnFace(arSceneView, renderable, modelTO.slot)
                     }
                     .exceptionally { ex ->
@@ -655,6 +666,7 @@ class FittingRoomActivity :
         isPublic: Boolean,
         name: String,
     ) {
+        progressBar.visibility = View.VISIBLE
         val lookId = UUID.randomUUID().toString()
         val isAnimated = doesTempAnimatedMaskExist(applicationContext)
 
@@ -691,6 +703,7 @@ class FittingRoomActivity :
                     "Look saved successfully",
                     R.style.mytoast,
                 ).show()
+                progressBar.visibility = View.INVISIBLE
             }
             .addOnFailureListener { ex -> Log.println(Log.ERROR, null, "onFailure: $ex") }
     }

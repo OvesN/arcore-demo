@@ -4,7 +4,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-
     <View
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -19,7 +18,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@android:color/transparent" />
-
 
     <!-- Top UI Layout -->
     <LinearLayout
@@ -59,7 +57,6 @@
                 android:src="@drawable/redo" />
         </LinearLayout>
 
-
         <ImageButton
             android:id="@+id/button_layers"
             android:layout_width="0dp"
@@ -82,7 +79,6 @@
             android:textStyle="bold" />
     </LinearLayout>
 
-
     <!-- Bottom UI Layout -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/bottom_ui_makeup_editor"
@@ -91,12 +87,10 @@
         android:background="@color/colorTransparentBlack"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-     >
+        app:layout_constraintStart_toStartOf="parent">
 
         <LinearLayout
             android:id="@+id/left_column_buttons"
-
             android:layout_width="wrap_content"
             android:layout_height="0dp"
             android:layout_margin="10dp"
@@ -125,10 +119,7 @@
                 android:layout_gravity="center_horizontal|bottom"
                 android:background="@drawable/back"
                 android:scaleType="fitCenter" />
-
-
         </LinearLayout>
-
 
         <LinearLayout
             android:id="@+id/right_column_buttons"
@@ -163,51 +154,50 @@
                 app:srcCompat="@drawable/ok" />
         </LinearLayout>
 
+        <LinearLayout
+            android:id="@+id/menu_buttons"
+            android:background="@drawable/button"
+            android:backgroundTint="@color/colorDarkGrey"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:gravity="center"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@id/left_column_buttons">
 
-            <LinearLayout
-                android:id="@+id/menu_buttons"
-                android:background="@drawable/button"
-                android:backgroundTint="@color/colorDarkGrey"
-                android:layout_width="wrap_content"
-                android:layout_height="30dp"
-                android:layout_marginTop="10dp"
-                android:layout_marginBottom="10dp"
-                android:gravity="center"
-                android:orientation="horizontal"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="@id/left_column_buttons">
+            <Button
+                android:id="@+id/draw_button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@null"
+                android:backgroundTint="@color/colorMediumGrey"
+                android:text="@string/draw"
+                android:textAllCaps="false" />
 
-                <Button
-                    android:id="@+id/draw_button"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:background="@null"
-                    android:backgroundTint="@color/colorMediumGrey"
-                    android:text="@string/draw"
-                    android:textAllCaps="false" />
+            <Button
+                android:id="@+id/stamp_button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@null"
+                android:backgroundTint="@color/colorMediumGrey"
+                android:text="@string/stamp"
+                android:textAllCaps="false" />
 
-                <Button
-                    android:id="@+id/stamp_button"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:background="@null"
-                    android:backgroundTint="@color/colorMediumGrey"
-                    android:text="@string/stamp"
-                    android:textAllCaps="false" />
-
-                <Button
-                    android:id="@+id/image_button"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:background="@null"
-                    android:backgroundTint="@color/colorMediumGrey"
-                    android:text="@string/image"
-                    android:textAllCaps="false" />
-            </LinearLayout>
+            <Button
+                android:id="@+id/image_button"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@null"
+                android:backgroundTint="@color/colorMediumGrey"
+                android:text="@string/image"
+                android:textAllCaps="false" />
+        </LinearLayout>
 
         <FrameLayout
             android:id="@+id/menu_fragment_container"
@@ -216,12 +206,10 @@
             android:layout_height="wrap_content"
             android:background="@null"
             android:gravity="center_horizontal"
-
             app:layout_constraintBottom_toTopOf="@id/menu_buttons"
             app:layout_constraintEnd_toStartOf="@id/right_column_buttons"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@id/left_column_buttons" />
-
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <FrameLayout
@@ -261,10 +249,17 @@
             app:vsb_show_thumb="true" />
     </LinearLayout>
 
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="20dp"
+        android:visibility="invisible"
+       />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
-
-
-
-
-
-

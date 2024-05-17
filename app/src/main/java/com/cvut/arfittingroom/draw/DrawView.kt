@@ -240,9 +240,6 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
 
     private fun startAnimation(gif: Gif) {
-        if (gifRunnable != null) {
-            stopAnimation()
-        }
 
         Log.println(Log.INFO, null, "Start animation")
         gifRunnable =
@@ -258,13 +255,15 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                     gif.currentFrameIndex++
                     frameCount++
                     invalidate()
-                    handler.postDelayed(gifRunnable!!, frameDelay)
+                    gifRunnable?.let {   handler.postDelayed(it, frameDelay) }
+
                 }
             }
         gifRunnable?.let { handler.post(it) }
     }
 
     fun stopAnimation(gif: Gif? = null) {
+        frameCount = 0
         if (gif != null) {
             gif.shouldDrawNextFrame = false
             gif.currentFrameIndex = 0
@@ -353,6 +352,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         selectedElement?.let {
             isInElementMenuMode = false
             if (it is Gif) {
+                stopAnimation()
                 startAnimation(it)
             }
         }
@@ -935,6 +935,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
         layerManager.setUpdatableElement(gif)
 
+        stopAnimation()
         startAnimation(gif)
     }
 
@@ -951,6 +952,8 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     fun saveBitmap(onSaved: () -> Unit) {
         deleteTempFiles(context)
         layerManager.deselectAllElements()
+        stopAnimation()
+
         if (layerManager.doesContainAnyGif()) {
             layerManager.setAllGifsToAnimationMode()
             layerManager.resetAllGifs()

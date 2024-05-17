@@ -9,6 +9,10 @@ import com.cvut.arfittingroom.model.MASK_FRAMES_DIR_NAME
 import com.cvut.arfittingroom.model.MASK_FRAME_FILE_NAME
 import com.cvut.arfittingroom.model.MASK_TEXTURE_FILE_NAME
 import com.cvut.arfittingroom.utils.BitmapUtil.adjustBitmapFromEditor
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -20,16 +24,21 @@ object FileUtil {
         context: Context,
         onSaved: () -> Unit,
     ) {
-        try {
-            val internalStorageDir = context.filesDir
-            val file = File(internalStorageDir, MASK_TEXTURE_FILE_NAME)
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val internalStorageDir = context.filesDir
+                val file = File(internalStorageDir, MASK_TEXTURE_FILE_NAME)
 
-            FileOutputStream(file).use { fos ->
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos)
+                FileOutputStream(file).use { fos ->
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos)
+                }
+
+                withContext(Dispatchers.Main) {
+                    onSaved()
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
-            onSaved()
-        } catch (e: Exception) {
-            e.printStackTrace()
         }
     }
 
@@ -107,28 +116,34 @@ object FileUtil {
         context: Context,
         onSaved: () -> Unit,
     ) {
-        try {
-            val imagesDir = File(context.filesDir, MASK_FRAMES_DIR_NAME)
-            if (!imagesDir.exists()) {
-                imagesDir.mkdirs()
-            }
-
-            val maxNumberOfFrames = layerManager.getMaxNumberOfFrames()
-            for (counter in 0 until maxNumberOfFrames) {
-                val fileName = "${MASK_FRAME_FILE_NAME}_$counter.png"
-                val file = File(imagesDir, fileName)
-                FileOutputStream(file).use { fos ->
-                    val bitmap =
-                        adjustBitmapFromEditor(layerManager.createBitmapFromAllLayers(), height, width)
-                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos)
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val imagesDir = File(context.filesDir, MASK_FRAMES_DIR_NAME)
+                if (!imagesDir.exists()) {
+                    imagesDir.mkdirs()
                 }
+
+                val maxNumberOfFrames = layerManager.getMaxNumberOfFrames()
+                for (counter in 0 until maxNumberOfFrames) {
+                    val fileName = "${MASK_FRAME_FILE_NAME}_$counter.png"
+                    val file = File(imagesDir, fileName)
+                    FileOutputStream(file).use { fos ->
+                        val bitmap = adjustBitmapFromEditor(layerManager.createBitmapFromAllLayers(), height, width)
+                        bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos)
+                    }
+                }
+
+                withContext(Dispatchers.Main) {
+                    onSaved()
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(context, e.message, Toast.LENGTH_LONG).show()
+                }
+                e.printStackTrace()
             }
-            onSaved()
-        } catch (e: Exception) {
-            Toast.makeText(context, e.message, Toast.LENGTH_LONG).show()
-            e.printStackTrace()
         }
-    }
+        }
 
     fun deleteTempFiles(context: Context) {
         context.deleteFile(MASK_TEXTURE_FILE_NAME)
