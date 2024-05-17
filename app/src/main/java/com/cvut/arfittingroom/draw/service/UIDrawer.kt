@@ -17,6 +17,9 @@ import java.lang.IllegalArgumentException
 import kotlin.math.sqrt
 
 const val ELEMENT_MENU_ICON_SIZE = 70f
+const val MENU_SCALE_FACTOR = 1.5f
+const val ELEMENT_MENU_ICON_BOUNDS_SCALE_FACTOR = 2f
+
 class UIDrawer(private val context: Context) {
     private var menuWidth: Float = 0f
     private var menuHeight: Float = 0f
@@ -86,13 +89,13 @@ class UIDrawer(private val context: Context) {
     }
 
     private fun initializeDimensions() {
-        menuWidth = viewWidth * 0.3f * 1.3f
-        menuHeight = viewHeight * 0.125f * 1.3f
-        cornerRadius = viewWidth * 0.02f * 1.3f
-        textSize = viewHeight * 0.02f * 1.3f
-        textPadding = viewWidth * 0.025f * 1.3f
-        lineSpacing = viewHeight * 0.005f * 1.3f
-        menuItemSpacing = viewHeight * 0.025f * 1.3f
+        menuWidth = viewWidth * 0.3f * MENU_SCALE_FACTOR
+        menuHeight = viewHeight * 0.125f * MENU_SCALE_FACTOR
+        cornerRadius = viewWidth * 0.02f * MENU_SCALE_FACTOR
+        textSize = viewHeight * 0.02f * MENU_SCALE_FACTOR
+        textPadding = viewWidth * 0.025f * MENU_SCALE_FACTOR
+        lineSpacing = viewHeight * 0.005f * MENU_SCALE_FACTOR
+        menuItemSpacing = viewHeight * 0.025f * MENU_SCALE_FACTOR
     }
     private fun loadEditElementIcons() {
         editElementIcons[EElementEditAction.DELETE] =
@@ -174,7 +177,9 @@ class UIDrawer(private val context: Context) {
     }
 
     private fun defineMenuBounds(action: EElementEditAction, x: Float, y: Float, canvasScaleFactor: Float) {
-        editElementIconsBounds[action] = RectF(x, y, x + menuWidth / canvasScaleFactor * 2f, y + textSize / canvasScaleFactor * 2f)
+        editElementIconsBounds[action] = RectF(x, y,
+            x + menuWidth / canvasScaleFactor * ELEMENT_MENU_ICON_BOUNDS_SCALE_FACTOR,
+            y + textSize / canvasScaleFactor * ELEMENT_MENU_ICON_BOUNDS_SCALE_FACTOR)
     }
 
     private fun removeMenuBounds() {
