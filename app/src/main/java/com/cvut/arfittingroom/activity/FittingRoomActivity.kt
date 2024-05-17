@@ -212,7 +212,6 @@ class FittingRoomActivity :
         if (DrawHistoryHolder.isNotEmpty()) {
             showWarningDialog(lookTO)
         } else {
-            stopAnimation()
             maskEditorFragment.editorStateTO = lookTO.editorState
             stateService.clearAll()
 
@@ -232,10 +231,12 @@ class FittingRoomActivity :
 
             if (lookTO.isAnimated) {
                 downloadLookFrames(lookTO.lookId) { textures ->
+                    startAnimation()
                     gifTextures.addAll(textures)
                     startAnimation()
                 }
             } else {
+                stopAnimation()
                 downloadLookTextureAndApply(lookTO.lookId)
             }
         }
