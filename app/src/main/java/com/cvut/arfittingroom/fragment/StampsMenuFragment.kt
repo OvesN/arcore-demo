@@ -26,6 +26,8 @@ class StampsMenuFragment(
     private var selectedViewId = 0
     private val paint = Paint().apply {
         strokeWidth = 6f
+        color = Color.WHITE
+        style = Style.FILL
     }
     private var underscoreSelectedView: View? = null
 
@@ -52,7 +54,6 @@ class StampsMenuFragment(
                 layoutParams = LinearLayout.LayoutParams(
                     ScreenUtil.dpToPx(50, requireContext()),
                     ScreenUtil.dpToPx(50, requireContext())
-
                 )
                 orientation = LinearLayout.VERTICAL
                 background = null
@@ -91,6 +92,7 @@ class StampsMenuFragment(
             }
 
             if (selectedViewId == imageButton.id) {
+                underscoreSelectedView = underscoreLine
                 underscoreLine.visibility = View.VISIBLE
                 imageButton.imageTintList = ColorStateList.valueOf(paint.color)
             }

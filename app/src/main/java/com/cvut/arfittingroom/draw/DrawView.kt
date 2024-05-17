@@ -678,7 +678,6 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         editorMode = EEditorMode.BRUSH
 
         paintOptions.strokeTextureRef = brush.strokeTextureRef
-        paintOptions.style = brush.style
         paintOptions.strokeCap = brush.strokeCap
         paintOptions.strokeJoint = brush.strokeJoint
         paintOptions.blurRadius = brush.blurRadius

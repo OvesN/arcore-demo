@@ -123,11 +123,11 @@ class BrushesMenuFragment(private val drawView: DrawView) : Fragment() {
             val canvas = Canvas(bitmap)
             val paint = Paint().apply {
                 color = Color.WHITE
-                style = brush.style
                 strokeCap = brush.strokeCap
                 strokeJoin = brush.strokeJoint
                 strokeWidth = 70f
                 isAntiAlias = true
+                style = Paint.Style.STROKE
             }
             if (brush.blurRadius != 0f) {
                 paint.maskFilter = BlurMaskFilter(brush.blurRadius, brush.blurType)

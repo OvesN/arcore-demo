@@ -38,7 +38,7 @@ class UIDrawer(private val context: Context) {
         }
     private val menuPaint: Paint =
         Paint().apply {
-            color = Color.DKGRAY
+            color = Color.GRAY
             alpha = (255 * 0.9).toInt()
         }
     private val editElementIcons: HashMap<EElementEditAction, Bitmap> = hashMapOf()
@@ -130,7 +130,6 @@ class UIDrawer(private val context: Context) {
             val boundingBox = element.boundingBox
             val scaledIconSize = ELEMENT_MENU_ICON_SIZE / canvasScaleFactor
 
-            // Draw each edit icon with appropriate scaling
             drawEditIcon(canvas, EElementEditAction.MENU, boundingBox.topRightCornerCoor.x, boundingBox.topRightCornerCoor.y - scaledIconSize, scaledIconSize)
             drawEditIcon(canvas, EElementEditAction.SCALE, boundingBox.bottomRightCornerCoor.x, boundingBox.bottomRightCornerCoor.y, scaledIconSize)
             drawEditIcon(canvas, EElementEditAction.ROTATE, boundingBox.bottomLeftCornerCoor.x - scaledIconSize, boundingBox.bottomLeftCornerCoor.y, scaledIconSize)
