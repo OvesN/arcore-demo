@@ -22,6 +22,7 @@ class MainActivity : AppCompatActivity() {
         deleteTempFiles(applicationContext)
 
         if (auth.currentUser != null) {
+            handleIntent(intent)
             startActivity(Intent(this, FittingRoomActivity::class.java))
             finish()
             return
@@ -39,5 +40,30 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, SignUpActivity::class.java))
             finish()
         }
+
     }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        handleIntent(intent)
+    }
+
+    private fun handleIntent(intent: Intent) {
+        intent.data?.let { uri ->
+            if (uri.toString().startsWith("http://www.glamartist.com/look")) {
+                val lookId = uri.getQueryParameter("lookId")
+                if (lookId != null) {
+                    navigateToFittingRoom(lookId)
+                }
+            }
+        }
+    }
+
+    private fun navigateToFittingRoom(lookId: String) {
+        val intent = Intent(this, FittingRoomActivity::class.java)
+        intent.putExtra("LOOK_ID", lookId)
+        startActivity(intent)
+    }
+
 }

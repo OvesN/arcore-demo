@@ -22,7 +22,6 @@ import com.cvut.arfittingroom.model.LOOKS_COLLECTION
 import com.cvut.arfittingroom.model.NUM_OF_ELEMENTS_IN_ROW_BIG_MENU
 import com.cvut.arfittingroom.model.to.LookTO
 import com.cvut.arfittingroom.module.GlideApp
-import com.cvut.arfittingroom.utils.UIUtil
 import com.cvut.arfittingroom.utils.UIUtil.deselectLookButton
 import com.cvut.arfittingroom.utils.UIUtil.selectLookButton
 import com.cvut.arfittingroom.utils.UIUtil.showLookInfoDialog
@@ -211,6 +210,7 @@ class LooksMenuFragment : Fragment() {
     private fun showLookInfoMenu() {
         showLookInfoDialog(
             requireContext(),
+            lookId = selectedLookTO.lookId,
             isAuthor = selectedLookTO.author == auth.currentUserUsername(),
             isPublic = selectedLookTO.isPublic,
             authorName = selectedLookTO.author,
@@ -228,8 +228,7 @@ class LooksMenuFragment : Fragment() {
                     )
                 }
 
-            },
-            onLookShare = {}
+            }
         )
     }
 
@@ -283,8 +282,18 @@ class LooksMenuFragment : Fragment() {
         }
     }
 
-    //TODO
-    private fun shareLook() {
-
+    fun getLook(lookId: String, onSuccess: (LookTO) -> Unit = {}) {
+        firestore.collection(LOOKS_COLLECTION).document(lookId).get().addOnSuccessListener {
+            val lookTo = it.toObject<LookTO>()
+            lookTo?.let { onSuccess(lookTo) }
+        }.addOnFailureListener { ex ->
+            StyleableToast.makeText(
+                requireContext(),
+                ex.message,
+                Toast.LENGTH_SHORT,
+                R.style.mytoast,
+            ).show()
+        }
     }
+
 }

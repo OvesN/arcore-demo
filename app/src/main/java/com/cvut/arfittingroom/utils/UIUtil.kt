@@ -4,6 +4,7 @@ import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.app.AlertDialog
 import android.content.Context
+import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.LayerDrawable
 import android.view.LayoutInflater
@@ -33,11 +34,11 @@ object UIUtil {
 
     fun showLookInfoDialog(
         context: Context,
+        lookId: String,
         isAuthor: Boolean,
         isPublic: Boolean,
         authorName: String,
         onLookDelete: () -> Unit = {},
-        onLookShare: () -> Unit = {},
         onChangeIsPublic: (Boolean) -> Unit,
     ) {
         val dialogView: View =
@@ -55,8 +56,15 @@ object UIUtil {
         }
 
         dialogView.findViewById<ImageButton>(R.id.share_button).setOnClickListener {
-            onLookShare()
-            dialog.dismiss()
+            val shareIntent = Intent().apply {
+                action = Intent.ACTION_SEND
+                putExtra(
+                    Intent.EXTRA_TEXT,
+                    "Check out this look: http://www.glamartist.com/look?lookId=$lookId"
+                )
+                type = "text/plain"
+            }
+            context.startActivity(Intent.createChooser(shareIntent, "Share Look"))
         }
 
         val authorNameText = dialogView.findViewById<TextView>(R.id.look_author_name)

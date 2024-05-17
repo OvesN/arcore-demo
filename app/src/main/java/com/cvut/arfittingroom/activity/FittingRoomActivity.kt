@@ -3,6 +3,7 @@ package com.cvut.arfittingroom.activity
 import android.app.ActivityManager
 import android.app.AlertDialog
 import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import android.os.Bundle
@@ -164,6 +165,20 @@ class FittingRoomActivity :
         binding.maskEditorButton.setOnClickListener {
             showMakeupEditorUI()
             arSceneView.pause()
+        }
+
+        val lookId = intent.getStringExtra("LOOK_ID")
+        if (lookId != null) {
+           looksOptionsFragment.getLook(lookId) { lookTO -> applyLook(lookTO) }
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        val lookId = intent.getStringExtra("LOOK_ID")
+        if (lookId != null) {
+            looksOptionsFragment.getLook(lookId) { lookTO -> applyLook(lookTO) }
         }
     }
 
