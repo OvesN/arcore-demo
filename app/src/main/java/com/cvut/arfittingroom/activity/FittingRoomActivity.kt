@@ -231,7 +231,7 @@ class FittingRoomActivity :
 
             if (lookTO.isAnimated) {
                 downloadLookFrames(lookTO.lookId) { textures ->
-                    startAnimation()
+                    stopAnimation()
                     gifTextures.addAll(textures)
                     startAnimation()
                 }

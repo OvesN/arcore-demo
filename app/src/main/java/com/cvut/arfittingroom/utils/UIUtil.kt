@@ -13,12 +13,15 @@ import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.CheckBox
+import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.Spinner
+import android.widget.TextView
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import com.cvut.arfittingroom.R
+import com.google.ar.sceneform.rendering.Texture
 import com.skydoves.colorpickerview.ColorPickerView
 
 object UIUtil {
@@ -27,6 +30,54 @@ object UIUtil {
             layoutParams = ViewGroup.LayoutParams(2, ViewGroup.LayoutParams.MATCH_PARENT)
             background = AppCompatResources.getDrawable(context, R.color.colorLightGrey)
         }
+
+    fun showLookInfoDialog(
+        context: Context,
+        isAuthor: Boolean,
+        isPublic: Boolean,
+        authorName: String,
+        onLookDelete: () -> Unit = {},
+        onLookShare: () -> Unit = {},
+        onChangeIsPublic: (Boolean) -> Unit,
+    ) {
+        val dialogView: View =
+            LayoutInflater.from(context).inflate(R.layout.popup_look_info, null)
+
+        val checkBox = dialogView.findViewById<CheckBox>(R.id.is_public_checkbox)
+        checkBox.isChecked = isPublic
+
+        val dialog = AlertDialog.Builder(context)
+            .setView(dialogView)
+            .create()
+
+        dialogView.findViewById<Button>(R.id.cancel_popup_button).setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialogView.findViewById<ImageButton>(R.id.share_button).setOnClickListener {
+            onLookShare()
+            dialog.dismiss()
+        }
+
+        val authorNameText = dialogView.findViewById<TextView>(R.id.look_author_name)
+        authorNameText.text = if (isAuthor) "$authorName (you)" else authorName
+
+        if (isAuthor) {
+            val deleteButton = dialogView.findViewById<Button>(R.id.delete_look_button)
+            deleteButton.visibility = View.VISIBLE
+            checkBox.visibility = View.VISIBLE
+            deleteButton.setOnClickListener {
+                onLookDelete()
+                dialog.dismiss()
+            }
+        }
+
+        dialog.setOnDismissListener {
+            onChangeIsPublic(checkBox.isChecked)
+        }
+
+        dialog.show()
+    }
 
     fun showEditorSubmenuDialog(
         context: Context,

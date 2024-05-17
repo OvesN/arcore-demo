@@ -28,6 +28,7 @@ class LayersMenuFragment(private val drawView: DrawView) : Fragment() {
     private lateinit var layerDownButton: ImageButton
     private lateinit var isVisibleButton: ImageButton
 
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,

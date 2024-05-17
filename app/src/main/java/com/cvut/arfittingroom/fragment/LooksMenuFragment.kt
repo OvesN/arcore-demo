@@ -22,22 +22,26 @@ import com.cvut.arfittingroom.model.LOOKS_COLLECTION
 import com.cvut.arfittingroom.model.NUM_OF_ELEMENTS_IN_ROW_BIG_MENU
 import com.cvut.arfittingroom.model.to.LookTO
 import com.cvut.arfittingroom.module.GlideApp
+import com.cvut.arfittingroom.utils.UIUtil
 import com.cvut.arfittingroom.utils.UIUtil.deselectLookButton
 import com.cvut.arfittingroom.utils.UIUtil.selectLookButton
+import com.cvut.arfittingroom.utils.UIUtil.showLookInfoDialog
 import com.cvut.arfittingroom.utils.currentUserUsername
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.Filter
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.toObject
 import com.google.firebase.storage.FirebaseStorage
 import io.github.muddz.styleabletoast.StyleableToast
 
 class LooksMenuFragment : Fragment() {
-    private var selectedLookViewId: Int = 0
+    private var selectedLookTO = LookTO()
     private val looks = mutableMapOf<String, LookTO>()
     private lateinit var firestore: FirebaseFirestore
     private lateinit var auth: FirebaseAuth
     private lateinit var storage: FirebaseStorage
     private lateinit var filter: Filter
+    private lateinit var lookInfoButton: ImageButton
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -86,6 +90,10 @@ class LooksMenuFragment : Fragment() {
                         )
                     }
             }
+        lookInfoButton = view.findViewById(R.id.look_info_button)
+        lookInfoButton.setOnClickListener {
+            showLookInfoMenu()
+        }
     }
 
     fun fetchLooks() {
@@ -155,7 +163,7 @@ class LooksMenuFragment : Fragment() {
 
                 options.addView(button, params)
 
-                if (selectedLookViewId == button.id) {
+                if (selectedLookTO.lookId.hashCode() == button.id) {
                     selectLookButton(button)
                 }
 
@@ -174,8 +182,8 @@ class LooksMenuFragment : Fragment() {
         buttonView: View,
         lookTO: LookTO,
     ) {
-        view.findViewById<View>(selectedLookViewId)
-            ?.let { deselectLookButton(view.findViewById(selectedLookViewId)) }
+        view.findViewById<View>(selectedLookTO.lookId.hashCode())
+            ?.let { deselectLookButton(it) }
 
         val listener = context as? ResourceListener
         if (listener == null) {
@@ -183,18 +191,100 @@ class LooksMenuFragment : Fragment() {
             return
         }
 
-        if (selectedLookViewId == buttonView.id) {
+        selectedLookTO = if (selectedLookTO.lookId.hashCode() == buttonView.id) {
             listener.removeLook(lookTO.lookId)
-            selectedLookViewId = 0
+            lookInfoButton.visibility = View.INVISIBLE
+            LookTO()
         } else {
             listener.applyLook(lookTO)
             selectLookButton(buttonView)
-            selectedLookViewId = buttonView.id
+            lookInfoButton.visibility = View.VISIBLE
+            lookTO
         }
     }
 
     fun resetMenu() {
-        selectedLookViewId = 0
+        selectedLookTO = LookTO()
         fetchLooks()
+    }
+
+    private fun showLookInfoMenu() {
+        showLookInfoDialog(
+            requireContext(),
+            isAuthor = selectedLookTO.author == auth.currentUserUsername(),
+            isPublic = selectedLookTO.isPublic,
+            authorName = selectedLookTO.author,
+            onLookDelete = {
+                deleteLook(selectedLookTO.lookId)
+                val listener = context as? ResourceListener
+                listener?.removeLook(selectedLookTO.lookId)
+                resetMenu()
+            },
+            onChangeIsPublic = { isPublic ->
+                if (selectedLookTO.lookId.isNotEmpty()) {
+                    changeLookPublicity(
+                        lookId = selectedLookTO.lookId,
+                        isPublic
+                    )
+                }
+
+            },
+            onLookShare = {}
+        )
+    }
+
+    private fun deleteLook(lookId: String) {
+        firestore.collection(LOOKS_COLLECTION).document(lookId)
+            .get()
+            .addOnSuccessListener { result ->
+                val lookTo = result.toObject<LookTO>()
+                lookTo?.let {
+                    storage.getReference(it.imagePreviewRef).delete()
+                    val folderRef = storage.getReference("$LOOKS_COLLECTION/${lookTo.lookId}")
+                    folderRef.listAll()
+                        .addOnSuccessListener { listResult ->
+                            val items = listResult.items
+                            items.map { item ->
+                                item.delete()
+                            }
+                        }
+                        .addOnFailureListener { ex ->
+                            StyleableToast.makeText(
+                                requireContext(),
+                                ex.message,
+                                Toast.LENGTH_SHORT,
+                                R.style.mytoast,
+                            ).show()
+                        }
+                }
+            }
+            .addOnFailureListener { ex ->
+                StyleableToast.makeText(
+                    requireContext(),
+                    ex.message,
+                    Toast.LENGTH_SHORT,
+                    R.style.mytoast,
+                ).show()
+            }
+
+        firestore.collection(LOOKS_COLLECTION).document(lookId).delete()
+    }
+
+    private fun changeLookPublicity(lookId: String, isPublic: Boolean) {
+
+        val lookDoc = firestore.collection(LOOKS_COLLECTION).document(lookId)
+
+        lookDoc.get().addOnSuccessListener {
+            val lookTo = it.toObject<LookTO>()
+            lookTo?.let { look ->
+                look.isPublic = isPublic
+                lookDoc.set(look)
+            }
+        }
+    }
+
+    //TODO
+    private fun shareLook() {
+
     }
 }

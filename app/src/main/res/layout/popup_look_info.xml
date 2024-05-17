@@ -71,6 +71,7 @@
             android:layout_weight="0.8"
             android:background="@drawable/small_button"
             android:backgroundTint="@color/colorActive"
+            android:visibility="invisible"
             android:text="@string/delete"
             android:textAllCaps="false" />
 
