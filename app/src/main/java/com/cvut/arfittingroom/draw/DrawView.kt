@@ -516,9 +516,13 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
             EElementEditAction.CHANGE_COLOR -> {
                 selectedElement?.let { selectedElement ->
+                    val initialColor = when (selectedElement) {
+                        is Repaintable -> selectedElement.paint.color
+                        else -> paintOptions.color
+                    }
                     showColorPickerDialog(
                         context,
-                        paintOptions.color,
+                        initialColor,
                         fill = paintOptions.style == Paint.Style.FILL,
                         shouldShowFillCheckbox = true,
                         shouldShowPipette = true,

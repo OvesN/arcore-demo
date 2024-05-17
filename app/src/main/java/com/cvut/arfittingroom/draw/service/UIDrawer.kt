@@ -174,7 +174,7 @@ class UIDrawer(private val context: Context) {
     }
 
     private fun defineMenuBounds(action: EElementEditAction, x: Float, y: Float, canvasScaleFactor: Float) {
-        editElementIconsBounds[action] = RectF(x, y, x + menuWidth / canvasScaleFactor, y + textSize / canvasScaleFactor)
+        editElementIconsBounds[action] = RectF(x, y, x + menuWidth / canvasScaleFactor * 2f, y + textSize / canvasScaleFactor * 2f)
     }
 
     private fun removeMenuBounds() {
