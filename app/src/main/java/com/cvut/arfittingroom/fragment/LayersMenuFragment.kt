@@ -13,6 +13,7 @@ import androidx.fragment.app.Fragment
 import com.cvut.arfittingroom.R
 import com.cvut.arfittingroom.draw.DrawView
 import com.cvut.arfittingroom.utils.ScreenUtil.dpToPx
+import com.cvut.arfittingroom.utils.UIUtil
 import io.github.muddz.styleabletoast.StyleableToast
 
 /**
@@ -40,6 +41,7 @@ class LayersMenuFragment(private val drawView: DrawView) : Fragment() {
         layersButtonsContainer = view.findViewById(R.id.layers_buttons_container)
 
         view.findViewById<ImageButton>(R.id.add_layer_button).setOnClickListener {
+
             updateLayersButtons(drawView.addLayer() + 1)
             drawView.layerManager.makeLayersSemiTransparentExceptOne(drawView.layerManager.getActiveLayerIndex())
             drawView.invalidate()
@@ -48,9 +50,11 @@ class LayersMenuFragment(private val drawView: DrawView) : Fragment() {
         }
 
         view.findViewById<ImageButton>(R.id.delete_layer_button).setOnClickListener {
-            drawView.removeLayer(drawView.layerManager.getActiveLayerIndex())
-            updateLayersButtons(drawView.layerManager.getNumOfLayers())
-            StyleableToast.makeText(requireContext(), "Layer deleted", R.style.mytoast).show()
+            UIUtil.showDeleteLayerDialog(requireContext()) {
+                drawView.removeLayer(drawView.layerManager.getActiveLayerIndex())
+                updateLayersButtons(drawView.layerManager.getNumOfLayers())
+                StyleableToast.makeText(requireContext(), "Layer deleted", R.style.mytoast).show()
+            }
         }
 
         // This will block the touch event so it will not propagate to draw view
@@ -83,9 +87,8 @@ class LayersMenuFragment(private val drawView: DrawView) : Fragment() {
         isVisibleButton = view.findViewById(R.id.is_visible_button)
         isVisibleButton.setOnClickListener {
             val layerIndex = drawView.layerManager.getActiveLayerIndex()
+            drawView.toggleLayerVisibility(layerIndex)
 
-            drawView.layerManager.toggleActiveLayerVisibility()
-            drawView.invalidate()
             setIsVisibleButton(layerIndex)
 
             if (drawView.layerManager.isVisible(layerIndex)) {

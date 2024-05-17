@@ -24,11 +24,14 @@ import com.cvut.arfittingroom.draw.DrawHistoryHolder.addToHistory
 import com.cvut.arfittingroom.draw.DrawHistoryHolder.clearHistory
 import com.cvut.arfittingroom.draw.command.Repaintable
 import com.cvut.arfittingroom.draw.command.action.AddElementToLayer
+import com.cvut.arfittingroom.draw.command.action.AddLayer
 import com.cvut.arfittingroom.draw.command.action.MoveElement
+import com.cvut.arfittingroom.draw.command.action.MoveLayer
 import com.cvut.arfittingroom.draw.command.action.RemoveElementFromLayer
 import com.cvut.arfittingroom.draw.command.action.RepaintElement
 import com.cvut.arfittingroom.draw.command.action.RotateElement
 import com.cvut.arfittingroom.draw.command.action.ScaleElement
+import com.cvut.arfittingroom.draw.command.action.ToggleLayerVisibility
 import com.cvut.arfittingroom.draw.model.PaintOptions
 import com.cvut.arfittingroom.draw.model.element.Element
 import com.cvut.arfittingroom.draw.model.element.impl.Curve
@@ -566,7 +569,8 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             }
 
             EElementEditAction.TO_LAYER -> {
-                showMoveToLayerDialog(context,
+                showMoveToLayerDialog(
+                    context,
                     currentLayerIndex = layerManager.getActiveLayerIndex(),
                     maxLayerIndex = layerManager.getNumOfLayers() - 1
                 ) { newLayerIndex ->
@@ -640,6 +644,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         command?.let {
             StyleableToast.makeText(context, "Undo ${command.description}", R.style.mytoast).show()
         }
+
         stopAnimation()
         layerManager.updateLayersBitmaps()
         invalidate()
@@ -656,9 +661,17 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     }
 
     fun addLayer(): Int {
-        val newLayerIndex = layerManager.addLayer(width, height)
-        layerManager.setActiveLayer(newLayerIndex)
-        return newLayerIndex
+        if (layerManager.canAddNewLayer()) {
+            addToHistory(AddLayer(width, height, layerManager))
+        } else {
+            StyleableToast.makeText(
+                context,
+                "Cannot create more than ${LayerManager.MAX_NUMBER_OF_LAYERS} layers",
+                R.style.mytoast
+            ).show()
+        }
+
+        return layerManager.getActiveLayerIndex()
     }
 
 
@@ -857,14 +870,24 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         toIndex: Int,
     ) {
         if (layerManager.canMoveLayer(fromIndex, toIndex)) {
+            addToHistory(MoveLayer(layerManager, fromIndex, toIndex))
             layerManager.setActiveLayer(toIndex)
+            layerManager.recreateLayersBitmaps()
             invalidate()
         }
     }
 
+    fun toggleLayerVisibility(
+        layerIndex: Int
+    ) {
+        val layerId = layerManager.getLayerIdByIndex(layerIndex)
+        layerId?.let { addToHistory(ToggleLayerVisibility(layerIndex, layerId, layerManager)) }
+        layerManager.recreateLayersBitmaps()
+        invalidate()
+    }
+
     fun removeLayer(layerIndex: Int) {
         layerManager.removeLayer(layerIndex)
-        layerManager.setActiveLayer(if (layerIndex == 0) 0 else layerIndex - 1)
         invalidate()
     }
 

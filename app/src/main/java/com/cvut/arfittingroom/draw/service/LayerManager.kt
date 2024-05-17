@@ -4,12 +4,12 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import com.cvut.arfittingroom.draw.Layer
 import com.cvut.arfittingroom.draw.command.action.MoveElementBetweenLayers
+import com.cvut.arfittingroom.draw.command.action.MoveLayer
 import com.cvut.arfittingroom.draw.model.PaintOptions
 import com.cvut.arfittingroom.draw.model.element.Element
 import com.cvut.arfittingroom.draw.path.DrawablePath
 import mu.KotlinLogging
 import java.util.UUID
-
 private val logger = KotlinLogging.logger {}
 
 /**
@@ -81,14 +81,16 @@ class LayerManager {
         recreateLayersBitmaps()
     }
 
-    // Returns index of the last layer
+    // Returns id of the new layer
     fun addLayer(
         width: Int,
         height: Int,
-        layerId: UUID? = null,
-    ): Int {
-        val layer =
-            layerId?.let { Layer(layerId, width, height) } ?: Layer(width = width, height = height)
+    ): UUID {
+        if(layers.size  == MAX_NUMBER_OF_LAYERS) {
+            return getActiveLayerId()
+        }
+
+        val layer = Layer(width = width, height = height)
 
         if (layers.isNotEmpty()) {
             layers[activeLayerIndex].deselectAllElements()
@@ -98,8 +100,9 @@ class LayerManager {
 
         layers.add(layer)
 
-        activeLayerIndex = layers.size - 1
-        return activeLayerIndex
+        setActiveLayer(layers.size - 1)
+
+        return layer.id
     }
 
     fun addElementToLayer(
@@ -118,12 +121,8 @@ class LayerManager {
 
     fun getLayerIdByIndex(index: Int): UUID? = layers.getOrNull(index)?.id
 
-    fun toggleActiveLayerVisibility() {
-        if (layers.isEmpty()) {
-            return
-        }
-        layers[activeLayerIndex].isVisible = !layers[activeLayerIndex].isVisible
-    }
+    fun canAddNewLayer() = layers.size < MAX_NUMBER_OF_LAYERS
+
 
     fun removeElementFromLayer(
         elementId: UUID,
@@ -149,37 +148,41 @@ class LayerManager {
                 ?: layers.getOrNull(index)
                 ?: return
 
+        val layerIndex = layers.indexOf(layerToRemove)
+
         idToLayerMap.remove(layerToRemove.id)
-        layers.removeAt(index)
+        layers.remove(layerToRemove)
 
-        logger.info { "Layer from index $index removed" }
+        setActiveLayer(if (layerIndex == 0) 0 else layerIndex - 1)
+
+        logger.info { "Layer from on $index is removed" }
     }
 
-    fun setLayerVisibility(
-        index: Int,
-        isVisible: Boolean,
+    fun toggleLayerVisibility(
+        layerId: UUID
     ) {
-        layers[index].isVisible = isVisible
+        idToLayerMap[layerId]?.let {
+            it.isVisible = !it.isVisible
+        }
     }
 
-    // Returns true if layer was moved
+    fun moveLayer(
+        fromIndex: Int,
+        toIndex: Int,
+    ) {
+        val layer = layers.removeAt(fromIndex)
+        layers.add(toIndex, layer)
+    }
+
     fun canMoveLayer(
         fromIndex: Int,
         toIndex: Int,
     ): Boolean {
         // Check for no movement or invalid indices
-        if (fromIndex == toIndex ||
-            fromIndex < 0 || toIndex < 0 ||
-            toIndex > layers.size ||
-            fromIndex == layers.size - 1 && toIndex == layers.size
-        ) {
-            return false
-        }
-
-        val layer = layers.removeAt(fromIndex)
-        layers.add(toIndex, layer)
-
-        return true
+        return !(fromIndex == toIndex ||
+                fromIndex < 0 || toIndex < 0 ||
+                toIndex > layers.size ||
+                fromIndex == layers.size - 1 && toIndex == layers.size)
     }
 
     fun getNumOfLayers() = layers.size
@@ -405,4 +408,7 @@ class LayerManager {
         layers.forEach { it.resetAllGifs() }
     }
 
+    companion object {
+        const val MAX_NUMBER_OF_LAYERS = 20
+    }
 }

@@ -55,4 +55,6 @@
     <string name="ok">Ok</string>
     <string name="move">Move</string>
     <string name="move_element_to_layer">Move element to layer:</string>
+    <string name="delete">Delete</string>
+    <string name="delete_layer_this_action_cannot_be_undone">Delete layer? This action cannot be undone</string>
 </resources>

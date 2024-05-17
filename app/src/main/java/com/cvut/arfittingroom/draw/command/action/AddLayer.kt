@@ -8,12 +8,12 @@ class AddLayer(
     private val width: Int,
     private val height: Int,
     private val layerManager: LayerManager,
-    private val layerId: UUID,
 ) : Command {
     override val description: String = "add new layer"
+    private var layerId: UUID = UUID.randomUUID()
 
     override fun execute() {
-        layerManager.addLayer(width, height, layerId)
+        layerManager.addLayer(width, height)
     }
 
     override fun revert() {

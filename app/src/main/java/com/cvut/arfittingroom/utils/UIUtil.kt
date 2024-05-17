@@ -28,8 +28,35 @@ object UIUtil {
             background = AppCompatResources.getDrawable(context, R.color.colorLightGrey)
         }
 
-    fun showMoveToLayerDialog(context: Context, currentLayerIndex:Int, maxLayerIndex: Int, onLayerSelected: (Int) -> Unit) {
-        val dialogView: View = LayoutInflater.from(context).inflate(R.layout.popup_move_to_layer, null)
+    fun showDeleteLayerDialog(context: Context, onDelete: () -> Unit) {
+        val dialogView: View =
+            LayoutInflater.from(context).inflate(R.layout.popup_delete_layer, null)
+        val dialog = AlertDialog.Builder(context)
+            .setView(dialogView)
+            .create()
+
+
+        dialogView.findViewById<Button>(R.id.cancel_popup_button).setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialogView.findViewById<Button>(R.id.delete_button).setOnClickListener {
+            onDelete()
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
+
+
+    fun showMoveToLayerDialog(
+        context: Context,
+        currentLayerIndex: Int,
+        maxLayerIndex: Int,
+        onLayerSelected: (Int) -> Unit
+    ) {
+        val dialogView: View =
+            LayoutInflater.from(context).inflate(R.layout.popup_move_to_layer, null)
         val dialog = AlertDialog.Builder(context)
             .setView(dialogView)
             .create()
