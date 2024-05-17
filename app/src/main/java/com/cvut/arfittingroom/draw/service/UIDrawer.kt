@@ -18,8 +18,7 @@ import java.lang.IllegalArgumentException
 import kotlin.math.sqrt
 
 private const val ELEMENT_MENU_ICON_SIZE = 70f
-private const val MENU_SCALE_FACTOR = 1.5f
-private const val ELEMENT_MENU_ICON_BOUNDS_SCALE_FACTOR = 2f
+private const val MENU_SCALE_FACTOR = 1.7f
 private const val BOUNDS_SCALE_FACTOR = 1.4f
 
 class UIDrawer(private val context: Context) {
@@ -260,11 +259,6 @@ class UIDrawer(private val context: Context) {
                 canvasScaleFactor
             )
         }
-
-        for (bounds in editElementIconsBounds.values) {
-            canvas.drawRect(bounds, boundsPaint)
-        }
-
     }
 
     private fun defineMenuBounds(
@@ -276,7 +270,7 @@ class UIDrawer(private val context: Context) {
         editElementIconsBounds[action] = RectF(
             x, y,
             x + menuWidth / canvasScaleFactor,
-            y + textSize / canvasScaleFactor
+            y + textSize / canvasScaleFactor + textPadding / canvasScaleFactor
         )
     }
 
