@@ -42,6 +42,7 @@ class Curve(
     override var originalCenterX: Float = 0f
     override var originalCenterY: Float = 0f
     override var originalRadius: Float = 0f
+    private var originalStrokeWidth: Float = paint.strokeWidth
 
     private var scaledTextureBitmap: Bitmap? = null
 
@@ -109,18 +110,20 @@ class Curve(
     // Scaling function
     override fun scale(newRadius: Float) {
         outerRadius = max(newRadius, 1f)
-
         radiusDiff = outerRadius / originalRadius
+        updateStrokeWidth()
     }
 
     override fun scaleContinuously(factor: Float) {
         super.scaleContinuously(factor)
 
         radiusDiff = outerRadius / originalRadius
+        updateStrokeWidth()
     }
 
     override fun endContinuousScale() {
         outerRadius = originalRadius
+        updateStrokeWidth()
     }
 
     override fun doesIntersect(
@@ -191,5 +194,9 @@ class Curve(
         originalRadius = outerRadius
 
         return createBoundingBox()
+    }
+
+    private fun updateStrokeWidth() {
+        paint.strokeWidth = originalStrokeWidth * radiusDiff
     }
 }
