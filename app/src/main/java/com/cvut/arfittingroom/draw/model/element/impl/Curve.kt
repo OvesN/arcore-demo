@@ -184,9 +184,7 @@ class Curve(
 
         val boundsCenter = max(bounds.width(), bounds.height()) / 2
 
-        // If outer radius is 1 it means that dot was drawn, so
-        // outer radius should be adjusted to the stroke size
-        if (boundsCenter > 1) {
+        if (boundsCenter > outerRadius) {
             outerRadius = boundsCenter
         }
 
