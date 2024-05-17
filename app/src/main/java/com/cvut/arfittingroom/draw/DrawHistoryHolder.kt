@@ -1,6 +1,7 @@
 package com.cvut.arfittingroom.draw
 
 import com.cvut.arfittingroom.draw.command.Command
+import com.cvut.arfittingroom.fragment.HistoryChangeListener
 import java.util.LinkedList
 
 private const val MAX_NUMBER_OF_ACTIONS_HOLD_IN_HISTORY = 50
@@ -9,10 +10,6 @@ object DrawHistoryHolder {
     private val undoneActions = LinkedList<Command>()
 
     private var historyChangeListener: HistoryChangeListener? = null
-
-    interface HistoryChangeListener {
-        fun onHistoryChanged()
-    }
 
     fun setHistoryChangeListener(listener: HistoryChangeListener) {
         historyChangeListener = listener

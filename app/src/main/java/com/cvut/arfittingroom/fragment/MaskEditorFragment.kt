@@ -39,7 +39,7 @@ import io.github.muddz.styleabletoast.StyleableToast
 import java.util.LinkedList
 import javax.inject.Inject
 
-class MaskEditorFragment : Fragment(), DrawHistoryHolder.HistoryChangeListener {
+class MaskEditorFragment : Fragment(), HistoryChangeListener, ColorChangeListener {
     private var backgroundBitmap: Bitmap? = null
     var editorStateTO: EditorStateTO? = null
     private var isLayersMenuShown = false
@@ -221,8 +221,8 @@ class MaskEditorFragment : Fragment(), DrawHistoryHolder.HistoryChangeListener {
         slider.setOnReleaseListener {
             drawView.setStrokeWidth(it)
         }
-
         drawView.setStrokeWidth(slider.progress)
+        drawView.setOnColorChangeListener(this)
     }
 
     private fun showLayersMenu() {
@@ -528,5 +528,10 @@ class MaskEditorFragment : Fragment(), DrawHistoryHolder.HistoryChangeListener {
 
     override fun onHistoryChanged() {
         updateUndoRedoButtons()
+    }
+
+    override fun onColorChanged(newColor: Int, fill: Boolean) {
+        brushesMenuFragment.changeColor(newColor)
+        stampsMenuFragment.changeColor(newColor, fill)
     }
 }

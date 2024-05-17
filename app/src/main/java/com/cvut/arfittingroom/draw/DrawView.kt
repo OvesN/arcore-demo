@@ -45,6 +45,7 @@ import com.cvut.arfittingroom.draw.path.DrawablePath
 import com.cvut.arfittingroom.draw.service.LayerManager
 import com.cvut.arfittingroom.draw.service.TexturedBrushDrawer
 import com.cvut.arfittingroom.draw.service.UIDrawer
+import com.cvut.arfittingroom.fragment.ColorChangeListener
 import com.cvut.arfittingroom.model.SPAN_SLOP
 import com.cvut.arfittingroom.model.TOUCH_TO_MOVE_THRESHOLD
 import com.cvut.arfittingroom.model.to.BrushTO
@@ -105,6 +106,8 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     @Inject
     lateinit var layerManager: LayerManager
+
+    private var colorChangeListener: ColorChangeListener? = null
 
 
     init {
@@ -628,6 +631,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
                 if (pipetteSelectedColor != Color.TRANSPARENT) {
                     setColor(pipetteSelectedColor, paintOptions.style == Paint.Style.FILL)
+                    colorChangeListener?.onColorChanged(pipetteSelectedColor, paintOptions.style == Paint.Style.FILL)
                 }
                 pipetteSelectedColor = Color.TRANSPARENT
             }
@@ -1035,4 +1039,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         uiDrawer.shouldDrawGrid = isVisible
     }
 
+    fun setOnColorChangeListener(listener: ColorChangeListener) {
+        colorChangeListener = listener
+    }
 }

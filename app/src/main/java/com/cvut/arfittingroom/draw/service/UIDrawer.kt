@@ -20,6 +20,7 @@ import kotlin.math.sqrt
 private const val ELEMENT_MENU_ICON_SIZE = 70f
 private const val MENU_SCALE_FACTOR = 1.5f
 private const val ELEMENT_MENU_ICON_BOUNDS_SCALE_FACTOR = 2f
+private const val BOUNDS_SCALE_FACTOR = 1.4f
 
 class UIDrawer(private val context: Context) {
     private var menuWidth: Float = 0f
@@ -45,12 +46,6 @@ class UIDrawer(private val context: Context) {
             color = Color.GRAY
             alpha = (255 * 0.9).toInt()
         }
-    private val highlightPaint:
-        Paint =
-            Paint().apply {
-                color = Color.YELLOW
-                alpha = (255 * 0.7).toInt()
-            }
 
     private val editElementIcons: HashMap<EElementEditAction, Bitmap> = hashMapOf()
     private val editElementIconsBounds: HashMap<EElementEditAction, RectF> = hashMapOf()
@@ -62,7 +57,6 @@ class UIDrawer(private val context: Context) {
     private var viewWidth: Int = 0
     private var viewHeight: Int = 0
 
-    private var selectedEditAction: EElementEditAction? = null
     var shouldDrawGrid = true
 
     private fun prepareMatrix(bitmap: Bitmap?): Matrix {
@@ -130,6 +124,13 @@ class UIDrawer(private val context: Context) {
             faceTextureBitmap?.let { canvas.drawBitmap(it, faceTextureMatrix, null) }
         }
     }
+
+    private val boundsPaint: Paint =
+        Paint().apply {
+            color = Color.BLACK
+            alpha = (255 * 0.5).toInt()
+            style = Paint.Style.FILL
+        }
 
     fun drawSelectedElementEditIcons(
         canvas: Canvas,
@@ -211,7 +212,18 @@ class UIDrawer(private val context: Context) {
                 true
             )
             canvas.drawBitmap(scaledIcon, x, y, null)
-            editElementIconsBounds[action] = RectF(x, y, x + scaledIconSize, y + scaledIconSize)
+
+            val centerX = x + scaledIconSize / 2
+            val centerY = y + scaledIconSize / 2
+            val newHalfWidth = scaledIconSize * BOUNDS_SCALE_FACTOR / 2
+            val newHalfHeight = scaledIconSize * BOUNDS_SCALE_FACTOR / 2
+
+            editElementIconsBounds[action] = RectF(
+                centerX - newHalfWidth,
+                centerY - newHalfHeight,
+                centerX + newHalfWidth,
+                centerY + newHalfHeight
+            )
         }
     }
 
@@ -249,9 +261,8 @@ class UIDrawer(private val context: Context) {
             )
         }
 
-        selectedEditAction?.let {action ->
-            highlightButton(action, canvas)
-            selectedEditAction = null
+        for (bounds in editElementIconsBounds.values) {
+            canvas.drawRect(bounds, boundsPaint)
         }
 
     }
@@ -264,8 +275,8 @@ class UIDrawer(private val context: Context) {
     ) {
         editElementIconsBounds[action] = RectF(
             x, y,
-            x + menuWidth / canvasScaleFactor * ELEMENT_MENU_ICON_BOUNDS_SCALE_FACTOR,
-            y + textSize / canvasScaleFactor * ELEMENT_MENU_ICON_BOUNDS_SCALE_FACTOR
+            x + menuWidth / canvasScaleFactor,
+            y + textSize / canvasScaleFactor
         )
     }
 
@@ -426,11 +437,5 @@ class UIDrawer(private val context: Context) {
 
     fun drawBackground(canvas: Canvas) {
         backgroundBitmap?.let { canvas.drawBitmap(it, backgroundBitmapMatrix, null) }
-    }
-
-    private fun highlightButton(action: EElementEditAction, canvas: Canvas) {
-        editElementIconsBounds[action]?.let { bounds ->
-            canvas.drawRect(bounds, highlightPaint)
-        }
     }
 }
