@@ -311,8 +311,6 @@ class FittingRoomActivity :
                     )
                     null
                 }
-        }.addOnFailureListener { ex ->
-            StyleableToast.makeText(this, ex.message, R.style.mytoast).show()
         }
     }
 
