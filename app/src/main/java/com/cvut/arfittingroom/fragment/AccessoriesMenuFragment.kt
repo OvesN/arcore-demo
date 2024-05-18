@@ -19,7 +19,7 @@ import com.cvut.arfittingroom.activity.ResourceListener
 import com.cvut.arfittingroom.model.ACCESSORY_TYPES_COLLECTION
 import com.cvut.arfittingroom.model.MODELS_COLLECTION
 import com.cvut.arfittingroom.model.NUM_OF_ELEMENTS_IN_ROW
-import com.cvut.arfittingroom.model.PREVIEW_IMAGE_ATTRIBUTE
+import com.cvut.arfittingroom.model.PREVIEW_ATTRIBUTE
 import com.cvut.arfittingroom.model.REF_ATTRIBUTE
 import com.cvut.arfittingroom.model.SLOT_ATTRIBUTE
 import com.cvut.arfittingroom.model.TYPE_ATTRIBUTE
@@ -128,14 +128,14 @@ class AccessoriesMenuFragment : Fragment() {
             .addOnSuccessListener { result ->
                 for (document in result) {
                     val ref = document[REF_ATTRIBUTE].toString()
-                    val preview = document[PREVIEW_IMAGE_ATTRIBUTE].toString()
+                    val preview = document[PREVIEW_ATTRIBUTE].toString()
                     val slot = document[SLOT_ATTRIBUTE]?.toString() ?: ref
 
                     modelsInfo.add(
                         ModelTO(
                             slot = slot,
-                            modelRef = ref,
-                            imagePreviewRef = preview,
+                            ref = ref,
+                            previewRef = preview,
                             type = type,
                         ),
                     )
@@ -175,7 +175,7 @@ class AccessoriesMenuFragment : Fragment() {
                     ImageButton(context).apply {
                         scaleType = ImageView.ScaleType.FIT_CENTER
                         background = null
-                        id = modelInfo.modelRef.hashCode()
+                        id = modelInfo.ref.hashCode()
                         setOnClickListener {
                             selectAccessoriesOption(view, this, modelInfo)
                         }
@@ -199,7 +199,7 @@ class AccessoriesMenuFragment : Fragment() {
                 }
 
                 GlideApp.with(this)
-                    .load(storage.getReference(modelInfo.imagePreviewRef))
+                    .load(storage.getReference(modelInfo.previewRef))
                     .thumbnail()
                     .into(imageButton)
             }
@@ -238,7 +238,7 @@ class AccessoriesMenuFragment : Fragment() {
 
     fun applyState(selectedModels: List<ModelTO>) {
         selectedSlotToViewId.clear()
-        selectedModels.forEach { selectedSlotToViewId[it.slot] = it.modelRef.hashCode() }
+        selectedModels.forEach { selectedSlotToViewId[it.slot] = it.ref.hashCode() }
         fetchAccessoriesTypes(requireView())
     }
 

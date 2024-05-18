@@ -130,7 +130,7 @@ class LooksMenuFragment : Fragment() {
 
             looks.values.forEach { lookInfo ->
                 val button =
-                    if (lookInfo.imagePreviewRef.isNotEmpty()) {
+                    if (lookInfo.previewRef.isNotEmpty()) {
                         ImageButton(context).apply {
                             scaleType = ImageView.ScaleType.FIT_CENTER
                             background = ContextCompat.getDrawable(context, R.drawable.head_model)
@@ -166,9 +166,9 @@ class LooksMenuFragment : Fragment() {
                     selectLookButton(button)
                 }
 
-                if (lookInfo.imagePreviewRef.isNotEmpty()) {
+                if (lookInfo.previewRef.isNotEmpty()) {
                     GlideApp.with(this)
-                        .load(storage.getReference(lookInfo.imagePreviewRef))
+                        .load(storage.getReference(lookInfo.previewRef))
                         .thumbnail()
                         .into(button as ImageButton)
                 }
@@ -238,7 +238,7 @@ class LooksMenuFragment : Fragment() {
             .addOnSuccessListener { result ->
                 val lookTo = result.toObject<LookTO>()
                 lookTo?.let {
-                    storage.getReference(it.imagePreviewRef).delete()
+                    storage.getReference(it.previewRef).delete()
                     val folderRef = storage.getReference("$LOOKS_COLLECTION/${lookTo.lookId}")
                     folderRef.listAll()
                         .addOnSuccessListener { listResult ->

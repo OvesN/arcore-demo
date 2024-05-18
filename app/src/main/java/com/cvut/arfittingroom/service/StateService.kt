@@ -76,12 +76,14 @@ class StateService {
                 reapplyNodesForNewFace(face, sceneView)
             }
 
-            faceNodesInfo.slotToFaceNodeMap[slot] ?: AugmentedFaceNode(face).also { newNode ->
-                newNode.parent = sceneView.scene
-                newNode.renderable = renderable
-                faceNodesInfo.slotToFaceNodeMap[slot] = newNode
-            }.apply {
-                this.renderable = renderable
+            val slotFaceNode = faceNodesInfo.slotToFaceNodeMap[slot]
+            if (slotFaceNode != null) {
+                slotFaceNode.renderable = renderable
+            } else {
+                faceNodesInfo.slotToFaceNodeMap[slot] = AugmentedFaceNode(face).also { newNode ->
+                    newNode.parent = sceneView.scene
+                    newNode.renderable = renderable
+                }
             }
         }
     }

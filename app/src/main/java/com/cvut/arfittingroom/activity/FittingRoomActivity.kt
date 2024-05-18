@@ -44,7 +44,6 @@ import com.cvut.arfittingroom.model.PREVIEW_COLLECTION
 import com.cvut.arfittingroom.model.to.LookTO
 import com.cvut.arfittingroom.model.to.MakeupTO
 import com.cvut.arfittingroom.model.to.ModelTO
-import com.cvut.arfittingroom.module.GlideApp
 import com.cvut.arfittingroom.service.StateService
 import com.cvut.arfittingroom.utils.BitmapUtil.combineBitmaps
 import com.cvut.arfittingroom.utils.FileUtil.deleteTempFiles
@@ -221,7 +220,6 @@ class FittingRoomActivity :
 
     override fun applyModel(modelTO: ModelTO) {
         binding.progressBar.visibility = View.VISIBLE
-        stateService.addModel(modelTO)
         loadModel(modelTO)
     }
 
@@ -482,7 +480,7 @@ class FittingRoomActivity :
     }
 
     private fun loadModel(modelTO: ModelTO) {
-        storage.getReference(modelTO.modelRef)
+        storage.getReference(modelTO.ref)
             .downloadUrl
             .addOnSuccessListener { uri ->
                 ModelRenderable.builder()
@@ -491,6 +489,7 @@ class FittingRoomActivity :
                     .build()
                     .thenAccept { renderable ->
                         progressBar.visibility = View.INVISIBLE
+                        stateService.addModel(modelTO)
                         stateService.applyModelOnFace(arSceneView, renderable, modelTO.slot)
                     }
                     .exceptionally { ex ->
@@ -686,7 +685,7 @@ class FittingRoomActivity :
                 appliedModels = stateService.getAppliedModelsList(),
                 editorState = maskEditorFragment.serializeEditorState(),
                 name = name,
-                imagePreviewRef = createPreview(lookId),
+                previewRef = createPreview(lookId),
             )
 
         fireStore.collection(LOOKS_COLLECTION)
