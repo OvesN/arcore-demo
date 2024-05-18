@@ -147,7 +147,7 @@ class MakeupMenuFragment : Fragment() {
             .get()
             .addOnSuccessListener { result ->
                 view?.let { view ->
-                    updateColorOptionsMenu(view, result.map { Color.parseColor(it.id) })
+                    updateColorOptionsMenu(view, result.map { Color.parseColor(it["color"].toString()) })
                 }
             }
             .addOnFailureListener { ex ->

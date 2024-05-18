@@ -40,20 +40,18 @@
 
             <ImageButton
                 android:id="@+id/button_undo"
-                android:layout_width="wrap_content"
-                android:layout_height="25dp"
-                android:layout_marginEnd="10dp"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+
                 android:background="@null"
-                android:scaleType="fitCenter"
                 android:src="@drawable/undo" />
 
             <ImageButton
                 android:id="@+id/button_redo"
-                android:layout_width="wrap_content"
-                android:layout_height="25dp"
-                android:layout_marginStart="10dp"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+
                 android:background="@null"
-                android:scaleType="fitCenter"
                 android:src="@drawable/redo" />
         </LinearLayout>
 
@@ -156,12 +154,12 @@
 
         <LinearLayout
             android:id="@+id/menu_buttons"
-            android:background="@drawable/button"
-            android:backgroundTint="@color/colorDarkGrey"
             android:layout_width="wrap_content"
             android:layout_height="30dp"
             android:layout_marginTop="10dp"
             android:layout_marginBottom="10dp"
+            android:background="@drawable/button"
+            android:backgroundTint="@color/colorDarkGrey"
             android:gravity="center"
             android:orientation="horizontal"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -201,11 +199,11 @@
 
         <FrameLayout
             android:id="@+id/menu_fragment_container"
-            android:paddingTop="20dp"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:background="@null"
             android:gravity="center_horizontal"
+            android:paddingTop="20dp"
             app:layout_constraintBottom_toTopOf="@id/menu_buttons"
             app:layout_constraintEnd_toStartOf="@id/right_column_buttons"
             app:layout_constraintHorizontal_bias="0.5"
@@ -227,8 +225,6 @@
         android:id="@+id/stroke_size_layout"
         android:layout_width="40dp"
         android:layout_height="350dp"
-        android:background="@drawable/size_bar"
-        android:translationX="-10dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
@@ -244,8 +240,9 @@
             android:stepSize="1"
             android:value="10"
             app:tickVisible="false"
-            app:vsb_bar_width="0dp"
-            app:vsb_max_value="200"
+            app:vsb_bar_progress="@color/colorActiveLight"
+            app:vsb_bar_width="2dp"
+            app:vsb_max_value="150"
             app:vsb_show_thumb="true" />
     </LinearLayout>
 
@@ -253,13 +250,12 @@
         android:id="@+id/progress_bar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:indeterminate="true"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="20dp"
         android:layout_marginBottom="20dp"
+        android:indeterminate="true"
         android:visibility="invisible"
-       />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

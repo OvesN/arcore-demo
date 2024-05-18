@@ -99,8 +99,11 @@ class MaskEditorFragment : Fragment(), HistoryChangeListener, ColorChangeListene
         menuButtons = view.findViewById(R.id.menu_buttons)
 
         slider = view.findViewById(R.id.stroke_size_slider)
-        slider.thumbPlaceholderDrawable = ContextCompat.getDrawable(view.context, R.drawable.slider)
-        slider.thumbContainerColor = Color.TRANSPARENT
+        slider.useThumbToSetProgress = true
+       // slider.barBackgroundEndColor
+        slider.thumbPlaceholderDrawable = ContextCompat.getDrawable(view.context, R.drawable.thumb)
+//        slider.thumbPlaceholderDrawable = ContextCompat.getDrawable(view.context, R.drawable.slider)
+       slider.thumbContainerColor = Color.TRANSPARENT
 
         layersButton = view.findViewById(R.id.button_layers)
         layersButton.setOnClickListener {
