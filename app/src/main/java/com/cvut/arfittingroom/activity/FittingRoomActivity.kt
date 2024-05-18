@@ -90,7 +90,7 @@ class FittingRoomActivity :
     private var handler = Handler(Looper.getMainLooper())
     private var gifRunnable: Runnable? = null
 
-    private var frameDelay: Long = 100  // Default frame delay (100 ms per frame)
+    private var frameDelay: Long = 100
     private val accessoriesMenuFragment = AccessoriesMenuFragment()
     private val looksOptionsFragment = LooksMenuFragment()
     private val makeupOptionsFragment = MakeupMenuFragment()
