@@ -58,11 +58,11 @@ class AccessoriesMenuFragment : Fragment() {
         savedInstanceState: Bundle?,
     ) {
         super.onViewCreated(view, savedInstanceState)
-        fetchAccessoriesTypes(view)
+        fetchAccessoriesTypes()
     }
 
-    private fun fetchAccessoriesTypes(view: View) {
-        view.findViewById<ConstraintLayout>(R.id.vertical_scroll_view).visibility = View.GONE
+    fun fetchAccessoriesTypes() {
+        requireView().findViewById<ConstraintLayout>(R.id.vertical_scroll_view).visibility = View.GONE
 
         firestore.collection(ACCESSORY_TYPES_COLLECTION)
             .get()
@@ -73,7 +73,7 @@ class AccessoriesMenuFragment : Fragment() {
                 }
 
                 if (isAdded) {
-                    updateAccessoriesTypesMenu(view)
+                    updateAccessoriesTypesMenu(requireView())
                 }
             }
             .addOnFailureListener { ex ->
@@ -163,7 +163,7 @@ class AccessoriesMenuFragment : Fragment() {
             }
         typeButton.setOnClickListener {
             // Return back
-            fetchAccessoriesTypes(view)
+            fetchAccessoriesTypes()
         }
 
         options.post {
@@ -239,11 +239,11 @@ class AccessoriesMenuFragment : Fragment() {
     fun applyState(selectedModels: List<ModelTO>) {
         selectedSlotToViewId.clear()
         selectedModels.forEach { selectedSlotToViewId[it.slot] = it.ref.hashCode() }
-        fetchAccessoriesTypes(requireView())
+        fetchAccessoriesTypes()
     }
 
     fun resetMenu() {
         selectedSlotToViewId.clear()
-        fetchAccessoriesTypes(requireView())
+        fetchAccessoriesTypes()
     }
 }

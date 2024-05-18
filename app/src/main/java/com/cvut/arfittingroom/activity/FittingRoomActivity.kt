@@ -145,9 +145,11 @@ class FittingRoomActivity :
 
         binding.makeupButton.setOnClickListener {
             showMakeupOptionsMenu()
+            makeupOptionsFragment.fetchMakeupTypes()
         }
         binding.accessoriesButton.setOnClickListener {
             showAccessoriesMenu()
+            accessoriesMenuFragment.fetchAccessoriesTypes()
         }
         binding.looksButton.setOnClickListener {
             showLooksMenu()

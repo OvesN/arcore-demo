@@ -63,10 +63,10 @@ class MakeupMenuFragment : Fragment() {
         savedInstanceState: Bundle?,
     ) {
         super.onViewCreated(view, savedInstanceState)
-        getView()?.let { fetchMakeupTypes(it) }
+        getView()?.let { fetchMakeupTypes() }
     }
 
-    private fun fetchMakeupTypes(view: View) {
+    fun fetchMakeupTypes() {
         firestore.collection(MAKEUP_TYPES_COLLECTION)
             .get()
             .addOnSuccessListener { result ->
@@ -81,7 +81,7 @@ class MakeupMenuFragment : Fragment() {
                 }
 
                 if (isAdded) {
-                    updateMakeupTypesMenu(view)
+                    updateMakeupTypesMenu(requireView())
                 }
             }
             .addOnFailureListener { ex ->
@@ -275,7 +275,7 @@ class MakeupMenuFragment : Fragment() {
                 background = null
                 id = type.hashCode()
                 setOnClickListener {
-                    fetchMakeupTypes(view)
+                    fetchMakeupTypes()
                 }
             }
 
@@ -365,6 +365,6 @@ class MakeupMenuFragment : Fragment() {
 
     fun resetMenu() {
         selectedOptionTypeToViewId.clear()
-        fetchMakeupTypes(requireView())
+        fetchMakeupTypes()
     }
 }
