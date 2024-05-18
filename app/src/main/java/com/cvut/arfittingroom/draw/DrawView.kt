@@ -103,7 +103,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private var frameCount = 0
     private var pipetteSelectedColor = Color.TRANSPARENT
     private var colorChangeListener: ColorChangeListener? = null
-
+    private var elementToRepaintAfterPipetteView: Element? = null
     @Inject
     lateinit var layerManager: LayerManager
 
@@ -537,10 +537,12 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             fill = style == Paint.Style.FILL,
             shouldShowFillCheckbox = true,
             shouldShowPipette = true,
-            onPipetteSelected = { showPipetteView() },
+            onPipetteSelected = { showPipetteView();  elementToRepaintAfterPipetteView = element},
         ) { envelopColor, fill ->
             repaintElement(element, envelopColor, fill)
+            elementToRepaintAfterPipetteView = null
         }
+
 
         element.setSelected(false)
         selectedElement = null
@@ -626,8 +628,13 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                 layerManager.bitmapFromAllLayers = null
 
                 if (pipetteSelectedColor != Color.TRANSPARENT) {
-                    setColor(pipetteSelectedColor, paintOptions.style == Paint.Style.FILL)
-                    colorChangeListener?.onColorChanged(pipetteSelectedColor, paintOptions.style == Paint.Style.FILL)
+                    elementToRepaintAfterPipetteView?.let { element ->
+                        repaintElement(element, pipetteSelectedColor, paintOptions.style == Paint.Style.FILL)
+                        elementToRepaintAfterPipetteView = null
+                    } ?: run {
+                        setColor(pipetteSelectedColor, paintOptions.style == Paint.Style.FILL)
+                        colorChangeListener?.onColorChanged(pipetteSelectedColor, paintOptions.style == Paint.Style.FILL)
+                    }
                 }
                 pipetteSelectedColor = Color.TRANSPARENT
             }
