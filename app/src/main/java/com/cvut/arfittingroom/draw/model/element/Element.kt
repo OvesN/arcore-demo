@@ -55,13 +55,13 @@ abstract class Element :
     }
 
     override fun scale(newRadius: Float) {
-        outerRadius = max(newRadius, 1f)
+        outerRadius = max(newRadius, 5f)
         originalRadius = outerRadius
     }
 
     // Scale while scaling gesture
     override fun scaleContinuously(factor: Float) {
-        val newRadius = max(factor * originalRadius, 1f)
+        val newRadius = max(factor * originalRadius, 5f)
 
         outerRadius = newRadius
     }

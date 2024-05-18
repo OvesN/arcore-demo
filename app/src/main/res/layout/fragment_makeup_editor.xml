@@ -224,7 +224,7 @@
     <LinearLayout
         android:id="@+id/stroke_size_layout"
         android:layout_width="40dp"
-        android:layout_height="350dp"
+        android:layout_height="300dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
