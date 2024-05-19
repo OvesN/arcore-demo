@@ -60,7 +60,20 @@
             android:textAllCaps="false" />
 
         <Space
-            android:layout_width="10dp"
+            android:layout_width="20dp"
+            android:layout_height="10dp"
+            android:layout_weight="0.5" />
+        <Button
+            android:id="@+id/ok_popup_button"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:layout_weight="0.8"
+            android:background="@drawable/small_button"
+            android:text="@string/ok"
+            android:textAllCaps="false" />
+
+        <Space
+            android:layout_width="20dp"
             android:layout_height="10dp"
             android:layout_weight="0.5" />
 
@@ -71,25 +84,14 @@
             android:layout_weight="0.8"
             android:background="@drawable/small_button"
             android:backgroundTint="@color/colorActive"
-            android:visibility="invisible"
+            android:visibility="gone"
             android:text="@string/delete"
             android:textAllCaps="false" />
 
         <Space
-            android:layout_width="10dp"
+            android:layout_width="20dp"
             android:layout_height="10dp"
             android:layout_weight="0.5" />
-
-        <ImageButton
-            android:src="@drawable/share"
-            android:id="@+id/share_button"
-            android:scaleType="fitCenter"
-            android:background="@null"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_weight="0.2"
-
-            android:textAllCaps="false" />
     </LinearLayout>
 
 </LinearLayout>

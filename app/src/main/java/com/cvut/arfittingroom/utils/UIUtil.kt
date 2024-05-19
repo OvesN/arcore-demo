@@ -55,16 +55,9 @@ object UIUtil {
             dialog.dismiss()
         }
 
-        dialogView.findViewById<ImageButton>(R.id.share_button).setOnClickListener {
-            val shareIntent = Intent().apply {
-                action = Intent.ACTION_SEND
-                putExtra(
-                    Intent.EXTRA_TEXT,
-                    "Check out this look: http://www.glamartist.com/look?lookId=$lookId"
-                )
-                type = "text/plain"
-            }
-            context.startActivity(Intent.createChooser(shareIntent, "Share Look"))
+        dialogView.findViewById<Button>(R.id.ok_popup_button).setOnClickListener {
+            onChangeIsPublic(checkBox.isChecked)
+            dialog.dismiss()
         }
 
         val authorNameText = dialogView.findViewById<TextView>(R.id.look_author_name)
@@ -80,9 +73,6 @@ object UIUtil {
             }
         }
 
-        dialog.setOnDismissListener {
-            onChangeIsPublic(checkBox.isChecked)
-        }
 
         dialog.show()
     }

@@ -15,6 +15,7 @@ import android.view.View
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
+import android.widget.ImageButton
 import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
@@ -104,6 +105,7 @@ class FittingRoomActivity :
     private lateinit var storage: FirebaseStorage
 
     private lateinit var progressBar: ProgressBar
+    private lateinit var shareButton: ImageButton
 
     @Inject
     lateinit var stateService: StateService
@@ -171,6 +173,23 @@ class FittingRoomActivity :
             arSceneView.pause()
         }
 
+        shareButton = binding.shareButton
+
+        shareButton.setOnClickListener {
+            val shareIntent = Intent().apply {
+                action = Intent.ACTION_SEND
+                putExtra(
+                    Intent.EXTRA_TEXT,
+                    "Check out this look: http://www.glamartist.com/look?lookId=${looksOptionsFragment.getSelectedLookId()}"
+                )
+                type = "text/plain"
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            }
+            applicationContext.startActivity(Intent.createChooser(shareIntent, "Share Look").apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            })
+        }
+
         progressBar = binding.progressBar
 
         val lookId = intent.getStringExtra("LOOK_ID")
@@ -233,10 +252,14 @@ class FittingRoomActivity :
         if (DrawHistoryHolder.isNotEmpty()) {
             showWarningDialog(lookTO)
         } else {
+            shareButton.visibility = View.VISIBLE
             progressBar.visibility = View.VISIBLE
 
             if (lookTO.editorState.layers.isNotEmpty()) {
                 maskEditorFragment.editorStateTO = lookTO.editorState
+            }
+            else  {
+                maskEditorFragment.editorStateTO = null
             }
 
             stateService.clearAll()
@@ -320,6 +343,7 @@ class FittingRoomActivity :
     }
 
     override fun removeLook(lookId: String) {
+        shareButton.visibility = View.INVISIBLE
         stopAnimation()
         accessoriesMenuFragment.resetMenu()
         makeupOptionsFragment.resetMenu()
@@ -709,6 +733,7 @@ class FittingRoomActivity :
                 ).show()
                 progressBar.visibility = View.INVISIBLE
                 looksOptionsFragment.selectLook(lookId)
+                shareButton.visibility = View.VISIBLE
             }
             .addOnFailureListener { ex -> Log.println(Log.ERROR, null, "onFailure: $ex") }
     }
@@ -794,6 +819,7 @@ class FittingRoomActivity :
     }
 
     private fun clearAll() {
+        shareButton.visibility = View.INVISIBLE
         stopAnimation()
         deleteTempFiles(applicationContext)
 

@@ -219,6 +219,7 @@ class LooksMenuFragment : Fragment() {
                 val listener = context as? ResourceListener
                 listener?.removeLook(selectedLookTO.lookId)
                 resetMenu()
+                lookInfoButton.visibility = View.INVISIBLE
             },
             onChangeIsPublic = { isPublic ->
                 if (selectedLookTO.lookId.isNotEmpty()) {
@@ -308,4 +309,5 @@ class LooksMenuFragment : Fragment() {
         }
     }
 
+    fun getSelectedLookId() = selectedLookTO.lookId
 }
