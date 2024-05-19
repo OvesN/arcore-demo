@@ -208,19 +208,19 @@ class MaskEditorFragment : Fragment(), HistoryChangeListener, ColorChangeListene
         view.findViewById<Button>(R.id.image_button).setOnClickListener {
             showImageMenu(it)
         }
-
-        view.findViewById<ImageButton>(R.id.button_menu).setOnClickListener {
-            showEditorSubmenuDialog(
-                requireContext(), onAddImage = { imageMenuFragment.uploadImage() },
-                onChangeBackground = { shouldShowBackground ->
-                    drawView.setFaceGridVisibility(
-                        shouldShowBackground
-                    )
-                    drawView.invalidate()
-                },
-                isBackgroundShown = drawView.getFaceGridVisibility()
-            )
-        }
+//
+//        view.findViewById<ImageButton>(R.id.button_menu).setOnClickListener {
+//            showEditorSubmenuDialog(
+//                requireContext(), onAddImage = { imageMenuFragment.uploadImage() },
+//                onChangeBackground = { shouldShowBackground ->
+//                    drawView.setFaceGridVisibility(
+//                        shouldShowBackground
+//                    )
+//                    drawView.invalidate()
+//                },
+//                isBackgroundShown = drawView.getFaceGridVisibility()
+//            )
+//        }
 
         slider.setOnReleaseListener {
             drawView.setStrokeWidth(it)

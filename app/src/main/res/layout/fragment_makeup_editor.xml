@@ -135,7 +135,8 @@
                 android:layout_height="20dp"
                 android:layout_gravity="center_horizontal|top"
                 android:background="@drawable/menu"
-                android:scaleType="fitCenter" />
+                android:scaleType="fitCenter"
+                android:visibility="invisible"/>
 
             <Space
                 android:layout_width="match_parent"

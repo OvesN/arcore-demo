@@ -16,6 +16,7 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.DrawableCompat
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
@@ -69,17 +70,18 @@ class ImagesMenuFragment(private val drawView: DrawView) : Fragment() {
             NUM_OF_ELEMENTS_IN_ROW_BIG_MENU
     }
 
-    private val getImage = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-        uri?.let {
-            uploadImage(it)
-        } ?: run {
-            StyleableToast.makeText(
-                requireContext(),
-                "Failed to select image.",
-                R.style.mytoast
-            ).show()
+    private val getImage =
+        registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+            uri?.let {
+                uploadImage(it)
+            } ?: run {
+                StyleableToast.makeText(
+                    requireContext(),
+                    "Failed to select image.",
+                    R.style.mytoast
+                ).show()
+            }
         }
-    }
 
     fun fetchImages() {
         val options = requireView().findViewById<GridLayout>(R.id.vertical_options)
@@ -116,6 +118,24 @@ class ImagesMenuFragment(private val drawView: DrawView) : Fragment() {
         options.post {
             val imageWidth =
                 (options.width - options.paddingStart - options.paddingEnd) / NUM_OF_ELEMENTS_IN_ROW_BIG_MENU
+            val addImageButton = ImageButton(context).apply {
+                scaleType = ImageView.ScaleType.FIT_CENTER
+                background = ContextCompat.getDrawable(requireContext(), R.drawable.plus)
+                setOnClickListener {
+                    uploadImage()
+                }
+            }
+            val params =
+                GridLayout.LayoutParams().apply {
+                    columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
+                    rowSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
+                    height = imageWidth
+                    width = imageWidth
+                }
+
+            params.setGravity(Gravity.START)
+
+            options.addView(addImageButton, params)
             imagesTO.forEach { image ->
                 val button =
                     ImageButton(context).apply {
