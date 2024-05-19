@@ -249,7 +249,7 @@ class FittingRoomActivity :
     }
 
     override fun applyLook(lookTO: LookTO) {
-        if (DrawHistoryHolder.isNotEmpty()) {
+        if (DrawHistoryHolder.isNotEmpty() || stateService.isStateNotEmpty()) {
             showWarningDialog(lookTO)
         } else {
             shareButton.visibility = View.VISIBLE

@@ -174,4 +174,5 @@ class StateService {
     fun getAppliedModelsList() = appliedModels.values.toList()
 
     fun getAppliedMakeupList() = appliedMakeUpTypes.values.toList()
+    fun isStateNotEmpty() = appliedMakeUpTypes.isNotEmpty() || appliedModels.isNotEmpty()
 }
