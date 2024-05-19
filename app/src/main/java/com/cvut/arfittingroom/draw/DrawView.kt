@@ -103,7 +103,8 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private var frameCount = 0
     private var pipetteSelectedColor = Color.TRANSPARENT
     private var colorChangeListener: ColorChangeListener? = null
-    private var elementToRepaintAfterPipetteView: Element? = null
+    private var elementToRepaintAfterPipetteView: Repaintable? = null
+
     @Inject
     lateinit var layerManager: LayerManager
 
@@ -245,9 +246,9 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                 Log.println(Log.INFO, null, "count $frameCount")
                 // Play gif three times and stop on the first frame
                 if (frameCount >= (
-                    gif.gifDrawable?.numberOfFrames
-                        ?: 0
-                ) * 3 && gif.currentFrameIndex == 0
+                            gif.gifDrawable?.numberOfFrames
+                                ?: 0
+                            ) * 3 && gif.currentFrameIndex == 0
                 ) {
                     frameCount = 0
                     stopAnimation(gif)
@@ -521,31 +522,27 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     }
 
     private fun changeElementColor(element: Element) {
-        val initialColor =
-            when (element) {
-                is Repaintable -> element.paint.color
-                else -> paintOptions.color
+        val repaintable = element as? Repaintable
+        repaintable?.let {
+            showColorPickerDialog(
+                context,
+                repaintable.paint.color,
+                fill = repaintable.paint.style == Paint.Style.FILL,
+                shouldShowFillCheckbox = true,
+                shouldShowPipette = true,
+                onPipetteSelected = {
+                    showPipetteView(); elementToRepaintAfterPipetteView = element as Repaintable
+                },
+            ) { envelopColor, fill ->
+                repaintElement(element, envelopColor, fill)
+                elementToRepaintAfterPipetteView = null
             }
-        val style =
-            when (element) {
-                is Repaintable -> element.paint.style
-                else -> paintOptions.style
-            }
-        showColorPickerDialog(
-            context,
-            initialColor,
-            fill = style == Paint.Style.FILL,
-            shouldShowFillCheckbox = true,
-            shouldShowPipette = true,
-            onPipetteSelected = { showPipetteView();  elementToRepaintAfterPipetteView = element},
-        ) { envelopColor, fill ->
-            repaintElement(element, envelopColor, fill)
-            elementToRepaintAfterPipetteView = null
+
+
+            element.setSelected(false)
+            selectedElement = null
         }
 
-
-        element.setSelected(false)
-        selectedElement = null
     }
 
     private fun moveElementLayerUp(element: Element) {
@@ -629,11 +626,18 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
                 if (pipetteSelectedColor != Color.TRANSPARENT) {
                     elementToRepaintAfterPipetteView?.let { element ->
-                        repaintElement(element, pipetteSelectedColor, paintOptions.style == Paint.Style.FILL)
+                        repaintElement(
+                            element,
+                            pipetteSelectedColor,
+                            element.paint.style == Paint.Style.FILL
+                        )
                         elementToRepaintAfterPipetteView = null
                     } ?: run {
                         setColor(pipetteSelectedColor, paintOptions.style == Paint.Style.FILL)
-                        colorChangeListener?.onColorChanged(pipetteSelectedColor, paintOptions.style == Paint.Style.FILL)
+                        colorChangeListener?.onColorChanged(
+                            pipetteSelectedColor,
+                            paintOptions.style == Paint.Style.FILL
+                        )
                     }
                 }
                 pipetteSelectedColor = Color.TRANSPARENT
@@ -839,14 +843,14 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             Curve(
                 path = layerManager.getCurPath(),
                 paint =
-                    Paint().apply {
-                        color = paintOptions.color
-                        strokeWidth = paintOptions.strokeWidth
-                        alpha = paintOptions.alpha
-                        strokeCap = Paint.Cap.ROUND
-                        strokeJoin = Paint.Join.ROUND
-                        style = Paint.Style.STROKE
-                    },
+                Paint().apply {
+                    color = paintOptions.color
+                    strokeWidth = paintOptions.strokeWidth
+                    alpha = paintOptions.alpha
+                    strokeCap = Paint.Cap.ROUND
+                    strokeJoin = Paint.Join.ROUND
+                    style = Paint.Style.STROKE
+                },
                 outerRadius = paintOptions.strokeWidth,
                 bitmapTexture = TexturedBrushDrawer.originalBitmap,
                 strokeTextureRef = paintOptions.strokeTextureRef,
@@ -872,12 +876,12 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                     outerRadius = outerRadius,
                     pathCreationStrategy = stampType,
                     paint =
-                        Paint().apply {
-                            color = paintOptions.color
-                            style = paintOptions.style
-                            strokeWidth = 6f
-                            alpha = paintOptions.alpha
-                        },
+                    Paint().apply {
+                        color = paintOptions.color
+                        style = paintOptions.style
+                        strokeWidth = 6f
+                        alpha = paintOptions.alpha
+                    },
                 )
 
             addElementToLayer(layerManager.getActiveLayerIndex(), stamp)
@@ -1003,19 +1007,17 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     }
 
     private fun repaintElement(
-        element: Element,
+        element: Repaintable,
         newColor: Int,
         fill: Boolean,
     ) {
-        val repaintable = element as Repaintable
-
         addToHistory(
             RepaintElement(
-                repaintable,
-                oldColor = repaintable.paint.color,
+                element,
+                oldColor = element.paint.color,
                 newColor = newColor,
                 fill = fill,
-                wasFilled = repaintable.paint.style == Paint.Style.FILL,
+                wasFilled = element.paint.style == Paint.Style.FILL,
             ),
         )
 
