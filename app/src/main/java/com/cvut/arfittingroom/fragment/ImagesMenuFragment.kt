@@ -1,7 +1,6 @@
 package com.cvut.arfittingroom.fragment
 
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
@@ -9,40 +8,35 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.GridLayout
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
-import androidx.core.graphics.drawable.DrawableCompat
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
 import com.cvut.arfittingroom.R
 import com.cvut.arfittingroom.draw.DrawView
-import com.cvut.arfittingroom.draw.model.element.impl.Gif
+import com.cvut.arfittingroom.model.CREATED_AT_ATTRIBUTE
 import com.cvut.arfittingroom.model.GIFS_COLLECTION
 import com.cvut.arfittingroom.model.IMAGES_COLLECTION
-import com.cvut.arfittingroom.model.LOOKS_COLLECTION
 import com.cvut.arfittingroom.model.NUM_OF_ELEMENTS_IN_ROW_BIG_MENU
 import com.cvut.arfittingroom.model.to.ImageTO
-import com.cvut.arfittingroom.model.to.LookTO
 import com.cvut.arfittingroom.module.GlideApp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import com.google.firebase.storage.FirebaseStorage
 import io.github.muddz.styleabletoast.StyleableToast
 import pl.droidsonroids.gif.GifDrawable
 import pl.droidsonroids.gif.GifDrawableBuilder
-import java.io.BufferedInputStream
-import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.IOException
-import java.io.InputStream
+import java.sql.Timestamp
+import java.time.Instant
 import kotlin.random.Random
 
 class ImagesMenuFragment(private val drawView: DrawView) : Fragment() {
@@ -87,6 +81,7 @@ class ImagesMenuFragment(private val drawView: DrawView) : Fragment() {
         val options = requireView().findViewById<GridLayout>(R.id.vertical_options)
         options.removeAllViews()
         firestore.collection(IMAGES_COLLECTION)
+            .orderBy(CREATED_AT_ATTRIBUTE,  Query.Direction.DESCENDING)
             .get()
             .addOnSuccessListener { result ->
                 val images = result.documents.mapNotNull { it.toObject(ImageTO::class.java) }
@@ -125,7 +120,7 @@ class ImagesMenuFragment(private val drawView: DrawView) : Fragment() {
                     uploadImage()
                 }
             }
-            val params =
+            val addImageButtonParams =
                 GridLayout.LayoutParams().apply {
                     columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
                     rowSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
@@ -133,9 +128,9 @@ class ImagesMenuFragment(private val drawView: DrawView) : Fragment() {
                     width = imageWidth
                 }
 
-            params.setGravity(Gravity.START)
+            addImageButtonParams.setGravity(Gravity.START)
 
-            options.addView(addImageButton, params)
+            options.addView(addImageButton, addImageButtonParams)
             imagesTO.forEach { image ->
                 val button =
                     ImageButton(context).apply {
@@ -174,7 +169,7 @@ class ImagesMenuFragment(private val drawView: DrawView) : Fragment() {
         }
     }
 
-    fun uploadImage() {
+    private fun uploadImage() {
         getImage.launch("image/*")
     }
 
@@ -216,7 +211,8 @@ class ImagesMenuFragment(private val drawView: DrawView) : Fragment() {
 
         fileRef.putFile(fileUri)
             .addOnSuccessListener {
-                val image = ImageTO(ref = ref, isAnimated = isAnimated)
+                val image = ImageTO(ref = ref, isAnimated = isAnimated, createdAt = Timestamp.from(
+                    Instant.now()))
                 firestore.collection(IMAGES_COLLECTION).document().set(image)
                 fetchImages()
                 StyleableToast.makeText(

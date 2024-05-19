@@ -17,6 +17,7 @@ import androidx.fragment.app.Fragment
 import com.cvut.arfittingroom.R
 import com.cvut.arfittingroom.activity.ResourceListener
 import com.cvut.arfittingroom.model.AUTHOR_ATTRIBUTE
+import com.cvut.arfittingroom.model.CREATED_AT_ATTRIBUTE
 import com.cvut.arfittingroom.model.IS_PUBLIC_ATTRIBUTE
 import com.cvut.arfittingroom.model.LOOKS_COLLECTION
 import com.cvut.arfittingroom.model.NUM_OF_ELEMENTS_IN_ROW_BIG_MENU
@@ -29,6 +30,7 @@ import com.cvut.arfittingroom.utils.currentUserUsername
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.Filter
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.toObject
 import com.google.firebase.storage.FirebaseStorage
 import io.github.muddz.styleabletoast.StyleableToast
@@ -101,6 +103,7 @@ class LooksMenuFragment : Fragment() {
             .where(
                 filter,
             )
+            .orderBy(CREATED_AT_ATTRIBUTE,  Query.Direction.DESCENDING)
             .get()
             .addOnSuccessListener { result ->
                 result.documents.forEach { look ->
@@ -284,7 +287,8 @@ class LooksMenuFragment : Fragment() {
     }
 
     fun getLook(lookId: String, onSuccess: (LookTO) -> Unit = {}) {
-        firestore.collection(LOOKS_COLLECTION).document(lookId).get().addOnSuccessListener {
+        firestore.collection(LOOKS_COLLECTION).document(lookId)
+            .get().addOnSuccessListener {
             val lookTo = it.toObject<LookTO>()
             lookTo?.let { onSuccess(lookTo) }
         }.addOnFailureListener { ex ->

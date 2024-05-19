@@ -2,6 +2,9 @@ package com.cvut.arfittingroom.model.to
 
 import com.cvut.arfittingroom.model.to.drawhistory.EditorStateTO
 import com.google.firebase.firestore.PropertyName
+import java.sql.Timestamp
+import java.time.Instant
+import java.util.Date
 
 data class LookTO(
     @get:PropertyName("look_id") @set:PropertyName("look_id") var lookId: String = "",
@@ -13,4 +16,5 @@ data class LookTO(
     @get:PropertyName("preview_ref") @set:PropertyName("preview_ref") var previewRef: String = "",
     @get:PropertyName("is_animated") @set:PropertyName("is_animated") var isAnimated: Boolean = false,
     @get:PropertyName("is_public") @set:PropertyName("is_public") var isPublic: Boolean = false,
+    @get:PropertyName("created_at") @set:PropertyName("created_at") var createdAt: Date?  = null
 )

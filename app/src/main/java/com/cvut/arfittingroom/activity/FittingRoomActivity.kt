@@ -35,6 +35,7 @@ import com.cvut.arfittingroom.fragment.LooksMenuFragment
 import com.cvut.arfittingroom.fragment.MakeupMenuFragment
 import com.cvut.arfittingroom.fragment.MaskEditorFragment
 import com.cvut.arfittingroom.fragment.ProfileFragment
+import com.cvut.arfittingroom.model.IMAGES_COLLECTION
 import com.cvut.arfittingroom.model.LOOKS_COLLECTION
 import com.cvut.arfittingroom.model.MAKEUP_SLOT
 import com.cvut.arfittingroom.model.MASK_FRAME_FILE_NAME
@@ -77,6 +78,8 @@ import io.github.muddz.styleabletoast.StyleableToast
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.lang.Exception
+import java.sql.Timestamp
+import java.time.Instant
 import java.util.UUID
 import java.util.concurrent.CountDownLatch
 import javax.inject.Inject
@@ -717,6 +720,8 @@ class FittingRoomActivity :
                 editorState = maskEditorFragment.serializeEditorState(),
                 name = name,
                 previewRef = createPreview(lookId),
+                createdAt = Timestamp.from(
+                    Instant.now()),
             )
 
         fireStore.collection(LOOKS_COLLECTION)
