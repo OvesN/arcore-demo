@@ -708,6 +708,7 @@ class FittingRoomActivity :
                     R.style.mytoast,
                 ).show()
                 progressBar.visibility = View.INVISIBLE
+                looksOptionsFragment.selectLook(lookId)
             }
             .addOnFailureListener { ex -> Log.println(Log.ERROR, null, "onFailure: $ex") }
     }
@@ -859,6 +860,7 @@ class FittingRoomActivity :
 
         dialog.show()
     }
+
 
     companion object {
         const val MIN_OPENGL_VERSION = 3.0

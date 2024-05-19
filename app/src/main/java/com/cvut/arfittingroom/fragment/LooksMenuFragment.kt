@@ -296,4 +296,16 @@ class LooksMenuFragment : Fragment() {
         }
     }
 
+    fun selectLook(lookId: String) {
+        getLook(lookId) { lookTO ->
+            requireView().findViewById<View>(selectedLookTO.lookId.hashCode())
+                ?.let { deselectLookButton(it) }
+            selectedLookTO = lookTO
+            requireView().findViewById<View>(selectedLookTO.lookId.hashCode())?.let {
+                lookInfoButton.visibility = View.VISIBLE
+                selectLookButton(it)
+            }
+        }
+    }
+
 }
