@@ -17,6 +17,7 @@ class Layer(
     val id: UUID = UUID.randomUUID(),
     private val width: Int,
     private val height: Int,
+    val idNum: Int,
 ) {
     var isVisible: Boolean = true
     val elements = HashMap<UUID, Element>()
@@ -72,8 +73,7 @@ class Layer(
 
         if (paintOptions.strokeTextureRef.isNotEmpty()) {
             TexturedBrushDrawer.draw(canvas, curPath, curPaint.strokeWidth)
-        }
-        else {
+        } else {
             canvas.drawPath(curPath, curPaint)
         }
     }
@@ -114,8 +114,7 @@ class Layer(
 
         if (paintOptions.blurRadius != 0f) {
             curPaint.maskFilter = BlurMaskFilter(paintOptions.blurRadius, paintOptions.blurType)
-        }
-        else {
+        } else {
             curPaint.maskFilter = null
         }
     }
@@ -261,7 +260,9 @@ class Layer(
 
     fun doesHaveGif(): Boolean = elementsToDraw.firstOrNull { it is Gif }?.let { true } ?: false
 
-    fun getMaxNumberOfFrames() = elementsToDraw.filterIsInstance<Gif>().maxOfOrNull { it.gifDrawable?.numberOfFrames ?: 0 } ?: 0
+    fun getMaxNumberOfFrames() =
+        elementsToDraw.filterIsInstance<Gif>().maxOfOrNull { it.gifDrawable?.numberOfFrames ?: 0 }
+            ?: 0
 
     fun setAllGifsToAnimationMode() {
         elementsToDraw.forEach {

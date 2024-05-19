@@ -81,6 +81,8 @@ class LayerManager {
         recreateLayersBitmaps()
     }
 
+    fun getLayersNumIds() = layers.map { it.idNum }
+
     // Returns id of the new layer
     fun addLayer(
         width: Int,
@@ -90,7 +92,7 @@ class LayerManager {
             return getActiveLayerId()
         }
 
-        val layer = Layer(width = width, height = height)
+        val layer = Layer(width = width, height = height, idNum = layers.size)
 
         if (layers.isNotEmpty()) {
             layers[activeLayerIndex].deselectAllElements()

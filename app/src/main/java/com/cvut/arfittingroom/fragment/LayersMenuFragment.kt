@@ -111,23 +111,26 @@ class LayersMenuFragment(private val drawView: DrawView) : Fragment() {
     fun updateLayersButtons(numOfLayers: Int) {
         layersButtonsContainer.removeAllViews()
 
-        for (i in numOfLayers - 1 downTo 0) {
-            val button =
-                Button(requireContext()).apply {
-                    height = dpToPx(30, requireContext())
-                    setTypeface(typeface, Typeface.BOLD)
-                    text = i.toString()
-                    setOnClickListener {
-                        drawView.layerManager.setActiveLayer(i)
-                        drawView.layerManager.makeLayersSemiTransparentExceptOne(i)
-                        updateLayersButtons(drawView.layerManager.getNumOfLayers())
+        val nums = drawView.layerManager.getLayersNumIds()
 
-                        drawView.invalidate()
-                    }
+        nums.asReversed().forEachIndexed { reversedIndex, i ->
+            val index = nums.size - 1 - reversedIndex
+
+            val button = Button(requireContext()).apply {
+                height = dpToPx(30, requireContext())
+                setTypeface(typeface, Typeface.BOLD)
+                text = i.toString()
+                setOnClickListener {
+                    drawView.layerManager.setActiveLayer(index)
+                    drawView.layerManager.makeLayersSemiTransparentExceptOne(index)
+                    updateLayersButtons(drawView.layerManager.getNumOfLayers())
+
+                    drawView.invalidate()
                 }
+            }
 
-            if (i == drawView.layerManager.getActiveLayerIndex()) {
-                setIsVisibleButton(i)
+            if (index == drawView.layerManager.getActiveLayerIndex()) {
+                setIsVisibleButton(index)
                 button.setBackgroundColor(
                     ContextCompat.getColor(
                         requireContext(),
@@ -144,6 +147,41 @@ class LayersMenuFragment(private val drawView: DrawView) : Fragment() {
             }
 
             layersButtonsContainer.addView(button, layersButtonsContainer.childCount)
+        }
+
+        for (i in numOfLayers - 1 downTo 0) {
+//            val button =
+//                Button(requireContext()).apply {
+//                    height = dpToPx(30, requireContext())
+//                    setTypeface(typeface, Typeface.BOLD)
+//                    text = i.toString()
+//                    setOnClickListener {
+//                        drawView.layerManager.setActiveLayer(i)
+//                        drawView.layerManager.makeLayersSemiTransparentExceptOne(i)
+//                        updateLayersButtons(drawView.layerManager.getNumOfLayers())
+//
+//                        drawView.invalidate()
+//                    }
+//                }
+//
+//            if (i == drawView.layerManager.getActiveLayerIndex()) {
+//                setIsVisibleButton(i)
+//                button.setBackgroundColor(
+//                    ContextCompat.getColor(
+//                        requireContext(),
+//                        R.color.colorActive,
+//                    ),
+//                )
+//            } else {
+//                button.setBackgroundColor(
+//                    ContextCompat.getColor(
+//                        requireContext(),
+//                        R.color.colorTransparent,
+//                    ),
+//                )
+//            }
+//
+//            layersButtonsContainer.addView(button, layersButtonsContainer.childCount)
         }
     }
 
