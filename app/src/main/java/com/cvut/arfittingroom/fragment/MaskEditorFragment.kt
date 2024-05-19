@@ -58,6 +58,8 @@ class MaskEditorFragment : Fragment(), HistoryChangeListener, ColorChangeListene
     private lateinit var progressBarDialog: AlertDialog
     private lateinit var progressBar: ProgressBar
 
+    var wasDeserialized = false
+
     @Inject
     lateinit var strategies: Map<String, @JvmSuppressWildcards PathCreationStrategy>
 
@@ -100,10 +102,8 @@ class MaskEditorFragment : Fragment(), HistoryChangeListener, ColorChangeListene
 
         slider = view.findViewById(R.id.stroke_size_slider)
         slider.useThumbToSetProgress = true
-       // slider.barBackgroundEndColor
         slider.thumbPlaceholderDrawable = ContextCompat.getDrawable(view.context, R.drawable.thumb)
-//        slider.thumbPlaceholderDrawable = ContextCompat.getDrawable(view.context, R.drawable.slider)
-       slider.thumbContainerColor = Color.TRANSPARENT
+        slider.thumbContainerColor = Color.TRANSPARENT
 
         layersButton = view.findViewById(R.id.button_layers)
         layersButton.setOnClickListener {
@@ -157,6 +157,7 @@ class MaskEditorFragment : Fragment(), HistoryChangeListener, ColorChangeListene
             UIUtil.showClearAllDialog(requireContext()) {
                 run {
                     clearAll()
+                    wasDeserialized = false
                     showMainLayout()
                 }
             }
@@ -276,8 +277,10 @@ class MaskEditorFragment : Fragment(), HistoryChangeListener, ColorChangeListene
         super.onResume()
         editorStateTO?.let {
             drawView.post {
-                deserializeEditorState(it)
-                editorStateTO = null
+                if (!wasDeserialized) {
+                    deserializeEditorState(it)
+                    wasDeserialized = true
+                }
             }
         }
 
@@ -358,7 +361,6 @@ class MaskEditorFragment : Fragment(), HistoryChangeListener, ColorChangeListene
     }
 
     fun clearAll() {
-        editorStateTO = null
         if (isAdded) {
             deleteTempFiles(requireContext())
             if (::drawView.isInitialized) {
@@ -513,18 +515,16 @@ class MaskEditorFragment : Fragment(), HistoryChangeListener, ColorChangeListene
         val redo = requireView().findViewById<ImageButton>(R.id.button_redo)
 
         if (isRedoActive) {
-           redo.imageTintList = ColorStateList.valueOf(Color.WHITE)
-        }
-        else {
+            redo.imageTintList = ColorStateList.valueOf(Color.WHITE)
+        } else {
             redo.imageTintList = ColorStateList.valueOf(Color.GRAY)
         }
 
         val undo = requireView().findViewById<ImageButton>(R.id.button_undo)
 
-        if (isUndoActive){
+        if (isUndoActive) {
             undo.imageTintList = ColorStateList.valueOf(Color.WHITE)
-        }
-        else {
+        } else {
             undo.imageTintList = ColorStateList.valueOf(Color.GRAY)
         }
     }

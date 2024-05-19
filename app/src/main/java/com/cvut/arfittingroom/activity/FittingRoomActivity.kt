@@ -235,7 +235,10 @@ class FittingRoomActivity :
         } else {
             progressBar.visibility = View.VISIBLE
 
-            maskEditorFragment.editorStateTO = lookTO.editorState
+            if (lookTO.editorState.layers.isNotEmpty()) {
+                maskEditorFragment.editorStateTO = lookTO.editorState
+            }
+
             stateService.clearAll()
 
             accessoriesMenuFragment.applyState(lookTO.appliedModels)
@@ -323,6 +326,8 @@ class FittingRoomActivity :
 
         stateService.clearAll()
         maskEditorFragment.clearAll()
+        maskEditorFragment.editorStateTO = null
+        maskEditorFragment.wasDeserialized = false
     }
 
     private fun onAttachFragment(
