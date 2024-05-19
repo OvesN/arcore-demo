@@ -242,7 +242,7 @@
             app:tickVisible="false"
             app:vsb_bar_progress="@color/colorActiveLight"
             app:vsb_bar_width="2dp"
-            app:vsb_max_value="150"
+            app:vsb_max_value="100"
             app:vsb_show_thumb="true" />
     </LinearLayout>
 
