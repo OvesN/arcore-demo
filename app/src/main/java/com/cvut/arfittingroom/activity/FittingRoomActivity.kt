@@ -857,6 +857,9 @@ class FittingRoomActivity :
         if (doesTempAnimatedMaskExist(applicationContext)) {
             prepareAllGifTextures()
         }
+        else {
+            stopAnimation()
+        }
     }
 
     private fun showSaveLookDialog() {
