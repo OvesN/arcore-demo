@@ -249,7 +249,7 @@ class FittingRoomActivity :
     }
 
     override fun applyLook(lookTO: LookTO) {
-        if (DrawHistoryHolder.isNotEmpty() || stateService.isStateNotEmpty()) {
+        if (DrawHistoryHolder.isNotEmpty()) {
             showWarningDialog(lookTO)
         } else {
             shareButton.visibility = View.VISIBLE
@@ -257,8 +257,10 @@ class FittingRoomActivity :
 
             if (lookTO.editorState.layers.isNotEmpty()) {
                 maskEditorFragment.editorStateTO = lookTO.editorState
+                maskEditorFragment.wasDeserialized = false
             }
             else  {
+                maskEditorFragment.wasDeserialized = false
                 maskEditorFragment.editorStateTO = null
             }
 
