@@ -172,7 +172,7 @@ constructor(private val strategies: Map<String, @JvmSuppressWildcards PathCreati
         layer: Layer,
         index: Int,
     ) = LayerTO(
-        id = layer.id.toString(),
+        id = layer.id,
         isVisible = layer.isVisible,
         index = index,
         elements = layer.elements.keys.map { it.toString() },

@@ -42,7 +42,6 @@ class LooksMenuFragment : Fragment() {
     private lateinit var auth: FirebaseAuth
     private lateinit var storage: FirebaseStorage
     private lateinit var filter: Filter
-    private lateinit var lookInfoButton: ImageButton
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -195,12 +194,10 @@ class LooksMenuFragment : Fragment() {
 
         selectedLookTO = if (selectedLookTO.lookId.hashCode() == buttonView.id) {
             listener.removeLook(lookTO.lookId)
-            lookInfoButton.visibility = View.INVISIBLE
             LookTO()
         } else {
             listener.applyLook(lookTO)
             selectLookButton(buttonView)
-            lookInfoButton.visibility = View.VISIBLE
             lookTO
         }
     }
@@ -221,7 +218,6 @@ class LooksMenuFragment : Fragment() {
                 val listener = context as? ResourceListener
                 listener?.removeLook(selectedLookTO.lookId)
                 resetMenu()
-                lookInfoButton.visibility = View.INVISIBLE
             },
             onChangeIsPublic = { isPublic ->
                 if (selectedLookTO.lookId.isNotEmpty()) {
@@ -306,7 +302,6 @@ class LooksMenuFragment : Fragment() {
                 ?.let { deselectLookButton(it) }
             selectedLookTO = lookTO
             requireView().findViewById<View>(selectedLookTO.lookId.hashCode())?.let {
-                lookInfoButton.visibility = View.VISIBLE
                 selectLookButton(it)
             }
         }
