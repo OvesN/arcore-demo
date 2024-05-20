@@ -98,7 +98,7 @@ class LooksMenuFragment : Fragment() {
             .where(
                 filter,
             )
-            .orderBy(CREATED_AT_ATTRIBUTE,  Query.Direction.DESCENDING)
+            .orderBy(CREATED_AT_ATTRIBUTE, Query.Direction.DESCENDING)
             .get()
             .addOnSuccessListener { result ->
                 result.documents.forEach { look ->
@@ -138,7 +138,7 @@ class LooksMenuFragment : Fragment() {
                             setOnClickListener {
                                 selectLook(requireView(), it, lookInfo)
                             }
-                            setOnLongClickListener {view ->
+                            setOnLongClickListener { view ->
                                 showLookInfoMenu(view, lookInfo)
                                 true
                             }
@@ -153,7 +153,7 @@ class LooksMenuFragment : Fragment() {
                             setOnClickListener {
                                 selectLook(requireView(), it, lookInfo)
                             }
-                            setOnLongClickListener {view ->
+                            setOnLongClickListener { view ->
                                 showLookInfoMenu(view, lookInfo)
                                 true
                             }
@@ -200,14 +200,15 @@ class LooksMenuFragment : Fragment() {
             return
         }
 
-        selectedLookTO = if (selectedLookTO.lookId.hashCode() == buttonView.id) {
-            listener.removeLook(lookTO.lookId)
-            LookTO()
-        } else {
-            listener.applyLook(lookTO)
-            selectLookButton(buttonView)
-            lookTO
-        }
+        selectedLookTO =
+            if (selectedLookTO.lookId.hashCode() == buttonView.id) {
+                listener.removeLook(lookTO.lookId)
+                LookTO()
+            } else {
+                listener.applyLook(lookTO)
+                selectLookButton(buttonView)
+                lookTO
+            }
     }
 
     fun resetMenu() {
@@ -215,7 +216,10 @@ class LooksMenuFragment : Fragment() {
         fetchLooks()
     }
 
-    private fun showLookInfoMenu(view: View, lookTO: LookTO) {
+    private fun showLookInfoMenu(
+        view: View,
+        lookTO: LookTO,
+    ) {
         showLookInfoPopup(
             requireContext(),
             lookTO,
@@ -231,20 +235,20 @@ class LooksMenuFragment : Fragment() {
                 if (lookTO.lookId.isNotEmpty()) {
                     changeLookPublicity(
                         lookId = lookTO.lookId,
-                        isPublic
+                        isPublic,
                     )
                 }
-            }
+            },
         )
     }
 
     private fun deleteLook(lookId: String) {
-        firestore.collection(LOOKS_COLLECTION).document(lookId)
+        firestore.collection(LOOKS_COLLECTION)
+            .document(lookId)
             .get()
             .addOnSuccessListener { result ->
-                val lookTo = result.toObject<LookTO>()
-                lookTo?.let {
-                    storage.getReference(it.previewRef).delete()
+                result.toObject<LookTO>()?.let { lookTo ->
+                    storage.getReference(lookTo.previewRef).delete()
                     val folderRef = storage.getReference("$LOOKS_COLLECTION/${lookTo.lookId}")
                     folderRef.listAll()
                         .addOnSuccessListener { listResult ->
@@ -275,8 +279,10 @@ class LooksMenuFragment : Fragment() {
         firestore.collection(LOOKS_COLLECTION).document(lookId).delete()
     }
 
-    private fun changeLookPublicity(lookId: String, isPublic: Boolean) {
-
+    private fun changeLookPublicity(
+        lookId: String,
+        isPublic: Boolean,
+    ) {
         val lookDoc = firestore.collection(LOOKS_COLLECTION).document(lookId)
 
         lookDoc.get().addOnSuccessListener {
@@ -288,19 +294,25 @@ class LooksMenuFragment : Fragment() {
         }
     }
 
-    fun getLook(lookId: String, onSuccess: (LookTO) -> Unit = {}) {
-        firestore.collection(LOOKS_COLLECTION).document(lookId)
-            .get().addOnSuccessListener {
-            val lookTo = it.toObject<LookTO>()
-            lookTo?.let { onSuccess(lookTo) }
-        }.addOnFailureListener { ex ->
-            StyleableToast.makeText(
-                requireContext(),
-                ex.message,
-                Toast.LENGTH_SHORT,
-                R.style.mytoast,
-            ).show()
-        }
+    fun getLook(
+        lookId: String,
+        onSuccess: (LookTO) -> Unit = {},
+    ) {
+        firestore.collection(LOOKS_COLLECTION)
+            .document(lookId)
+            .get()
+            .addOnSuccessListener {
+                val lookTo = it.toObject<LookTO>()
+                lookTo?.let { onSuccess(lookTo) }
+            }
+            .addOnFailureListener { ex ->
+                StyleableToast.makeText(
+                    requireContext(),
+                    ex.message,
+                    Toast.LENGTH_SHORT,
+                    R.style.mytoast,
+                ).show()
+            }
     }
 
     fun selectLook(lookId: String) {

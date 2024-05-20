@@ -27,7 +27,6 @@ class LayersMenuFragment(private val drawView: DrawView) : Fragment() {
     private lateinit var layerDownButton: ImageButton
     private lateinit var isVisibleButton: ImageButton
 
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -42,7 +41,6 @@ class LayersMenuFragment(private val drawView: DrawView) : Fragment() {
         layersButtonsContainer = view.findViewById(R.id.layers_buttons_container)
 
         view.findViewById<ImageButton>(R.id.add_layer_button).setOnClickListener {
-
             updateLayersButtons()
             drawView.layerManager.makeLayersSemiTransparentExceptOne(drawView.layerManager.getActiveLayerIndex())
             drawView.invalidate()
@@ -105,7 +103,6 @@ class LayersMenuFragment(private val drawView: DrawView) : Fragment() {
     /**
      * Create buttons for layers in reverse order and select the active one
      *
-     * @param numOfLayers
      */
     fun updateLayersButtons() {
         layersButtonsContainer.removeAllViews()
@@ -115,18 +112,19 @@ class LayersMenuFragment(private val drawView: DrawView) : Fragment() {
         nums.asReversed().forEachIndexed { reversedIndex, i ->
             val index = nums.size - 1 - reversedIndex
 
-            val button = Button(requireContext()).apply {
-                height = dpToPx(30, requireContext())
-                setTypeface(typeface, Typeface.BOLD)
-                text = i.toString()
-                setOnClickListener {
-                    drawView.layerManager.setActiveLayer(index)
-                    drawView.layerManager.makeLayersSemiTransparentExceptOne(index)
-                    updateLayersButtons()
+            val button =
+                Button(requireContext()).apply {
+                    height = dpToPx(30, requireContext())
+                    setTypeface(typeface, Typeface.BOLD)
+                    text = i.toString()
+                    setOnClickListener {
+                        drawView.layerManager.setActiveLayer(index)
+                        drawView.layerManager.makeLayersSemiTransparentExceptOne(index)
+                        updateLayersButtons()
 
-                    drawView.invalidate()
+                        drawView.invalidate()
+                    }
                 }
-            }
 
             if (index == drawView.layerManager.getActiveLayerIndex()) {
                 setIsVisibleButton(index)

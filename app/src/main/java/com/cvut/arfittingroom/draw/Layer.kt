@@ -30,7 +30,6 @@ class Layer(
             }
     val opacityPaint = Paint()
 
-
     /**
      * Range from 0.0 (fully transparent) to 1.0 (fully opaque)
      */

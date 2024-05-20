@@ -9,6 +9,7 @@ import com.cvut.arfittingroom.draw.model.element.Element
 import com.cvut.arfittingroom.draw.path.DrawablePath
 import mu.KotlinLogging
 import java.util.UUID
+
 private val logger = KotlinLogging.logger {}
 
 /**
@@ -87,7 +88,7 @@ class LayerManager {
         width: Int,
         height: Int,
     ): Int {
-        if(layers.size  == MAX_NUMBER_OF_LAYERS) {
+        if (layers.size == MAX_NUMBER_OF_LAYERS) {
             return getActiveLayerId()
         }
 
@@ -108,14 +109,12 @@ class LayerManager {
 
     private fun generateNewLayerId(): Int {
         val maxId = layers.maxOfOrNull { it.id }
-        return if(maxId == null) {
+        return if (maxId == null) {
             0
-        }
-        else {
+        } else {
             maxId + 1
         }
     }
-
 
     fun addElementToLayer(
         index: Int = 0,
@@ -134,7 +133,6 @@ class LayerManager {
     fun getLayerIdByIndex(index: Int): Int? = layers.getOrNull(index)?.id
 
     fun canAddNewLayer() = layers.size < MAX_NUMBER_OF_LAYERS
-
 
     fun removeElementFromLayer(
         elementId: UUID,
@@ -170,9 +168,7 @@ class LayerManager {
         logger.info { "Layer from on $index is removed" }
     }
 
-    fun toggleLayerVisibility(
-        layerId: Int
-    ) {
+    fun toggleLayerVisibility(layerId: Int) {
         idToLayerMap[layerId]?.let {
             it.isVisible = !it.isVisible
         }
@@ -191,10 +187,12 @@ class LayerManager {
         toIndex: Int,
     ): Boolean {
         // Check for no movement or invalid indices
-        return !(fromIndex == toIndex ||
+        return !(
+            fromIndex == toIndex ||
                 fromIndex < 0 || toIndex < 0 ||
                 toIndex > layers.size ||
-                fromIndex == layers.size - 1 && toIndex == layers.size)
+                fromIndex == layers.size - 1 && toIndex == layers.size
+        )
     }
 
     fun getNumOfLayers() = layers.size
@@ -287,13 +285,15 @@ class LayerManager {
         }
     }
 
-    private fun setLayerOpacity(opacity: Float, layerIndex: Int) {
+    private fun setLayerOpacity(
+        opacity: Float,
+        layerIndex: Int,
+    ) {
         if (layerIndex >= layers.size || layerIndex < 0) {
             return
         }
         layers[layerIndex].setOpacity(opacity)
     }
-
 
     /**
      * Initiates the process of separating the elements that
@@ -383,7 +383,6 @@ class LayerManager {
     fun recreateLayersBitmaps() {
         setActiveLayer(activeLayerIndex)
     }
-
 
     fun doesContainAnyGif() = layers.any { it.doesHaveGif() }
 

@@ -2,7 +2,6 @@ package com.cvut.arfittingroom.draw.command.action
 
 import com.cvut.arfittingroom.draw.command.Command
 import com.cvut.arfittingroom.draw.service.LayerManager
-import java.util.UUID
 
 class AddLayer(
     private val width: Int,

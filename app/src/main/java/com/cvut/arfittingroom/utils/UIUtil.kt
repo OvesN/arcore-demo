@@ -4,12 +4,10 @@ import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.app.AlertDialog
 import android.content.Context
-import android.content.Context.LAYOUT_INFLATER_SERVICE
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.LayerDrawable
 import android.view.Gravity
 import android.view.LayoutInflater
-import android.view.MenuInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AccelerateDecelerateInterpolator
@@ -17,13 +15,11 @@ import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.ImageButton
-import android.widget.PopupMenu
 import android.widget.PopupWindow
 import android.widget.Spinner
 import android.widget.TextView
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.graphics.drawable.DrawableCompat
 import com.cvut.arfittingroom.R
 import com.cvut.arfittingroom.model.to.LookTO
@@ -51,11 +47,13 @@ object UIUtil {
         val focusable = true
         val popupWindow = PopupWindow(popupView, width, height, focusable)
 
-        val checkBox = popupView.findViewById<CheckBox>(R.id.is_public_checkbox)
-        checkBox.isChecked = lookTO.isPublic
+        val checkBox = popupView.findViewById<CheckBox>(R.id.is_public_checkbox).apply {
+            isChecked = lookTO.isPublic
+        }
 
-        val authorNameText = popupView.findViewById<TextView>(R.id.look_author_name)
-        authorNameText.text = if (isAuthor) "${lookTO.author} (you)" else lookTO.author
+        val authorNameText = popupView.findViewById<TextView>(R.id.look_author_name).apply {
+            text = if (isAuthor) "${lookTO.author} (you)" else lookTO.author
+        }
 
         val cancelButton: Button = popupView.findViewById(R.id.cancel_popup_button)
         val okButton: Button = popupView.findViewById(R.id.ok_popup_button)
@@ -83,13 +81,17 @@ object UIUtil {
         popupWindow.showAtLocation(view, Gravity.CENTER, 0, 0)
     }
 
-    private fun showDeleteLookWarning(context: Context, onLookDelete: () -> Unit = {}) {
+    private fun showDeleteLookWarning(
+        context: Context,
+        onLookDelete: () -> Unit = {},
+    ) {
         val dialogView: View =
             LayoutInflater.from(context).inflate(R.layout.popup_really_delete, null)
 
-        val dialog = AlertDialog.Builder(context)
-            .setView(dialogView)
-            .create()
+        val dialog =
+            AlertDialog.Builder(context)
+                .setView(dialogView)
+                .create()
 
         dialogView.findViewById<Button>(R.id.cancel_popup_button).setOnClickListener {
             dialog.dismiss()
@@ -103,45 +105,16 @@ object UIUtil {
         dialog.show()
     }
 
-//    fun showEditorSubmenuDialog(
-//        context: Context,
-//        onAddImage: () -> Unit,
-//        isBackgroundShown: Boolean,
-//        onChangeBackground: (Boolean) -> Unit
-//    ) {
-//        val dialogView: View =
-//            LayoutInflater.from(context).inflate(R.layout.popup_editor_submenu, null)
-//
-//        val checkBox = dialogView.findViewById<CheckBox>(R.id.show_face_grid_checkbox)
-//        checkBox.isChecked = isBackgroundShown
-//
-//        val dialog = AlertDialog.Builder(context)
-//            .setView(dialogView)
-//            .create()
-//
-//        dialogView.findViewById<Button>(R.id.cancel_popup_button).setOnClickListener {
-//            dialog.dismiss()
-//        }
-//
-//        dialogView.findViewById<Button>(R.id.upload_image_button).setOnClickListener {
-//            onAddImage()
-//            dialog.dismiss()
-//        }
-//
-//        dialog.setOnDismissListener {
-//            onChangeBackground(checkBox.isChecked)
-//        }
-//        dialog.show()
-//    }
-
-
-    fun showDeleteLayerDialog(context: Context, onDelete: () -> Unit) {
+    fun showDeleteLayerDialog(
+        context: Context,
+        onDelete: () -> Unit,
+    ) {
         val dialogView: View =
             LayoutInflater.from(context).inflate(R.layout.popup_delete_layer, null)
-        val dialog = AlertDialog.Builder(context)
-            .setView(dialogView)
-            .create()
-
+        val dialog =
+            AlertDialog.Builder(context)
+                .setView(dialogView)
+                .create()
 
         dialogView.findViewById<Button>(R.id.cancel_popup_button).setOnClickListener {
             dialog.dismiss()
@@ -159,13 +132,14 @@ object UIUtil {
         context: Context,
         currentLayerIndex: Int,
         maxLayerIndex: Int,
-        onLayerSelected: (Int) -> Unit
+        onLayerSelected: (Int) -> Unit,
     ) {
         val dialogView: View =
             LayoutInflater.from(context).inflate(R.layout.popup_move_to_layer, null)
-        val dialog = AlertDialog.Builder(context)
-            .setView(dialogView)
-            .create()
+        val dialog =
+            AlertDialog.Builder(context)
+                .setView(dialogView)
+                .create()
 
         val layerSpinner: Spinner = dialogView.findViewById(R.id.layer_spinner)
         val layers = (0..maxLayerIndex).toList()
@@ -186,7 +160,6 @@ object UIUtil {
         }
 
         dialog.show()
-
     }
 
     fun showColorPickerDialog(

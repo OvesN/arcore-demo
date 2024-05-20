@@ -59,8 +59,7 @@ constructor(private val strategies: Map<String, @JvmSuppressWildcards PathCreati
             strokeJoin = paintOptions.strokeJoint
         }
 
-    private fun pathToPathTO(drawablePath: DrawablePath) =
-        PathTO(drawablePath.actions.map { pathActionToActionTO(it) })
+    private fun pathToPathTO(drawablePath: DrawablePath) = PathTO(drawablePath.actions.map { pathActionToActionTO(it) })
 
     private fun pathTOPath(pathTO: PathTO): DrawablePath {
         val drawablePath = DrawablePath()
@@ -117,13 +116,13 @@ constructor(private val strategies: Map<String, @JvmSuppressWildcards PathCreati
         val baseTO =
             ElementTO(
                 elementType =
-                when (element) {
-                    is Curve -> EElementType.CURVE
-                    is Image -> EElementType.IMAGE
-                    is Gif -> EElementType.GIF
-                    is Stamp -> EElementType.STAMP
-                    else -> throw IllegalArgumentException("Unsupported element type")
-                },
+                    when (element) {
+                        is Curve -> EElementType.CURVE
+                        is Image -> EElementType.IMAGE
+                        is Gif -> EElementType.GIF
+                        is Stamp -> EElementType.STAMP
+                        else -> throw IllegalArgumentException("Unsupported element type")
+                    },
                 id = element.id.toString(),
                 centerX = element.centerX / width,
                 centerY = element.centerY / height,
@@ -132,21 +131,19 @@ constructor(private val strategies: Map<String, @JvmSuppressWildcards PathCreati
             )
 
         return when (element) {
-            is Curve -> {
-                baseTO.copy(
-                    drawablePath = pathToPathTO(element.path),
-                    paint = paintToPaintTO(element.paint)
+            is Curve -> baseTO.copy(
+                drawablePath = pathToPathTO(element.path),
+                paint =
+                    paintToPaintTO(element.paint)
                         .apply {
                             strokeTextureRef = element.strokeTextureRef
                             blurRadius = element.blurRadius
                             blurType = element.blurType
                         },
-                    xdiff = element.xdiff,
-                    ydiff = element.ydiff,
-                    radiusDiff = element.radiusDiff
-                    )
-
-            }
+                xdiff = element.xdiff,
+                ydiff = element.ydiff,
+                radiusDiff = element.radiusDiff,
+            )
 
             is Image ->
                 baseTO.copy(
@@ -229,9 +226,8 @@ constructor(private val strategies: Map<String, @JvmSuppressWildcards PathCreati
                     blurRadius = elementTO.paint.blurRadius,
                     xdiff = elementTO.xdiff,
                     ydiff = elementTO.ydiff,
-                    radiusDiff = elementTO.radiusDiff
+                    radiusDiff = elementTO.radiusDiff,
                 )
-
         }
 
     fun layerTOtoLayer(layerTO: LayerTO) =

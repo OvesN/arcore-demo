@@ -3,7 +3,6 @@ package com.cvut.arfittingroom.draw.command.action
 import com.cvut.arfittingroom.draw.command.Command
 import com.cvut.arfittingroom.draw.model.element.Element
 import com.cvut.arfittingroom.draw.service.LayerManager
-import java.util.UUID
 
 class AddElementToLayer(
     private val element: Element,

@@ -11,9 +11,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.CheckBox
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.ProgressBar
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.cvut.arfittingroom.ARFittingRoomApplication
@@ -23,6 +25,7 @@ import com.cvut.arfittingroom.draw.DrawHistoryHolder
 import com.cvut.arfittingroom.draw.DrawView
 import com.cvut.arfittingroom.draw.Layer
 import com.cvut.arfittingroom.draw.command.Repaintable
+import com.cvut.arfittingroom.draw.model.element.Element
 import com.cvut.arfittingroom.draw.model.element.impl.Curve
 import com.cvut.arfittingroom.draw.model.element.impl.Gif
 import com.cvut.arfittingroom.draw.model.element.impl.Image
@@ -39,26 +42,29 @@ import io.github.muddz.styleabletoast.StyleableToast
 import java.util.LinkedList
 import javax.inject.Inject
 
-class MaskEditorFragment : Fragment(), HistoryChangeListener, ColorChangeListener {
+class MaskEditorFragment :
+    Fragment(),
+    HistoryChangeListener,
+    ColorChangeListener,
+    EditorStateChangeListener {
     private var backgroundBitmap: Bitmap? = null
     var editorStateTO: EditorStateTO? = null
     private var isLayersMenuShown = false
+    private var isInEditMode = false
+    var wasDeserialized = false
     private lateinit var drawView: DrawView
     private lateinit var sliderLayout: LinearLayout
     private lateinit var slider: VerticalSeekBar
     private lateinit var layersButton: ImageButton
-
     private lateinit var menuButtons: LinearLayout
     private lateinit var layersMenuFragment: LayersMenuFragment
     private lateinit var stampsMenuFragment: StampsMenuFragment
     private lateinit var imageMenuFragment: ImagesMenuFragment
     private lateinit var brushesMenuFragment: BrushesMenuFragment
     private lateinit var storage: FirebaseStorage
-
     private lateinit var progressBarDialog: AlertDialog
     private lateinit var progressBar: ProgressBar
-
-    var wasDeserialized = false
+    private lateinit var editingModeButton: ImageButton
 
     @Inject
     lateinit var strategies: Map<String, @JvmSuppressWildcards PathCreationStrategy>
@@ -80,30 +86,23 @@ class MaskEditorFragment : Fragment(), HistoryChangeListener, ColorChangeListene
         storage = FirebaseStorage.getInstance()
 
         val dialogView = LayoutInflater.from(context).inflate(R.layout.progress_dialog, null)
-
         progressBarDialog =
             AlertDialog.Builder(context)
                 .setView(dialogView)
                 .create()
 
-        drawView = view.findViewById(R.id.draw_view)
-        drawView.applyBitmapBackground(backgroundBitmap)
-
         sliderLayout = view.findViewById(R.id.stroke_size_layout)
         progressBar = view.findViewById(R.id.progress_bar)
-
-        // This will block the touch event so it will not propagate to draw view
-        sliderLayout.setOnTouchListener { v, event -> true }
-        view.findViewById<View>(R.id.top_ui_makeup_editor).setOnTouchListener { v, event -> true }
-        view.findViewById<View>(R.id.bottom_ui_makeup_editor)
-            .setOnTouchListener { v, event -> true }
-
         menuButtons = view.findViewById(R.id.menu_buttons)
 
-        slider = view.findViewById(R.id.stroke_size_slider)
-        slider.useThumbToSetProgress = true
-        slider.thumbPlaceholderDrawable = ContextCompat.getDrawable(view.context, R.drawable.thumb)
-        slider.thumbContainerColor = Color.TRANSPARENT
+        prepareDrawView()
+        // This will block the touch event so it will not propagate to draw view
+        blockTouchEvents()
+        prepareSlider()
+        prepareFragments()
+
+        DrawHistoryHolder.setHistoryChangeListener(this)
+        updateUndoRedoButtons()
 
         layersButton = view.findViewById(R.id.button_layers)
         layersButton.setOnClickListener {
@@ -114,11 +113,108 @@ class MaskEditorFragment : Fragment(), HistoryChangeListener, ColorChangeListene
                 hideLayersMenu()
             }
         }
+        view.findViewById<ImageButton>(R.id.button_ok).setOnClickListener {
+            progressBar.visibility = View.VISIBLE
+            hideLayersMenu()
 
+            drawView.saveBitmap {
+                showMainLayout()
+                progressBar.visibility = View.INVISIBLE
+            }
+        }
+        view.findViewById<ImageButton>(R.id.button_back).setOnClickListener {
+            UIUtil.showClearAllDialog(requireContext()) {
+                run {
+                    clearAll()
+                    wasDeserialized = false
+                    showMainLayout(restoreLookTexture = true)
+                }
+            }
+        }
+        view.findViewById<Button>(R.id.button_clear_all).setOnClickListener {
+            UIUtil.showClearAllDialog(requireContext()) { clearAll() }
+        }
+        view.findViewById<ImageButton>(R.id.button_color_picker).setOnClickListener {
+            showColorPicker()
+        }
+        view.findViewById<ImageButton>(R.id.button_redo).setOnClickListener {
+            drawView.redo()
+            updateUndoRedoButtons()
+        }
+        view.findViewById<ImageButton>(R.id.button_undo).setOnClickListener {
+            drawView.undo()
+            updateUndoRedoButtons()
+        }
+        view.findViewById<Button>(R.id.draw_button).setOnClickListener {
+            showBrushMenu(it)
+        }
+        view.findViewById<Button>(R.id.stamp_button).setOnClickListener {
+            showStampMenu(it)
+        }
+        view.findViewById<Button>(R.id.image_button).setOnClickListener {
+            showImageMenu(it)
+        }
+        editingModeButton = view.findViewById(R.id.select_mode_button)
+        editingModeButton.setOnClickListener {
+            if (isInEditMode) {
+                deselectEditingMode()
+            } else {
+                selectEditingMode()
+            }
+        }
+    }
+
+    private fun blockTouchEvents() {
+        sliderLayout.setOnTouchListener { _, _ -> true }
+        requireView().findViewById<View>(R.id.top_ui_makeup_editor)
+            .setOnTouchListener { _, _ -> true }
+        requireView().findViewById<View>(R.id.bottom_ui_makeup_editor)
+            .setOnTouchListener { _, _ -> true }
+    }
+
+    private fun prepareDrawView() {
+        drawView = requireView().findViewById(R.id.draw_view)
+        drawView.applyBitmapBackground(backgroundBitmap)
+
+        drawView.post {
+            mapper.setDimensions(drawView.width, drawView.height)
+            drawView.setDimensions(drawView.width, drawView.height)
+            drawView.invalidate()
+            if (drawView.layerManager.getNumOfLayers() == 0) {
+                drawView.layerManager.addLayer(drawView.width, drawView.height)
+            }
+
+            showBrushMenu(requireView().findViewById<Button>(R.id.draw_button))
+
+            drawView.findViewById<CheckBox>(R.id.grid_checkbox)
+                .setOnCheckedChangeListener { _, isChecked ->
+                    drawView.setFaceGridVisibility(isChecked)
+                }
+
+            drawView.setStrokeWidth(slider.progress)
+            drawView.setOnColorChangeListener(this)
+        }
+    }
+
+    private fun prepareSlider() {
+        slider = requireView().findViewById(R.id.stroke_size_slider)
+        slider.useThumbToSetProgress = true
+        slider.thumbPlaceholderDrawable =
+            ContextCompat.getDrawable(requireView().context, R.drawable.thumb)
+        slider.thumbContainerColor = Color.TRANSPARENT
+        slider.setOnReleaseListener {
+            drawView.setStrokeWidth(it)
+        }
+    }
+
+    private fun prepareFragments() {
         layersMenuFragment = LayersMenuFragment(drawView)
         brushesMenuFragment = BrushesMenuFragment(drawView)
         stampsMenuFragment = StampsMenuFragment(strategies, drawView)
         imageMenuFragment = ImagesMenuFragment(drawView)
+
+        brushesMenuFragment.setEditorStateChangeListener(this)
+        stampsMenuFragment.setEditorStateChangeListener(this)
 
         activity?.supportFragmentManager
             ?.beginTransaction()
@@ -131,108 +227,19 @@ class MaskEditorFragment : Fragment(), HistoryChangeListener, ColorChangeListene
             ?.hide(stampsMenuFragment)
             ?.hide(imageMenuFragment)
             ?.commit()
+    }
 
-        drawView.post {
-            mapper.setDimensions(drawView.width, drawView.height)
-            drawView.setDimensions(drawView.width, drawView.height)
-            drawView.invalidate()
-            if (drawView.layerManager.getNumOfLayers() == 0) {
-                drawView.layerManager.addLayer(drawView.width, drawView.height)
-            }
+    private fun selectEditingMode() {
+        isInEditMode = true
+        editingModeButton.setBackgroundResource(R.drawable.select_active)
+        drawView.setEditingMode()
+    }
 
-            showBrushMenu(view.findViewById<Button>(R.id.draw_button))
-        }
-
-        view.findViewById<ImageButton>(R.id.button_ok).setOnClickListener {
-            progressBar.visibility = View.VISIBLE
-            hideLayersMenu()
-
-            drawView.saveBitmap {
-                showMainLayout()
-                progressBar.visibility = View.INVISIBLE
-            }
-        }
-
-        view.findViewById<ImageButton>(R.id.button_back).setOnClickListener {
-            UIUtil.showClearAllDialog(requireContext()) {
-                run {
-                    clearAll()
-                    wasDeserialized = false
-                    showMainLayout(restoreLookTexture = true)
-                }
-            }
-        }
-
-        view.findViewById<Button>(R.id.button_clear_all).setOnClickListener {
-            UIUtil.showClearAllDialog(requireContext()) { clearAll() }
-        }
-
-        view.findViewById<ImageButton>(R.id.button_color_picker).setOnClickListener {
-            UIUtil.showColorPickerDialog(
-                requireActivity(),
-                drawView.paintOptions.color,
-                fill = drawView.paintOptions.style == Paint.Style.FILL,
-                shouldShowFillCheckbox = true,
-                shouldShowPipette = true,
-                onPipetteSelected = { drawView.showPipetteView() }
-            ) { envelopColor, fill ->
-                val repaintebale = drawView.selectedElement as? Repaintable
-                if (repaintebale != null) {
-                    drawView.repaintElement(repaintebale, envelopColor, fill)
-                }
-                else {
-                    drawView.setColor(
-                        envelopColor,
-                        fill
-                    )
-                    brushesMenuFragment.changeColor(envelopColor)
-                    stampsMenuFragment.changeColor(envelopColor, fill)
-                }
-            }
-        }
-
-        DrawHistoryHolder.setHistoryChangeListener(this)
-        updateUndoRedoButtons()
-
-        view.findViewById<ImageButton>(R.id.button_redo).setOnClickListener {
-            drawView.redo()
-            updateUndoRedoButtons()
-        }
-        view.findViewById<ImageButton>(R.id.button_undo).setOnClickListener {
-            drawView.undo()
-            updateUndoRedoButtons()
-        }
-
-        view.findViewById<Button>(R.id.draw_button).setOnClickListener {
-            showBrushMenu(it)
-        }
-
-        view.findViewById<Button>(R.id.stamp_button).setOnClickListener {
-            showStampMenu(it)
-        }
-
-        view.findViewById<Button>(R.id.image_button).setOnClickListener {
-            showImageMenu(it)
-        }
-//
-//        view.findViewById<ImageButton>(R.id.button_menu).setOnClickListener {
-//            showEditorSubmenuDialog(
-//                requireContext(), onAddImage = { imageMenuFragment.uploadImage() },
-//                onChangeBackground = { shouldShowBackground ->
-//                    drawView.setFaceGridVisibility(
-//                        shouldShowBackground
-//                    )
-//                    drawView.invalidate()
-//                },
-//                isBackgroundShown = drawView.getFaceGridVisibility()
-//            )
-//        }
-
-        slider.setOnReleaseListener {
-            drawView.setStrokeWidth(it)
-        }
-        drawView.setStrokeWidth(slider.progress)
-        drawView.setOnColorChangeListener(this)
+    private fun deselectEditingMode() {
+        isInEditMode = false
+        editingModeButton.setBackgroundResource(R.drawable.select_inactive)
+        drawView.layerManager.deselectAllElements()
+        drawView.invalidate()
     }
 
     private fun showLayersMenu() {
@@ -242,8 +249,8 @@ class MaskEditorFragment : Fragment(), HistoryChangeListener, ColorChangeListene
         layersButton.setImageDrawable(
             ContextCompat.getDrawable(
                 requireContext(),
-                R.drawable.selected_layers
-            )
+                R.drawable.selected_layers,
+            ),
         )
 
         sliderLayout.visibility = View.GONE
@@ -263,8 +270,8 @@ class MaskEditorFragment : Fragment(), HistoryChangeListener, ColorChangeListene
         layersButton.setImageDrawable(
             ContextCompat.getDrawable(
                 requireContext(),
-                R.drawable.layers
-            )
+                R.drawable.layers,
+            ),
         )
         requireActivity()
             .supportFragmentManager
@@ -306,7 +313,8 @@ class MaskEditorFragment : Fragment(), HistoryChangeListener, ColorChangeListene
         resetMenu()
 
         button.setBackgroundResource(R.drawable.small_button)
-        requireActivity().supportFragmentManager.beginTransaction()
+        requireActivity().supportFragmentManager
+            .beginTransaction()
             .show(brushesMenuFragment)
             .commit()
 
@@ -317,7 +325,8 @@ class MaskEditorFragment : Fragment(), HistoryChangeListener, ColorChangeListene
         resetMenu()
 
         button.setBackgroundResource(R.drawable.small_button)
-        requireActivity().supportFragmentManager.beginTransaction()
+        requireActivity().supportFragmentManager
+            .beginTransaction()
             .show(stampsMenuFragment)
             .commit()
 
@@ -329,7 +338,8 @@ class MaskEditorFragment : Fragment(), HistoryChangeListener, ColorChangeListene
 
         button.setBackgroundResource(R.drawable.small_button)
         drawView.setEditingMode()
-        requireActivity().supportFragmentManager.beginTransaction()
+        requireActivity().supportFragmentManager
+            .beginTransaction()
             .show(imageMenuFragment)
             .commit()
 
@@ -348,7 +358,8 @@ class MaskEditorFragment : Fragment(), HistoryChangeListener, ColorChangeListene
     }
 
     private fun hideMenuFragments() {
-        requireActivity().supportFragmentManager.beginTransaction()
+        requireActivity().supportFragmentManager
+            .beginTransaction()
             .hide(brushesMenuFragment)
             .hide(stampsMenuFragment)
             .hide(imageMenuFragment)
@@ -384,7 +395,9 @@ class MaskEditorFragment : Fragment(), HistoryChangeListener, ColorChangeListene
     }
 
     fun serializeEditorState(): EditorStateTO {
-        if (!::mapper.isInitialized) return EditorStateTO()
+        if (!::mapper.isInitialized) {
+            return EditorStateTO()
+        }
         mapper.setDimensions(drawView.width, drawView.height)
 
         val layers = drawView.layerManager.layers
@@ -407,103 +420,147 @@ class MaskEditorFragment : Fragment(), HistoryChangeListener, ColorChangeListene
 
         val errorMessages = mutableListOf<String>()
 
-        val elementsMap = try {
-            editorStateTO.elements.associateBy(
-                keySelector = { it.id },
-                valueTransform = { elementTO ->
-                    try {
-                        mapper.elementTOtoElement(elementTO)
-                    } catch (e: Exception) {
-                        errorMessages.add("Error deserializing element ${elementTO.id}: ${e.message}")
-                        null
-                    }
-                }
-            ).filterValues { it != null }
-        } catch (e: Exception) {
-            errorMessages.add("Error deserializing elements: ${e.message}")
-            emptyMap()
-        }
+        val elementsMap = deserializeElements(editorStateTO, errorMessages)
+        val remainingDownloads = countRemainingDownloads(elementsMap)
 
-        var remainingDownloads =
-            elementsMap.values.count { it is Image || it is Gif || it is Curve && it.strokeTextureRef.isNotEmpty() }
+        val onDownloadComplete =
+            createDownloadCompleteCallback(
+                remainingDownloads,
+                editorStateTO,
+                elementsMap,
+                errorMessages,
+            )
 
-        val onDownloadComplete = {
-            remainingDownloads--
-            if (remainingDownloads <= 0) {
-                hideProgressBar()
+        startElementDownloads(elementsMap, onDownloadComplete)
+    }
 
-                if (errorMessages.isNotEmpty()) {
-                    StyleableToast.makeText(
-                        requireContext(),
-                        errorMessages.joinToString("\n"),
-                        R.style.mytoast
-                    ).show()
-                }
-
-                val sortedLayers = editorStateTO.layers.sortedBy { it.index }
-                val layersList: LinkedList<Layer> = LinkedList()
-
-                val layersMap = try {
-                    sortedLayers.associateBy(
-                        keySelector = { it.id },
-                        valueTransform = { layerTO ->
-                            try {
-                                val layer = mapper.layerTOtoLayer(layerTO)
-                                layersList.add(layer)
-                                layerTO.elements.forEach {
-                                    elementsMap[it]?.let { element -> layer.addElement(element) }
-                                }
-                                layer
-                            } catch (e: Exception) {
-                                errorMessages.add("Error deserializing layer ${layerTO.id}: ${e.message}")
-                                null
-                            }
-                        }
-                    ).filterValues { it != null }
+    private fun deserializeElements(
+        editorStateTO: EditorStateTO,
+        errorMessages: MutableList<String>,
+    ): Map<String, Element?> = try {
+        editorStateTO.elements.associateBy(
+            keySelector = { it.id },
+            valueTransform = { elementTO ->
+                try {
+                    mapper.elementTOtoElement(elementTO)
                 } catch (e: Exception) {
-                    errorMessages.add("Error deserializing layers: ${e.message}")
-                    emptyMap()
+                    errorMessages.add("Error deserializing element ${elementTO.id}: ${e.message}")
+                    null
                 }
+            },
+        ).filterValues { it != null }
+    } catch (e: Exception) {
+        errorMessages.add("Error deserializing elements: ${e.message}")
+        emptyMap()
+    }
 
-                drawView.layerManager.deleteLayers()
-                drawView.layerManager.layers.addAll(layersList)
+    private fun countRemainingDownloads(elementsMap: Map<String, Element?>): Int = elementsMap.values.count {
+        it is Image || it is Gif || (it is Curve && it.strokeTextureRef.isNotEmpty())
+    }
 
-                if (errorMessages.isNotEmpty()) {
-                    StyleableToast.makeText(
-                        requireContext(),
-                        "Drawing was opened with errors",
-                        R.style.mytoast
-                    ).show()
-                }
-            }
-        }
+    private fun createDownloadCompleteCallback(
+        remainingDownloads: Int,
+        editorStateTO: EditorStateTO,
+        elementsMap: Map<String, Element?>,
+        errorMessages: MutableList<String>,
+    ): () -> Unit {
+        var remaining = remainingDownloads
 
-        elementsMap.values.forEach {
-            if (remainingDownloads == 0) {
-                onDownloadComplete()
-            }
-            if (it is Image) {
-                imageMenuFragment.downloadImage(it.resourceRef, onDownloadComplete) { bitmap, _ ->
-                    it.bitmap = bitmap
-                }
-            } else if (it is Gif) {
-                imageMenuFragment.downloadGif(
-                    it.resourceRef,
-                    onDownloadComplete
-                ) { gifDrawable, _ ->
-                    it.setDrawable(gifDrawable)
-                }
-            } else if (it is Curve && it.strokeTextureRef.isNotEmpty()) {
-                imageMenuFragment.downloadImage(
-                    it.strokeTextureRef,
-                    onDownloadComplete
-                ) { bitmap, _ ->
-                    it.setTextureBitmap(bitmap)
-                }
+        return {
+            remaining--
+            if (remaining <= 0) {
+                hideProgressBar()
+                handleDeserializationCompletion(editorStateTO, elementsMap, errorMessages)
             }
         }
     }
 
+    private fun handleDeserializationCompletion(
+        editorStateTO: EditorStateTO,
+        elementsMap: Map<String, Element?>,
+        errorMessages: MutableList<String>,
+    ) {
+        val layersList = deserializeLayers(editorStateTO, elementsMap, errorMessages)
+
+        drawView.layerManager.deleteLayers()
+        drawView.layerManager.layers.addAll(layersList)
+
+        if (errorMessages.isNotEmpty()) {
+            StyleableToast.makeText(
+                requireContext(),
+                "Drawing was opened with errors",
+                Toast.LENGTH_SHORT,
+                R.style.mytoast,
+            ).show()
+        }
+    }
+
+    private fun deserializeLayers(
+        editorStateTO: EditorStateTO,
+        elementsMap: Map<String, Element?>,
+        errorMessages: MutableList<String>,
+    ): LinkedList<Layer> {
+        val sortedLayers = editorStateTO.layers.sortedBy { it.index }
+        val layersList: LinkedList<Layer> = LinkedList()
+
+        try {
+            sortedLayers.associateBy(
+                keySelector = { it.id },
+                valueTransform = { layerTO ->
+                    try {
+                        val layer = mapper.layerTOtoLayer(layerTO)
+                        layersList.add(layer)
+                        layerTO.elements.forEach {
+                            elementsMap[it]?.let { element -> layer.addElement(element) }
+                        }
+                        layer
+                    } catch (e: Exception) {
+                        errorMessages.add("Error deserializing layer ${layerTO.id}: ${e.message}")
+                        null
+                    }
+                },
+            ).filterValues { it != null }
+        } catch (e: Exception) {
+            errorMessages.add("Error deserializing layers: ${e.message}")
+        }
+
+        return layersList
+    }
+
+    private fun startElementDownloads(
+        elementsMap: Map<String, Element?>,
+        onDownloadComplete: () -> Unit,
+    ) {
+        elementsMap.values.forEach { element ->
+            when (element) {
+                is Image ->
+                    imageMenuFragment.downloadImage(
+                        element.resourceRef,
+                        onDownloadComplete,
+                    ) { bitmap, _ ->
+                        element.bitmap = bitmap
+                    }
+
+                is Gif ->
+                    imageMenuFragment.downloadGif(
+                        element.resourceRef,
+                        onDownloadComplete,
+                    ) { gifDrawable, _ ->
+                        element.setDrawable(gifDrawable)
+                    }
+
+                is Curve ->
+                    if (element.strokeTextureRef.isNotEmpty()) {
+                        imageMenuFragment.downloadImage(
+                            element.strokeTextureRef,
+                            onDownloadComplete,
+                        ) { bitmap, _ ->
+                            element.setTextureBitmap(bitmap)
+                        }
+                    }
+            }
+        }
+    }
 
     private fun showProgressBar() {
         progressBarDialog.show()
@@ -535,16 +592,46 @@ class MaskEditorFragment : Fragment(), HistoryChangeListener, ColorChangeListene
         }
     }
 
-    companion object {
-        const val MAKEUP_EDITOR_FRAGMENT_TAG = "MakeupEditorFragmentTag"
+    private fun showColorPicker() {
+        UIUtil.showColorPickerDialog(
+            requireActivity(),
+            drawView.paintOptions.color,
+            fill = drawView.paintOptions.style == Paint.Style.FILL,
+            shouldShowFillCheckbox = true,
+            shouldShowPipette = true,
+            onPipetteSelected = { drawView.showPipetteView() },
+        ) { envelopColor, fill ->
+            val repaintebale = drawView.selectedElement as? Repaintable
+            if (repaintebale != null) {
+                drawView.repaintElement(repaintebale, envelopColor, fill)
+            } else {
+                drawView.setColor(
+                    envelopColor,
+                    fill,
+                )
+                brushesMenuFragment.changeColor(envelopColor)
+                stampsMenuFragment.changeColor(envelopColor, fill)
+            }
+        }
     }
 
     override fun onHistoryChanged() {
         updateUndoRedoButtons()
     }
 
-    override fun onColorChanged(newColor: Int, fill: Boolean) {
+    override fun onColorChanged(
+        newColor: Int,
+        fill: Boolean,
+    ) {
         brushesMenuFragment.changeColor(newColor)
         stampsMenuFragment.changeColor(newColor, fill)
+    }
+
+    override fun onEditingStateExit() {
+        deselectEditingMode()
+    }
+
+    companion object {
+        const val MAKEUP_EDITOR_FRAGMENT_TAG = "MakeupEditorFragmentTag"
     }
 }

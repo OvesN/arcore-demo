@@ -2,8 +2,8 @@ package com.cvut.arfittingroom.draw.model.enums
 
 enum class EEditorMode {
     BRUSH,
-    STAMP,
-    NONE,
+    EDITING,
     PIPETTE,
+    STAMP,
     ;
 }

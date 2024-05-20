@@ -7,5 +7,6 @@ fun String.makeFirstLetterCapital() =
         if (it.isLowerCase()) it.titlecase() else it.toString()
     }
 
-fun FirebaseAuth.currentUserUsername() = this.currentUser?.email?.substringBefore("@")
-    .orEmpty()
+fun FirebaseAuth.currentUserUsername() =
+    this.currentUser?.email?.substringBefore("@")
+        .orEmpty()
