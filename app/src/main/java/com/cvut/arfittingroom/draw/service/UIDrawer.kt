@@ -21,6 +21,13 @@ private const val ELEMENT_MENU_ICON_SIZE = 70f
 private const val MENU_SCALE_FACTOR = 1.7f
 private const val BOUNDS_SCALE_FACTOR = 1.4f
 
+/**
+ * U i drawer
+ *
+ * @property context
+ *
+ * @author Veronika Ovsyannikova
+ */
 class UIDrawer(private val context: Context) {
     private var menuWidth: Float = 0f
     private var menuHeight: Float = 0f
@@ -123,13 +130,6 @@ class UIDrawer(private val context: Context) {
             faceTextureBitmap?.let { canvas.drawBitmap(it, faceTextureMatrix, null) }
         }
     }
-
-    private val boundsPaint: Paint =
-        Paint().apply {
-            color = Color.BLACK
-            alpha = (255 * 0.5).toInt()
-            style = Paint.Style.FILL
-        }
 
     fun drawSelectedElementEditIcons(
         canvas: Canvas,

@@ -5,6 +5,21 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Paint.Style
 
+/**
+ * Paint options
+ *
+ * @property color
+ * @property strokeWidth
+ * @property alpha
+ * @property style
+ * @property strokeCap
+ * @property strokeJoint
+ * @property strokeTextureRef
+ * @property blurRadius
+ * @property blurType
+ *
+ * @author Veronika Ovsyannikova
+ */
 data class PaintOptions(
     var color: Int = Color.WHITE,
     var strokeWidth: Float = 8f,

@@ -2,6 +2,11 @@ package com.cvut.arfittingroom.utils
 
 import android.content.Context
 
+/**
+ * Screen util
+ *
+ * @author Veronika Ovsyannikova
+ */
 object ScreenUtil {
     fun dpToPx(
         dp: Int,

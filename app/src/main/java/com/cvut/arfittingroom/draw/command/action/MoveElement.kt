@@ -2,8 +2,18 @@ package com.cvut.arfittingroom.draw.command.action
 
 import com.cvut.arfittingroom.draw.command.Command
 import com.cvut.arfittingroom.draw.command.Movable
-import java.util.UUID
 
+/**
+ * Move element
+ *
+ * @property movable
+ * @property oldX
+ * @property oldY
+ * @property newX
+ * @property newY
+ *
+ * @author Veronika Ovsyannikova
+ */
 class MoveElement(
     private val movable: Movable,
     private val oldX: Float,

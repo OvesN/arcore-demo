@@ -2,8 +2,16 @@ package com.cvut.arfittingroom.draw.command.action
 
 import com.cvut.arfittingroom.draw.command.Command
 import com.cvut.arfittingroom.draw.service.LayerManager
-import java.util.UUID
 
+/**
+ * Move layer
+ *
+ * @property layerManager
+ * @property fromIndex
+ * @property toIndex
+ *
+ * @author Veronika Ovsyannikova
+ */
 class MoveLayer(
     private val layerManager: LayerManager,
     private val fromIndex: Int,

@@ -1,5 +1,12 @@
 package com.cvut.arfittingroom.draw.model.enums
 
+/**
+ * E element edit action
+ *
+ * @property actionName
+ *
+ * @author Veronika Ovsyannikova
+ */
 enum class EElementEditAction(val actionName: String = "") {
     CHANGE_COLOR("Change color"),
     DELETE,

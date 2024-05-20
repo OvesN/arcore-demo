@@ -10,6 +10,18 @@ import pl.droidsonroids.gif.GifDrawable
 import java.util.UUID
 import kotlin.math.max
 
+/**
+ * Gif
+ *
+ * @property id
+ * @property resourceRef
+ * @property centerX
+ * @property centerY
+ * @property outerRadius
+ * @property rotationAngle
+ *
+ * @author Veronika Ovsyannikova
+ */
 class Gif(
     override val id: UUID = UUID.randomUUID(),
     val resourceRef: String,

@@ -39,6 +39,13 @@ import java.sql.Timestamp
 import java.time.Instant
 import kotlin.random.Random
 
+/**
+ * Images menu fragment
+ *
+ * @property drawView
+ *
+ * @author Veronika Ovsyannikova
+ */
 class ImagesMenuFragment(private val drawView: DrawView) : Fragment() {
     private lateinit var firestore: FirebaseFirestore
     private lateinit var storage: FirebaseStorage

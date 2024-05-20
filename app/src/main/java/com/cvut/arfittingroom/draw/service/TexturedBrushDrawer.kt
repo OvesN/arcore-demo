@@ -11,8 +11,9 @@ import kotlin.math.PI
 import kotlin.math.atan2
 
 /**
- * Curved bitmap drawer for textured brushes
+ * Bitmap drawer for textured brushes
  *
+ * @author Veronika Ovsyannikova
  */
 object TexturedBrushDrawer {
     var originalBitmap: Bitmap? = null
@@ -47,21 +48,6 @@ object TexturedBrushDrawer {
             BitmapUtil.replaceNonTransparentPixels(
                 it,
                 (alpha shl 24) or (color and 0xFFFFFF))
-        }
-       // changeBrushColor( color, alpha)
-    }
-
-    fun changeBrushColor(color:Int, alpha: Int) {
-        scaledBitmap?.let { bitmap ->
-            BitmapUtil.replaceNonTransparentPixels(bitmap, (alpha shl 24) or (color and 0xFFFFFF))
-            scaledBitmap = originalBitmap?.let {
-                Bitmap.createScaledBitmap(
-                    it,
-                    bitmap.width,
-                    bitmap.height,
-                    true
-                )
-            }
         }
     }
 
@@ -109,9 +95,6 @@ object TexturedBrushDrawer {
         }
     }
 
-    fun adjustBitmaps(strokeWidth: Float, color: Int, alpha: Int) {
-
-    }
 
     fun resetBitmaps() {
         originalBitmap = null

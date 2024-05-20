@@ -83,6 +83,11 @@ import java.util.UUID
 import java.util.concurrent.CountDownLatch
 import javax.inject.Inject
 
+/**
+ * Fitting room activity
+ *
+ *  @author Veronika Ovsyannikova
+ */
 class FittingRoomActivity :
     AppCompatActivity(),
     ResourceListener,
@@ -351,7 +356,7 @@ class FittingRoomActivity :
         }
     }
 
-    override fun removeLook(lookId: String) {
+    override fun removeLook() {
         shareButton.visibility = View.INVISIBLE
         stopAnimation()
         accessoriesMenuFragment.resetMenu()
@@ -592,10 +597,6 @@ class FittingRoomActivity :
         gifTextures.clear()
         gifRunnable?.let { handler.removeCallbacks(it) }
         gifRunnable = null
-    }
-
-    private fun setSpeed(fps: Int) {
-        frameDelay = 1000L / fps
     }
 
     private fun addMenuFragments() {

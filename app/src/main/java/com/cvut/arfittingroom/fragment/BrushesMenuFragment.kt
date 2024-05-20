@@ -34,6 +34,8 @@ import io.github.muddz.styleabletoast.StyleableToast
  * Brushes menu fragment
  *
  * @property drawView
+ *
+ * @author Veronika Ovsyannikova
  */
 class BrushesMenuFragment(private val drawView: DrawView) : Fragment() {
     private val brushesOptions = mutableListOf<BrushTO>()

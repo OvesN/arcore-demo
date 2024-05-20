@@ -17,6 +17,11 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 import io.github.muddz.styleabletoast.StyleableToast
 
+/**
+ * Log in activity
+ *
+ * @author Veronika Ovsyannikova
+ */
 class LogInActivity : AppCompatActivity() {
     private val binding: ActivityLoginBinding by viewBinding(createMethod = CreateMethod.INFLATE)
     private lateinit var auth: FirebaseAuth

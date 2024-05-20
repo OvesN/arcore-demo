@@ -2,8 +2,16 @@ package com.cvut.arfittingroom.draw.command.action
 
 import com.cvut.arfittingroom.draw.command.Command
 import com.cvut.arfittingroom.draw.command.Rotatable
-import java.util.UUID
 
+/**
+ * Rotate element
+ *
+ * @property rotatable
+ * @property newRotationAngle
+ * @property oldRotationAngle
+ *
+ * @author Veronika Ovsyannikova
+ */
 class RotateElement(
     private val rotatable: Rotatable,
     private val newRotationAngle: Float,

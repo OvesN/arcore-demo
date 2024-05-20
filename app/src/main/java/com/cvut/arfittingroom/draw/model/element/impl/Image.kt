@@ -9,6 +9,18 @@ import com.cvut.arfittingroom.model.TRANSPARENT_CODE
 import java.util.UUID
 import kotlin.math.max
 
+/**
+ * Image
+ *
+ * @property id
+ * @property resourceRef
+ * @property centerX
+ * @property centerY
+ * @property outerRadius
+ * @property rotationAngle
+ *
+ * @author Veronika Ovsyannikova
+ */
 class Image(
     override val id: UUID = UUID.randomUUID(),
     val resourceRef: String,

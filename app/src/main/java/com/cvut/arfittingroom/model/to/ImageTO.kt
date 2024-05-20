@@ -1,10 +1,18 @@
 package com.cvut.arfittingroom.model.to
 
 import com.google.firebase.firestore.PropertyName
-import java.sql.Timestamp
-import java.time.Instant
 import java.util.Date
 
+/**
+ * Image t o
+ *
+ * @property ref
+ * @property isAnimated
+ * @property uploadedBy
+ * @property createdAt
+ *
+ * @author Veronika Ovsyannikova
+ */
 data class ImageTO(
     @get:PropertyName("ref") @set:PropertyName("ref") var ref: String = "",
     @get:PropertyName("is_animated") @set:PropertyName("is_animated") var isAnimated: Boolean = false,

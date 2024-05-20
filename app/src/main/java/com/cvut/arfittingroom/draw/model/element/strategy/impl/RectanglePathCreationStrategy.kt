@@ -4,6 +4,11 @@ import com.cvut.arfittingroom.draw.model.element.strategy.PathCreationStrategy
 import com.cvut.arfittingroom.draw.path.DrawablePath
 import javax.inject.Inject
 
+/**
+ * Rectangle path creation strategy
+ *
+ * @author Veronika Ovsyannikova
+ */
 class RectanglePathCreationStrategy
 @Inject
 constructor() : PathCreationStrategy {

@@ -18,6 +18,11 @@ import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.lang.Exception
 
+/**
+ * File util
+ *
+ * @author Veronika Ovsyannikova
+ */
 object FileUtil {
     fun saveTempMaskTextureBitmap(
         bitmap: Bitmap,

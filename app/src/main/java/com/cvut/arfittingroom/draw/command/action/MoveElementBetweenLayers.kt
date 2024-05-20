@@ -4,6 +4,16 @@ import com.cvut.arfittingroom.draw.command.Command
 import com.cvut.arfittingroom.draw.model.element.Element
 import com.cvut.arfittingroom.draw.service.LayerManager
 
+/**
+ * Move element between layers
+ *
+ * @property element
+ * @property oldLayerId
+ * @property newLayerId
+ * @property layerManager
+ *
+ * @author Veronika Ovsyannikova
+ */
 class MoveElementBetweenLayers(
     private val element: Element,
     private val oldLayerId: Int,

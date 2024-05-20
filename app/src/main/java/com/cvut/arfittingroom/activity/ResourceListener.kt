@@ -4,6 +4,11 @@ import com.cvut.arfittingroom.model.to.LookTO
 import com.cvut.arfittingroom.model.to.MakeupTO
 import com.cvut.arfittingroom.model.to.ModelTO
 
+/**
+ * Resource listener
+ *
+ * @author Veronika Ovsyannikova
+ */
 interface ResourceListener {
     fun applyMakeup(makeupTO: MakeupTO)
 
@@ -15,5 +20,5 @@ interface ResourceListener {
 
     fun applyLook(lookTO: LookTO)
 
-    fun removeLook(lookId: String)
+    fun removeLook()
 }

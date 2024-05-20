@@ -37,6 +37,11 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import io.github.muddz.styleabletoast.StyleableToast
 
+/**
+ * Makeup menu fragment
+ *
+ * @author Veronika Ovsyannikova
+ */
 class MakeupMenuFragment : Fragment() {
     private val makeupTypes = mutableListOf<MakeupType>()
     private var selectedMakeupOptionRef: String = ""

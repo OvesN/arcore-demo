@@ -8,6 +8,11 @@ import com.cvut.arfittingroom.draw.command.Scalable
 import java.util.UUID
 import kotlin.math.max
 
+/**
+ * Base class for all elements that will be drawn on the canvas
+ *
+ * @author Veronika Ovsyannikova
+ */
 abstract class Element :
     Scalable,
     Drawable,

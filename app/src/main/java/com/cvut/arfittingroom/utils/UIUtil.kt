@@ -25,6 +25,11 @@ import com.cvut.arfittingroom.R
 import com.cvut.arfittingroom.model.to.LookTO
 import com.skydoves.colorpickerview.ColorPickerView
 
+/**
+ * U i util
+ *
+ * @author Veronika Ovsyannikova
+ */
 object UIUtil {
     fun createDivider(context: Context): View =
         View(context).apply {

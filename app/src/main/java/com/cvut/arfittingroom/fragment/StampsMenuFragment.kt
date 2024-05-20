@@ -20,6 +20,14 @@ import com.cvut.arfittingroom.draw.model.element.strategy.PathCreationStrategy
 import com.cvut.arfittingroom.draw.model.enums.EEditorMode
 import com.cvut.arfittingroom.utils.ScreenUtil
 
+/**
+ * Stamps menu fragment
+ *
+ * @property strategies
+ * @property drawView
+ *
+ * @author Veronika Ovsyannikova
+ */
 class StampsMenuFragment(
     private val strategies: Map<String, @JvmSuppressWildcards PathCreationStrategy>,
     private val drawView: DrawView,

@@ -9,6 +9,19 @@ import com.cvut.arfittingroom.draw.model.element.strategy.PathCreationStrategy
 import com.cvut.arfittingroom.draw.path.DrawablePath
 import java.util.UUID
 
+/**
+ * Stamp
+ *
+ * @property id
+ * @property centerX
+ * @property centerY
+ * @property outerRadius
+ * @property pathCreationStrategy
+ * @property paint
+ * @property rotationAngle
+ *
+ * @author Veronika Ovsyannikova
+ */
 class Stamp(
     override val id: UUID = UUID.randomUUID(),
     override var centerX: Float,

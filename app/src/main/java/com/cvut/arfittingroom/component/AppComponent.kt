@@ -9,6 +9,11 @@ import com.cvut.arfittingroom.module.ServiceModule
 import dagger.Component
 import javax.inject.Singleton
 
+/**
+ * App component
+ *
+ * @author Veronika Ovsyannikova
+ */
 @Singleton
 @Component(modules = [ServiceModule::class, BindingModule::class])
 interface AppComponent {

@@ -6,6 +6,11 @@ import javax.inject.Inject
 import kotlin.math.cos
 import kotlin.math.sin
 
+/**
+ * Star path creation strategy
+ *
+ * @author Veronika Ovsyannikova
+ */
 class StarPathCreationStrategy
 @Inject
 constructor() : PathCreationStrategy {

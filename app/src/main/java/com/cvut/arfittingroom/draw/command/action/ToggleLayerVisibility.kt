@@ -3,6 +3,17 @@ package com.cvut.arfittingroom.draw.command.action
 import com.cvut.arfittingroom.draw.command.Command
 import com.cvut.arfittingroom.draw.service.LayerManager
 
+/**
+ * Toggle layer visibility
+ *
+ * @property layerId
+ * @property layerManager
+ * @constructor
+ *
+ * @param layerIndex
+ *
+ * @author Veronika Ovsyannikova
+ */
 class ToggleLayerVisibility(
     layerIndex: Int,
     private val layerId: Int,

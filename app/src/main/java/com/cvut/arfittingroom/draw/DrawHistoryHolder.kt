@@ -5,6 +5,12 @@ import com.cvut.arfittingroom.fragment.HistoryChangeListener
 import java.util.LinkedList
 
 private const val MAX_NUMBER_OF_ACTIONS_HOLD_IN_HISTORY = 50
+
+/**
+ * Draw history holder
+ *
+ * @author Veronika Ovsyannikova
+ */
 object DrawHistoryHolder {
     private val globalHistory = LinkedList<Command>()
     private val undoneActions = LinkedList<Command>()

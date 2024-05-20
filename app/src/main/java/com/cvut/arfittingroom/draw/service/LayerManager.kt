@@ -15,6 +15,7 @@ private val logger = KotlinLogging.logger {}
 /**
  * Layer manager
  *
+ * @author Veronika Ovsyannikova
  */
 class LayerManager {
     val layers = mutableListOf<Layer>()

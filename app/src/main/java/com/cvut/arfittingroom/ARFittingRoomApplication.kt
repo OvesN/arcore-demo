@@ -4,11 +4,16 @@ import android.app.Application
 import com.cvut.arfittingroom.component.AppComponent
 import com.cvut.arfittingroom.component.DaggerAppComponent
 
+/**
+ * Main class
+ *
+ * @author Veronika Ovsyannikova
+ */
 class ARFittingRoomApplication : Application() {
     lateinit var appComponent: AppComponent
 
     override fun onCreate() {
         super.onCreate()
-        appComponent = com.cvut.arfittingroom.component.DaggerAppComponent.create()
+        appComponent = DaggerAppComponent.create()
     }
 }

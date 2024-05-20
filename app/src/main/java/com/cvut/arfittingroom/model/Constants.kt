@@ -1,4 +1,7 @@
 package com.cvut.arfittingroom.model
+/**
+ * @author Veronika Ovsyannikova
+ */
 
 const val MASK_TEXTURE_FILE_NAME = "mask_texture.png"
 const val MASK_FRAME_FILE_NAME = "frame"

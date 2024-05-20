@@ -20,6 +20,8 @@ import io.github.muddz.styleabletoast.StyleableToast
  * Layers menu fragment, manages menu for layers
  *
  * @property drawView
+ *
+ * @author Veronika Ovsyannikova
  */
 class LayersMenuFragment(private val drawView: DrawView) : Fragment() {
     private lateinit var layersButtonsContainer: LinearLayout

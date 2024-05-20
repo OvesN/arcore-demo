@@ -11,6 +11,11 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 
+/**
+ * Main activity
+ *
+ * @author Veronika Ovsyannikova
+ */
 class MainActivity : AppCompatActivity() {
     private val binding: ActivityMainBinding by viewBinding(createMethod = CreateMethod.INFLATE)
     private lateinit var auth: FirebaseAuth

@@ -1,8 +1,12 @@
 package com.cvut.arfittingroom.draw.command
 
 import android.graphics.Paint
-import android.icu.text.ListFormatter.Width
 
+/**
+ * Repaintable
+ *
+ * @author Veronika Ovsyannikova
+ */
 interface Repaintable {
     val paint: Paint
 

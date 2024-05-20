@@ -19,6 +19,11 @@ import io.github.muddz.styleabletoast.StyleableToast
 
 private val USERNAME_REGEX = "^[a-zA-Z0-9]+$".toRegex()
 
+/**
+ * Sign up activity
+ *
+ * @author Veronika Ovsyannikova
+ */
 class SignUpActivity : AppCompatActivity() {
     private val binding: ActivitySignupBinding by viewBinding(createMethod = CreateMethod.INFLATE)
     private lateinit var auth: FirebaseAuth

@@ -43,6 +43,11 @@ import io.github.muddz.styleabletoast.StyleableToast
 import java.util.LinkedList
 import javax.inject.Inject
 
+/**
+ * Mask editor fragment
+ *
+ * @author Veronika Ovsyannikova
+ */
 class MaskEditorFragment :
     Fragment(),
     HistoryChangeListener,

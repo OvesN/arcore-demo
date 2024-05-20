@@ -2,10 +2,24 @@ package com.cvut.arfittingroom.model.to
 
 import com.cvut.arfittingroom.model.to.drawhistory.EditorStateTO
 import com.google.firebase.firestore.PropertyName
-import java.sql.Timestamp
-import java.time.Instant
 import java.util.Date
 
+/**
+ * Look t o
+ *
+ * @property lookId
+ * @property author
+ * @property appliedMakeup
+ * @property appliedModels
+ * @property editorState
+ * @property name
+ * @property previewRef
+ * @property isAnimated
+ * @property isPublic
+ * @property createdAt
+ *
+ * @author Veronika Ovsyannikova
+ */
 data class LookTO(
     @get:PropertyName("look_id") @set:PropertyName("look_id") var lookId: String = "",
     @get:PropertyName("author") @set:PropertyName("author") var author: String = "",

@@ -15,6 +15,11 @@ import com.cvut.arfittingroom.activity.UIChangeListener
 import com.cvut.arfittingroom.utils.currentUserUsername
 import com.google.firebase.auth.FirebaseAuth
 
+/**
+ * Profile fragment
+ *
+ * @author Veronika Ovsyannikova
+ */
 class ProfileFragment : Fragment() {
     private lateinit var auth: FirebaseAuth
 

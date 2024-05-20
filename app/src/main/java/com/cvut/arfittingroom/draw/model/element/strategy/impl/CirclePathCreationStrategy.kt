@@ -5,6 +5,11 @@ import com.cvut.arfittingroom.draw.model.element.strategy.PathCreationStrategy
 import com.cvut.arfittingroom.draw.path.DrawablePath
 import javax.inject.Inject
 
+/**
+ * Circle path creation strategy
+ *
+ * @author Veronika Ovsyannikova
+ */
 class CirclePathCreationStrategy
 @Inject
 constructor() : PathCreationStrategy {

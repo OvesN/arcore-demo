@@ -35,6 +35,11 @@ import com.google.firebase.firestore.toObject
 import com.google.firebase.storage.FirebaseStorage
 import io.github.muddz.styleabletoast.StyleableToast
 
+/**
+ * Looks menu fragment
+ *
+ * @author Veronika Ovsyannikova
+ */
 class LooksMenuFragment : Fragment() {
     private var selectedLookTO = LookTO()
     private val looks = mutableMapOf<String, LookTO>()
@@ -202,7 +207,7 @@ class LooksMenuFragment : Fragment() {
 
         selectedLookTO =
             if (selectedLookTO.lookId.hashCode() == buttonView.id) {
-                listener.removeLook(lookTO.lookId)
+                listener.removeLook()
                 LookTO()
             } else {
                 listener.applyLook(lookTO)
@@ -228,7 +233,7 @@ class LooksMenuFragment : Fragment() {
             onLookDelete = {
                 deleteLook(lookTO.lookId)
                 val listener = context as? ResourceListener
-                listener?.removeLook(lookTO.lookId)
+                listener?.removeLook()
                 resetMenu()
             },
             onChangeIsPublic = { isPublic ->

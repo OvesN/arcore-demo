@@ -6,6 +6,11 @@ import android.graphics.Color
 import android.graphics.Matrix
 import com.cvut.arfittingroom.model.BITMAP_SIZE
 
+/**
+ * Bitmap util
+ *
+ * @author Veronika Ovsyannikova
+ */
 object BitmapUtil {
     /**
      * Modifies all non-transparent pixels in the provided bitmap to the specified new color

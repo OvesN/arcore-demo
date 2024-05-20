@@ -8,6 +8,11 @@ import dagger.Module
 import dagger.Provides
 import javax.inject.Singleton
 
+/**
+ * Service module
+ *
+ * @author Veronika Ovsyannikova
+ */
 @Module
 class ServiceModule {
     @Provides

@@ -1,10 +1,19 @@
 package com.cvut.arfittingroom.draw.command.action
 
-import android.sax.Element
 import com.cvut.arfittingroom.draw.command.Command
 import com.cvut.arfittingroom.draw.command.Repaintable
-import java.util.UUID
 
+/**
+ * Repaint element
+ *
+ * @property repaintable
+ * @property newColor
+ * @property oldColor
+ * @property fill
+ * @property wasFilled
+ *
+ * @author Veronika Ovsyannikova
+ */
 class RepaintElement(
     private val repaintable: Repaintable,
     private val newColor: Int,

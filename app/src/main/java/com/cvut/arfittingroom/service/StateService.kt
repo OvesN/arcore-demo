@@ -19,6 +19,7 @@ import com.google.ar.sceneform.ux.AugmentedFaceNode
 /**
  * State service manages that models and textures should be displayed
  *
+ * @author Veronika Ovsyannikova
  */
 class StateService {
     val appliedMakeUpTypes = mutableMapOf<String, MakeupTO>()
@@ -174,5 +175,4 @@ class StateService {
     fun getAppliedModelsList() = appliedModels.values.toList()
 
     fun getAppliedMakeupList() = appliedMakeUpTypes.values.toList()
-    fun isStateNotEmpty() = appliedMakeUpTypes.isNotEmpty() || appliedModels.isNotEmpty()
 }

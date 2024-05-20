@@ -5,6 +5,11 @@ import com.cvut.arfittingroom.draw.path.DrawablePath
 import javax.inject.Inject
 import kotlin.math.sqrt
 
+/**
+ * Triangle path creation strategy
+ *
+ * @author Veronika Ovsyannikova
+ */
 class TrianglePathCreationStrategy
 @Inject
 constructor() : PathCreationStrategy {

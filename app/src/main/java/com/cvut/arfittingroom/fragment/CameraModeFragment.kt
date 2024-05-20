@@ -28,6 +28,11 @@ import com.google.ar.sceneform.ux.ArFrontFacingFragment
 import io.github.muddz.styleabletoast.StyleableToast
 import java.io.IOException
 
+/**
+ * Camera mode fragment
+ *
+ * @author Veronika Ovsyannikova
+ */
 class CameraModeFragment : Fragment() {
     private var activeCameraMode = ECameraMode.PHOTO
     private var timerHandler: Handler? = null

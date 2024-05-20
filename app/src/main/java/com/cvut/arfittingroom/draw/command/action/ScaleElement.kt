@@ -2,8 +2,16 @@ package com.cvut.arfittingroom.draw.command.action
 
 import com.cvut.arfittingroom.draw.command.Command
 import com.cvut.arfittingroom.draw.command.Scalable
-import java.util.UUID
 
+/**
+ * Scale element
+ *
+ * @property scalable
+ * @property newRadius
+ * @property oldRadius
+ *
+ * @author Veronika Ovsyannikova
+ */
 class ScaleElement(
     private val scalable: Scalable,
     private val newRadius: Float,

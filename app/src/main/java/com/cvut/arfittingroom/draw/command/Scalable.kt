@@ -1,5 +1,10 @@
 package com.cvut.arfittingroom.draw.command
 
+/**
+ * Scalable
+ *
+ * @author Veronika Ovsyannikova
+ */
 interface Scalable {
     fun scale(newRadius: Float)
 

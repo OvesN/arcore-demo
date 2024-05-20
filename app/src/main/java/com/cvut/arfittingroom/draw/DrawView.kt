@@ -11,6 +11,7 @@ import android.os.Looper
 import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
+import android.view.MotionEvent.ACTION_DOWN
 import android.view.MotionEvent.ACTION_MOVE
 import android.view.MotionEvent.ACTION_POINTER_UP
 import android.view.MotionEvent.ACTION_UP
@@ -68,6 +69,8 @@ import kotlin.math.sqrt
  *
  * @param context
  * @param attrs
+ *
+ * @author Veronika Ovsyannikova
  */
 class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     var paintOptions = PaintOptions()
@@ -277,7 +280,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     private fun handleCanvasGesture(event: MotionEvent) {
         when (event.actionMasked) {
-            MotionEvent.ACTION_MOVE -> {
+            ACTION_MOVE -> {
                 val currentX = (event.getX(0) + event.getX(1)) / 2
                 val currentY = (event.getY(0) + event.getY(1)) / 2
 
@@ -294,7 +297,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                 lastTouchY = currentY
             }
 
-            ACTION_POINTER_UP, MotionEvent.ACTION_UP ->
+            ACTION_POINTER_UP, ACTION_UP ->
                 if (event.pointerCount <= 2) {
                     lastTouchX = 0f
                     lastTouchY = 0f
@@ -310,8 +313,8 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         if (!scaleGestureDetector.isInProgress) {
             when (event.action) {
                 ACTION_POINTER_UP, ACTION_UP -> handleActionUp(event, x, y)
-                MotionEvent.ACTION_DOWN -> handleActionDown(x, y)
-                MotionEvent.ACTION_MOVE -> handleActionMove(x, y)
+                ACTION_DOWN -> handleActionDown(x, y)
+                ACTION_MOVE -> handleActionMove(x, y)
             }
         }
     }

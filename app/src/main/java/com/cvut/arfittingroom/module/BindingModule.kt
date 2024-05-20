@@ -11,6 +11,11 @@ import dagger.Module
 import dagger.multibindings.IntoMap
 import dagger.multibindings.StringKey
 
+/**
+ * Binding module
+ *
+ * @author Veronika Ovsyannikova
+ */
 @Module
 abstract class BindingModule {
     @Binds

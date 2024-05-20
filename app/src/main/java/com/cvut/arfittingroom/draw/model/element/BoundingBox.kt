@@ -8,6 +8,15 @@ import com.cvut.arfittingroom.draw.command.Drawable
 import com.cvut.arfittingroom.draw.path.DrawablePath
 import com.cvut.arfittingroom.model.Coordinates
 
+/**
+ * Bounding box
+ *
+ * @property centerX
+ * @property centerY
+ * @property outerRadius
+ *
+ * @author Veronika Ovsyannikova
+ */
 class BoundingBox(
     var centerX: Float,
     var centerY: Float,

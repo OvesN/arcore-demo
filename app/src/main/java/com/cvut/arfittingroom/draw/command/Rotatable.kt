@@ -1,5 +1,10 @@
 package com.cvut.arfittingroom.draw.command
 
+/**
+ * Rotatable
+ *
+ * @author Veronika Ovsyannikova
+ */
 interface Rotatable {
     fun rotate(newRotationAngle: Float)
 

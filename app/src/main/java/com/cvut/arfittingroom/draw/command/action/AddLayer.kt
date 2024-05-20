@@ -3,6 +3,15 @@ package com.cvut.arfittingroom.draw.command.action
 import com.cvut.arfittingroom.draw.command.Command
 import com.cvut.arfittingroom.draw.service.LayerManager
 
+/**
+ * Add layer
+ *
+ * @property width
+ * @property height
+ * @property layerManager
+ *
+ * @author Veronika Ovsyannikova
+ */
 class AddLayer(
     private val width: Int,
     private val height: Int,

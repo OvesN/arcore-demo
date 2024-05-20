@@ -19,6 +19,26 @@ import kotlin.math.max
 
 private const val PROXIMITY_THRESHOLD = 60f  // pixels
 
+/**
+ * Curve
+ *
+ * @property id
+ * @property path
+ * @property paint
+ * @property rotationAngle
+ * @property bitmapTexture
+ * @property strokeTextureRef
+ * @property blurRadius
+ * @property blurType
+ * @property centerX
+ * @property centerY
+ * @property outerRadius
+ * @property xdiff
+ * @property ydiff
+ * @property radiusDiff
+ *
+ * @author Veronika Ovsyannikova
+ */
 class Curve(
     override val id: UUID = UUID.randomUUID(),
     var path: DrawablePath,

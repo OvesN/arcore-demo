@@ -5,6 +5,11 @@ import com.cvut.arfittingroom.draw.model.element.strategy.PathCreationStrategy
 import com.cvut.arfittingroom.draw.path.DrawablePath
 import javax.inject.Inject
 
+/**
+ * Heart path creation strategy
+ *
+ * @author Veronika Ovsyannikova
+ */
 class HeartPathCreationStrategy
 @Inject
 constructor() : PathCreationStrategy {

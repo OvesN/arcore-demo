@@ -4,6 +4,15 @@ import com.cvut.arfittingroom.draw.command.Command
 import com.cvut.arfittingroom.draw.model.element.Element
 import com.cvut.arfittingroom.draw.service.LayerManager
 
+/**
+ * Remove element from layer
+ *
+ * @property element
+ * @property layerManager
+ * @property layerId
+ *
+ * @author Veronika Ovsyannikova
+ */
 class RemoveElementFromLayer(
     private val element: Element,
     private val layerManager: LayerManager,

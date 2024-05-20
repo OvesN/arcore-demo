@@ -33,6 +33,11 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import io.github.muddz.styleabletoast.StyleableToast
 
+/**
+ * Accessories menu fragment
+ *
+ * @author Veronika Ovsyannikova
+ */
 class AccessoriesMenuFragment : Fragment() {
     private val accessoriesTypes = mutableSetOf<String>()
     private val modelsInfo = mutableListOf<ModelTO>()

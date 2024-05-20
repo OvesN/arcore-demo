@@ -7,6 +7,11 @@ import com.cvut.arfittingroom.draw.path.impl.Quad
 import java.io.Serializable
 import java.util.LinkedList
 
+/**
+ * Drawable path
+ *
+ * @author Veronika Ovsyannikova
+ */
 class DrawablePath : Path(), Serializable {
     val actions = LinkedList<PathAction>()
 

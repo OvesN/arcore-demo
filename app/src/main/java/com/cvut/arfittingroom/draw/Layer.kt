@@ -13,6 +13,15 @@ import java.util.LinkedList
 import java.util.UUID
 import kotlin.collections.HashMap
 
+/**
+ * Layer
+ *
+ * @property id
+ * @property width
+ * @property height
+ *
+ * @author Veronika Ovsyannikova
+ */
 class Layer(
     val id: Int,
     private val width: Int,

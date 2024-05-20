@@ -24,10 +24,15 @@ import com.google.firebase.storage.FirebaseStorage
 import java.util.UUID
 import javax.inject.Inject
 
+/**
+ * Mapper
+ *
+ * @property strategies
+ * @author Veronika Ovsyannikova
+ */
 class Mapper
 @Inject
 constructor(private val strategies: Map<String, @JvmSuppressWildcards PathCreationStrategy>) {
-    private val storage = FirebaseStorage.getInstance()
     private var width: Int = 0
     private var height: Int = 0
 
@@ -232,7 +237,7 @@ constructor(private val strategies: Map<String, @JvmSuppressWildcards PathCreati
 
     fun layerTOtoLayer(layerTO: LayerTO) =
         Layer(
-            id = layerTO.id.toInt(),
+            id = layerTO.id,
             width = width,
             height = height,
         )
