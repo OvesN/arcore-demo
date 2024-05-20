@@ -166,6 +166,9 @@ class LayerManager {
 
         setActiveLayer(if (layerIndex == 0) 0 else layerIndex - 1)
 
+        if (layers.isEmpty()) {
+            addLayer(viewWidth, viewHeight)
+        }
         logger.info { "Layer from on $index is removed" }
     }
 
