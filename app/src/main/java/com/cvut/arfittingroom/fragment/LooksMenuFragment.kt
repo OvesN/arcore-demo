@@ -25,7 +25,7 @@ import com.cvut.arfittingroom.model.to.LookTO
 import com.cvut.arfittingroom.module.GlideApp
 import com.cvut.arfittingroom.utils.UIUtil.deselectLookButton
 import com.cvut.arfittingroom.utils.UIUtil.selectLookButton
-import com.cvut.arfittingroom.utils.UIUtil.showLookInfoDialog
+import com.cvut.arfittingroom.utils.UIUtil.showLookInfoPopup
 import com.cvut.arfittingroom.utils.currentUserUsername
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.Filter
@@ -91,10 +91,6 @@ class LooksMenuFragment : Fragment() {
                         )
                     }
             }
-        lookInfoButton = view.findViewById(R.id.look_info_button)
-        lookInfoButton.setOnClickListener {
-            showLookInfoMenu()
-        }
     }
 
     fun fetchLooks() {
@@ -149,6 +145,10 @@ class LooksMenuFragment : Fragment() {
                             id = lookInfo.lookId.hashCode()
                             setOnClickListener {
                                 selectLook(requireView(), it, lookInfo)
+                            }
+                            setOnLongClickListener {view ->
+                                showLookInfoMenu(view)
+                                true
                             }
                         }
                     }
@@ -210,13 +210,12 @@ class LooksMenuFragment : Fragment() {
         fetchLooks()
     }
 
-    private fun showLookInfoMenu() {
-        showLookInfoDialog(
+    private fun showLookInfoMenu(view: View) {
+        showLookInfoPopup(
             requireContext(),
-            lookId = selectedLookTO.lookId,
+            selectedLookTO,
             isAuthor = selectedLookTO.author == auth.currentUserUsername(),
-            isPublic = selectedLookTO.isPublic,
-            authorName = selectedLookTO.author,
+            view,
             onLookDelete = {
                 deleteLook(selectedLookTO.lookId)
                 val listener = context as? ResourceListener

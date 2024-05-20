@@ -512,7 +512,6 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private fun deleteElement(element: Element) {
         addToHistory(
             RemoveElementFromLayer(
-                element.id,
                 element,
                 layerManager,
                 layerManager.getActiveLayerId(),
@@ -531,7 +530,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                 shouldShowFillCheckbox = true,
                 shouldShowPipette = true,
                 onPipetteSelected = {
-                    showPipetteView(); elementToRepaintAfterPipetteView = element as Repaintable
+                    showPipetteView(); elementToRepaintAfterPipetteView = element
                 },
             ) { envelopColor, fill ->
                 repaintElement(element, envelopColor, fill)
@@ -1006,7 +1005,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         return bitmap
     }
 
-    private fun repaintElement(
+    fun repaintElement(
         element: Repaintable,
         newColor: Int,
         fill: Boolean,

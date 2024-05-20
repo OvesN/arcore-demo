@@ -6,7 +6,7 @@ import java.util.UUID
 
 class ToggleLayerVisibility(
     layerIndex: Int,
-    private val layerId: UUID,
+    private val layerId: Int,
     private val layerManager: LayerManager
 ) : Command {
     override val description: String = "layer $layerIndex is hidden"

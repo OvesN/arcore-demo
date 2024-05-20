@@ -14,10 +14,9 @@ import java.util.UUID
 import kotlin.collections.HashMap
 
 class Layer(
-    val id: UUID = UUID.randomUUID(),
+    val id: Int,
     private val width: Int,
     private val height: Int,
-    val idNum: Int,
 ) {
     var isVisible: Boolean = true
     val elements = HashMap<UUID, Element>()

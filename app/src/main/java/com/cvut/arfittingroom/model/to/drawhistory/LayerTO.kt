@@ -5,5 +5,4 @@ data class LayerTO(
     var index: Int = 0,
     var elements: List<String> = emptyList(),
     var isVisible: Boolean = false,
-    var idNum:Int = 0,
 )

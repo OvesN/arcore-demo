@@ -173,7 +173,6 @@ constructor(private val strategies: Map<String, @JvmSuppressWildcards PathCreati
         index: Int,
     ) = LayerTO(
         id = layer.id.toString(),
-        idNum = layer.idNum,
         isVisible = layer.isVisible,
         index = index,
         elements = layer.elements.keys.map { it.toString() },
@@ -237,11 +236,8 @@ constructor(private val strategies: Map<String, @JvmSuppressWildcards PathCreati
 
     fun layerTOtoLayer(layerTO: LayerTO) =
         Layer(
-            id = UUID.fromString(layerTO.id),
+            id = layerTO.id.toInt(),
             width = width,
             height = height,
-            idNum = layerTO.idNum
         )
-
-
 }

@@ -4,10 +4,10 @@ import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.app.AlertDialog
 import android.content.Context
-import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.LayerDrawable
 import android.view.LayoutInflater
+import android.view.MenuInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AccelerateDecelerateInterpolator
@@ -15,14 +15,14 @@ import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.ImageButton
-import android.widget.ImageView
+import android.widget.PopupMenu
 import android.widget.Spinner
 import android.widget.TextView
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import com.cvut.arfittingroom.R
-import com.google.ar.sceneform.rendering.Texture
+import com.cvut.arfittingroom.model.to.LookTO
 import com.skydoves.colorpickerview.ColorPickerView
 
 object UIUtil {
@@ -32,12 +32,11 @@ object UIUtil {
             background = AppCompatResources.getDrawable(context, R.color.colorLightGrey)
         }
 
-    fun showLookInfoDialog(
+    fun showLookInfoPopup(
         context: Context,
-        lookId: String,
+        lookTO: LookTO,
         isAuthor: Boolean,
-        isPublic: Boolean,
-        authorName: String,
+        view: View,
         onLookDelete: () -> Unit = {},
         onChangeIsPublic: (Boolean) -> Unit,
     ) {
@@ -45,36 +44,37 @@ object UIUtil {
             LayoutInflater.from(context).inflate(R.layout.popup_look_info, null)
 
         val checkBox = dialogView.findViewById<CheckBox>(R.id.is_public_checkbox)
-        checkBox.isChecked = isPublic
+        checkBox.isChecked = lookTO.isPublic
 
-        val dialog = AlertDialog.Builder(context)
-            .setView(dialogView)
-            .create()
-
-        dialogView.findViewById<Button>(R.id.cancel_popup_button).setOnClickListener {
-            dialog.dismiss()
-        }
-
-        dialogView.findViewById<Button>(R.id.ok_popup_button).setOnClickListener {
-            onChangeIsPublic(checkBox.isChecked)
-            dialog.dismiss()
-        }
+        val popupMenu = PopupMenu(context, view)
+        val inflater: MenuInflater = popupMenu.menuInflater
+//        inflater.inflate(R.menu.image_button_menu, popupMenu.menu)
+//
+//
+//        dialogView.findViewById<Button>(R.id.cancel_popup_button).setOnClickListener {
+//            popup.dismiss()
+//        }
+//
+//        dialogView.findViewById<Button>(R.id.ok_popup_button).setOnClickListener {
+//            onChangeIsPublic(checkBox.isChecked)
+//            popup.dismiss()
+//        }
 
         val authorNameText = dialogView.findViewById<TextView>(R.id.look_author_name)
-        authorNameText.text = if (isAuthor) "$authorName (you)" else authorName
+        authorNameText.text = if (isAuthor) "${lookTO.author} (you)" else lookTO.author
 
-        if (isAuthor) {
-            val deleteButton = dialogView.findViewById<Button>(R.id.delete_look_button)
-            deleteButton.visibility = View.VISIBLE
-            checkBox.visibility = View.VISIBLE
-            deleteButton.setOnClickListener {
-                onLookDelete()
-                dialog.dismiss()
-            }
-        }
-
-
-        dialog.show()
+//        if (isAuthor) {
+//            val deleteButton = dialogView.findViewById<Button>(R.id.delete_look_button)
+//            deleteButton.visibility = View.VISIBLE
+//            checkBox.visibility = View.VISIBLE
+//            deleteButton.setOnClickListener {
+//                onLookDelete()
+//                popup.dismiss()
+//            }
+//        }
+//
+//
+//        popup.show()
     }
 
     fun showEditorSubmenuDialog(

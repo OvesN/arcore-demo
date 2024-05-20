@@ -6,16 +6,13 @@ import com.cvut.arfittingroom.draw.service.LayerManager
 import java.util.UUID
 
 class MoveElementBetweenLayers(
-    private val elementId: UUID,
     private val element: Element,
-    private val oldLayerId: UUID,
-    private val newLayerId: UUID,
-    newLayerIndex: Int,
-    oldLayerIndex: Int,
+    private val oldLayerId: Int,
+    private val newLayerId: Int,
     private val layerManager: LayerManager,
 ) : Command {
     override val description: String =
-        "move ${element.name} from layer $oldLayerIndex to $newLayerIndex"
+        "move ${element.name} from layer $oldLayerId to $newLayerId"
 
     override fun execute() {
         layerManager.removeElementFromLayer(

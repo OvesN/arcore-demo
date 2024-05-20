@@ -6,10 +6,9 @@ import com.cvut.arfittingroom.draw.service.LayerManager
 import java.util.UUID
 
 class RemoveElementFromLayer(
-    private val elementId: UUID,
     private val element: Element,
     private val layerManager: LayerManager,
-    private val layerId: UUID,
+    private val layerId: Int,
 ) : Command {
     override val description: String = "remove ${element.name}"
 

@@ -22,6 +22,7 @@ import com.cvut.arfittingroom.activity.UIChangeListener
 import com.cvut.arfittingroom.draw.DrawHistoryHolder
 import com.cvut.arfittingroom.draw.DrawView
 import com.cvut.arfittingroom.draw.Layer
+import com.cvut.arfittingroom.draw.command.Repaintable
 import com.cvut.arfittingroom.draw.model.element.impl.Curve
 import com.cvut.arfittingroom.draw.model.element.impl.Gif
 import com.cvut.arfittingroom.draw.model.element.impl.Image
@@ -176,12 +177,18 @@ class MaskEditorFragment : Fragment(), HistoryChangeListener, ColorChangeListene
                 shouldShowPipette = true,
                 onPipetteSelected = { drawView.showPipetteView() }
             ) { envelopColor, fill ->
-                drawView.setColor(
-                    envelopColor,
-                    fill
-                )
-                brushesMenuFragment.changeColor(envelopColor)
-                stampsMenuFragment.changeColor(envelopColor, fill)
+                val repaintebale = drawView.selectedElement as? Repaintable
+                if (repaintebale != null) {
+                    drawView.repaintElement(repaintebale, envelopColor, fill)
+                }
+                else {
+                    drawView.setColor(
+                        envelopColor,
+                        fill
+                    )
+                    brushesMenuFragment.changeColor(envelopColor)
+                    stampsMenuFragment.changeColor(envelopColor, fill)
+                }
             }
         }
 
@@ -246,7 +253,7 @@ class MaskEditorFragment : Fragment(), HistoryChangeListener, ColorChangeListene
             .beginTransaction()
             .show(layersMenuFragment)
             .commit()
-        layersMenuFragment.updateLayersButtons(drawView.layerManager.getNumOfLayers())
+        layersMenuFragment.updateLayersButtons()
     }
 
     private fun hideLayersMenu() {
@@ -365,7 +372,7 @@ class MaskEditorFragment : Fragment(), HistoryChangeListener, ColorChangeListene
             deleteTempFiles(requireContext())
             if (::drawView.isInitialized) {
                 drawView.clearCanvas()
-                layersMenuFragment.updateLayersButtons(drawView.layerManager.getNumOfLayers())
+                layersMenuFragment.updateLayersButtons()
             }
         }
     }

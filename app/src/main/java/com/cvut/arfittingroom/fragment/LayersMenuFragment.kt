@@ -2,7 +2,6 @@ package com.cvut.arfittingroom.fragment
 
 import android.graphics.Typeface
 import android.os.Bundle
-import android.provider.ContactsContract.CommonDataKinds.Im
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -44,7 +43,7 @@ class LayersMenuFragment(private val drawView: DrawView) : Fragment() {
 
         view.findViewById<ImageButton>(R.id.add_layer_button).setOnClickListener {
 
-            updateLayersButtons(drawView.addLayer() + 1)
+            updateLayersButtons()
             drawView.layerManager.makeLayersSemiTransparentExceptOne(drawView.layerManager.getActiveLayerIndex())
             drawView.invalidate()
 
@@ -54,13 +53,13 @@ class LayersMenuFragment(private val drawView: DrawView) : Fragment() {
         view.findViewById<ImageButton>(R.id.delete_layer_button).setOnClickListener {
             UIUtil.showDeleteLayerDialog(requireContext()) {
                 drawView.removeLayer(drawView.layerManager.getActiveLayerIndex())
-                updateLayersButtons(drawView.layerManager.getNumOfLayers())
+                updateLayersButtons()
                 StyleableToast.makeText(requireContext(), "Layer deleted", R.style.mytoast).show()
             }
         }
 
         // This will block the touch event so it will not propagate to draw view
-        view.findViewById<LinearLayout>(R.id.layers_menu_layout).setOnTouchListener { v, event ->
+        view.findViewById<LinearLayout>(R.id.layers_menu_layout).setOnTouchListener { _, _ ->
             true
         }
 
@@ -71,7 +70,7 @@ class LayersMenuFragment(private val drawView: DrawView) : Fragment() {
                 layerIndex,
                 layerIndex + 1,
             )
-            updateLayersButtons(drawView.layerManager.getNumOfLayers())
+            updateLayersButtons()
             StyleableToast.makeText(requireContext(), "Layer moved up", R.style.mytoast).show()
         }
 
@@ -82,7 +81,7 @@ class LayersMenuFragment(private val drawView: DrawView) : Fragment() {
                 layerIndex,
                 layerIndex - 1,
             )
-            updateLayersButtons(drawView.layerManager.getNumOfLayers())
+            updateLayersButtons()
             StyleableToast.makeText(requireContext(), "Layer moved down", R.style.mytoast).show()
         }
 
@@ -108,10 +107,10 @@ class LayersMenuFragment(private val drawView: DrawView) : Fragment() {
      *
      * @param numOfLayers
      */
-    fun updateLayersButtons(numOfLayers: Int) {
+    fun updateLayersButtons() {
         layersButtonsContainer.removeAllViews()
 
-        val nums = drawView.layerManager.getLayersNumIds()
+        val nums = drawView.layerManager.getLayersIdsInOrder()
 
         nums.asReversed().forEachIndexed { reversedIndex, i ->
             val index = nums.size - 1 - reversedIndex
@@ -123,7 +122,7 @@ class LayersMenuFragment(private val drawView: DrawView) : Fragment() {
                 setOnClickListener {
                     drawView.layerManager.setActiveLayer(index)
                     drawView.layerManager.makeLayersSemiTransparentExceptOne(index)
-                    updateLayersButtons(drawView.layerManager.getNumOfLayers())
+                    updateLayersButtons()
 
                     drawView.invalidate()
                 }
@@ -147,41 +146,6 @@ class LayersMenuFragment(private val drawView: DrawView) : Fragment() {
             }
 
             layersButtonsContainer.addView(button, layersButtonsContainer.childCount)
-        }
-
-        for (i in numOfLayers - 1 downTo 0) {
-//            val button =
-//                Button(requireContext()).apply {
-//                    height = dpToPx(30, requireContext())
-//                    setTypeface(typeface, Typeface.BOLD)
-//                    text = i.toString()
-//                    setOnClickListener {
-//                        drawView.layerManager.setActiveLayer(i)
-//                        drawView.layerManager.makeLayersSemiTransparentExceptOne(i)
-//                        updateLayersButtons(drawView.layerManager.getNumOfLayers())
-//
-//                        drawView.invalidate()
-//                    }
-//                }
-//
-//            if (i == drawView.layerManager.getActiveLayerIndex()) {
-//                setIsVisibleButton(i)
-//                button.setBackgroundColor(
-//                    ContextCompat.getColor(
-//                        requireContext(),
-//                        R.color.colorActive,
-//                    ),
-//                )
-//            } else {
-//                button.setBackgroundColor(
-//                    ContextCompat.getColor(
-//                        requireContext(),
-//                        R.color.colorTransparent,
-//                    ),
-//                )
-//            }
-//
-//            layersButtonsContainer.addView(button, layersButtonsContainer.childCount)
         }
     }
 
