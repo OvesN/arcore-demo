@@ -74,7 +74,6 @@
             android:text="@string/grid"
             android:textAllCaps="false"
             android:textSize="17sp"
-            android:textStyle="bold"
             android:checked="true"
             android:buttonTint="#FFFFFF"/>
 
