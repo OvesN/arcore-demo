@@ -4,8 +4,10 @@ import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.app.AlertDialog
 import android.content.Context
+import android.content.Context.LAYOUT_INFLATER_SERVICE
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.LayerDrawable
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.MenuInflater
 import android.view.View
@@ -16,10 +18,12 @@ import android.widget.Button
 import android.widget.CheckBox
 import android.widget.ImageButton
 import android.widget.PopupMenu
+import android.widget.PopupWindow
 import android.widget.Spinner
 import android.widget.TextView
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.graphics.drawable.DrawableCompat
 import com.cvut.arfittingroom.R
 import com.cvut.arfittingroom.model.to.LookTO
@@ -40,54 +44,48 @@ object UIUtil {
         onLookDelete: () -> Unit = {},
         onChangeIsPublic: (Boolean) -> Unit,
     ) {
-        val dialogView: View =
-            LayoutInflater.from(context).inflate(R.layout.popup_look_info, null)
+        val popupView: View = LayoutInflater.from(context).inflate(R.layout.popup_look_info, null)
 
-        val checkBox = dialogView.findViewById<CheckBox>(R.id.is_public_checkbox)
+        val width = ViewGroup.LayoutParams.WRAP_CONTENT
+        val height = ViewGroup.LayoutParams.WRAP_CONTENT
+        val focusable = true
+        val popupWindow = PopupWindow(popupView, width, height, focusable)
+
+        val checkBox = popupView.findViewById<CheckBox>(R.id.is_public_checkbox)
         checkBox.isChecked = lookTO.isPublic
 
-        val popupMenu = PopupMenu(context, view)
-        val inflater: MenuInflater = popupMenu.menuInflater
-//        inflater.inflate(R.menu.image_button_menu, popupMenu.menu)
-//
-//
-//        dialogView.findViewById<Button>(R.id.cancel_popup_button).setOnClickListener {
-//            popup.dismiss()
-//        }
-//
-//        dialogView.findViewById<Button>(R.id.ok_popup_button).setOnClickListener {
-//            onChangeIsPublic(checkBox.isChecked)
-//            popup.dismiss()
-//        }
-
-        val authorNameText = dialogView.findViewById<TextView>(R.id.look_author_name)
+        val authorNameText = popupView.findViewById<TextView>(R.id.look_author_name)
         authorNameText.text = if (isAuthor) "${lookTO.author} (you)" else lookTO.author
 
-//        if (isAuthor) {
-//            val deleteButton = dialogView.findViewById<Button>(R.id.delete_look_button)
-//            deleteButton.visibility = View.VISIBLE
-//            checkBox.visibility = View.VISIBLE
-//            deleteButton.setOnClickListener {
-//                onLookDelete()
-//                popup.dismiss()
-//            }
-//        }
-//
-//
-//        popup.show()
+        val cancelButton: Button = popupView.findViewById(R.id.cancel_popup_button)
+        val okButton: Button = popupView.findViewById(R.id.ok_popup_button)
+        val deleteButton: Button = popupView.findViewById(R.id.delete_look_button)
+
+        cancelButton.setOnClickListener {
+            popupWindow.dismiss()
+        }
+
+        if (isAuthor) {
+            deleteButton.visibility = View.VISIBLE
+            checkBox.visibility = View.VISIBLE
+            deleteButton.setOnClickListener {
+                showDeleteLookWarning(context, onLookDelete)
+                popupWindow.dismiss()
+            }
+
+            okButton.visibility = View.VISIBLE
+            okButton.setOnClickListener {
+                onChangeIsPublic(checkBox.isChecked)
+                popupWindow.dismiss()
+            }
+        }
+
+        popupWindow.showAtLocation(view, Gravity.CENTER, 0, 0)
     }
 
-    fun showEditorSubmenuDialog(
-        context: Context,
-        onAddImage: () -> Unit,
-        isBackgroundShown: Boolean,
-        onChangeBackground: (Boolean) -> Unit
-    ) {
+    private fun showDeleteLookWarning(context: Context, onLookDelete: () -> Unit = {}) {
         val dialogView: View =
-            LayoutInflater.from(context).inflate(R.layout.popup_editor_submenu, null)
-
-        val checkBox = dialogView.findViewById<CheckBox>(R.id.show_face_grid_checkbox)
-        checkBox.isChecked = isBackgroundShown
+            LayoutInflater.from(context).inflate(R.layout.popup_really_delete, null)
 
         val dialog = AlertDialog.Builder(context)
             .setView(dialogView)
@@ -97,16 +95,44 @@ object UIUtil {
             dialog.dismiss()
         }
 
-        dialogView.findViewById<Button>(R.id.upload_image_button).setOnClickListener {
-            onAddImage()
+        dialogView.findViewById<Button>(R.id.delete_button).setOnClickListener {
+            onLookDelete()
             dialog.dismiss()
         }
 
-        dialog.setOnDismissListener {
-            onChangeBackground(checkBox.isChecked)
-        }
         dialog.show()
     }
+
+//    fun showEditorSubmenuDialog(
+//        context: Context,
+//        onAddImage: () -> Unit,
+//        isBackgroundShown: Boolean,
+//        onChangeBackground: (Boolean) -> Unit
+//    ) {
+//        val dialogView: View =
+//            LayoutInflater.from(context).inflate(R.layout.popup_editor_submenu, null)
+//
+//        val checkBox = dialogView.findViewById<CheckBox>(R.id.show_face_grid_checkbox)
+//        checkBox.isChecked = isBackgroundShown
+//
+//        val dialog = AlertDialog.Builder(context)
+//            .setView(dialogView)
+//            .create()
+//
+//        dialogView.findViewById<Button>(R.id.cancel_popup_button).setOnClickListener {
+//            dialog.dismiss()
+//        }
+//
+//        dialogView.findViewById<Button>(R.id.upload_image_button).setOnClickListener {
+//            onAddImage()
+//            dialog.dismiss()
+//        }
+//
+//        dialog.setOnDismissListener {
+//            onChangeBackground(checkBox.isChecked)
+//        }
+//        dialog.show()
+//    }
 
 
     fun showDeleteLayerDialog(context: Context, onDelete: () -> Unit) {

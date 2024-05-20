@@ -7,30 +7,21 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-    <Button
-        android:id="@+id/upload_image_button"
-        android:layout_width="wrap_content"
-        android:layout_height="30dp"
-        android:layout_gravity="center_horizontal"
-        android:backgroundTint="@color/colorActive"
-        android:background="@drawable/button"
-        android:text="@string/upload_image_or_gif"
-        android:textAllCaps="false" />
-
-    <CheckBox
-        android:id="@+id/show_face_grid_checkbox"
+    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="start"
-        android:text="@string/show_face_grid"
-        android:paddingBottom="10dp"
-        android:paddingTop="10dp"
-        android:textAllCaps="false"/>
+        android:layout_gravity="center_horizontal"
+        android:text="@string/delete_the_look"
+        android:textAllCaps="false"
+        android:textColor="#FFFFFF"
+        android:textSize="20sp"
+        android:paddingBottom="40dp" />
+
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="end"
+        android:gravity="center_horizontal"
         android:orientation="horizontal">
 
         <Button
@@ -42,6 +33,14 @@
             android:text="@string/cancel"
             android:textAllCaps="false" />
 
+        <Button
+            android:id="@+id/delete_button"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:background="@drawable/small_button"
+            android:backgroundTint="@color/colorActive"
+            android:text="@string/delete"
+            android:textAllCaps="false" />
     </LinearLayout>
 
 </LinearLayout>

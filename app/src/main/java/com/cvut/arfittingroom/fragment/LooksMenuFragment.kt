@@ -133,8 +133,14 @@ class LooksMenuFragment : Fragment() {
                             scaleType = ImageView.ScaleType.FIT_CENTER
                             background = ContextCompat.getDrawable(context, R.drawable.head_model)
                             id = lookInfo.lookId.hashCode()
+                            isLongClickable = true
+                            isClickable = true
                             setOnClickListener {
                                 selectLook(requireView(), it, lookInfo)
+                            }
+                            setOnLongClickListener {view ->
+                                showLookInfoMenu(view, lookInfo)
+                                true
                             }
                         }
                     } else {
@@ -142,11 +148,13 @@ class LooksMenuFragment : Fragment() {
                             text = lookInfo.name
                             background = null
                             id = lookInfo.lookId.hashCode()
+                            isLongClickable = true
+                            isClickable = true
                             setOnClickListener {
                                 selectLook(requireView(), it, lookInfo)
                             }
                             setOnLongClickListener {view ->
-                                showLookInfoMenu(view)
+                                showLookInfoMenu(view, lookInfo)
                                 true
                             }
                         }
@@ -207,26 +215,25 @@ class LooksMenuFragment : Fragment() {
         fetchLooks()
     }
 
-    private fun showLookInfoMenu(view: View) {
+    private fun showLookInfoMenu(view: View, lookTO: LookTO) {
         showLookInfoPopup(
             requireContext(),
-            selectedLookTO,
-            isAuthor = selectedLookTO.author == auth.currentUserUsername(),
+            lookTO,
+            isAuthor = lookTO.author == auth.currentUserUsername(),
             view,
             onLookDelete = {
-                deleteLook(selectedLookTO.lookId)
+                deleteLook(lookTO.lookId)
                 val listener = context as? ResourceListener
-                listener?.removeLook(selectedLookTO.lookId)
+                listener?.removeLook(lookTO.lookId)
                 resetMenu()
             },
             onChangeIsPublic = { isPublic ->
-                if (selectedLookTO.lookId.isNotEmpty()) {
+                if (lookTO.lookId.isNotEmpty()) {
                     changeLookPublicity(
-                        lookId = selectedLookTO.lookId,
+                        lookId = lookTO.lookId,
                         isPublic
                     )
                 }
-
             }
         )
     }
