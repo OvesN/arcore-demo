@@ -40,14 +40,14 @@
 
             <ImageButton
                 android:id="@+id/button_undo"
-                android:layout_width="50dp"
+                android:layout_width="40dp"
                 android:layout_height="50dp"
                 android:background="@null"
                 android:src="@drawable/undo" />
 
             <ImageButton
                 android:id="@+id/button_redo"
-                android:layout_width="50dp"
+                android:layout_width="40dp"
                 android:layout_height="50dp"
 
                 android:background="@null"
@@ -87,8 +87,7 @@
             android:scaleType="fitCenter"
             android:text="@string/clear_all"
             android:textAllCaps="false"
-            android:textSize="17sp"
-            android:textStyle="bold" />
+            android:textSize="17sp" />
     </LinearLayout>
 
     <!-- Bottom UI Layout -->

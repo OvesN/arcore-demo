@@ -745,7 +745,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     fun setEditingMode() {
         previousEditorMode = editorMode
         editorMode = EEditorMode.EDITING
-        TexturedBrushDrawer.resetBitmaps()
+        //TexturedBrushDrawer.resetBitmaps()
     }
 
     fun setBrushMode() {
@@ -1050,6 +1050,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     fun setFaceGridVisibility(isVisible: Boolean) {
         uiDrawer.shouldDrawGrid = isVisible
+        invalidate()
     }
 
     fun applyBitmapBackground(bitmap: Bitmap?) {

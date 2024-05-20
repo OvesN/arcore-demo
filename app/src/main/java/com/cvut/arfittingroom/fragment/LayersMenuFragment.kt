@@ -41,6 +41,7 @@ class LayersMenuFragment(private val drawView: DrawView) : Fragment() {
         layersButtonsContainer = view.findViewById(R.id.layers_buttons_container)
 
         view.findViewById<ImageButton>(R.id.add_layer_button).setOnClickListener {
+            drawView.addLayer()
             updateLayersButtons()
             drawView.layerManager.makeLayersSemiTransparentExceptOne(drawView.layerManager.getActiveLayerIndex())
             drawView.invalidate()

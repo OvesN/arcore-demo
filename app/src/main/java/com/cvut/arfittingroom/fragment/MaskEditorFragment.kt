@@ -154,6 +154,10 @@ class MaskEditorFragment :
         view.findViewById<Button>(R.id.image_button).setOnClickListener {
             showImageMenu(it)
         }
+        requireView().findViewById<CheckBox>(R.id.grid_checkbox)
+            .setOnCheckedChangeListener { _, isChecked ->
+                drawView.setFaceGridVisibility(isChecked)
+            }
         editingModeButton = view.findViewById(R.id.select_mode_button)
         editingModeButton.setOnClickListener {
             if (isInEditMode) {
@@ -185,11 +189,6 @@ class MaskEditorFragment :
             }
 
             showBrushMenu(requireView().findViewById<Button>(R.id.draw_button))
-
-            drawView.findViewById<CheckBox>(R.id.grid_checkbox)
-                .setOnCheckedChangeListener { _, isChecked ->
-                    drawView.setFaceGridVisibility(isChecked)
-                }
 
             drawView.setStrokeWidth(slider.progress)
             drawView.setOnColorChangeListener(this)
@@ -484,6 +483,7 @@ class MaskEditorFragment :
 
         drawView.layerManager.deleteLayers()
         drawView.layerManager.layers.addAll(layersList)
+        drawView.layerManager.recreateLayersBitmaps()
 
         if (errorMessages.isNotEmpty()) {
             StyleableToast.makeText(
