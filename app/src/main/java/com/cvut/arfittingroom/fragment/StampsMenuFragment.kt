@@ -17,20 +17,22 @@ import androidx.fragment.app.Fragment
 import com.cvut.arfittingroom.R
 import com.cvut.arfittingroom.draw.DrawView
 import com.cvut.arfittingroom.draw.model.element.strategy.PathCreationStrategy
+import com.cvut.arfittingroom.draw.model.enums.EEditorMode
 import com.cvut.arfittingroom.utils.ScreenUtil
 
 class StampsMenuFragment(
     private val strategies: Map<String, @JvmSuppressWildcards PathCreationStrategy>,
-    private val drawView: DrawView
+    private val drawView: DrawView,
 ) : Fragment() {
     private var selectedViewId = 0
-    private val paint = Paint().apply {
-        strokeWidth = 6f
-        color = Color.WHITE
-        style = Style.FILL
-    }
+    private val paint =
+        Paint().apply {
+            strokeWidth = 6f
+            color = Color.WHITE
+            style = Style.FILL
+        }
     private var underscoreSelectedView: View? = null
-
+    private var editorModeChangeListener: EditorModeChangeListener? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -38,7 +40,10 @@ class StampsMenuFragment(
         savedInstanceState: Bundle?,
     ): View = inflater.inflate(R.layout.fragment_menu, container, false)
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
         super.onViewCreated(view, savedInstanceState)
         createStampMenu(view)
     }
@@ -50,46 +55,52 @@ class StampsMenuFragment(
         val imageSizePx = ScreenUtil.dpToPx(40, requireContext())
 
         for (stamp in strategies) {
-            val verticalContainer = LinearLayout(requireContext()).apply {
-                layoutParams = LinearLayout.LayoutParams(
-                    ScreenUtil.dpToPx(50, requireContext()),
-                    ScreenUtil.dpToPx(50, requireContext())
-                )
-                orientation = LinearLayout.VERTICAL
-                background = null
-            }
+            val verticalContainer =
+                LinearLayout(requireContext()).apply {
+                    layoutParams =
+                        LinearLayout.LayoutParams(
+                            ScreenUtil.dpToPx(50, requireContext()),
+                            ScreenUtil.dpToPx(50, requireContext()),
+                        )
+                    orientation = LinearLayout.VERTICAL
+                    background = null
+                }
 
-            verticalContainer.setPadding( ScreenUtil.dpToPx(5, requireContext()), 0, ScreenUtil.dpToPx(5, requireContext()), 0)
-            val underscoreLine = View(requireContext()).apply {
-                layoutParams = LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    5
-                )
-                setBackgroundColor(Color.WHITE)
-                visibility = View.INVISIBLE
-            }
+            verticalContainer.setPadding(ScreenUtil.dpToPx(5, requireContext()), 0, ScreenUtil.dpToPx(5, requireContext()), 0)
+            val underscoreLine =
+                View(requireContext()).apply {
+                    layoutParams =
+                        LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT,
+                            5,
+                        )
+                    setBackgroundColor(Color.WHITE)
+                    visibility = View.INVISIBLE
+                }
 
             val bitmap = Bitmap.createBitmap(imageSizePx, imageSizePx, Bitmap.Config.ARGB_8888)
             val canvas = Canvas(bitmap)
-            val paint = Paint().apply {
-                color = Color.WHITE
-                style = paint.style
-                strokeWidth = 3f
-                isAntiAlias = true
-            }
+            val paint =
+                Paint().apply {
+                    color = Color.WHITE
+                    style = paint.style
+                    strokeWidth = 3f
+                    isAntiAlias = true
+                }
             val path = stamp.value.createPath(imageSizePx / 2f, imageSizePx / 2f, imageSizePx / 2f)
             canvas.drawPath(path, paint)
 
-            val imageButton = ImageButton(context).apply {
-                id = stamp.key.hashCode()
-                layoutParams = ViewGroup.LayoutParams(imageSizePx, imageSizePx)
-                setImageBitmap(bitmap)
-                ImageView.ScaleType.FIT_CENTER
-                background = null
-                setOnClickListener {
-                    selectStamp(stamp.value, this, underscoreLine)
+            val imageButton =
+                ImageButton(context).apply {
+                    id = stamp.key.hashCode()
+                    layoutParams = ViewGroup.LayoutParams(imageSizePx, imageSizePx)
+                    setImageBitmap(bitmap)
+                    ImageView.ScaleType.FIT_CENTER
+                    background = null
+                    setOnClickListener {
+                        selectStamp(stamp.value, this, underscoreLine)
+                    }
                 }
-            }
 
             if (selectedViewId == imageButton.id) {
                 underscoreSelectedView = underscoreLine
@@ -106,7 +117,7 @@ class StampsMenuFragment(
     private fun selectStamp(
         pathCreationStrategy: PathCreationStrategy,
         view: ImageView,
-        underscore: View
+        underscore: View,
     ) {
         underscoreSelectedView?.let { it.visibility = View.INVISIBLE }
         requireView().findViewById<ImageButton>(selectedViewId)?.let {
@@ -118,6 +129,8 @@ class StampsMenuFragment(
             underscore.visibility = View.GONE
             drawView.setEditingMode()
         } else {
+            editorModeChangeListener?.onEditingModeExit(EEditorMode.STAMP)
+
             selectedViewId = view.id
             underscoreSelectedView = underscore
             underscore.visibility = View.VISIBLE
@@ -127,22 +140,26 @@ class StampsMenuFragment(
         }
     }
 
-
-    fun changeColor(newColor: Int, fill: Boolean) {
+    fun changeColor(
+        newColor: Int,
+        fill: Boolean,
+    ) {
         paint.color = newColor
 
-        paint.style =  if (fill)  Style.FILL else Style.STROKE
+        paint.style = if (fill) Style.FILL else Style.STROKE
 
         createStampMenu(requireView())
     }
 
-
     fun checkIfStampSelected() {
         if (selectedViewId != 0) {
-            drawView.setStampMode()
-        }
-        else {
+            editorModeChangeListener?.onEditingModeExit(newMode = EEditorMode.STAMP)
+        } else {
             drawView.setEditingMode()
         }
+    }
+
+    fun setEditorStateChangeListener(listener: EditorModeChangeListener) {
+        editorModeChangeListener = listener
     }
 }

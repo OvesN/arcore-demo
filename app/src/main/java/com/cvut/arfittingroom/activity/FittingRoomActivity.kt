@@ -35,7 +35,6 @@ import com.cvut.arfittingroom.fragment.LooksMenuFragment
 import com.cvut.arfittingroom.fragment.MakeupMenuFragment
 import com.cvut.arfittingroom.fragment.MaskEditorFragment
 import com.cvut.arfittingroom.fragment.ProfileFragment
-import com.cvut.arfittingroom.model.IMAGES_COLLECTION
 import com.cvut.arfittingroom.model.LOOKS_COLLECTION
 import com.cvut.arfittingroom.model.MAKEUP_SLOT
 import com.cvut.arfittingroom.model.MASK_FRAME_FILE_NAME
@@ -93,7 +92,6 @@ class FittingRoomActivity :
     private var frameCounter = 0
     private var handler = Handler(Looper.getMainLooper())
     private var gifRunnable: Runnable? = null
-
     private var frameDelay: Long = 100
     private val accessoriesMenuFragment = AccessoriesMenuFragment()
     private val looksOptionsFragment = LooksMenuFragment()
@@ -106,7 +104,6 @@ class FittingRoomActivity :
     private lateinit var auth: FirebaseAuth
     private lateinit var fireStore: FirebaseFirestore
     private lateinit var storage: FirebaseStorage
-
     private lateinit var progressBar: ProgressBar
     private lateinit var shareButton: ImageButton
 
@@ -179,25 +176,28 @@ class FittingRoomActivity :
         shareButton = binding.shareButton
 
         shareButton.setOnClickListener {
-            val shareIntent = Intent().apply {
-                action = Intent.ACTION_SEND
-                putExtra(
-                    Intent.EXTRA_TEXT,
-                    "Check out this look: http://www.glamartist.com/look?lookId=${looksOptionsFragment.getSelectedLookId()}"
-                )
-                type = "text/plain"
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            }
-            applicationContext.startActivity(Intent.createChooser(shareIntent, "Share Look").apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            })
+            val shareIntent =
+                Intent().apply {
+                    action = Intent.ACTION_SEND
+                    putExtra(
+                        Intent.EXTRA_TEXT,
+                        "Check out this look: http://www.glamartist.com/look?lookId=${looksOptionsFragment.getSelectedLookId()}",
+                    )
+                    type = "text/plain"
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                }
+            applicationContext.startActivity(
+                Intent.createChooser(shareIntent, "Share Look").apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                },
+            )
         }
 
         progressBar = binding.progressBar
 
         val lookId = intent.getStringExtra("LOOK_ID")
         if (lookId != null) {
-           looksOptionsFragment.getLook(lookId) { lookTO -> applyLook(lookTO) }
+            looksOptionsFragment.getLook(lookId) { lookTO -> applyLook(lookTO) }
         }
     }
 
@@ -235,6 +235,7 @@ class FittingRoomActivity :
         // Clear faceNode with makeup
         if (appliedMakeupTypes.isEmpty()) {
             stateService.clearFaceNodeSlot(MAKEUP_SLOT)
+            stateService.makeupTextureBitmap = null
         } else {
             stateService.appliedMakeUpTypes.values.forEach {
                 loadImage(it.ref, it.color)
@@ -261,8 +262,7 @@ class FittingRoomActivity :
             if (lookTO.editorState.layers.isNotEmpty()) {
                 maskEditorFragment.editorStateTO = lookTO.editorState
                 maskEditorFragment.wasDeserialized = false
-            }
-            else  {
+            } else {
                 maskEditorFragment.wasDeserialized = false
                 maskEditorFragment.editorStateTO = null
             }
@@ -283,17 +283,21 @@ class FittingRoomActivity :
                 applyModel(it)
             }
 
-            if (lookTO.isAnimated) {
-                downloadLookFrames(lookTO.lookId) { textures ->
-                    stopAnimation()
-                    gifTextures.addAll(textures)
-                    startAnimation()
-                    progressBar.visibility = View.INVISIBLE
-                }
-            } else {
+            applyLookTexture(lookTO)
+        }
+    }
+
+    private fun applyLookTexture(lookTO: LookTO) {
+        if (lookTO.isAnimated) {
+            downloadLookFrames(lookTO.lookId) { textures ->
                 stopAnimation()
-                downloadLookTextureAndApply(lookTO.lookId)
+                gifTextures.addAll(textures)
+                startAnimation()
+                progressBar.visibility = View.INVISIBLE
             }
+        } else {
+            stopAnimation()
+            downloadLookTextureAndApply(lookTO.lookId)
         }
     }
 
@@ -408,7 +412,10 @@ class FittingRoomActivity :
         }
     }
 
-    private fun downloadLookFrames(lookId: String, onComplete: ( List<Texture> ) -> Unit){
+    private fun downloadLookFrames(
+        lookId: String,
+        onComplete: (List<Texture>) -> Unit,
+    ) {
         val ref =
             try {
                 storage.getReference("$LOOKS_COLLECTION/$lookId/")
@@ -430,14 +437,14 @@ class FittingRoomActivity :
                         .setSource(applicationContext, uri)
                         .build()
                         .thenAccept { texture ->
-                            downloadedTextures[index] =  texture
+                            downloadedTextures[index] = texture
                             latch.countDown()
                         }
                         .exceptionally { throwable ->
                             Log.println(
                                 Log.ERROR,
                                 null,
-                                "Error creating texture for frame $index: $throwable"
+                                "Error creating texture for frame $index: $throwable",
                             )
                             latch.countDown()
                             null
@@ -446,9 +453,9 @@ class FittingRoomActivity :
                     Log.println(
                         Log.ERROR,
                         null,
-                        "Error downloading URL for frame $index"
+                        "Error downloading URL for frame $index",
                     )
-                    latch.countDown() // Ensure latch is decremented on URL download failure
+                    latch.countDown()  // Ensure latch is decremented on URL download failure
                 }
             }
 
@@ -488,7 +495,7 @@ class FittingRoomActivity :
 
     private fun checkIsSupportedDeviceOrFinish(): Boolean {
         if (ArCoreApk.getInstance()
-                .checkAvailability(this) == ArCoreApk.Availability.UNSUPPORTED_DEVICE_NOT_CAPABLE
+            .checkAvailability(this) == ArCoreApk.Availability.UNSUPPORTED_DEVICE_NOT_CAPABLE
         ) {
             StyleableToast.makeText(this, "Augmented Faces requires ARCore", R.style.mytoast).show()
             finish()
@@ -562,19 +569,19 @@ class FittingRoomActivity :
         if (gifTextures.size == 0) {
             return
         }
-            gifRunnable =
-                Runnable {
-                    if (gifTextures.size > frameCounter) {
-                        stateService.applyTextureToFaceNode(
-                            gifTextures[frameCounter],
-                            arSceneView,
-                            MASK_TEXTURE_SLOT,
-                        )
-                        Log.println(Log.INFO, "animaton", "Frame $frameCounter drawn")
-                        frameCounter = (frameCounter + 1) % gifTextures.size
-                    }
-                    gifRunnable?.let { handler.postDelayed(it, frameDelay) }
+        gifRunnable =
+            Runnable {
+                if (gifTextures.size > frameCounter) {
+                    stateService.applyTextureToFaceNode(
+                        gifTextures[frameCounter],
+                        arSceneView,
+                        MASK_TEXTURE_SLOT,
+                    )
+                    Log.println(Log.INFO, "animaton", "Frame $frameCounter drawn")
+                    frameCounter = (frameCounter + 1) % gifTextures.size
                 }
+                gifRunnable?.let { handler.postDelayed(it, frameDelay) }
+            }
 
         gifRunnable?.let { handler.post(it) }
     }
@@ -649,7 +656,7 @@ class FittingRoomActivity :
                 .add(
                     R.id.makeup_editor_fragment_container,
                     maskEditorFragment,
-                    MaskEditorFragment.MAKEUP_EDITOR_FRAGMENT_TAG
+                    MaskEditorFragment.MAKEUP_EDITOR_FRAGMENT_TAG,
                 )
                 .commit()
             container.postDelayed({
@@ -667,7 +674,6 @@ class FittingRoomActivity :
             maskEditorFragment.onResume()
         }
     }
-
 
     private fun resetMenu() {
         for (i in 0 until binding.menuButtons.childCount) {
@@ -720,8 +726,10 @@ class FittingRoomActivity :
                 editorState = maskEditorFragment.serializeEditorState(),
                 name = name,
                 previewRef = createPreview(lookId),
-                createdAt = Timestamp.from(
-                    Instant.now()),
+                createdAt =
+                    Timestamp.from(
+                        Instant.now(),
+                    ),
             )
 
         fireStore.collection(LOOKS_COLLECTION)
@@ -780,7 +788,7 @@ class FittingRoomActivity :
         val uploadTask =
             ref.putStream(ByteArrayInputStream(stream.toByteArray()))
 
-        uploadTask.addOnCompleteListener{
+        uploadTask.addOnCompleteListener {
             looksOptionsFragment.fetchLooks()
         }
         uploadTask.addOnFailureListener {
@@ -838,7 +846,7 @@ class FittingRoomActivity :
         maskEditorFragment.clearAll()
     }
 
-    override fun showMainLayout() {
+    override fun showMainLayout(restoreLookTexture: Boolean) {
         findViewById<View>(R.id.top_ui).visibility = View.VISIBLE
         findViewById<View>(R.id.bottom_ui).visibility = View.VISIBLE
 
@@ -856,16 +864,19 @@ class FittingRoomActivity :
 
         arSceneView.resume()
 
-        val bitmap = getTempMaskTextureBitmap(applicationContext)
-        bitmap?.let {
-            stateService.createTextureAndApply(it, arFragment.arSceneView, MASK_TEXTURE_SLOT)
-        }
+        if (restoreLookTexture) {
+            applyLookTexture(looksOptionsFragment.getSelectedLookTO())
+        } else {
+            val bitmap = getTempMaskTextureBitmap(applicationContext)
+            bitmap?.let {
+                stateService.createTextureAndApply(it, arFragment.arSceneView, MASK_TEXTURE_SLOT)
+            }
 
-        if (doesTempAnimatedMaskExist(applicationContext)) {
-            prepareAllGifTextures()
-        }
-        else {
-            stopAnimation()
+            if (doesTempAnimatedMaskExist(applicationContext)) {
+                prepareAllGifTextures()
+            } else {
+                stopAnimation()
+            }
         }
     }
 
@@ -896,7 +907,6 @@ class FittingRoomActivity :
 
         dialog.show()
     }
-
 
     companion object {
         const val MIN_OPENGL_VERSION = 3.0

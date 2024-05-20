@@ -37,7 +37,8 @@
         android:paddingBottom="10dp"
         android:paddingTop="10dp"
         android:textAllCaps="false"
-        android:visibility="gone"/>
+        android:visibility="gone"
+        android:buttonTint="#FFFFFF"/>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -45,6 +46,22 @@
         android:orientation="horizontal"
         android:background="@null"
         android:gravity="center_vertical">
+
+        <Space
+            android:layout_width="20dp"
+            android:layout_height="10dp"
+            android:layout_weight="0.5" />
+
+        <Button
+            android:id="@+id/delete_look_button"
+            android:layout_width="wrap_content"
+            android:layout_height="25dp"
+            android:backgroundTint="@color/colorDarkGrey"
+            android:layout_weight="0.8"
+            android:background="@drawable/small_button"
+            android:text="@string/delete"
+            android:visibility="gone"
+            android:textAllCaps="false" />
 
         <Space
             android:layout_width="40dp"
@@ -63,30 +80,17 @@
             android:layout_width="20dp"
             android:layout_height="10dp"
             android:layout_weight="0.5" />
+
         <Button
             android:id="@+id/ok_popup_button"
             android:layout_width="wrap_content"
             android:layout_height="30dp"
             android:layout_weight="0.8"
             android:background="@drawable/small_button"
-            android:text="@string/ok"
-            android:textAllCaps="false" />
-
-        <Space
-            android:layout_width="20dp"
-            android:layout_height="10dp"
-            android:layout_weight="0.5" />
-
-        <Button
-            android:id="@+id/delete_look_button"
-            android:layout_width="wrap_content"
-            android:layout_height="30dp"
-            android:layout_weight="0.8"
-            android:background="@drawable/small_button"
             android:backgroundTint="@color/colorActive"
-            android:visibility="gone"
-            android:text="@string/delete"
-            android:textAllCaps="false" />
+            android:text="@string/ok"
+            android:textAllCaps="false"
+            android:visibility="invisible"/>
 
         <Space
             android:layout_width="20dp"

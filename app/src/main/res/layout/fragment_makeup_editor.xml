@@ -40,15 +40,14 @@
 
             <ImageButton
                 android:id="@+id/button_undo"
-                android:layout_width="50dp"
+                android:layout_width="40dp"
                 android:layout_height="50dp"
-
                 android:background="@null"
                 android:src="@drawable/undo" />
 
             <ImageButton
                 android:id="@+id/button_redo"
-                android:layout_width="50dp"
+                android:layout_width="40dp"
                 android:layout_height="50dp"
 
                 android:background="@null"
@@ -62,7 +61,22 @@
             android:layout_weight="1"
             android:background="@null"
             android:scaleType="fitStart"
+            android:layout_marginLeft="10dp"
             android:src="@drawable/layers" />
+
+        <CheckBox
+            android:id="@+id/grid_checkbox"
+            android:layout_width="0dp"
+            android:layout_height="25dp"
+            android:layout_weight="1"
+            android:background="@null"
+            android:scaleType="fitCenter"
+            android:text="@string/grid"
+            android:textAllCaps="false"
+            android:textSize="17sp"
+            android:textStyle="bold"
+            android:checked="true"
+            android:buttonTint="#FFFFFF"/>
 
         <Button
             android:id="@+id/button_clear_all"
@@ -73,8 +87,7 @@
             android:scaleType="fitCenter"
             android:text="@string/clear_all"
             android:textAllCaps="false"
-            android:textSize="17sp"
-            android:textStyle="bold" />
+            android:textSize="17sp" />
     </LinearLayout>
 
     <!-- Bottom UI Layout -->
@@ -259,4 +272,13 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <ImageButton
+        android:id="@+id/select_mode_button"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="@drawable/select_inactive"
+        android:scaleType="fitCenter"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/top_ui_makeup_editor"
+        android:layout_margin="10dp" />
 </androidx.constraintlayout.widget.ConstraintLayout>

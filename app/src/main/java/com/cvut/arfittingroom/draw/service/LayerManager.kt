@@ -4,12 +4,12 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import com.cvut.arfittingroom.draw.Layer
 import com.cvut.arfittingroom.draw.command.action.MoveElementBetweenLayers
-import com.cvut.arfittingroom.draw.command.action.MoveLayer
 import com.cvut.arfittingroom.draw.model.PaintOptions
 import com.cvut.arfittingroom.draw.model.element.Element
 import com.cvut.arfittingroom.draw.path.DrawablePath
 import mu.KotlinLogging
 import java.util.UUID
+
 private val logger = KotlinLogging.logger {}
 
 /**
@@ -18,7 +18,7 @@ private val logger = KotlinLogging.logger {}
  */
 class LayerManager {
     val layers = mutableListOf<Layer>()
-    private val idToLayerMap = HashMap<UUID, Layer>()
+    private val idToLayerMap = HashMap<Int, Layer>()
     private var activeLayerIndex = 0
     private var layersBelowActiveLayerBitmap: Bitmap? = null
     private var layersAboveActiveLayerBitmap: Bitmap? = null
@@ -81,18 +81,18 @@ class LayerManager {
         recreateLayersBitmaps()
     }
 
-    fun getLayersNumIds() = layers.map { it.idNum }
+    fun getLayersIdsInOrder() = layers.map { it.id }
 
     // Returns id of the new layer
     fun addLayer(
         width: Int,
         height: Int,
-    ): UUID {
-        if(layers.size  == MAX_NUMBER_OF_LAYERS) {
+    ): Int {
+        if (layers.size == MAX_NUMBER_OF_LAYERS) {
             return getActiveLayerId()
         }
 
-        val layer = Layer(width = width, height = height, idNum = layers.size)
+        val layer = Layer(width = width, height = height, id = generateNewLayerId())
 
         if (layers.isNotEmpty()) {
             layers[activeLayerIndex].deselectAllElements()
@@ -107,11 +107,20 @@ class LayerManager {
         return layer.id
     }
 
+    private fun generateNewLayerId(): Int {
+        val maxId = layers.maxOfOrNull { it.id }
+        return if (maxId == null) {
+            0
+        } else {
+            maxId + 1
+        }
+    }
+
     fun addElementToLayer(
         index: Int = 0,
         element: Element,
         layer: Layer? = null,
-        layerId: UUID? = null,
+        layerId: Int? = null,
     ) {
         val foundLayer =
             layer
@@ -121,16 +130,15 @@ class LayerManager {
         foundLayer?.addElement(element)
     }
 
-    fun getLayerIdByIndex(index: Int): UUID? = layers.getOrNull(index)?.id
+    fun getLayerIdByIndex(index: Int): Int? = layers.getOrNull(index)?.id
 
     fun canAddNewLayer() = layers.size < MAX_NUMBER_OF_LAYERS
-
 
     fun removeElementFromLayer(
         elementId: UUID,
         index: Int = 0,
         layer: Layer? = null,
-        layerId: UUID? = null,
+        layerId: Int? = null,
     ) {
         val foundLayer =
             layer
@@ -143,7 +151,7 @@ class LayerManager {
 
     fun removeLayer(
         index: Int = 0,
-        layerId: UUID? = null,
+        layerId: Int? = null,
     ) {
         val layerToRemove =
             layerId?.let { idToLayerMap[layerId] }
@@ -160,9 +168,7 @@ class LayerManager {
         logger.info { "Layer from on $index is removed" }
     }
 
-    fun toggleLayerVisibility(
-        layerId: UUID
-    ) {
+    fun toggleLayerVisibility(layerId: Int) {
         idToLayerMap[layerId]?.let {
             it.isVisible = !it.isVisible
         }
@@ -181,10 +187,12 @@ class LayerManager {
         toIndex: Int,
     ): Boolean {
         // Check for no movement or invalid indices
-        return !(fromIndex == toIndex ||
+        return !(
+            fromIndex == toIndex ||
                 fromIndex < 0 || toIndex < 0 ||
                 toIndex > layers.size ||
-                fromIndex == layers.size - 1 && toIndex == layers.size)
+                fromIndex == layers.size - 1 && toIndex == layers.size
+        )
     }
 
     fun getNumOfLayers() = layers.size
@@ -229,12 +237,9 @@ class LayerManager {
             null
         } else {
             MoveElementBetweenLayers(
-                element.id,
                 element,
                 oldLayerId = getActiveLayerId(),
                 newLayerId = layers[activeLayerIndex + 1].id,
-                oldLayerIndex = activeLayerIndex,
-                newLayerIndex = activeLayerIndex + 1,
                 layerManager = this,
             )
         }
@@ -246,12 +251,9 @@ class LayerManager {
             null
         } else {
             MoveElementBetweenLayers(
-                element.id,
                 element,
                 oldLayerId = getActiveLayerId(),
                 newLayerId = layers[activeLayerIndex - 1].id,
-                oldLayerIndex = activeLayerIndex,
-                newLayerIndex = activeLayerIndex - 1,
                 layerManager = this,
             )
         }
@@ -265,12 +267,9 @@ class LayerManager {
             null
         } else {
             MoveElementBetweenLayers(
-                element.id,
                 element,
                 oldLayerId = getActiveLayerId(),
                 newLayerId = layers[layerIndex].id,
-                oldLayerIndex = activeLayerIndex,
-                newLayerIndex = layerIndex,
                 layerManager = this,
             )
         }
@@ -286,13 +285,15 @@ class LayerManager {
         }
     }
 
-    private fun setLayerOpacity(opacity: Float, layerIndex: Int) {
+    private fun setLayerOpacity(
+        opacity: Float,
+        layerIndex: Int,
+    ) {
         if (layerIndex >= layers.size || layerIndex < 0) {
             return
         }
         layers[layerIndex].setOpacity(opacity)
     }
-
 
     /**
      * Initiates the process of separating the elements that
@@ -382,7 +383,6 @@ class LayerManager {
     fun recreateLayersBitmaps() {
         setActiveLayer(activeLayerIndex)
     }
-
 
     fun doesContainAnyGif() = layers.any { it.doesHaveGif() }
 

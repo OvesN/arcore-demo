@@ -1,5 +1,5 @@
 package com.cvut.arfittingroom.activity
 
 interface UIChangeListener {
-    fun showMainLayout()
+    fun showMainLayout(restoreLookTexture: Boolean = false)
 }

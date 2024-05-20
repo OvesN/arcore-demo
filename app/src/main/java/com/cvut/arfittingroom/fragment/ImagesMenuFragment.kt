@@ -185,6 +185,7 @@ class ImagesMenuFragment(private val drawView: DrawView) : Fragment() {
 
         val isAnimated = when (val mimeType = requireContext().contentResolver.getType(fileUri)) {
             "image/png" -> false
+            "image/jpeg" -> false
             "image/gif" -> true
             else -> {
                 StyleableToast.makeText(

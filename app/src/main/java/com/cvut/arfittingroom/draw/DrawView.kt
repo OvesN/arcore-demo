@@ -88,7 +88,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private var isInElementScalingMode: Boolean = false
     private var isInElementMenuMode: Boolean = false
     var selectedElement: Element? = null
-    private var editorMode = EEditorMode.BRUSH
+    var editorMode = EEditorMode.BRUSH
     private var previousEditorMode = EEditorMode.BRUSH
     private var stampType: PathCreationStrategy? = null
     private var ignoreNextOneFingerMove = false
@@ -228,7 +228,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             return true
         } else {
             when (editorMode) {
-                EEditorMode.NONE -> handleElementEditing(event, x, y)
+                EEditorMode.EDITING -> handleElementEditing(event, x, y)
                 EEditorMode.BRUSH -> handleDrawing(event, x, y)
                 EEditorMode.STAMP -> handleStampDrawing(event, x, y)
                 EEditorMode.PIPETTE -> handlePipette(event, x, y)
@@ -246,9 +246,9 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                 Log.println(Log.INFO, null, "count $frameCount")
                 // Play gif three times and stop on the first frame
                 if (frameCount >= (
-                            gif.gifDrawable?.numberOfFrames
-                                ?: 0
-                            ) * 3 && gif.currentFrameIndex == 0
+                    gif.gifDrawable?.numberOfFrames
+                        ?: 0
+                ) * 3 && gif.currentFrameIndex == 0
                 ) {
                     frameCount = 0
                     stopAnimation(gif)
@@ -512,7 +512,6 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private fun deleteElement(element: Element) {
         addToHistory(
             RemoveElementFromLayer(
-                element.id,
                 element,
                 layerManager,
                 layerManager.getActiveLayerId(),
@@ -531,18 +530,17 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                 shouldShowFillCheckbox = true,
                 shouldShowPipette = true,
                 onPipetteSelected = {
-                    showPipetteView(); elementToRepaintAfterPipetteView = element as Repaintable
+                    showPipetteView()
+                    elementToRepaintAfterPipetteView = element
                 },
             ) { envelopColor, fill ->
                 repaintElement(element, envelopColor, fill)
                 elementToRepaintAfterPipetteView = null
             }
 
-
             element.setSelected(false)
             selectedElement = null
         }
-
     }
 
     private fun moveElementLayerUp(element: Element) {
@@ -629,14 +627,14 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                         repaintElement(
                             element,
                             pipetteSelectedColor,
-                            element.paint.style == Paint.Style.FILL
+                            element.paint.style == Paint.Style.FILL,
                         )
                         elementToRepaintAfterPipetteView = null
                     } ?: run {
                         setColor(pipetteSelectedColor, paintOptions.style == Paint.Style.FILL)
                         colorChangeListener?.onColorChanged(
                             pipetteSelectedColor,
-                            paintOptions.style == Paint.Style.FILL
+                            paintOptions.style == Paint.Style.FILL,
                         )
                     }
                 }
@@ -745,16 +743,8 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     }
 
     fun setEditingMode() {
-        editorMode = EEditorMode.NONE
-        TexturedBrushDrawer.resetBitmaps()
-    }
-
-    fun setBrushMode() {
-        editorMode = EEditorMode.BRUSH
-    }
-
-    fun setStampMode() {
-        editorMode = EEditorMode.STAMP
+        previousEditorMode = editorMode
+        editorMode = EEditorMode.EDITING
     }
 
     fun setStamp(pathCreationStrategy: PathCreationStrategy) {
@@ -843,14 +833,14 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             Curve(
                 path = layerManager.getCurPath(),
                 paint =
-                Paint().apply {
-                    color = paintOptions.color
-                    strokeWidth = paintOptions.strokeWidth
-                    alpha = paintOptions.alpha
-                    strokeCap = Paint.Cap.ROUND
-                    strokeJoin = Paint.Join.ROUND
-                    style = Paint.Style.STROKE
-                },
+                    Paint().apply {
+                        color = paintOptions.color
+                        strokeWidth = paintOptions.strokeWidth
+                        alpha = paintOptions.alpha
+                        strokeCap = Paint.Cap.ROUND
+                        strokeJoin = Paint.Join.ROUND
+                        style = Paint.Style.STROKE
+                    },
                 outerRadius = paintOptions.strokeWidth,
                 bitmapTexture = TexturedBrushDrawer.originalBitmap,
                 strokeTextureRef = paintOptions.strokeTextureRef,
@@ -876,12 +866,12 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                     outerRadius = outerRadius,
                     pathCreationStrategy = stampType,
                     paint =
-                    Paint().apply {
-                        color = paintOptions.color
-                        style = paintOptions.style
-                        strokeWidth = 6f
-                        alpha = paintOptions.alpha
-                    },
+                        Paint().apply {
+                            color = paintOptions.color
+                            style = paintOptions.style
+                            strokeWidth = 6f
+                            alpha = paintOptions.alpha
+                        },
                 )
 
             addElementToLayer(layerManager.getActiveLayerIndex(), stamp)
@@ -1006,7 +996,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         return bitmap
     }
 
-    private fun repaintElement(
+    fun repaintElement(
         element: Repaintable,
         newColor: Int,
         fill: Boolean,
@@ -1049,14 +1039,13 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         invalidate()
     }
 
-    fun applyBitmapBackground(bitmap: Bitmap?) {
-        uiDrawer.setBackgroundBitmap(bitmap)
-    }
-
-    fun getFaceGridVisibility() = uiDrawer.shouldDrawGrid
-
     fun setFaceGridVisibility(isVisible: Boolean) {
         uiDrawer.shouldDrawGrid = isVisible
+        invalidate()
+    }
+
+    fun applyBitmapBackground(bitmap: Bitmap?) {
+        uiDrawer.setBackgroundBitmap(bitmap)
     }
 
     fun setOnColorChangeListener(listener: ColorChangeListener) {

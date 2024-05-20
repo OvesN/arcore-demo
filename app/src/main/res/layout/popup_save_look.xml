@@ -37,7 +37,8 @@
         android:text="@string/make_it_public"
         android:paddingBottom="10dp"
         android:paddingTop="10dp"
-        android:textAllCaps="false"/>
+        android:textAllCaps="false"
+        android:buttonTint="#FFFFFF"/>
 
     <LinearLayout
         android:layout_width="match_parent"

@@ -2,7 +2,6 @@ package com.cvut.arfittingroom.draw.command.action
 
 import com.cvut.arfittingroom.draw.command.Command
 import com.cvut.arfittingroom.draw.service.LayerManager
-import java.util.UUID
 
 class AddLayer(
     private val width: Int,
@@ -10,13 +9,13 @@ class AddLayer(
     private val layerManager: LayerManager,
 ) : Command {
     override val description: String = "add new layer"
-    private var layerId: UUID = UUID.randomUUID()
+    private var layerId: Int = 0
 
     override fun execute() {
-        layerManager.addLayer(width, height)
+        layerId = layerManager.addLayer(width, height)
     }
 
     override fun revert() {
-        layerManager.removeLayer(layerId = layerId)
+        layerManager.removeLayer(layerId)
     }
 }

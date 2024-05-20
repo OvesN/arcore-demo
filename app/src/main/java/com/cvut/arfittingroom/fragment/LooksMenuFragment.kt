@@ -25,7 +25,7 @@ import com.cvut.arfittingroom.model.to.LookTO
 import com.cvut.arfittingroom.module.GlideApp
 import com.cvut.arfittingroom.utils.UIUtil.deselectLookButton
 import com.cvut.arfittingroom.utils.UIUtil.selectLookButton
-import com.cvut.arfittingroom.utils.UIUtil.showLookInfoDialog
+import com.cvut.arfittingroom.utils.UIUtil.showLookInfoPopup
 import com.cvut.arfittingroom.utils.currentUserUsername
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.Filter
@@ -42,7 +42,6 @@ class LooksMenuFragment : Fragment() {
     private lateinit var auth: FirebaseAuth
     private lateinit var storage: FirebaseStorage
     private lateinit var filter: Filter
-    private lateinit var lookInfoButton: ImageButton
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -91,10 +90,6 @@ class LooksMenuFragment : Fragment() {
                         )
                     }
             }
-        lookInfoButton = view.findViewById(R.id.look_info_button)
-        lookInfoButton.setOnClickListener {
-            showLookInfoMenu()
-        }
     }
 
     fun fetchLooks() {
@@ -103,7 +98,7 @@ class LooksMenuFragment : Fragment() {
             .where(
                 filter,
             )
-            .orderBy(CREATED_AT_ATTRIBUTE,  Query.Direction.DESCENDING)
+            .orderBy(CREATED_AT_ATTRIBUTE, Query.Direction.DESCENDING)
             .get()
             .addOnSuccessListener { result ->
                 result.documents.forEach { look ->
@@ -138,8 +133,14 @@ class LooksMenuFragment : Fragment() {
                             scaleType = ImageView.ScaleType.FIT_CENTER
                             background = ContextCompat.getDrawable(context, R.drawable.head_model)
                             id = lookInfo.lookId.hashCode()
+                            isLongClickable = true
+                            isClickable = true
                             setOnClickListener {
                                 selectLook(requireView(), it, lookInfo)
+                            }
+                            setOnLongClickListener { view ->
+                                showLookInfoMenu(view, lookInfo)
+                                true
                             }
                         }
                     } else {
@@ -147,8 +148,14 @@ class LooksMenuFragment : Fragment() {
                             text = lookInfo.name
                             background = null
                             id = lookInfo.lookId.hashCode()
+                            isLongClickable = true
+                            isClickable = true
                             setOnClickListener {
                                 selectLook(requireView(), it, lookInfo)
+                            }
+                            setOnLongClickListener { view ->
+                                showLookInfoMenu(view, lookInfo)
+                                true
                             }
                         }
                     }
@@ -193,16 +200,15 @@ class LooksMenuFragment : Fragment() {
             return
         }
 
-        selectedLookTO = if (selectedLookTO.lookId.hashCode() == buttonView.id) {
-            listener.removeLook(lookTO.lookId)
-            lookInfoButton.visibility = View.INVISIBLE
-            LookTO()
-        } else {
-            listener.applyLook(lookTO)
-            selectLookButton(buttonView)
-            lookInfoButton.visibility = View.VISIBLE
-            lookTO
-        }
+        selectedLookTO =
+            if (selectedLookTO.lookId.hashCode() == buttonView.id) {
+                listener.removeLook(lookTO.lookId)
+                LookTO()
+            } else {
+                listener.applyLook(lookTO)
+                selectLookButton(buttonView)
+                lookTO
+            }
     }
 
     fun resetMenu() {
@@ -210,39 +216,39 @@ class LooksMenuFragment : Fragment() {
         fetchLooks()
     }
 
-    private fun showLookInfoMenu() {
-        showLookInfoDialog(
+    private fun showLookInfoMenu(
+        view: View,
+        lookTO: LookTO,
+    ) {
+        showLookInfoPopup(
             requireContext(),
-            lookId = selectedLookTO.lookId,
-            isAuthor = selectedLookTO.author == auth.currentUserUsername(),
-            isPublic = selectedLookTO.isPublic,
-            authorName = selectedLookTO.author,
+            lookTO,
+            isAuthor = lookTO.author == auth.currentUserUsername(),
+            view,
             onLookDelete = {
-                deleteLook(selectedLookTO.lookId)
+                deleteLook(lookTO.lookId)
                 val listener = context as? ResourceListener
-                listener?.removeLook(selectedLookTO.lookId)
+                listener?.removeLook(lookTO.lookId)
                 resetMenu()
-                lookInfoButton.visibility = View.INVISIBLE
             },
             onChangeIsPublic = { isPublic ->
-                if (selectedLookTO.lookId.isNotEmpty()) {
+                if (lookTO.lookId.isNotEmpty()) {
                     changeLookPublicity(
-                        lookId = selectedLookTO.lookId,
-                        isPublic
+                        lookId = lookTO.lookId,
+                        isPublic,
                     )
                 }
-
-            }
+            },
         )
     }
 
     private fun deleteLook(lookId: String) {
-        firestore.collection(LOOKS_COLLECTION).document(lookId)
+        firestore.collection(LOOKS_COLLECTION)
+            .document(lookId)
             .get()
             .addOnSuccessListener { result ->
-                val lookTo = result.toObject<LookTO>()
-                lookTo?.let {
-                    storage.getReference(it.previewRef).delete()
+                result.toObject<LookTO>()?.let { lookTo ->
+                    storage.getReference(lookTo.previewRef).delete()
                     val folderRef = storage.getReference("$LOOKS_COLLECTION/${lookTo.lookId}")
                     folderRef.listAll()
                         .addOnSuccessListener { listResult ->
@@ -273,8 +279,10 @@ class LooksMenuFragment : Fragment() {
         firestore.collection(LOOKS_COLLECTION).document(lookId).delete()
     }
 
-    private fun changeLookPublicity(lookId: String, isPublic: Boolean) {
-
+    private fun changeLookPublicity(
+        lookId: String,
+        isPublic: Boolean,
+    ) {
         val lookDoc = firestore.collection(LOOKS_COLLECTION).document(lookId)
 
         lookDoc.get().addOnSuccessListener {
@@ -286,19 +294,25 @@ class LooksMenuFragment : Fragment() {
         }
     }
 
-    fun getLook(lookId: String, onSuccess: (LookTO) -> Unit = {}) {
-        firestore.collection(LOOKS_COLLECTION).document(lookId)
-            .get().addOnSuccessListener {
-            val lookTo = it.toObject<LookTO>()
-            lookTo?.let { onSuccess(lookTo) }
-        }.addOnFailureListener { ex ->
-            StyleableToast.makeText(
-                requireContext(),
-                ex.message,
-                Toast.LENGTH_SHORT,
-                R.style.mytoast,
-            ).show()
-        }
+    fun getLook(
+        lookId: String,
+        onSuccess: (LookTO) -> Unit = {},
+    ) {
+        firestore.collection(LOOKS_COLLECTION)
+            .document(lookId)
+            .get()
+            .addOnSuccessListener {
+                val lookTo = it.toObject<LookTO>()
+                lookTo?.let { onSuccess(lookTo) }
+            }
+            .addOnFailureListener { ex ->
+                StyleableToast.makeText(
+                    requireContext(),
+                    ex.message,
+                    Toast.LENGTH_SHORT,
+                    R.style.mytoast,
+                ).show()
+            }
     }
 
     fun selectLook(lookId: String) {
@@ -307,11 +321,12 @@ class LooksMenuFragment : Fragment() {
                 ?.let { deselectLookButton(it) }
             selectedLookTO = lookTO
             requireView().findViewById<View>(selectedLookTO.lookId.hashCode())?.let {
-                lookInfoButton.visibility = View.VISIBLE
                 selectLookButton(it)
             }
         }
     }
 
     fun getSelectedLookId() = selectedLookTO.lookId
+
+    fun getSelectedLookTO() = selectedLookTO
 }
