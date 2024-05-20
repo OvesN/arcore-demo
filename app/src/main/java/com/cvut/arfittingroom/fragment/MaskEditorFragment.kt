@@ -30,6 +30,7 @@ import com.cvut.arfittingroom.draw.model.element.impl.Curve
 import com.cvut.arfittingroom.draw.model.element.impl.Gif
 import com.cvut.arfittingroom.draw.model.element.impl.Image
 import com.cvut.arfittingroom.draw.model.element.strategy.PathCreationStrategy
+import com.cvut.arfittingroom.draw.model.enums.EEditorMode
 import com.cvut.arfittingroom.model.to.drawhistory.EditorStateTO
 import com.cvut.arfittingroom.model.to.drawhistory.ElementTO
 import com.cvut.arfittingroom.model.to.drawhistory.LayerTO
@@ -46,7 +47,7 @@ class MaskEditorFragment :
     Fragment(),
     HistoryChangeListener,
     ColorChangeListener,
-    EditorStateChangeListener {
+    EditorModeChangeListener {
     private var backgroundBitmap: Bitmap? = null
     var editorStateTO: EditorStateTO? = null
     private var isLayersMenuShown = false
@@ -627,8 +628,9 @@ class MaskEditorFragment :
         stampsMenuFragment.changeColor(newColor, fill)
     }
 
-    override fun onEditingStateExit() {
+    override fun onEditingModeExit(newMode: EEditorMode) {
         deselectEditingMode()
+        drawView.editorMode = newMode
     }
 
     companion object {

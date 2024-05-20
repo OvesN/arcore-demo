@@ -61,7 +61,7 @@
             android:layout_weight="1"
             android:background="@null"
             android:scaleType="fitStart"
-            android:layout_marginLeft="30dp"
+            android:layout_marginLeft="10dp"
             android:src="@drawable/layers" />
 
         <CheckBox

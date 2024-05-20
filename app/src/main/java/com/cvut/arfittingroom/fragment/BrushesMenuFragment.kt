@@ -21,6 +21,7 @@ import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
 import com.cvut.arfittingroom.R
 import com.cvut.arfittingroom.draw.DrawView
+import com.cvut.arfittingroom.draw.model.enums.EEditorMode
 import com.cvut.arfittingroom.model.BRUSHES_COLLECTION
 import com.cvut.arfittingroom.model.to.BrushTO
 import com.cvut.arfittingroom.utils.ScreenUtil
@@ -38,7 +39,7 @@ class BrushesMenuFragment(private val drawView: DrawView) : Fragment() {
     private val brushesOptions = mutableListOf<BrushTO>()
     private var selectedViewId = 0
     private var underscoreSelectedView: View? = null
-    private var editorStateChangeListener: EditorStateChangeListener? = null
+    private var editorModeChangeListener: EditorModeChangeListener? = null
     private var isInitialized = false
     private val paint =
         Paint().apply {
@@ -259,7 +260,7 @@ class BrushesMenuFragment(private val drawView: DrawView) : Fragment() {
             underscore.visibility = View.GONE
             drawView.setEditingMode()
         } else {
-            editorStateChangeListener?.onEditingStateExit()
+            editorModeChangeListener?.onEditingModeExit(EEditorMode.BRUSH)
 
             selectedViewId = view.id
             underscoreSelectedView = underscore
@@ -298,11 +299,11 @@ class BrushesMenuFragment(private val drawView: DrawView) : Fragment() {
         if (selectedViewId == 0 && isInitialized) {
             drawView.setEditingMode()
         } else {
-            drawView.setBrushMode()
+            editorModeChangeListener?.onEditingModeExit(newMode = EEditorMode.BRUSH)
         }
     }
 
-    fun setEditorStateChangeListener(listener: EditorStateChangeListener) {
-        editorStateChangeListener = listener
+    fun setEditorStateChangeListener(listener: EditorModeChangeListener) {
+        editorModeChangeListener = listener
     }
 }

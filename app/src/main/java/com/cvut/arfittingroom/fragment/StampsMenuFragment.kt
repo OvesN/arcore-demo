@@ -17,6 +17,7 @@ import androidx.fragment.app.Fragment
 import com.cvut.arfittingroom.R
 import com.cvut.arfittingroom.draw.DrawView
 import com.cvut.arfittingroom.draw.model.element.strategy.PathCreationStrategy
+import com.cvut.arfittingroom.draw.model.enums.EEditorMode
 import com.cvut.arfittingroom.utils.ScreenUtil
 
 class StampsMenuFragment(
@@ -31,7 +32,7 @@ class StampsMenuFragment(
             style = Style.FILL
         }
     private var underscoreSelectedView: View? = null
-    private var editorStateChangeListener: EditorStateChangeListener? = null
+    private var editorModeChangeListener: EditorModeChangeListener? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -128,7 +129,7 @@ class StampsMenuFragment(
             underscore.visibility = View.GONE
             drawView.setEditingMode()
         } else {
-            editorStateChangeListener?.onEditingStateExit()
+            editorModeChangeListener?.onEditingModeExit(EEditorMode.STAMP)
 
             selectedViewId = view.id
             underscoreSelectedView = underscore
@@ -152,13 +153,13 @@ class StampsMenuFragment(
 
     fun checkIfStampSelected() {
         if (selectedViewId != 0) {
-            drawView.setStampMode()
+            editorModeChangeListener?.onEditingModeExit(newMode = EEditorMode.STAMP)
         } else {
             drawView.setEditingMode()
         }
     }
 
-    fun setEditorStateChangeListener(listener: EditorStateChangeListener) {
-        editorStateChangeListener = listener
+    fun setEditorStateChangeListener(listener: EditorModeChangeListener) {
+        editorModeChangeListener = listener
     }
 }

@@ -88,7 +88,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private var isInElementScalingMode: Boolean = false
     private var isInElementMenuMode: Boolean = false
     var selectedElement: Element? = null
-    private var editorMode = EEditorMode.BRUSH
+    var editorMode = EEditorMode.BRUSH
     private var previousEditorMode = EEditorMode.BRUSH
     private var stampType: PathCreationStrategy? = null
     private var ignoreNextOneFingerMove = false
@@ -745,15 +745,6 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     fun setEditingMode() {
         previousEditorMode = editorMode
         editorMode = EEditorMode.EDITING
-        //TexturedBrushDrawer.resetBitmaps()
-    }
-
-    fun setBrushMode() {
-        editorMode = EEditorMode.BRUSH
-    }
-
-    fun setStampMode() {
-        editorMode = EEditorMode.STAMP
     }
 
     fun setStamp(pathCreationStrategy: PathCreationStrategy) {
