@@ -313,4 +313,6 @@ class LooksMenuFragment : Fragment() {
     }
 
     fun getSelectedLookId() = selectedLookTO.lookId
+
+    fun getSelectedLookTO() = selectedLookTO
 }

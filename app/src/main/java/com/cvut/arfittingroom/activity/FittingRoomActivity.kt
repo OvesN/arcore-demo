@@ -35,7 +35,6 @@ import com.cvut.arfittingroom.fragment.LooksMenuFragment
 import com.cvut.arfittingroom.fragment.MakeupMenuFragment
 import com.cvut.arfittingroom.fragment.MaskEditorFragment
 import com.cvut.arfittingroom.fragment.ProfileFragment
-import com.cvut.arfittingroom.model.IMAGES_COLLECTION
 import com.cvut.arfittingroom.model.LOOKS_COLLECTION
 import com.cvut.arfittingroom.model.MAKEUP_SLOT
 import com.cvut.arfittingroom.model.MASK_FRAME_FILE_NAME
@@ -235,6 +234,7 @@ class FittingRoomActivity :
         // Clear faceNode with makeup
         if (appliedMakeupTypes.isEmpty()) {
             stateService.clearFaceNodeSlot(MAKEUP_SLOT)
+            stateService.makeupTextureBitmap = null
         } else {
             stateService.appliedMakeUpTypes.values.forEach {
                 loadImage(it.ref, it.color)
@@ -283,17 +283,21 @@ class FittingRoomActivity :
                 applyModel(it)
             }
 
-            if (lookTO.isAnimated) {
-                downloadLookFrames(lookTO.lookId) { textures ->
-                    stopAnimation()
-                    gifTextures.addAll(textures)
-                    startAnimation()
-                    progressBar.visibility = View.INVISIBLE
-                }
-            } else {
+            applyLookTexture(lookTO)
+        }
+    }
+
+    private fun applyLookTexture(lookTO: LookTO) {
+        if (lookTO.isAnimated) {
+            downloadLookFrames(lookTO.lookId) { textures ->
                 stopAnimation()
-                downloadLookTextureAndApply(lookTO.lookId)
+                gifTextures.addAll(textures)
+                startAnimation()
+                progressBar.visibility = View.INVISIBLE
             }
+        } else {
+            stopAnimation()
+            downloadLookTextureAndApply(lookTO.lookId)
         }
     }
 
@@ -838,7 +842,7 @@ class FittingRoomActivity :
         maskEditorFragment.clearAll()
     }
 
-    override fun showMainLayout() {
+    override fun showMainLayout(restoreLookTexture: Boolean) {
         findViewById<View>(R.id.top_ui).visibility = View.VISIBLE
         findViewById<View>(R.id.bottom_ui).visibility = View.VISIBLE
 
@@ -856,16 +860,21 @@ class FittingRoomActivity :
 
         arSceneView.resume()
 
-        val bitmap = getTempMaskTextureBitmap(applicationContext)
-        bitmap?.let {
-            stateService.createTextureAndApply(it, arFragment.arSceneView, MASK_TEXTURE_SLOT)
-        }
-
-        if (doesTempAnimatedMaskExist(applicationContext)) {
-            prepareAllGifTextures()
+        if (restoreLookTexture) {
+            applyLookTexture(looksOptionsFragment.getSelectedLookTO())
         }
         else {
-            stopAnimation()
+            val bitmap = getTempMaskTextureBitmap(applicationContext)
+            bitmap?.let {
+                stateService.createTextureAndApply(it, arFragment.arSceneView, MASK_TEXTURE_SLOT)
+            }
+
+            if (doesTempAnimatedMaskExist(applicationContext)) {
+                prepareAllGifTextures()
+            }
+            else {
+                stopAnimation()
+            }
         }
     }
 

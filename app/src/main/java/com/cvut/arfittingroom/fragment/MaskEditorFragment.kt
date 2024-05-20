@@ -33,7 +33,6 @@ import com.cvut.arfittingroom.model.to.drawhistory.LayerTO
 import com.cvut.arfittingroom.service.Mapper
 import com.cvut.arfittingroom.utils.FileUtil.deleteTempFiles
 import com.cvut.arfittingroom.utils.UIUtil
-import com.cvut.arfittingroom.utils.UIUtil.showEditorSubmenuDialog
 import com.google.firebase.storage.FirebaseStorage
 import com.lukelorusso.verticalseekbar.VerticalSeekBar
 import io.github.muddz.styleabletoast.StyleableToast
@@ -159,7 +158,7 @@ class MaskEditorFragment : Fragment(), HistoryChangeListener, ColorChangeListene
                 run {
                     clearAll()
                     wasDeserialized = false
-                    showMainLayout()
+                    showMainLayout(restoreLookTexture = true)
                 }
             }
         }
@@ -356,7 +355,7 @@ class MaskEditorFragment : Fragment(), HistoryChangeListener, ColorChangeListene
             .commit()
     }
 
-    private fun showMainLayout() {
+    private fun showMainLayout(restoreLookTexture: Boolean = false) {
         val listener = context as? UIChangeListener
         if (listener == null) {
             Log.println(Log.ERROR, null, "Activity does not implement ResourceListener")
@@ -364,7 +363,7 @@ class MaskEditorFragment : Fragment(), HistoryChangeListener, ColorChangeListene
         }
         drawView.stopAnimation()
         drawView.layerManager.setAllGifsToStaticMode()
-        listener.showMainLayout()
+        listener.showMainLayout(restoreLookTexture)
     }
 
     fun clearAll() {
