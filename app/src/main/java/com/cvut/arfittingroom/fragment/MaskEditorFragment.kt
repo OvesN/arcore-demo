@@ -71,6 +71,8 @@ class MaskEditorFragment :
     private lateinit var progressBarDialog: AlertDialog
     private lateinit var progressBar: ProgressBar
     private lateinit var editingModeButton: ImageButton
+    // We need this to be able to previous restore mode after deselecting 'select mode button'
+    private var activeFragmentMode = EEditorMode.BRUSH
 
     @Inject
     lateinit var strategies: Map<String, @JvmSuppressWildcards PathCreationStrategy>
@@ -245,6 +247,7 @@ class MaskEditorFragment :
         editingModeButton.setBackgroundResource(R.drawable.select_inactive)
         drawView.layerManager.deselectAllElements()
         drawView.invalidate()
+        drawView.editorMode = activeFragmentMode
     }
 
     private fun showLayersMenu() {
@@ -323,7 +326,12 @@ class MaskEditorFragment :
             .show(brushesMenuFragment)
             .commit()
 
-        brushesMenuFragment.checkIfBrushSelected()
+        brushesMenuFragment.changeEditorMode()
+        activeFragmentMode = if (brushesMenuFragment.isBrushSelected()) {
+            EEditorMode.BRUSH
+        } else {
+            EEditorMode.EDITING
+        }
     }
 
     private fun showStampMenu(button: View) {
@@ -335,7 +343,13 @@ class MaskEditorFragment :
             .show(stampsMenuFragment)
             .commit()
 
-        stampsMenuFragment.checkIfStampSelected()
+        stampsMenuFragment.changeEditorState()
+
+        activeFragmentMode = if (stampsMenuFragment.isStampSelected()) {
+            EEditorMode.STAMP
+        } else {
+            EEditorMode.EDITING
+        }
     }
 
     private fun showImageMenu(button: View) {
@@ -349,6 +363,7 @@ class MaskEditorFragment :
             .commit()
 
         imageMenuFragment.fetchImages()
+        activeFragmentMode = EEditorMode.EDITING
     }
 
     private fun resetMenu() {
@@ -635,6 +650,7 @@ class MaskEditorFragment :
 
     override fun onEditingModeExit(newMode: EEditorMode) {
         deselectEditingMode()
+        activeFragmentMode = newMode
         drawView.editorMode = newMode
     }
 

@@ -160,13 +160,15 @@ class StampsMenuFragment(
         createStampMenu(requireView())
     }
 
-    fun checkIfStampSelected() {
+    fun changeEditorState() {
         if (selectedViewId != 0) {
             editorModeChangeListener?.onEditingModeExit(newMode = EEditorMode.STAMP)
         } else {
             drawView.setEditingMode()
         }
     }
+
+    fun isStampSelected() = selectedViewId != 0
 
     fun setEditorStateChangeListener(listener: EditorModeChangeListener) {
         editorModeChangeListener = listener

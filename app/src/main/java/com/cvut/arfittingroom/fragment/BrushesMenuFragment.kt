@@ -297,13 +297,16 @@ class BrushesMenuFragment(private val drawView: DrawView) : Fragment() {
         }
     }
 
-    fun checkIfBrushSelected() {
+    fun changeEditorMode() {
         if (selectedViewId == 0 && isInitialized) {
             drawView.setEditingMode()
         } else {
             editorModeChangeListener?.onEditingModeExit(newMode = EEditorMode.BRUSH)
         }
     }
+
+    fun isBrushSelected() = (selectedViewId != 0 || !isInitialized)
+
 
     fun setEditorStateChangeListener(listener: EditorModeChangeListener) {
         editorModeChangeListener = listener

@@ -29,6 +29,7 @@ import com.cvut.arfittingroom.ARFittingRoomApplication
 import com.cvut.arfittingroom.R
 import com.cvut.arfittingroom.databinding.ActivityFittingRoomBinding
 import com.cvut.arfittingroom.draw.DrawHistoryHolder
+import com.cvut.arfittingroom.draw.model.enums.EEditorMode
 import com.cvut.arfittingroom.fragment.AccessoriesMenuFragment
 import com.cvut.arfittingroom.fragment.CameraModeFragment
 import com.cvut.arfittingroom.fragment.LooksMenuFragment
@@ -111,6 +112,7 @@ class FittingRoomActivity :
     private lateinit var storage: FirebaseStorage
     private lateinit var progressBar: ProgressBar
     private lateinit var shareButton: ImageButton
+
 
     @Inject
     lateinit var stateService: StateService
