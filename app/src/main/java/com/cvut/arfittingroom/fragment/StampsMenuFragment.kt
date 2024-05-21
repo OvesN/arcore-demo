@@ -95,6 +95,13 @@ class StampsMenuFragment(
                     strokeWidth = 3f
                     isAntiAlias = true
                 }
+
+            if (selectedViewId == stamp.key.hashCode()) {
+                underscoreSelectedView = underscoreLine
+                underscoreLine.visibility = View.VISIBLE
+                paint.color = this.paint.color
+            }
+
             val path = stamp.value.createPath(imageSizePx / 2f, imageSizePx / 2f, imageSizePx / 2f)
             canvas.drawPath(path, paint)
 
@@ -109,12 +116,6 @@ class StampsMenuFragment(
                         selectStamp(stamp.value, this, underscoreLine)
                     }
                 }
-
-            if (selectedViewId == imageButton.id) {
-                underscoreSelectedView = underscoreLine
-                underscoreLine.visibility = View.VISIBLE
-                imageButton.imageTintList = ColorStateList.valueOf(paint.color)
-            }
 
             verticalContainer.addView(imageButton)
             verticalContainer.addView(underscoreLine)
