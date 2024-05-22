@@ -1,7 +1,7 @@
-package com.cvut.arfittingroom.draw.command
+package com.cvut.arfittingroom.draw.model.element
 
 /**
- * Scalable
+ * Object that can be scaled
  *
  * @author Veronika Ovsyannikova
  */

@@ -8,7 +8,8 @@ import java.io.Serializable
 import java.util.LinkedList
 
 /**
- * Drawable path
+ * Extends the Android Path class to include a history of actions performed on the path
+ * This allows for serialization and recreation of the path
  *
  * @author Veronika Ovsyannikova
  */

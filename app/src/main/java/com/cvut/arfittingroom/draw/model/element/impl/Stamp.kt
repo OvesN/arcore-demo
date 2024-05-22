@@ -2,7 +2,7 @@ package com.cvut.arfittingroom.draw.model.element.impl
 
 import android.graphics.Canvas
 import android.graphics.Paint
-import com.cvut.arfittingroom.draw.command.Repaintable
+import com.cvut.arfittingroom.draw.model.element.Repaintable
 import com.cvut.arfittingroom.draw.model.element.BoundingBox
 import com.cvut.arfittingroom.draw.model.element.Element
 import com.cvut.arfittingroom.draw.model.element.strategy.PathCreationStrategy
@@ -10,7 +10,7 @@ import com.cvut.arfittingroom.draw.path.DrawablePath
 import java.util.UUID
 
 /**
- * Stamp
+ * Drawable element that uses a specific [pathCreationStrategy] to draw shapes on the canvas
  *
  * @property id
  * @property centerX

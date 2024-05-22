@@ -4,7 +4,7 @@ import android.graphics.Path
 import java.io.Serializable
 
 /**
- * Path action
+ * Represents an action that can be performed on the path
  *
  * @author Veronika Ovsyannikova
  */

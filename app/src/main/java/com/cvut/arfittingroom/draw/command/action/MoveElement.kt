@@ -1,10 +1,10 @@
 package com.cvut.arfittingroom.draw.command.action
 
 import com.cvut.arfittingroom.draw.command.Command
-import com.cvut.arfittingroom.draw.command.Movable
+import com.cvut.arfittingroom.draw.model.element.Movable
 
 /**
- * Move element
+ * Command to move an element from one position to another
  *
  * @property movable
  * @property oldX

@@ -24,7 +24,7 @@ import com.cvut.arfittingroom.activity.UIChangeListener
 import com.cvut.arfittingroom.draw.DrawHistoryHolder
 import com.cvut.arfittingroom.draw.DrawView
 import com.cvut.arfittingroom.draw.Layer
-import com.cvut.arfittingroom.draw.command.Repaintable
+import com.cvut.arfittingroom.draw.model.element.Repaintable
 import com.cvut.arfittingroom.draw.model.element.Element
 import com.cvut.arfittingroom.draw.model.element.impl.Curve
 import com.cvut.arfittingroom.draw.model.element.impl.Gif

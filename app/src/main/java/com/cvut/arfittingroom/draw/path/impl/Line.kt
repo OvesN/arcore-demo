@@ -4,10 +4,10 @@ import android.graphics.Path
 import com.cvut.arfittingroom.draw.path.PathAction
 
 /**
- * Line
+ * Represents an action that draws a line to a specified point
  *
- * @property x
- * @property y
+ * @property x The x-coordinate of the end point of the line
+ * @property y The y-coordinate of the end point of the line
  *
  * @author Veronika Ovsyannikova
  */

@@ -4,7 +4,7 @@ import com.cvut.arfittingroom.draw.command.Command
 import com.cvut.arfittingroom.draw.service.LayerManager
 
 /**
- * Add layer
+ * Command to add a new layer
  *
  * @property width
  * @property height

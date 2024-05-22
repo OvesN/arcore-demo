@@ -7,7 +7,7 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 /**
- * Star path creation strategy
+ * Draws a path in the form of a star
  *
  * @author Veronika Ovsyannikova
  */

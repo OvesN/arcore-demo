@@ -5,7 +5,7 @@ import com.cvut.arfittingroom.draw.model.element.Element
 import com.cvut.arfittingroom.draw.service.LayerManager
 
 /**
- * Remove element from layer
+ * Command to remove the element form the layer
  *
  * @property element
  * @property layerManager

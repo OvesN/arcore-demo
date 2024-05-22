@@ -7,7 +7,7 @@ import java.util.LinkedList
 private const val MAX_NUMBER_OF_ACTIONS_HOLD_IN_HISTORY = 50
 
 /**
- * Draw history holder
+ * Singleton object that manages the history of drawing commands
  *
  * @author Veronika Ovsyannikova
  */

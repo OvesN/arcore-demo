@@ -5,7 +5,7 @@ import com.cvut.arfittingroom.draw.model.element.Element
 import com.cvut.arfittingroom.draw.service.LayerManager
 
 /**
- * Add element to layer
+ * Command to add an element to a specific layer
  *
  * @property element
  * @property layerManager

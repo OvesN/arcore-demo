@@ -1,10 +1,10 @@
 package com.cvut.arfittingroom.draw.command.action
 
 import com.cvut.arfittingroom.draw.command.Command
-import com.cvut.arfittingroom.draw.command.Scalable
+import com.cvut.arfittingroom.draw.model.element.Scalable
 
 /**
- * Scale element
+ * Command to scale element
  *
  * @property scalable
  * @property newRadius

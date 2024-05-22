@@ -11,10 +11,10 @@ import java.util.UUID
 import kotlin.math.max
 
 /**
- * Gif
+ * Drawable element that uses [gifDrawable] to draw GIFs on the canvas
  *
  * @property id
- * @property resourceRef
+ * @property resourceRef The reference to the GIF stored in Firebase Storage
  * @property centerX
  * @property centerY
  * @property outerRadius

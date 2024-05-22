@@ -6,7 +6,7 @@ import com.cvut.arfittingroom.draw.path.DrawablePath
 import javax.inject.Inject
 
 /**
- * Heart path creation strategy
+ * Draws a path in the form of a heart
  *
  * @author Veronika Ovsyannikova
  */

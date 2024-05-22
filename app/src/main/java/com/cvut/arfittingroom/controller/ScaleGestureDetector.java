@@ -31,13 +31,11 @@ import androidx.annotation.Nullable;
  * Copy paste from android android.view because on some devices with
  * android 14 mMinSpan is always assigned to 0 for whatever reason
  * !!!!!!!!
- *
+ /*
  * Detects scaling transformation gestures using the supplied {@link MotionEvent}s.
  * The {@link OnScaleGestureListener} callback will notify users when a particular
  * gesture event has occurred.
- *
  * This class should only be used with {@link MotionEvent}s reported via touch.
- *
  * To use this class:
  * <ul>
  *  <li>Create an instance of the {@code ScaleGestureDetector} for your

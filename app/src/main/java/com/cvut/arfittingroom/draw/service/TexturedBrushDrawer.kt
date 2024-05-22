@@ -11,7 +11,7 @@ import kotlin.math.PI
 import kotlin.math.atan2
 
 /**
- * Bitmap drawer for textured brushes
+ * Renders textured brushes on canvas
  *
  * @author Veronika Ovsyannikova
  */

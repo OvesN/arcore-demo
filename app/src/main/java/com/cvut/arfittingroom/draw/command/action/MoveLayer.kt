@@ -4,7 +4,7 @@ import com.cvut.arfittingroom.draw.command.Command
 import com.cvut.arfittingroom.draw.service.LayerManager
 
 /**
- * Move layer
+ *  Command to move a layer to the different position
  *
  * @property layerManager
  * @property fromIndex

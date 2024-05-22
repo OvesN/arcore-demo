@@ -8,7 +8,7 @@ import android.graphics.Matrix
 import android.graphics.Paint
 import android.graphics.PathMeasure
 import android.graphics.RectF
-import com.cvut.arfittingroom.draw.command.Repaintable
+import com.cvut.arfittingroom.draw.model.element.Repaintable
 import com.cvut.arfittingroom.draw.model.element.BoundingBox
 import com.cvut.arfittingroom.draw.model.element.Element
 import com.cvut.arfittingroom.draw.path.DrawablePath
@@ -17,17 +17,18 @@ import com.cvut.arfittingroom.utils.BitmapUtil
 import java.util.UUID
 import kotlin.math.max
 
-private const val PROXIMITY_THRESHOLD = 60f  // pixels
+private const val PROXIMITY_THRESHOLD = 60f
 
 /**
- * Curve
+ * Drawable element that uses [path] to draw poly-lines on the canvas
  *
  * @property id
  * @property path
  * @property paint
  * @property rotationAngle
- * @property bitmapTexture
- * @property strokeTextureRef
+ * @property bitmapTexture The bitmap of the texture for textured brushes
+ * @property strokeTextureRef The reference to the texture image stored
+ * in Firebase Storage for textured brushes
  * @property blurRadius
  * @property blurType
  * @property centerX
@@ -120,7 +121,6 @@ class Curve(
         centerY = originalCenterY
     }
 
-    // Scaling function
     override fun scale(newRadius: Float) {
         outerRadius = max(newRadius, 10f)
         radiusDiff = max(outerRadius / originalRadius, 0.1f)
@@ -155,7 +155,7 @@ class Curve(
 
         val pm = PathMeasure(path, false)
         val pathLength = pm.length
-        val pathCoords = FloatArray(2)  // Holds coordinates as [x, y]
+        val pathCoords = FloatArray(2)
 
         var distance = 0f
         while (distance < pathLength) {

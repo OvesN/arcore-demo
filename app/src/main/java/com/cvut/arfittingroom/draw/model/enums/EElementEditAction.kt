@@ -1,9 +1,9 @@
 package com.cvut.arfittingroom.draw.model.enums
 
 /**
- * E element edit action
+ * Different actions that can be performed on an element
  *
- * @property actionName
+ * @property actionName used for user interface representation
  *
  * @author Veronika Ovsyannikova
  */

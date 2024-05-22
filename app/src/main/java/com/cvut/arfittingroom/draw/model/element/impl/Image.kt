@@ -10,10 +10,10 @@ import java.util.UUID
 import kotlin.math.max
 
 /**
- * Image
+ * Drawable element that uses [bitmap] to draw images on the canvas
  *
  * @property id
- * @property resourceRef
+ * @property resourceRef The reference to the image stored in Firebase Storage
  * @property centerX
  * @property centerY
  * @property outerRadius

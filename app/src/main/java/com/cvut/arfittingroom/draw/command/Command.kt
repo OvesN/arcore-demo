@@ -1,7 +1,7 @@
 package com.cvut.arfittingroom.draw.command
 
 /**
- * Command
+ * Command that will be stored in the draw history
  *
  * @author Veronika Ovsyannikova
  */

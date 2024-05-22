@@ -3,7 +3,7 @@ package com.cvut.arfittingroom.draw.model.element.strategy
 import com.cvut.arfittingroom.draw.path.DrawablePath
 
 /**
- * Path creation strategy
+ * Strategy for creating a specific path shape
  *
  * @author Veronika Ovsyannikova
  */

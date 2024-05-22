@@ -1,9 +1,9 @@
-package com.cvut.arfittingroom.draw.command
+package com.cvut.arfittingroom.draw.model.element
 
 import android.graphics.Canvas
 
 /**
- * Drawable
+ * Object that can be drawn on a Canvas
  *
  * @author Veronika Ovsyannikova
  */

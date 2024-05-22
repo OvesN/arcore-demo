@@ -1,7 +1,7 @@
-package com.cvut.arfittingroom.draw.command
+package com.cvut.arfittingroom.draw.model.element
 
 /**
- * Rotatable
+ * Object that can be rotated
  *
  * @author Veronika Ovsyannikova
  */

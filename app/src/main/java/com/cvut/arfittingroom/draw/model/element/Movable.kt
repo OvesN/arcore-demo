@@ -1,7 +1,7 @@
-package com.cvut.arfittingroom.draw.command
+package com.cvut.arfittingroom.draw.model.element
 
 /**
- * Movable
+ * Object that can be moved
  *
  * @author Veronika Ovsyannikova
  */

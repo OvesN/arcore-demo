@@ -13,7 +13,7 @@ import java.util.UUID
 private val logger = KotlinLogging.logger {}
 
 /**
- * Layer manager
+ * Manages layers in the 2D editor
  *
  * @author Veronika Ovsyannikova
  */

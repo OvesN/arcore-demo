@@ -1,10 +1,10 @@
 package com.cvut.arfittingroom.draw.command.action
 
 import com.cvut.arfittingroom.draw.command.Command
-import com.cvut.arfittingroom.draw.command.Repaintable
+import com.cvut.arfittingroom.draw.model.element.Repaintable
 
 /**
- * Repaint element
+ * Command to change the element color and/or style
  *
  * @property repaintable
  * @property newColor

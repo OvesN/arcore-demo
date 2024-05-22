@@ -14,7 +14,7 @@ import java.util.UUID
 import kotlin.collections.HashMap
 
 /**
- * Layer
+ * Holds various drawable elements
  *
  * @property id
  * @property width

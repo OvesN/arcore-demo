@@ -6,7 +6,7 @@ import javax.inject.Inject
 import kotlin.math.sqrt
 
 /**
- * Triangle path creation strategy
+ * Draws a path in the form of a triangle
  *
  * @author Veronika Ovsyannikova
  */

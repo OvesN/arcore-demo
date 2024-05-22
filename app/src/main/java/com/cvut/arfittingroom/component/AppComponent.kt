@@ -10,7 +10,7 @@ import dagger.Component
 import javax.inject.Singleton
 
 /**
- * App component
+ * Dagger AppComponent interface for dependency injection
  *
  * @author Veronika Ovsyannikova
  */

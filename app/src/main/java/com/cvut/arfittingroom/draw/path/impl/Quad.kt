@@ -4,12 +4,12 @@ import android.graphics.Path
 import com.cvut.arfittingroom.draw.path.PathAction
 
 /**
- * Quad
+ * Represents an action that draws a quadratic Bezier curve
  *
- * @property x1
- * @property y1
- * @property x2
- * @property y2
+ * @property x1 The x-coordinate of the control point
+ * @property y1 The y-coordinate of the control point
+ * @property x2 The x-coordinate of the end point
+ * @property y2 The y-coordinate of the end point
  *
  * @author Veronika Ovsyannikova
  */

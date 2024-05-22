@@ -5,7 +5,7 @@ import com.cvut.arfittingroom.draw.model.element.Element
 import com.cvut.arfittingroom.draw.service.LayerManager
 
 /**
- * Move element between layers
+ *  Command to move an element from one layer to another
  *
  * @property element
  * @property oldLayerId

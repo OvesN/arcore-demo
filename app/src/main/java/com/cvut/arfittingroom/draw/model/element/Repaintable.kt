@@ -1,9 +1,9 @@
-package com.cvut.arfittingroom.draw.command
+package com.cvut.arfittingroom.draw.model.element
 
 import android.graphics.Paint
 
 /**
- * Repaintable
+ * Object that can be repainted
  *
  * @author Veronika Ovsyannikova
  */

@@ -1,10 +1,10 @@
 package com.cvut.arfittingroom.draw.command.action
 
 import com.cvut.arfittingroom.draw.command.Command
-import com.cvut.arfittingroom.draw.command.Rotatable
+import com.cvut.arfittingroom.draw.model.element.Rotatable
 
 /**
- * Rotate element
+ * Command to rotate element
  *
  * @property rotatable
  * @property newRotationAngle

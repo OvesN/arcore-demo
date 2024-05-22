@@ -11,7 +11,7 @@ import androidx.core.graphics.drawable.toBitmap
 import androidx.core.graphics.get
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
 import com.cvut.arfittingroom.R
-import com.cvut.arfittingroom.draw.command.Repaintable
+import com.cvut.arfittingroom.draw.model.element.Repaintable
 import com.cvut.arfittingroom.draw.model.element.Element
 import com.cvut.arfittingroom.draw.model.enums.EElementEditAction
 import java.lang.IllegalArgumentException
@@ -22,7 +22,7 @@ private const val MENU_SCALE_FACTOR = 1.7f
 private const val BOUNDS_SCALE_FACTOR = 1.4f
 
 /**
- * U i drawer
+ * Provides functions to draw various UI elements for 2D editor
  *
  * @property context
  *

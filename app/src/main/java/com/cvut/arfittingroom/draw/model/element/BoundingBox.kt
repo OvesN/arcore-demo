@@ -4,12 +4,12 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.RectF
-import com.cvut.arfittingroom.draw.command.Drawable
 import com.cvut.arfittingroom.draw.path.DrawablePath
 import com.cvut.arfittingroom.model.Coordinates
 
 /**
- * Bounding box
+ * Rectangular boundary around the element, helps to detect intersections
+ * with the user's finger and is drawn when the element is selected
  *
  * @property centerX
  * @property centerY

@@ -4,10 +4,10 @@ import android.graphics.Path
 import com.cvut.arfittingroom.draw.path.PathAction
 
 /**
- * Move
+ * Represents an action that moves to a specified point without drawing
  *
- * @property x
- * @property y
+ * @property x The x-coordinate of the point to move to
+ * @property y The y-coordinate of the point to move to
  *
  * @author Veronika Ovsyannikova
  */

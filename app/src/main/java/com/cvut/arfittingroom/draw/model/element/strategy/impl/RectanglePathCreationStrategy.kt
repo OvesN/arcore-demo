@@ -5,7 +5,7 @@ import com.cvut.arfittingroom.draw.path.DrawablePath
 import javax.inject.Inject
 
 /**
- * Rectangle path creation strategy
+ * Draws a path in the form of a rectangle
  *
  * @author Veronika Ovsyannikova
  */

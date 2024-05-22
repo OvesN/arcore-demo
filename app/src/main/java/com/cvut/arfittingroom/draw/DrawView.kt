@@ -23,7 +23,7 @@ import com.cvut.arfittingroom.R
 import com.cvut.arfittingroom.controller.ScaleGestureDetector
 import com.cvut.arfittingroom.draw.DrawHistoryHolder.addToHistory
 import com.cvut.arfittingroom.draw.DrawHistoryHolder.clearHistory
-import com.cvut.arfittingroom.draw.command.Repaintable
+import com.cvut.arfittingroom.draw.model.element.Repaintable
 import com.cvut.arfittingroom.draw.command.action.AddElementToLayer
 import com.cvut.arfittingroom.draw.command.action.AddLayer
 import com.cvut.arfittingroom.draw.command.action.MoveElement
@@ -64,8 +64,8 @@ import kotlin.math.atan2
 import kotlin.math.sqrt
 
 /**
- * Draw view for 2D editor
- *
+ * Draw view for 2D editor,
+ * captures user's input and interpret it based on active [editorMode]
  *
  * @param context
  * @param attrs
@@ -591,7 +591,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             return
         }
         when (event.action) {
-            MotionEvent.ACTION_DOWN -> {
+            ACTION_DOWN -> {
                 startX = x
                 startY = y
                 actionDown(x, y)

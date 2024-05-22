@@ -4,7 +4,7 @@ import com.cvut.arfittingroom.draw.command.Command
 import com.cvut.arfittingroom.draw.service.LayerManager
 
 /**
- * Toggle layer visibility
+ * Command to hide/reveal the specific layer
  *
  * @property layerId
  * @property layerManager

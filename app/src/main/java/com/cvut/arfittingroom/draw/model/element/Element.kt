@@ -1,10 +1,6 @@
 package com.cvut.arfittingroom.draw.model.element
 
 import android.graphics.Canvas
-import com.cvut.arfittingroom.draw.command.Drawable
-import com.cvut.arfittingroom.draw.command.Movable
-import com.cvut.arfittingroom.draw.command.Rotatable
-import com.cvut.arfittingroom.draw.command.Scalable
 import java.util.UUID
 import kotlin.math.max
 

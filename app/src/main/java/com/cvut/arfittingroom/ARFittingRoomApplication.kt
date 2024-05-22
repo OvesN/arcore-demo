@@ -5,7 +5,7 @@ import com.cvut.arfittingroom.component.AppComponent
 import com.cvut.arfittingroom.component.DaggerAppComponent
 
 /**
- * Main class
+ * Main application class
  *
  * @author Veronika Ovsyannikova
  */

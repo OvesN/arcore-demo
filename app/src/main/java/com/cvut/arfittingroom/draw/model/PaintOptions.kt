@@ -6,7 +6,8 @@ import android.graphics.Paint
 import android.graphics.Paint.Style
 
 /**
- * Paint options
+ * Holds information about current paint options in the 2D editor
+ * and allows to serialise Paint
  *
  * @property color
  * @property strokeWidth
@@ -14,7 +15,7 @@ import android.graphics.Paint.Style
  * @property style
  * @property strokeCap
  * @property strokeJoint
- * @property strokeTextureRef
+ * @property strokeTextureRef The reference to the texture image stored in Firebase Storage for textured brushes
  * @property blurRadius
  * @property blurType
  *
