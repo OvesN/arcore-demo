@@ -248,6 +248,7 @@ class MaskEditorFragment :
         drawView.layerManager.deselectAllElements()
         drawView.invalidate()
         drawView.editorMode = activeFragmentMode
+        drawView.selectedElement = null
     }
 
     private fun showLayersMenu() {

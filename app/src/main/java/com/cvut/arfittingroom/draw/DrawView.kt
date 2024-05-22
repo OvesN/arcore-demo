@@ -197,7 +197,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
         // Some devices do not distinguish MOVE and just screen touching events, so we need to control it manually
         when (event.actionMasked) {
-            MotionEvent.ACTION_DOWN -> {
+            ACTION_DOWN -> {
                 lastDownX = x
                 lastDownY = y
             }
@@ -610,7 +610,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         if (ignoreDrawing) {
             return
         }
-        if (event.action == MotionEvent.ACTION_DOWN) {
+        if (event.action == ACTION_UP) {
             drawStamp(x, y, paintOptions.strokeWidth)
         }
     }
