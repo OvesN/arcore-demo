@@ -4,9 +4,9 @@ import com.google.ar.core.AugmentedFace
 import com.google.ar.sceneform.ux.AugmentedFaceNode
 
 /**
- * Face nodes info
+ * Holds information about applied effects to the user's face
  *
- * @property augmentedFace
+ * @property augmentedFace The current AugmentedFace being tracked
  * @property slotToFaceNodeMap
  *
  * @author Veronika Ovsyannikova

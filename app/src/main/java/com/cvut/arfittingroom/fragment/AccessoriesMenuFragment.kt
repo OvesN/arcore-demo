@@ -34,7 +34,7 @@ import com.google.firebase.storage.FirebaseStorage
 import io.github.muddz.styleabletoast.StyleableToast
 
 /**
- * Accessories menu fragment
+ * Displays accessory options, allows users to select and apply accessories
  *
  * @author Veronika Ovsyannikova
  */

@@ -16,7 +16,7 @@ import com.cvut.arfittingroom.utils.currentUserUsername
 import com.google.firebase.auth.FirebaseAuth
 
 /**
- * Profile fragment
+ * Allows to sing out
  *
  * @author Veronika Ovsyannikova
  */

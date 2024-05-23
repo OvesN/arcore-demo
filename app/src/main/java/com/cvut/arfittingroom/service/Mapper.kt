@@ -25,7 +25,7 @@ import java.util.UUID
 import javax.inject.Inject
 
 /**
- * Mapper
+ * Serializes objects to TO and deserializes TO to objects
  *
  * @property strategies
  * @author Veronika Ovsyannikova
@@ -36,6 +36,12 @@ constructor(private val strategies: Map<String, @JvmSuppressWildcards PathCreati
     private var width: Int = 0
     private var height: Int = 0
 
+    /**
+     * Sets the dimensions of the DrawView
+     *
+     * @param width
+     * @param height
+     */
     fun setDimensions(
         width: Int,
         height: Int,
@@ -117,6 +123,12 @@ constructor(private val strategies: Map<String, @JvmSuppressWildcards PathCreati
             else -> throw IllegalArgumentException("Unsupported element path action type")
         }
 
+    /**
+     * Serialize element
+     *
+     * @param element The element to serialize
+     * @return Serialized element
+     */
     fun elementToElementTO(element: Element): ElementTO {
         val baseTO =
             ElementTO(
@@ -170,6 +182,13 @@ constructor(private val strategies: Map<String, @JvmSuppressWildcards PathCreati
         }
     }
 
+    /**
+     * Serializes layer
+     *
+     * @param layer The layer to serialize
+     * @param index The index of the layer
+     * @return Serialized layer
+     */
     fun layerToLayerTO(
         layer: Layer,
         index: Int,
@@ -180,6 +199,12 @@ constructor(private val strategies: Map<String, @JvmSuppressWildcards PathCreati
         elements = layer.elements.keys.map { it.toString() },
     )
 
+    /**
+     * Deserializes element
+     *
+     * @param elementTO Serialized element
+     * @return Deserializes element
+     */
     fun elementTOtoElement(elementTO: ElementTO): Element =
         when (elementTO.elementType) {
             EElementType.STAMP -> {
@@ -235,6 +260,12 @@ constructor(private val strategies: Map<String, @JvmSuppressWildcards PathCreati
                 )
         }
 
+    /**
+     * Deserializes layer
+     *
+     * @param layerTO serialized layer
+     * @return deserialized layer
+     */
     fun layerTOtoLayer(layerTO: LayerTO) =
         Layer(
             id = layerTO.id,

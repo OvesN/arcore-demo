@@ -45,6 +45,10 @@ class StateService {
         return bitmap
     }
 
+
+    /**
+     * Delete all effects applied to the face
+     */
     fun clearAll() {
         appliedModels.clear()
         makeupTextureBitmap = null
@@ -54,6 +58,11 @@ class StateService {
         clearFaceNodes()
     }
 
+    /**
+     * Clears the face node for the specified slot.
+     *
+     * @param slot The slot to clear.
+     */
     fun clearFaceNodeSlot(slot: String) {
         appliedModels.remove(slot)
 
@@ -63,10 +72,23 @@ class StateService {
         }
     }
 
+    /**
+     * Adds a model to the applied models list
+     *
+     * @param modelTO The model to add
+     */
     fun addModel(modelTO: ModelTO) {
         appliedModels[modelTO.slot] = modelTO
     }
 
+
+    /**
+     * Applies the specified model to the face in the AR scene view
+     *
+     * @param sceneView The AR scene view
+     * @param renderable The model renderable to apply
+     * @param slot The slot to apply the model to
+     */
     fun applyModelOnFace(
         sceneView: ArSceneView,
         renderable: ModelRenderable,
@@ -96,6 +118,9 @@ class StateService {
         faceNodesInfo.slotToFaceNodeMap.clear()
     }
 
+    /**
+     * Hides face effects if the face tracking state is stopped or paused
+     */
     fun hideNodesIfFaceTrackingStopped() {
         faceNodesInfo.augmentedFace?.let { augmentedFace ->
             if (augmentedFace.trackingState == TrackingState.STOPPED || augmentedFace.trackingState == TrackingState.PAUSED) {
@@ -114,6 +139,13 @@ class StateService {
         }
     }
 
+    /**
+     * Applies the specified texture to the face node in the given slot
+     *
+     * @param texture The texture to apply
+     * @param sceneView The AR scene view
+     * @param slot The slot to apply the texture to
+     */
     fun applyTextureToFaceNode(
         texture: Texture,
         sceneView: ArSceneView,
@@ -130,6 +162,13 @@ class StateService {
             }
     }
 
+    /**
+     * Creates a texture from the given bitmap and applies it to the face node in the specified slot
+     *
+     * @param bitmap The bitmap to create the texture from
+     * @param sceneView The AR scene view
+     * @param slot The slot to apply the texture to
+     */
     fun createTextureAndApply(
         bitmap: Bitmap,
         sceneView: ArSceneView,
@@ -146,7 +185,14 @@ class StateService {
             }
     }
 
-    fun loadImage(
+    /**
+     * Loads an image, recolors it, and adds it to the makeup bitmaps
+     *
+     * @param image The image to load
+     * @param color The color to apply to the image
+     * @param sceneView The AR scene view
+     */
+    fun loadMakeup(
         image: Bitmap,
         color: Int,
         sceneView: ArSceneView,
@@ -160,6 +206,14 @@ class StateService {
         }
     }
 
+    /**
+     * Reapplies nodes for a new face detected in the AR scene view
+     * Is used because when AR session is paused and resumed the user's face
+     * will be treated as a new one
+     *
+     * @param face The new face to apply nodes to
+     * @param sceneView The AR scene view
+     */
     fun reapplyNodesForNewFace(
         face: AugmentedFace,
         sceneView: ArSceneView,
@@ -172,7 +226,17 @@ class StateService {
         }
     }
 
+    /**
+     * Retrieves the list of applied models
+     *
+     * @return The list of applied models
+     */
     fun getAppliedModelsList() = appliedModels.values.toList()
 
+    /**
+     * Retrieves the list of applied makeup types
+     *
+     * @return The list of applied makeup types
+     */
     fun getAppliedMakeupList() = appliedMakeUpTypes.values.toList()
 }

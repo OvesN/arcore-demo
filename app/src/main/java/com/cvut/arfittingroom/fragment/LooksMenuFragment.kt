@@ -36,7 +36,7 @@ import com.google.firebase.storage.FirebaseStorage
 import io.github.muddz.styleabletoast.StyleableToast
 
 /**
- * Looks menu fragment
+ * Displays looks menu, allows users to select and apply specific look
  *
  * @author Veronika Ovsyannikova
  */

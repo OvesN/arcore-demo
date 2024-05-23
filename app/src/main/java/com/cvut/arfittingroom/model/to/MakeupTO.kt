@@ -3,11 +3,12 @@ package com.cvut.arfittingroom.model.to
 import com.google.firebase.firestore.PropertyName
 
 /**
- * Makeup t o
+ * Makeup transfer object
+ * Represents makeup options displayed in the Makeup menu
  *
- * @property ref
- * @property type
- * @property color
+ * @property ref Reference to makeup texture in Firebase Storage
+ * @property type Type of makeup
+ * @property color Color with which makeup was applied
  *
  * @author Veronika Ovsyannikova
  */

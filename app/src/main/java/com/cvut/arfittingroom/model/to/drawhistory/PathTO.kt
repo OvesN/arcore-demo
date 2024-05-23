@@ -1,9 +1,10 @@
 package com.cvut.arfittingroom.model.to.drawhistory
 
 /**
- * Path t o
+ * Path transfer object
+ * Used to serialize the path
  *
- * @property actions
+ * @property actions Each action describes a step in the path
  *
  * @author Veronika Ovsyannikova
  */

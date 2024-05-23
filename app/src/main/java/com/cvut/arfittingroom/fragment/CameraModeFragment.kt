@@ -29,7 +29,7 @@ import io.github.muddz.styleabletoast.StyleableToast
 import java.io.IOException
 
 /**
- * Camera mode fragment
+ * Provides functionality for taking photos and recording videos
  *
  * @author Veronika Ovsyannikova
  */

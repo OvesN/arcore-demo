@@ -9,7 +9,7 @@ import dagger.Provides
 import javax.inject.Singleton
 
 /**
- * Service module
+ * Dagger module for providing singleton instances
  *
  * @author Veronika Ovsyannikova
  */

@@ -1,7 +1,7 @@
 package com.cvut.arfittingroom.model.to.drawhistory
 
 /**
- * Editor state t o
+ * Editor state transfer objects
  *
  * @property elements
  * @property layers

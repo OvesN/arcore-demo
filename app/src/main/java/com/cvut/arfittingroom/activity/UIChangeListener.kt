@@ -1,7 +1,7 @@
 package com.cvut.arfittingroom.activity
 
 /**
- * U i change listener
+ * Allows to open main layout of the activity from attached to it fragment
  *
  * @author Veronika Ovsyannikova
  */

@@ -5,7 +5,8 @@ import com.cvut.arfittingroom.model.to.MakeupTO
 import com.cvut.arfittingroom.model.to.ModelTO
 
 /**
- * Resource listener
+ *  Implemented by activity that interact with
+ *  menu fragments to apply and manage makeup and accessories
  *
  * @author Veronika Ovsyannikova
  */

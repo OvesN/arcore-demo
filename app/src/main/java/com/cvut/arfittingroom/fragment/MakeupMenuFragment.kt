@@ -38,7 +38,7 @@ import com.google.firebase.storage.FirebaseStorage
 import io.github.muddz.styleabletoast.StyleableToast
 
 /**
- * Makeup menu fragment
+ * Displays makeup menu, allows users to select and apply specific makeup
  *
  * @author Veronika Ovsyannikova
  */

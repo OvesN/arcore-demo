@@ -31,7 +31,7 @@ import com.google.firebase.storage.FirebaseStorage
 import io.github.muddz.styleabletoast.StyleableToast
 
 /**
- * Brushes menu fragment
+ * Displays brushes menu, allows users to select and apply specific brush
  *
  * @property drawView
  *

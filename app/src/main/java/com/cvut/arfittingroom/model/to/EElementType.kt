@@ -1,7 +1,7 @@
 package com.cvut.arfittingroom.model.to
 
 /**
- * E element type
+ * Helps to distinguish between different child classes of ElementTO during deserialization
  *
  * @author Veronika Ovsyannikova
  */

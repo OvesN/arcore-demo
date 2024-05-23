@@ -5,17 +5,18 @@ import com.google.firebase.firestore.PropertyName
 import java.util.Date
 
 /**
- * Look t o
+ * Look transfer object
+ * Represents a saved look created by a user, including makeup, models, face mask, editor state, and other metadata
  *
  * @property lookId
- * @property author
- * @property appliedMakeup
- * @property appliedModels
- * @property editorState
- * @property name
- * @property previewRef
- * @property isAnimated
- * @property isPublic
+ * @property author The author or creator of the look
+ * @property appliedMakeup List of applied makeup items in the look
+ * @property appliedModels List of applied models in the look
+ * @property editorState The state of the editor when the look was created
+ * @property name The name given to the look
+ * @property previewRef Reference to the preview image of the look in Firebase Storage
+ * @property isAnimated Indicates whether the look is animated
+ * @property isPublic Indicates whether the look is public or private.
  * @property createdAt
  *
  * @author Veronika Ovsyannikova

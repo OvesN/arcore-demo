@@ -1,7 +1,7 @@
 package com.cvut.arfittingroom.model.to
 
 /**
- * E path action type
+ * Helps to distinguish between different child classes of PathActionTO during deserialization
  *
  * @author Veronika Ovsyannikova
  */

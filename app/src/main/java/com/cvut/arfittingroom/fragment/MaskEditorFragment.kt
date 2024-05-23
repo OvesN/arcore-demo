@@ -44,7 +44,8 @@ import java.util.LinkedList
 import javax.inject.Inject
 
 /**
- * Mask editor fragment
+ * Manages UI for 2D editor
+ * Uses [drawView] for handling user's drawing
  *
  * @author Veronika Ovsyannikova
  */

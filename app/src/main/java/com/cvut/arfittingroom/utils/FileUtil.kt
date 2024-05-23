@@ -19,11 +19,19 @@ import java.io.FileOutputStream
 import java.lang.Exception
 
 /**
- * File util
+ * Utility class for handling file operations
  *
  * @author Veronika Ovsyannikova
  */
 object FileUtil {
+
+    /**
+     * Saves the given bitmap as a mask texture file
+     *
+     * @param bitmap The bitmap to save
+     * @param context
+     * @param onSaved A callback function to be executed after the bitmap is saved
+     */
     fun saveTempMaskTextureBitmap(
         bitmap: Bitmap,
         context: Context,
@@ -47,6 +55,12 @@ object FileUtil {
         }
     }
 
+    /**
+     * Retrieves the mask texture bitmap from the application's internal storage
+     *
+     * @param context
+     * @return The bitmap if it exists, null otherwise.
+     */
     fun getTempMaskTextureBitmap(context: Context): Bitmap? =
         try {
             val fis: FileInputStream = context.openFileInput(MASK_TEXTURE_FILE_NAME)
@@ -60,6 +74,12 @@ object FileUtil {
             null
         }
 
+    /**
+     * Retrieves a file input stream for the mask texture file
+     *
+     * @param context
+     * @return The file input stream if it exists, null otherwise
+     */
     fun getTempMaskTextureStream(context: Context): FileInputStream? =
         try {
             context.openFileInput(MASK_TEXTURE_FILE_NAME)
@@ -67,18 +87,38 @@ object FileUtil {
             null
         }
 
+    /**
+     * Checks if any temporary animated mask frames are
+     * stored in the internal storage
+     *
+     * @param context
+     * @return True if frames exist, false otherwise
+     */
     fun doesTempAnimatedMaskExist(context: Context): Boolean {
         val imagesDir = File(context.filesDir, MASK_FRAMES_DIR_NAME)
 
         return imagesDir.exists() && imagesDir.isDirectory && imagesDir.list()?.isNotEmpty() == true
     }
 
+    /**
+     * Retrieves the number of mask frames available
+     *
+     * @param context
+     * @return The number of frames available
+     */
     fun getNumberOfFrames(context: Context): Int {
         val imagesDir = File(context.filesDir, MASK_FRAMES_DIR_NAME)
 
         return imagesDir.list()?.size ?: 0
     }
 
+    /**
+     * Retrieves the next mask frame as a bitmap
+     *
+     * @param context
+     * @param counter The frame number to retrieve
+     * @return The bitmap if it exists, null otherwise
+     */
     fun getNextTempMaskFrame(
         context: Context,
         counter: Int,
@@ -101,6 +141,13 @@ object FileUtil {
             null
         }
 
+    /**
+     * Retrieves a file input stream for the next mask frame
+     *
+     * @param context
+     * @param counter The frame number to retrieve
+     * @return The file input stream if it exists, null otherwise
+     */
     fun getNextTempMaskFrameInputStream(
         context: Context,
         counter: Int,
@@ -114,6 +161,15 @@ object FileUtil {
         null
     }
 
+    /**
+     * Saves the mask frames
+     *
+     * @param layerManager To get layers
+     * @param height The height of the frames
+     * @param width The width of the frames
+     * @param context
+     * @param onSaved A callback function to be executed after the frames are saved
+     */
     fun saveTempMaskFrames(
         layerManager: LayerManager,
         height: Int,
@@ -150,6 +206,11 @@ object FileUtil {
         }
         }
 
+    /**
+     * Deletes all mask files from the internal file storage
+     *
+     * @param context
+     */
     fun deleteTempFiles(context: Context) {
         context.deleteFile(MASK_TEXTURE_FILE_NAME)
 

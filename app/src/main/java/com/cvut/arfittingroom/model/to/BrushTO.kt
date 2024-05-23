@@ -5,9 +5,10 @@ import android.graphics.Paint
 import com.google.firebase.firestore.PropertyName
 
 /**
- * Brush t o
+ * Brush transfer object
+ * Represents brushes options available in BrushesMenu
  *
- * @property strokeTextureRef
+ * @property strokeTextureRef Reference to the brush texture image in Firebase Storage
  * @property strokeCap
  * @property strokeJoint
  * @property blurType

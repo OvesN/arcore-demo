@@ -26,17 +26,33 @@ import com.cvut.arfittingroom.model.to.LookTO
 import com.skydoves.colorpickerview.ColorPickerView
 
 /**
- * U i util
+ * Utility class for UI-related functions
+ * Provides methods for creating UI elements
  *
  * @author Veronika Ovsyannikova
  */
 object UIUtil {
+
+    /**
+     * Creates vertical white line
+     *
+     * @return The created divider view
+     */
     fun createDivider(context: Context): View =
         View(context).apply {
             layoutParams = ViewGroup.LayoutParams(2, ViewGroup.LayoutParams.MATCH_PARENT)
             background = AppCompatResources.getDrawable(context, R.color.colorLightGrey)
         }
 
+    /**
+     * Shows a popup with look information
+     *
+     * @param lookTO Object containing information about the look
+     * @param isAuthor Indicates if the current user is the author of the look
+     * @param view The view to anchor the popup to
+     * @param onLookDelete A callback function to be called when the look is deleted
+     * @param onChangeIsPublic A callback function to be called when the public status of the look is changed
+     */
     fun showLookInfoPopup(
         context: Context,
         lookTO: LookTO,
@@ -56,8 +72,9 @@ object UIUtil {
             isChecked = lookTO.isPublic
         }
 
-        val authorNameText = popupView.findViewById<TextView>(R.id.look_author_name).apply {
-            text = if (isAuthor) "${lookTO.author} (you)" else lookTO.author
+        val authorNameText = if (isAuthor) "${lookTO.author} (you)" else lookTO.author
+        popupView.findViewById<TextView>(R.id.look_author_name).apply {
+            text = authorNameText
         }
 
         val cancelButton: Button = popupView.findViewById(R.id.cancel_popup_button)
@@ -86,6 +103,11 @@ object UIUtil {
         popupWindow.showAtLocation(view, Gravity.CENTER, 0, 0)
     }
 
+    /**
+     * Shows a warning dialog before deleting a look
+     *
+     * @param onLookDelete A callback function to be called when the look is deleted
+     */
     private fun showDeleteLookWarning(
         context: Context,
         onLookDelete: () -> Unit = {},
@@ -110,6 +132,11 @@ object UIUtil {
         dialog.show()
     }
 
+    /**
+     * Shows a dialog to confirm deleting a layer
+     *
+     * @param onDelete A callback function to be called when the layer is deleted
+     */
     fun showDeleteLayerDialog(
         context: Context,
         onDelete: () -> Unit,
@@ -133,6 +160,13 @@ object UIUtil {
         dialog.show()
     }
 
+    /**
+     * Shows a dialog to move an element to a different layer
+     *
+     * @param currentLayerIndex The current layer index of the element
+     * @param maxLayerIndex The maximum layer index available
+     * @param onLayerSelected A callback function to be called when a layer is selected
+     */
     fun showMoveToLayerDialog(
         context: Context,
         currentLayerIndex: Int,
@@ -167,6 +201,16 @@ object UIUtil {
         dialog.show()
     }
 
+    /**
+     * Shows a color picker dialog
+     *
+     * @param initialColor The initial color to display in the color picker
+     * @param fill Indicates if the fill option is selected
+     * @param shouldShowFillCheckbox Indicates if the fill checkbox should be shown
+     * @param shouldShowPipette Indicates if the pipette button should be shown
+     * @param onPipetteSelected A callback function to be called when the pipette is selected
+     * @param onColorSelected A callback function to be called when a color is selected
+     */
     fun showColorPickerDialog(
         context: Context,
         initialColor: Int,
@@ -218,6 +262,11 @@ object UIUtil {
         dialog.show()
     }
 
+    /**
+     * Shows a dialog to confirm clear all
+     *
+     * @param onClearAll A callback function to be called when the clear all action is confirmed
+     */
     fun showClearAllDialog(
         context: Context,
         onClearAll: () -> Unit,
@@ -241,6 +290,11 @@ object UIUtil {
         dialog.show()
     }
 
+    /**
+     * Make look button active
+     *
+     * @param view Look button
+     */
     fun selectLookButton(view: View) {
         if (view is ImageButton) {
             selectHeadBackgroundButton(view)
@@ -249,6 +303,11 @@ object UIUtil {
         }
     }
 
+    /**
+     * Make look button inactive
+     *
+     * @param view Look button
+     */
     fun deselectLookButton(view: View) {
         if (view is ImageButton) {
             deselectHeadBackgroundButton(view)
@@ -257,6 +316,11 @@ object UIUtil {
         }
     }
 
+    /**
+     * Draw head as a background and add a border
+     *
+     * @param view Button
+     */
     fun selectHeadBackgroundButton(view: View) {
         val layers =
             arrayOf(
@@ -267,18 +331,38 @@ object UIUtil {
         view.background = LayerDrawable(layers)
     }
 
+    /**
+     * Deselects the head background button by removing the border
+     *
+     * @param view Button
+     */
     fun deselectHeadBackgroundButton(view: View) {
         view.background = ContextCompat.getDrawable(view.context, R.drawable.head_model)!!
     }
 
+    /**
+     * Draw border around button
+     *
+     * @param view Button
+     */
     fun selectSquareButton(view: View) {
         view.background = ContextCompat.getDrawable(view.context, R.drawable.border)!!
     }
 
+    /**
+     * Remove button border
+     *
+     * @param view Button
+     */
     fun deselectButton(view: View) {
         view.background = null
     }
 
+    /**
+     * Draw circle border
+     *
+     * @param view Button
+     */
     fun selectColorButton(view: View) {
         val layers =
             arrayOf(
@@ -289,10 +373,20 @@ object UIUtil {
         view.background = LayerDrawable(layers)
     }
 
+    /**
+     * Removes circle border
+     *
+     * @param view Button
+     */
     fun deselectColorButton(view: View) {
         view.background = createColorOptionImage(view.context, view.id)
     }
 
+    /** Creates a drawable for a color option
+     *
+     * @param color
+     * @return Color option drawable
+     */
     fun createColorOptionImage(
         context: Context,
         color: Int,
@@ -304,6 +398,11 @@ object UIUtil {
         return wrap
     }
 
+    /**
+     * Animates a button with a scale up and scale down effect
+     *
+     * @param view Button
+     */
     fun animateButton(view: View) {
         val scaleUpX = ObjectAnimator.ofFloat(view, "scaleX", 1.0f, 1.5f)
         val scaleUpY = ObjectAnimator.ofFloat(view, "scaleY", 1.0f, 1.5f)

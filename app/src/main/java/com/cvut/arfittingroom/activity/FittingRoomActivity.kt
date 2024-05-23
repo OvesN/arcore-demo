@@ -29,7 +29,6 @@ import com.cvut.arfittingroom.ARFittingRoomApplication
 import com.cvut.arfittingroom.R
 import com.cvut.arfittingroom.databinding.ActivityFittingRoomBinding
 import com.cvut.arfittingroom.draw.DrawHistoryHolder
-import com.cvut.arfittingroom.draw.model.enums.EEditorMode
 import com.cvut.arfittingroom.fragment.AccessoriesMenuFragment
 import com.cvut.arfittingroom.fragment.CameraModeFragment
 import com.cvut.arfittingroom.fragment.LooksMenuFragment
@@ -85,7 +84,8 @@ import java.util.concurrent.CountDownLatch
 import javax.inject.Inject
 
 /**
- * Fitting room activity
+ *  Core activity of the application
+ *  Get trackable face from [arFragment] and renders effects on user's face
  *
  *  @author Veronika Ovsyannikova
  */
@@ -564,7 +564,7 @@ class FittingRoomActivity :
                         resource: Bitmap,
                         transition: Transition<in Bitmap>?,
                     ) {
-                        stateService.loadImage(resource, color, arSceneView)
+                        stateService.loadMakeup(resource, color, arSceneView)
                     }
 
                     override fun onLoadCleared(placeholder: Drawable?) {}

@@ -1,7 +1,7 @@
 package com.cvut.arfittingroom.model.to.drawhistory
 
 /**
- * Layer t o
+ * Layer transfer objects
  *
  * @property id
  * @property index

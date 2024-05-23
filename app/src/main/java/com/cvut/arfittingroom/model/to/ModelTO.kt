@@ -3,12 +3,13 @@ package com.cvut.arfittingroom.model.to
 import com.google.firebase.firestore.PropertyName
 
 /**
- * Model t o
+ * Model transfer object
+ * Represents accessories options displayed in the Accessories menu
  *
- * @property slot
- * @property ref
- * @property previewRef
- * @property type
+ * @property slot Slot to which model will be applied
+ * @property ref Reference to the model in Firebase Storage
+ * @property previewRef Reference to the model's preview image in Firebase Storage
+ * @property type Type of the model
  *
  * @author Veronika Ovsyannikova
  */

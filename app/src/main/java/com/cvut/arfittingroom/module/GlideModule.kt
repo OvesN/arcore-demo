@@ -10,7 +10,7 @@ import com.google.firebase.storage.StorageReference
 import java.io.InputStream
 
 /**
- * Glide module
+ * Module for integrating Firebase storage with Glide
  *
  * @author Veronika Ovsyannikova
  */

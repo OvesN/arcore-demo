@@ -40,7 +40,7 @@ import java.time.Instant
 import kotlin.random.Random
 
 /**
- * Images menu fragment
+ * Displays images menu, allows users to select and add image to the editor
  *
  * @property drawView
  *

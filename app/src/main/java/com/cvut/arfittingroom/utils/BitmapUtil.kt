@@ -7,7 +7,7 @@ import android.graphics.Matrix
 import com.cvut.arfittingroom.model.BITMAP_SIZE
 
 /**
- * Bitmap util
+ * Utility class for bitmap manipulation operations
  *
  * @author Veronika Ovsyannikova
  */
@@ -51,6 +51,14 @@ object BitmapUtil {
         bitmap.setPixels(pixels, 0, width, 0, 0, width, height)
     }
 
+    /**
+     * Combines a list of bitmaps into a single bitmap of the specified width and height
+     *
+     * @param bitmaps The list of bitmaps to combine
+     * @param width The width of the resulting combined bitmap
+     * @param height The height of the resulting combined bitmap
+     * @return The combined bitmap
+     */
     fun combineBitmaps(
         bitmaps: List<Bitmap>,
         width: Int,
@@ -74,6 +82,14 @@ object BitmapUtil {
         return combinedBitmap
     }
 
+    /**
+     * Adjusts the provided bitmap by cropping it to a square, mirroring it horizontally, and scaling it to a fixed size
+     *
+     * @param bitmap The original bitmap to adjust
+     * @param height The height of the original bitmap
+     * @param width The width of the original bitmap
+     * @return The adjusted bitmap.
+     */
     fun adjustBitmapFromEditor(
         bitmap: Bitmap,
         height: Int,

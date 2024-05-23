@@ -12,7 +12,7 @@ import dagger.multibindings.IntoMap
 import dagger.multibindings.StringKey
 
 /**
- * Binding module
+ * Dagger module for binding different PathCreationStrategy implementations
  *
  * @author Veronika Ovsyannikova
  */

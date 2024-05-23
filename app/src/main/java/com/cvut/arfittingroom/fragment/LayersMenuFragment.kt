@@ -17,7 +17,7 @@ import com.cvut.arfittingroom.utils.UIUtil
 import io.github.muddz.styleabletoast.StyleableToast
 
 /**
- * Layers menu fragment, manages menu for layers
+ * Manages menu for layers
  *
  * @property drawView
  *

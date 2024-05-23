@@ -4,9 +4,10 @@ import com.google.firebase.firestore.PropertyName
 import java.util.Date
 
 /**
- * Image t o
+ * Image transfer object
+ * Represents images displayed in the Images menu
  *
- * @property ref
+ * @property ref Reference to the image in Firebase Storage
  * @property isAnimated
  * @property uploadedBy
  * @property createdAt

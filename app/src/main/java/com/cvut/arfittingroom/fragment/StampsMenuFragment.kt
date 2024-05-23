@@ -21,9 +21,9 @@ import com.cvut.arfittingroom.draw.model.enums.EEditorMode
 import com.cvut.arfittingroom.utils.ScreenUtil
 
 /**
- * Stamps menu fragment
+ *  Displays stamps menu, allows users to select and add a stamp to the editor
  *
- * @property strategies
+ * @property strategies for path drawing
  * @property drawView
  *
  * @author Veronika Ovsyannikova
