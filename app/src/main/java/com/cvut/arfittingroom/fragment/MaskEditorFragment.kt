@@ -136,7 +136,7 @@ class MaskEditorFragment :
                 run {
                     clearAll()
                     wasDeserialized = false
-                    showMainLayout(restoreLookTexture = true)
+                    showMainLayout(restoreLookMask = true)
                 }
             }
         }
@@ -388,7 +388,7 @@ class MaskEditorFragment :
             .commit()
     }
 
-    private fun showMainLayout(restoreLookTexture: Boolean = false) {
+    private fun showMainLayout(restoreLookMask: Boolean = false) {
         val listener = context as? UIChangeListener
         if (listener == null) {
             Log.println(Log.ERROR, null, "Activity does not implement ResourceListener")
@@ -396,7 +396,7 @@ class MaskEditorFragment :
         }
         drawView.stopAnimation()
         drawView.layerManager.setAllGifsToStaticMode()
-        listener.showMainLayout(restoreLookTexture)
+        listener.showMainLayout(restoreLookMask)
     }
 
     fun clearAll() {

@@ -20,6 +20,11 @@ class MainActivity : AppCompatActivity() {
     private val binding: ActivityMainBinding by viewBinding(createMethod = CreateMethod.INFLATE)
     private lateinit var auth: FirebaseAuth
 
+    /**
+     * If user is logged in, starts FittingRoomActivity
+     *
+     * @param savedInstanceState
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         auth = Firebase.auth
@@ -48,6 +53,11 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    /**
+     * Handles link to the application
+     *
+     * @param intent
+     */
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)

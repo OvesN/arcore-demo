@@ -48,8 +48,10 @@ abstract class Element :
         centerY = y
     }
 
-    // End of the move gesture by the user
-    // Returns center x and y to the original values so move action can be applied correctly
+    /**
+     * End of the move gesture by the user
+     * Returns center x and y to the original values so move action can be applied correctly
+     */
     override fun endContinuousMove() {
         centerX = originalCenterX
         centerY = originalCenterY
@@ -60,15 +62,21 @@ abstract class Element :
         originalRadius = outerRadius
     }
 
-    // Scale while scaling gesture
+    /**
+     * Scaling during scaling gesture
+     *
+     * @param factor
+     */
     override fun scaleContinuously(factor: Float) {
         val newRadius = max(factor * originalRadius, 5f)
 
         outerRadius = newRadius
     }
 
-    // End of the scale gesture by the user
-    // Returns radius to the original one so scale action can be applied correctly
+    /**
+     * End of the scale gesture by the user
+     * Returns radius to the original one so scale action can be applied correctly
+     */
     override fun endContinuousScale() {
         outerRadius = originalRadius
     }
@@ -79,10 +87,18 @@ abstract class Element :
         originalRotationAngle = normalizedAngle
     }
 
+    /**
+     * Rotation during rotation gesture
+     *
+     * @param angleDelta
+     */
     override fun rotateContinuously(angleDelta: Float) {
         rotationAngle = normalizeAngle(originalRotationAngle + angleDelta)
     }
 
+    /**
+     * End of the rotation gesture by the user
+     */
     override fun endContinuousRotation() {
         rotationAngle = originalRotationAngle
     }

@@ -86,6 +86,7 @@ import javax.inject.Inject
 /**
  *  Core activity of the application
  *  Get trackable face from [arFragment] and renders effects on user's face
+ *  Manages the UI of application by showing and hiding different fragment
  *
  *  @author Veronika Ovsyannikova
  */
@@ -208,6 +209,12 @@ class FittingRoomActivity :
         }
     }
 
+
+    /**
+     * Handles new intents to apply a look form the link
+     *
+     * @param intent
+     */
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
@@ -227,6 +234,11 @@ class FittingRoomActivity :
         arSceneView.resume()
     }
 
+    /**
+     * Applies makeup to the face
+     *
+     * @param makeupTO The MakeupTO object containing makeup details
+     */
     override fun applyMakeup(makeupTO: MakeupTO) {
         stateService.appliedMakeUpTypes[makeupTO.type] = makeupTO
 
@@ -235,6 +247,11 @@ class FittingRoomActivity :
         }
     }
 
+    /**
+     * Removes the makeup of the specified type from the face
+     *
+     * @param type The type of makeup to remove
+     */
     override fun removeMakeup(type: String) {
         val appliedMakeupTypes = stateService.appliedMakeUpTypes
         appliedMakeupTypes.remove(type)
@@ -250,15 +267,30 @@ class FittingRoomActivity :
         }
     }
 
+    /**
+     * Applies a model to the face based on the provided ModelTO object
+     *
+     * @param modelTO The ModelTO object containing model details
+     */
     override fun applyModel(modelTO: ModelTO) {
         binding.progressBar.visibility = View.VISIBLE
         loadModel(modelTO)
     }
 
+    /**
+     * Removes the model from the specified slot
+     *
+     * @param slot The slot from which to remove the model
+     */
     override fun removeModel(slot: String) {
         stateService.clearFaceNodeSlot(slot)
     }
 
+    /**
+     * Applies a look to the face based on the provided LookTO object
+     *
+     * @param lookTO The LookTO object containing look details
+     */
     override fun applyLook(lookTO: LookTO) {
         if (DrawHistoryHolder.isNotEmpty()) {
             showWarningDialog(lookTO)
@@ -290,11 +322,11 @@ class FittingRoomActivity :
                 applyModel(it)
             }
 
-            applyLookTexture(lookTO)
+            applyLookMask(lookTO)
         }
     }
 
-    private fun applyLookTexture(lookTO: LookTO) {
+    private fun applyLookMask(lookTO: LookTO) {
         if (lookTO.isAnimated) {
             downloadLookFrames(lookTO.lookId) { textures ->
                 stopAnimation()
@@ -304,7 +336,7 @@ class FittingRoomActivity :
             }
         } else {
             stopAnimation()
-            downloadLookTextureAndApply(lookTO.lookId)
+            downloadLookFaceMaskAndApply(lookTO.lookId)
         }
     }
 
@@ -330,7 +362,7 @@ class FittingRoomActivity :
         dialog.show()
     }
 
-    private fun downloadLookTextureAndApply(lookId: String) {
+    private fun downloadLookFaceMaskAndApply(lookId: String) {
         val ref =
             try {
                 storage.getReference("$LOOKS_COLLECTION/$lookId/$MASK_FRAME_FILE_NAME")
@@ -358,6 +390,9 @@ class FittingRoomActivity :
         }
     }
 
+    /**
+     * Removes the currently applied look
+     */
     override fun removeLook() {
         shareButton.visibility = View.INVISIBLE
         stopAnimation()
@@ -849,7 +884,12 @@ class FittingRoomActivity :
         maskEditorFragment.clearAll()
     }
 
-    override fun showMainLayout(restoreLookTexture: Boolean) {
+    /**
+     * Shows the layout of the activity, optionally reapplying face mask from applied look
+     *
+     * @param restoreLookMask Whether to restore the look texture
+     */
+    override fun showMainLayout(restoreLookMask: Boolean) {
         findViewById<View>(R.id.top_ui).visibility = View.VISIBLE
         findViewById<View>(R.id.bottom_ui).visibility = View.VISIBLE
 
@@ -867,8 +907,8 @@ class FittingRoomActivity :
 
         arSceneView.resume()
 
-        if (restoreLookTexture) {
-            applyLookTexture(looksOptionsFragment.getSelectedLookTO())
+        if (restoreLookMask) {
+            applyLookMask(looksOptionsFragment.getSelectedLookTO())
         } else {
             val bitmap = getTempMaskTextureBitmap(applicationContext)
             bitmap?.let {

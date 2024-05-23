@@ -6,5 +6,12 @@ package com.cvut.arfittingroom.activity
  * @author Veronika Ovsyannikova
  */
 interface UIChangeListener {
-    fun showMainLayout(restoreLookTexture: Boolean = false)
+
+    /**
+     * Shows main layout of the activity
+     *
+     * @param restoreLookMask Defines if applied look face mask
+     * should be download and applied again, used when we want to restore look state
+     */
+    fun showMainLayout(restoreLookMask: Boolean = false)
 }

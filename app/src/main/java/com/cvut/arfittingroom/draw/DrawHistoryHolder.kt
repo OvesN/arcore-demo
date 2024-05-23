@@ -17,10 +17,21 @@ object DrawHistoryHolder {
 
     private var historyChangeListener: HistoryChangeListener? = null
 
+    /**
+     * Sets the listener to be notified when the history changes
+     *
+     * @param listener The listener to set
+     */
     fun setHistoryChangeListener(listener: HistoryChangeListener) {
         historyChangeListener = listener
     }
 
+
+    /**
+     * Undoes the last command and moves it to the undone actions list
+     *
+     * @return The last undone command, or null if there is no command to undo
+     */
     fun undo(): Command? {
         if (globalHistory.isEmpty()) {
             return null
@@ -38,6 +49,11 @@ object DrawHistoryHolder {
         return lastAction
     }
 
+    /**
+     * Redoes the last undone command and moves it back to the history list
+     *
+     * @return The last redone command, or null if there is no command to redo
+     */
     fun redo(): Command? {
         if (undoneActions.isEmpty()) {
             return null
@@ -55,6 +71,11 @@ object DrawHistoryHolder {
         return lastUndoneAction
     }
 
+    /**
+     * Adds a command to the history and executes it
+     *
+     * @param command The command to add to the history
+     */
     fun addToHistory(command: Command) {
         if (globalHistory.size == MAX_NUMBER_OF_ACTIONS_HOLD_IN_HISTORY) {
             globalHistory.removeFirst()

@@ -176,6 +176,12 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             )
     }
 
+    /**
+     * Sets the dimensions of the drawing area
+     *
+     * @param width
+     * @param height
+     */
     fun setDimensions(
         width: Int,
         height: Int,
@@ -242,6 +248,11 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         return true
     }
 
+    /**
+     * Starts the animation for the given gif element
+     *
+     * @param gif The gif element to start animating
+     */
     private fun startAnimation(gif: Gif) {
         Log.println(Log.INFO, null, "Start animation")
         gifRunnable =
@@ -651,6 +662,10 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         }
     }
 
+
+    /**
+     * Undoes the last action in the history
+     */
     fun undo() {
         val command = DrawHistoryHolder.undo()
         command?.let {
@@ -662,6 +677,9 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         invalidate()
     }
 
+    /**
+     * Redoes the last undone action in the history
+     */
     fun redo() {
         val command = DrawHistoryHolder.redo()
         command?.let {
@@ -672,6 +690,11 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         invalidate()
     }
 
+    /**
+     * Adds a new layer
+     *
+     * @return The index of the new layer
+     */
     fun addLayer(): Int {
         if (layerManager.canAddNewLayer()) {
             addToHistory(AddLayer(width, height, layerManager))
@@ -686,6 +709,12 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         return layerManager.getActiveLayerIndex()
     }
 
+    /**
+     * Sets the color and style for the current paint options
+     *
+     * @param newColor The new color to set
+     * @param fill Whether the style should be fill or stroke
+     */
     fun setColor(
         newColor: Int,
         fill: Boolean,
@@ -709,6 +738,11 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         }
     }
 
+    /**
+     * Sets the stroke width for the current paint options
+     *
+     * @param newStrokeWidth The new stroke width to set
+     */
     fun setStrokeWidth(newStrokeWidth: Int) {
         paintOptions.strokeWidth = newStrokeWidth.toFloat()
 
@@ -721,6 +755,12 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         }
     }
 
+    /**
+     * Sets the brush with given parameters
+     *
+     * @param brush The brush transfer object containing brush settings
+     * @param brushTexture The bitmap texture for the brush (optional)
+     */
     fun setBrush(
         brush: BrushTO,
         brushTexture: Bitmap? = null,
@@ -745,11 +785,20 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         }
     }
 
+    /**
+     * Sets the editor to mode where user
+     * can select elements and cannot draw
+     */
     fun setEditingMode() {
         previousEditorMode = editorMode
         editorMode = EEditorMode.EDITING
     }
 
+    /**
+     * Sets the stamp type to draw
+     *
+     * @param pathCreationStrategy The path creation strategy for the stamp
+     */
     fun setStamp(pathCreationStrategy: PathCreationStrategy) {
         editorMode = EEditorMode.STAMP
         stampType = pathCreationStrategy
@@ -763,6 +812,9 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         draw(canvas, true)
     }
 
+    /**
+     * Clears the canvas and resets the layers
+     */
     fun clearCanvas() {
         layerManager.deleteLayers()
         clearHistory()
@@ -881,6 +933,12 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         }
     }
 
+    /**
+     * Moves the layer from one index to another
+     *
+     * @param fromIndex The current index of the layer
+     * @param toIndex The new index of the layer
+     */
     fun moveLayer(
         fromIndex: Int,
         toIndex: Int,
@@ -893,6 +951,11 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         }
     }
 
+    /**
+     * Toggles the visibility of the layer at the specified index
+     *
+     * @param layerIndex The index of the layer
+     */
     fun toggleLayerVisibility(layerIndex: Int) {
         val layerId = layerManager.getLayerIdByIndex(layerIndex)
         layerId?.let { addToHistory(ToggleLayerVisibility(layerIndex, layerId, layerManager)) }
@@ -900,6 +963,11 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         invalidate()
     }
 
+    /**
+     * Removes the layer at the specified index
+     *
+     * @param layerIndex The index of the layer to remove
+     */
     fun removeLayer(layerIndex: Int) {
         layerManager.removeLayer(layerIndex)
         invalidate()
@@ -917,6 +985,12 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         }
     }
 
+    /**
+     * Adds an image element to the active layer
+     *
+     * @param bitmap The bitmap of the image
+     * @param imageRef The reference to the image in Firebase Storage
+     */
     fun addImage(
         bitmap: Bitmap,
         imageRef: String,
@@ -934,6 +1008,12 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         invalidate()
     }
 
+    /**
+     * Adds a gif element to the active layer
+     *
+     * @param gifDrawable The drawable of the gif
+     * @param gifRef The reference to the gif in Firebase Storage
+     */
     fun addGif(
         gifDrawable: GifDrawable,
         gifRef: String,
@@ -968,6 +1048,11 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         elementScaleFactor = 1f
     }
 
+    /**
+     * Saves the current drawing in editor as a bitmap
+     *
+     * @param onSaved Callback to be executed after saving
+     */
     fun saveBitmap(onSaved: () -> Unit) {
         deleteTempFiles(context)
         layerManager.deselectAllElements()
@@ -999,6 +1084,13 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         return bitmap
     }
 
+    /**
+     * Change color and style of the element
+     *
+     * @param element The element to repaint
+     * @param newColor The new color to set
+     * @param fill Whether the style should be fill or stroke
+     */
     fun repaintElement(
         element: Repaintable,
         newColor: Int,
@@ -1026,6 +1118,9 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         return transformationMatrix
     }
 
+    /**
+     * Shows the pipette view for color picking
+     */
     fun showPipetteView() {
         previousEditorMode = editorMode
         editorMode = EEditorMode.PIPETTE

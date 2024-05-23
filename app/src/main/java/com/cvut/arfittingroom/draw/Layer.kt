@@ -85,6 +85,12 @@ class Layer(
         }
     }
 
+
+    /**
+     * Removes an element from the layer by its ID
+     *
+     * @param elementId The UUID of the element to remove
+     */
     fun removeElement(elementId: UUID) {
         elements.remove(elementId)
         val iterator = elementsToDraw.iterator()
@@ -107,6 +113,11 @@ class Layer(
         prepareBitmap()
     }
 
+    /**
+     * Adds a new element to the layer
+     *
+     * @param element The element to add
+     */
     fun addElement(element: Element) {
         elements[element.id] = element
         elementsToDraw.add(element)
@@ -153,10 +164,16 @@ class Layer(
         return null
     }
 
+    /**
+     * Deselects all elements in the layer
+     */
     fun deselectAllElements() {
         elements.forEach { it.value.setSelected(false) }
     }
 
+    /**
+     * Resets all layer's bitmaps
+     */
     fun resetBitmaps() {
         elementsBelowUpdatableElementBitmap?.recycle()
         elementsBelowUpdatableElementBitmap = null
@@ -179,7 +196,6 @@ class Layer(
     /**
      * Prepare bitmaps
      * Recreate bitmaps for items above and below updatable element
-     *
      */
     fun prepareBitmaps() {
         resetBitmaps()
@@ -212,6 +228,9 @@ class Layer(
             }
     }
 
+    /**
+     * Prepares a bitmap for the entire layer
+     */
     fun prepareBitmap() {
         resetBitmaps()
         if (!isVisible) {
@@ -258,6 +277,11 @@ class Layer(
         elementAboveUpdatableElementBitmap = bitmap
     }
 
+    /**
+     * Sets the opacity of the layer
+     *
+     * @param opacity The new opacity value (0.0 to 1.0)
+     */
     fun setOpacity(opacity: Float) {
         this.opacity = opacity
         opacityPaint.apply {
@@ -265,12 +289,26 @@ class Layer(
         }
     }
 
+    /**
+     * Checks if the layer contains a GIF element
+     *
+     * @return True if the layer contains a GIF, false otherwise
+     */
     fun doesHaveGif(): Boolean = elementsToDraw.firstOrNull { it is Gif }?.let { true } ?: false
 
+    /**
+     * Gets the maximum number of frames among all GIF elements in the layer
+     *
+     * @return The maximum number of frames
+     */
     fun getMaxNumberOfFrames() =
         elementsToDraw.filterIsInstance<Gif>().maxOfOrNull { it.gifDrawable?.numberOfFrames ?: 0 }
             ?: 0
 
+    /**
+     * Sets all GIF elements in the layer to animation mode
+     * It means that on the draw call GIF will draw it's next frame
+     */
     fun setAllGifsToAnimationMode() {
         elementsToDraw.forEach {
             if (it is Gif) {
@@ -281,6 +319,9 @@ class Layer(
         }
     }
 
+    /**
+     * Resets all GIF elements in the layer to their initial frame
+     */
     fun resetAllGifs() {
         elementsToDraw.forEach {
             if (it is Gif) {
@@ -289,6 +330,10 @@ class Layer(
         }
     }
 
+    /**
+     * Sets all GIF elements in the layer to static mode
+     * That means that on the draw call only first frame of the GIF will be drawn
+     */
     fun setAllGifsToStaticMode() {
         elementsToDraw.forEach {
             if (it is Gif) {

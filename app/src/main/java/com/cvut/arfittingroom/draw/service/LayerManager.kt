@@ -56,6 +56,12 @@ class LayerManager {
         }
     }
 
+    /**
+     * Sets the dimensions for the layers
+     *
+     * @param width
+     * @param height
+     */
     fun setDimensions(
         width: Int,
         height: Int,
