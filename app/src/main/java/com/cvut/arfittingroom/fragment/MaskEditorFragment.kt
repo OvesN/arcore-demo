@@ -452,7 +452,7 @@ class MaskEditorFragment :
                 elementsMap,
                 errorMessages,
             )
-
+        if (remainingDownloads == 0) {onDownloadComplete(); return}
         startElementDownloads(elementsMap, onDownloadComplete)
     }
 
