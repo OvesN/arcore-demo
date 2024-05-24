@@ -616,15 +616,17 @@ class MaskEditorFragment :
     }
 
     private fun showColorPicker() {
+        val repaintebale = drawView.selectedElement as? Repaintable
+        val style = repaintebale?.let { it.paint.style } ?: drawView.paintOptions.style
         UIUtil.showColorPickerDialog(
             requireActivity(),
             drawView.paintOptions.color,
-            fill = drawView.paintOptions.style == Paint.Style.FILL,
+            fill = style == Paint.Style.FILL,
             shouldShowFillCheckbox = true,
             shouldShowPipette = true,
             onPipetteSelected = { drawView.showPipetteView() },
         ) { envelopColor, fill ->
-            val repaintebale = drawView.selectedElement as? Repaintable
+
             if (repaintebale != null) {
                 drawView.repaintElement(repaintebale, envelopColor, fill)
             } else {
