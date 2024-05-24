@@ -786,6 +786,7 @@ class FittingRoomActivity :
                 ).show()
                 progressBar.visibility = View.INVISIBLE
                 looksOptionsFragment.selectLook(lookId)
+                looksOptionsFragment.fetchLooks()
                 shareButton.visibility = View.VISIBLE
             }
             .addOnFailureListener { ex -> Log.println(Log.ERROR, null, "onFailure: $ex") }

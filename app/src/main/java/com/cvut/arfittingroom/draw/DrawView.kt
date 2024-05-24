@@ -106,7 +106,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private var frameCount = 0
     private var pipetteSelectedColor = Color.TRANSPARENT
     private var colorChangeListener: ColorChangeListener? = null
-    private var elementToRepaintAfterPipetteView: Repaintable? = null
+    var elementToRepaintAfterPipetteView: Repaintable? = null
 
     @Inject
     lateinit var layerManager: LayerManager
