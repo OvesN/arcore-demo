@@ -1057,7 +1057,7 @@ class DrawView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         deleteTempFiles(context)
         layerManager.deselectAllElements()
         stopAnimation()
-
+        layerManager.recreateLayersBitmaps()
         if (layerManager.doesContainAnyGif()) {
             layerManager.setAllGifsToAnimationMode()
             layerManager.resetAllGifs()
