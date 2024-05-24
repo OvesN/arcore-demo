@@ -624,7 +624,7 @@ class MaskEditorFragment :
             fill = style == Paint.Style.FILL,
             shouldShowFillCheckbox = true,
             shouldShowPipette = true,
-            onPipetteSelected = { drawView.showPipetteView() },
+            onPipetteSelected = { drawView.showPipetteView(); drawView.elementToRepaintAfterPipetteView = repaintebale },
         ) { envelopColor, fill ->
 
             if (repaintebale != null) {
