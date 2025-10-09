@@ -5,3 +5,12 @@ This is an Android application that uses ARCore and maintained Sceneform for ren
 
 The google-services.json file is a dummy file. If you want to try the application, please contact me so I can share the correct file with API keys. [veronika.oves@gmail.com]
 
+
+
+
+
+https://github.com/user-attachments/assets/9e90b2a2-abb2-4012-91d7-22dbe2ddf5a2
+
+
+https://github.com/user-attachments/assets/401b22c1-bb2a-4e45-9dfb-679123d8d788
+
